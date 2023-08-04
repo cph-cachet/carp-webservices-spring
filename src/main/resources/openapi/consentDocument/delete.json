@@ -1,0 +1,80 @@
+{
+  "tags": [
+    "consent-document-controller"
+  ],
+  "description": "> `Description`: `delete one` \n\nThis endpoint allows retrieving deleting consent document with the given [DEPLOYMENT_ID], and [CONSENT_DOCUMENT_ID] as the request parameter.\n\n> `Request`: (Http Method: [DELETE]) https://cans.cachet.dk:443/api/deployments/{{DEPLOYMENT_ID}}/consent-documents/{{CONSENT_DOCUMENT_ID}}\n\nThis request must be authenticated using a HTTP OAuth 2.0 Authentication header.\n\n> `Response`:\n\n- This request doesn't return a response body.\n- On failure status code `400` (bad request) is returned.\n- On failure status code `401` (unauthorized) is returned.\n- On failure status code `500` (internal server error) is returned.",
+  "responses": {
+    "200": {
+      "description": "delete one consent document by deploymentId and consent document id",
+      "headers": {
+        "Cache-Control": {
+          "schema": {
+            "type": "string",
+            "example": "no-cache, no-store, max-age=0, must-revalidate"
+          }
+        },
+        "Connection": {
+          "schema": {
+            "type": "string",
+            "example": "keep-alive"
+          }
+        },
+        "Content-Length": {
+          "schema": {
+            "type": "string",
+            "example": "0"
+          }
+        },
+        "Date": {
+          "schema": {
+            "type": "string",
+            "example": "Tue, 30 Jun 2020 15:11:57 GMT"
+          }
+        },
+        "Expires": {
+          "schema": {
+            "type": "string",
+            "example": "0"
+          }
+        },
+        "Pragma": {
+          "schema": {
+            "type": "string",
+            "example": "no-cache"
+          }
+        },
+        "Server": {
+          "schema": {
+            "type": "string",
+            "example": "nginx/1.14.0 (Ubuntu)"
+          }
+        },
+        "Strict-Transport-Security": {
+          "schema": {
+            "type": "string",
+            "example": "max-age=63072000; includeSubDomains; preload"
+          }
+        },
+        "X-Content-Type-Options": {
+          "schema": {
+            "type": "string",
+            "example": "nosniff"
+          }
+        },
+        "X-Frame-Options": {
+          "schema": {
+            "type": "string",
+            "example": "DENY"
+          }
+        },
+        "X-XSS-Protection": {
+          "schema": {
+            "type": "string",
+            "example": "1; mode=block"
+          }
+        }
+      },
+      "content": {}
+    }
+  }
+}

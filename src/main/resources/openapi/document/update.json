@@ -1,0 +1,230 @@
+{
+  "tags": [
+    "document-controller"
+  ],
+  "description": "> `Description`: `update - overwritting data` \n\nThis endpoint allows updating (overwriting) documents with the given [STUDY_ID] and [DOCUMENT_ID] as the request parameters.\n\n> `Request`: (Http Method: [PUT]) https://cans.cachet.dk:443/api/studies/{{STUDY_ID}}/documents/{{DOCUMENT_ID}}\n\nThis request must be authenticated using a HTTP OAuth 2.0 Authentication header.\n\n> `Response`:\n\n- On success a JSON object is returned with a fields `id`, `name`, `created_by_user_id`, `collection_id`, `collections`, `data`, `created_at` and `updated_at` list. \n- On failure status code `400` (bad request) is returned.\n- On failure status code `401` (unauthorized) is returned.\n- On failure status code `500` (internal server error) is returned.",
+  "requestBody": {
+    "content": {
+      "application/json": {
+        "example": {
+          "data": {
+            "event": {
+              "activity": "Walking",
+              "completed": 1,
+              "date": "6/20/2019",
+              "deleted": 0,
+              "duration": "33.0",
+              "id": 5000,
+              "notes": "",
+              "source": "New input",
+              "symptoms": [
+                "sdfasdf",
+                "adsafd"
+              ],
+              "time": "17:31"
+            }
+          },
+          "name": "test"
+        }
+      }
+    }
+  },
+  "responses": {
+    "200": {
+      "description": "update one",
+      "headers": {
+        "Cache-Control": {
+          "schema": {
+            "type": "string",
+            "example": "no-cache, no-store, max-age=0, must-revalidate"
+          }
+        },
+        "Connection": {
+          "schema": {
+            "type": "string",
+            "example": "keep-alive"
+          }
+        },
+        "Date": {
+          "schema": {
+            "type": "string",
+            "example": "Tue, 16 Jun 2020 13:50:12 GMT"
+          }
+        },
+        "Expires": {
+          "schema": {
+            "type": "string",
+            "example": "0"
+          }
+        },
+        "Pragma": {
+          "schema": {
+            "type": "string",
+            "example": "no-cache"
+          }
+        },
+        "Server": {
+          "schema": {
+            "type": "string",
+            "example": "nginx/1.14.0 (Ubuntu)"
+          }
+        },
+        "Strict-Transport-Security": {
+          "schema": {
+            "type": "string",
+            "example": "max-age=63072000; includeSubDomains; preload"
+          }
+        },
+        "Transfer-Encoding": {
+          "schema": {
+            "type": "string",
+            "example": "chunked"
+          }
+        },
+        "X-Content-Type-Options": {
+          "schema": {
+            "type": "string",
+            "example": "nosniff"
+          }
+        },
+        "X-Frame-Options": {
+          "schema": {
+            "type": "string",
+            "example": "DENY"
+          }
+        },
+        "X-XSS-Protection": {
+          "schema": {
+            "type": "string",
+            "example": "1; mode=block"
+          }
+        }
+      },
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "collection_id": {
+                "type": "number",
+                "example": 1
+              },
+              "collections": {
+                "type": "array",
+                "items": {},
+                "example": []
+              },
+              "created_at": {
+                "type": "string",
+                "example": "2020-04-30T18:37:22.312Z"
+              },
+              "created_by_user_id": {
+                "type": "number",
+                "example": 1
+              },
+              "data": {
+                "type": "object",
+                "properties": {
+                  "event": {
+                    "type": "object",
+                    "properties": {
+                      "activity": {
+                        "type": "string",
+                        "example": "Walking"
+                      },
+                      "completed": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "date": {
+                        "type": "string",
+                        "example": "6/20/2019"
+                      },
+                      "deleted": {
+                        "type": "number",
+                        "example": 0
+                      },
+                      "duration": {
+                        "type": "string",
+                        "example": "33.0"
+                      },
+                      "id": {
+                        "type": "number",
+                        "example": 562
+                      },
+                      "notes": {
+                        "type": "string",
+                        "example": ""
+                      },
+                      "source": {
+                        "type": "string",
+                        "example": "Self input"
+                      },
+                      "symptoms": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "example": "test_jacob"
+                        },
+                        "example": [
+                          "test_jacob",
+                          "test_jacob"
+                        ]
+                      },
+                      "time": {
+                        "type": "string",
+                        "example": "15:31"
+                      }
+                    }
+                  }
+                }
+              },
+              "id": {
+                "type": "number",
+                "example": 6
+              },
+              "name": {
+                "type": "string",
+                "example": "jacob_test"
+              },
+              "updated_at": {
+                "type": "string",
+                "example": "2020-06-16T13:50:12.624Z"
+              }
+            }
+          },
+          "examples": {
+            "update one": {
+              "value": {
+                "collection_id": 1,
+                "collections": [],
+                "created_at": "2020-04-30T18:37:22.312Z",
+                "created_by_user_id": 1,
+                "data": {
+                  "event": {
+                    "activity": "Walking",
+                    "completed": 1,
+                    "date": "6/20/2019",
+                    "deleted": 0,
+                    "duration": "33.0",
+                    "id": 562,
+                    "notes": "",
+                    "source": "Self input",
+                    "symptoms": [
+                      "test_jacob",
+                      "test_jacob"
+                    ],
+                    "time": "15:31"
+                  }
+                },
+                "id": 6,
+                "name": "jacob_test",
+                "updated_at": "2020-06-16T13:50:12.624Z"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

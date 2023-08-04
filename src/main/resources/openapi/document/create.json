@@ -1,0 +1,34 @@
+{
+  "tags": [
+    "document-controller"
+  ],
+  "description": "> `Description`: `create one` \n\nThis endpoint creates a new document with the given [STUDY_ID].\n\n> `Request`: (Http Method: [POST]) https://cans.cachet.dk:443/api/studies/{{STUDY_ID}}/documents\n\nThis request must be authenticated using a HTTP OAuth 2.0 Authentication header.\n\n> `Response`:\n\n- On success, a JSON object is returned with a created document.\n- On failure status code `400` (bad request) is returned.\n- On failure status code `401` (unauthorized) is returned.\n- On failure status code `500` (internal server error) is returned.",
+  "requestBody": {
+    "content": {
+      "application/json": {
+        "example": {
+          "collection_id": 1,
+          "collections": [],
+          "data": {
+            "event": {
+              "activity": "Walking",
+              "completed": 1,
+              "date": "6/20/2019",
+              "deleted": 0,
+              "duration": "33.0",
+              "id": 562,
+              "notes": "",
+              "source": "Self input",
+              "symptoms": [
+                "adsafd",
+                "adsafd"
+              ],
+              "time": "15:31"
+            }
+          },
+          "name": "test"
+        }
+      }
+    }
+  }
+}

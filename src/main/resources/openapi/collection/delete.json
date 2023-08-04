@@ -1,0 +1,74 @@
+{
+  "tags": [
+    "collection-controller"
+  ],
+  "description": "> `Description`: `delete one` \n\nThis endpoint allows deleting one collection with the given [STUDY_ID] and [COLLECTION_ID] as the request parameters.\n\n> `Request`: (Http Method: [DELETE]) https://cans.cachet.dk:443/api/studies/{{STUDY_ID}}/collections/{{COLLECTION_ID}}\n\nThis request must be authenticated using a HTTP OAuth 2.0 Authentication header.\n\n> `Response`:\n\n- This request doesn't return a response body. \n- On failure status code `400` (bad request) is returned.\n- On failure status code `401` (unauthorized) is returned.\n- On failure status code `500` (internal server error) is returned.",
+  "responses": {
+    "200": {
+      "description": "delete collection by studyId and collectionId",
+      "headers": {
+        "Cache-Control": {
+          "schema": {
+            "type": "string",
+            "example": "no-cache, no-store, max-age=0, must-revalidate"
+          }
+        },
+        "Connection": {
+          "schema": {
+            "type": "string",
+            "example": "keep-alive"
+          }
+        },
+        "Content-Length": {
+          "schema": {
+            "type": "string",
+            "example": "0"
+          }
+        },
+        "Date": {
+          "schema": {
+            "type": "string",
+            "example": "Fri, 26 Jun 2020 18:27:13 GMT"
+          }
+        },
+        "Expires": {
+          "schema": {
+            "type": "string",
+            "example": "0"
+          }
+        },
+        "Keep-Alive": {
+          "schema": {
+            "type": "string",
+            "example": "timeout=60"
+          }
+        },
+        "Pragma": {
+          "schema": {
+            "type": "string",
+            "example": "no-cache"
+          }
+        },
+        "X-Content-Type-Options": {
+          "schema": {
+            "type": "string",
+            "example": "nosniff"
+          }
+        },
+        "X-Frame-Options": {
+          "schema": {
+            "type": "string",
+            "example": "DENY"
+          }
+        },
+        "X-XSS-Protection": {
+          "schema": {
+            "type": "string",
+            "example": "1; mode=block"
+          }
+        }
+      },
+      "content": {}
+    }
+  }
+}

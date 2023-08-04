@@ -1,0 +1,488 @@
+{
+  "tags": [
+    "study-controller"
+  ],
+  "description": "For more information, refer to the documentation of [CARP Core](https://github.com/cph-cachet/carp.core-kotlin/blob/develop/docs/carp-studies.md#recruitmentservice)",
+  "requestBody": {
+    "content": {
+      "application/json": {
+        "example": {
+          "__type": "dk.cachet.carp.studies.infrastructure.ParticipantServiceRequest.GetParticipants",
+          "studyId": "18644246-0517-415f-8b7e-95e68bdab2e4"
+        }
+      }
+    }
+  },
+  "responses": {
+    "200": {
+      "description": "GetParticipantGroupStatusList",
+      "headers": {
+        "Cache-Control": {
+          "schema": {
+            "type": "string",
+            "example": "no-cache, no-store, max-age=0, must-revalidate"
+          }
+        },
+        "Connection": {
+          "schema": {
+            "type": "string",
+            "example": "keep-alive"
+          }
+        },
+        "Date": {
+          "schema": {
+            "type": "string",
+            "example": "Thu, 14 Jan 2021 10:00:11 GMT"
+          }
+        },
+        "Expires": {
+          "schema": {
+            "type": "string",
+            "example": "0"
+          }
+        },
+        "Keep-Alive": {
+          "schema": {
+            "type": "string",
+            "example": "timeout=60"
+          }
+        },
+        "Pragma": {
+          "schema": {
+            "type": "string",
+            "example": "no-cache"
+          }
+        },
+        "Transfer-Encoding": {
+          "schema": {
+            "type": "string",
+            "example": "chunked"
+          }
+        },
+        "X-Content-Type-Options": {
+          "schema": {
+            "type": "string",
+            "example": "nosniff"
+          }
+        },
+        "X-Frame-Options": {
+          "schema": {
+            "type": "string",
+            "example": "DENY"
+          }
+        },
+        "X-XSS-Protection": {
+          "schema": {
+            "type": "string",
+            "example": "1; mode=block"
+          }
+        }
+      },
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "__type": {
+                  "type": "string",
+                  "example": "dk.cachet.carp.studies.application.users.ParticipantGroupStatus.Running"
+                },
+                "id": {
+                  "type": "string",
+                  "example": "c9cc5317-48da-45f2-958e-58bc07f34681"
+                },
+                "invitedOn": {
+                  "type": "string",
+                  "example": "2022-01-18T13:53:30Z"
+                },
+                "participants": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "accountIdentity": {
+                        "type": "object",
+                        "properties": {
+                          "__type": {
+                            "type": "string",
+                            "example": "dk.cachet.carp.common.application.users.EmailAccountIdentity"
+                          },
+                          "emailAddress": {
+                            "type": "string",
+                            "example": "boaty@mcboatface.com"
+                          }
+                        }
+                      },
+                      "id": {
+                        "type": "string",
+                        "example": "32880e82-01c9-40cf-a6ed-17ff3348f251"
+                      }
+                    }
+                  },
+                  "example": [
+                    {
+                      "accountIdentity": {
+                        "__type": "dk.cachet.carp.common.application.users.EmailAccountIdentity",
+                        "emailAddress": "boaty@mcboatface.com"
+                      },
+                      "id": "32880e82-01c9-40cf-a6ed-17ff3348f251"
+                    }
+                  ]
+                },
+                "startedOn": {
+                  "type": "string",
+                  "example": "2022-01-18T11:15:00Z"
+                },
+                "studyDeploymentStatus": {
+                  "type": "object",
+                  "properties": {
+                    "__type": {
+                      "type": "string",
+                      "example": "dk.cachet.carp.deployments.application.StudyDeploymentStatus.Running"
+                    },
+                    "createdOn": {
+                      "type": "string",
+                      "example": "2022-01-18T11:06:40Z"
+                    },
+                    "deviceStatusList": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "__type": {
+                            "type": "string",
+                            "example": "dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Deployed"
+                          },
+                          "canBeDeployed": {
+                            "type": "boolean",
+                            "example": false
+                          },
+                          "device": {
+                            "type": "object",
+                            "properties": {
+                              "__type": {
+                                "type": "string",
+                                "example": "dk.cachet.carp.common.application.devices.Smartphone"
+                              },
+                              "defaultSamplingConfiguration": {
+                                "type": "object",
+                                "properties": {
+                                  "dk.cachet.carp.geolocation": {
+                                    "type": "object",
+                                    "properties": {
+                                      "__type": {
+                                        "type": "string",
+                                        "example": "dk.cachet.carp.common.application.sampling.BatteryAwareSamplingConfiguration"
+                                      },
+                                      "low": {
+                                        "type": "object",
+                                        "properties": {
+                                          "__type": {
+                                            "type": "string",
+                                            "example": "dk.cachet.carp.common.application.sampling.GranularitySamplingConfiguration"
+                                          },
+                                          "granularity": {
+                                            "type": "string",
+                                            "example": "Coarse"
+                                          }
+                                        }
+                                      },
+                                      "normal": {
+                                        "type": "object",
+                                        "properties": {
+                                          "__type": {
+                                            "type": "string",
+                                            "example": "dk.cachet.carp.common.application.sampling.GranularitySamplingConfiguration"
+                                          },
+                                          "granularity": {
+                                            "type": "string",
+                                            "example": "Detailed"
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "isOptional": {
+                                "type": "boolean",
+                                "example": true
+                              },
+                              "isPrimaryDevice": {
+                                "type": "boolean",
+                                "example": true
+                              },
+                              "roleName": {
+                                "type": "string",
+                                "example": "Participant's phone"
+                              }
+                            }
+                          },
+                          "remainingDevicesToRegisterBeforeDeployment": {
+                            "type": "array",
+                            "items": {},
+                            "example": []
+                          },
+                          "remainingDevicesToRegisterToObtainDeployment": {
+                            "type": "array",
+                            "items": {},
+                            "example": []
+                          }
+                        }
+                      },
+                      "example": [
+                        {
+                          "__type": "dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Deployed",
+                          "device": {
+                            "__type": "dk.cachet.carp.common.application.devices.Smartphone",
+                            "defaultSamplingConfiguration": {
+                              "dk.cachet.carp.geolocation": {
+                                "__type": "dk.cachet.carp.common.application.sampling.BatteryAwareSamplingConfiguration",
+                                "low": {
+                                  "__type": "dk.cachet.carp.common.application.sampling.GranularitySamplingConfiguration",
+                                  "granularity": "Coarse"
+                                },
+                                "normal": {
+                                  "__type": "dk.cachet.carp.common.application.sampling.GranularitySamplingConfiguration",
+                                  "granularity": "Detailed"
+                                }
+                              }
+                            },
+                            "isPrimaryDevice": true,
+                            "roleName": "Participant's phone"
+                          }
+                        },
+                        {
+                          "__type": "dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Registered",
+                          "canBeDeployed": false,
+                          "device": {
+                            "__type": "dk.cachet.carp.common.application.devices.AltBeacon",
+                            "isOptional": true,
+                            "roleName": "Participant's bike"
+                          },
+                          "remainingDevicesToRegisterBeforeDeployment": [],
+                          "remainingDevicesToRegisterToObtainDeployment": []
+                        }
+                      ]
+                    },
+                    "participantStatusList": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "assignedParticipantRoles": {
+                            "type": "object",
+                            "properties": {
+                              "__type": {
+                                "type": "string",
+                                "example": "dk.cachet.carp.common.application.users.AssignedTo.Roles"
+                              },
+                              "roleNames": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string",
+                                  "example": "Participant"
+                                },
+                                "example": [
+                                  "Participant"
+                                ]
+                              }
+                            }
+                          },
+                          "assignedPrimaryDeviceRoleNames": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "example": "Participant's phone"
+                            },
+                            "example": [
+                              "Participant's phone"
+                            ]
+                          },
+                          "participantId": {
+                            "type": "string",
+                            "example": "32880e82-01c9-40cf-a6ed-17ff3348f251"
+                          }
+                        }
+                      },
+                      "example": [
+                        {
+                          "assignedParticipantRoles": {
+                            "__type": "dk.cachet.carp.common.application.users.AssignedTo.Roles",
+                            "roleNames": [
+                              "Participant"
+                            ]
+                          },
+                          "assignedPrimaryDeviceRoleNames": [
+                            "Participant's phone"
+                          ],
+                          "participantId": "32880e82-01c9-40cf-a6ed-17ff3348f251"
+                        }
+                      ]
+                    },
+                    "startedOn": {
+                      "type": "string",
+                      "example": "2022-01-18T11:15:00Z"
+                    },
+                    "studyDeploymentId": {
+                      "type": "string",
+                      "example": "c9cc5317-48da-45f2-958e-58bc07f34681"
+                    }
+                  }
+                }
+              }
+            },
+            "example": [
+              {
+                "__type": "dk.cachet.carp.studies.application.users.ParticipantGroupStatus.Running",
+                "id": "c9cc5317-48da-45f2-958e-58bc07f34681",
+                "invitedOn": "2022-01-18T13:53:30Z",
+                "participants": [
+                  {
+                    "accountIdentity": {
+                      "__type": "dk.cachet.carp.common.application.users.EmailAccountIdentity",
+                      "emailAddress": "boaty@mcboatface.com"
+                    },
+                    "id": "32880e82-01c9-40cf-a6ed-17ff3348f251"
+                  }
+                ],
+                "startedOn": "2022-01-18T11:15:00Z",
+                "studyDeploymentStatus": {
+                  "__type": "dk.cachet.carp.deployments.application.StudyDeploymentStatus.Running",
+                  "createdOn": "2022-01-18T11:06:40Z",
+                  "deviceStatusList": [
+                    {
+                      "__type": "dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Deployed",
+                      "device": {
+                        "__type": "dk.cachet.carp.common.application.devices.Smartphone",
+                        "defaultSamplingConfiguration": {
+                          "dk.cachet.carp.geolocation": {
+                            "__type": "dk.cachet.carp.common.application.sampling.BatteryAwareSamplingConfiguration",
+                            "low": {
+                              "__type": "dk.cachet.carp.common.application.sampling.GranularitySamplingConfiguration",
+                              "granularity": "Coarse"
+                            },
+                            "normal": {
+                              "__type": "dk.cachet.carp.common.application.sampling.GranularitySamplingConfiguration",
+                              "granularity": "Detailed"
+                            }
+                          }
+                        },
+                        "isPrimaryDevice": true,
+                        "roleName": "Participant's phone"
+                      }
+                    },
+                    {
+                      "__type": "dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Registered",
+                      "canBeDeployed": false,
+                      "device": {
+                        "__type": "dk.cachet.carp.common.application.devices.AltBeacon",
+                        "isOptional": true,
+                        "roleName": "Participant's bike"
+                      },
+                      "remainingDevicesToRegisterBeforeDeployment": [],
+                      "remainingDevicesToRegisterToObtainDeployment": []
+                    }
+                  ],
+                  "participantStatusList": [
+                    {
+                      "assignedParticipantRoles": {
+                        "__type": "dk.cachet.carp.common.application.users.AssignedTo.Roles",
+                        "roleNames": [
+                          "Participant"
+                        ]
+                      },
+                      "assignedPrimaryDeviceRoleNames": [
+                        "Participant's phone"
+                      ],
+                      "participantId": "32880e82-01c9-40cf-a6ed-17ff3348f251"
+                    }
+                  ],
+                  "startedOn": "2022-01-18T11:15:00Z",
+                  "studyDeploymentId": "c9cc5317-48da-45f2-958e-58bc07f34681"
+                }
+              }
+            ]
+          },
+          "examples": {
+            "GetParticipantGroupStatusList": {
+              "value": [
+                {
+                  "__type": "dk.cachet.carp.studies.application.users.ParticipantGroupStatus.Running",
+                  "id": "c9cc5317-48da-45f2-958e-58bc07f34681",
+                  "invitedOn": "2022-01-18T13:53:30Z",
+                  "participants": [
+                    {
+                      "accountIdentity": {
+                        "__type": "dk.cachet.carp.common.application.users.EmailAccountIdentity",
+                        "emailAddress": "boaty@mcboatface.com"
+                      },
+                      "id": "32880e82-01c9-40cf-a6ed-17ff3348f251"
+                    }
+                  ],
+                  "startedOn": "2022-01-18T11:15:00Z",
+                  "studyDeploymentStatus": {
+                    "__type": "dk.cachet.carp.deployments.application.StudyDeploymentStatus.Running",
+                    "createdOn": "2022-01-18T11:06:40Z",
+                    "deviceStatusList": [
+                      {
+                        "__type": "dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Deployed",
+                        "device": {
+                          "__type": "dk.cachet.carp.common.application.devices.Smartphone",
+                          "defaultSamplingConfiguration": {
+                            "dk.cachet.carp.geolocation": {
+                              "__type": "dk.cachet.carp.common.application.sampling.BatteryAwareSamplingConfiguration",
+                              "low": {
+                                "__type": "dk.cachet.carp.common.application.sampling.GranularitySamplingConfiguration",
+                                "granularity": "Coarse"
+                              },
+                              "normal": {
+                                "__type": "dk.cachet.carp.common.application.sampling.GranularitySamplingConfiguration",
+                                "granularity": "Detailed"
+                              }
+                            }
+                          },
+                          "isPrimaryDevice": true,
+                          "roleName": "Participant's phone"
+                        }
+                      },
+                      {
+                        "__type": "dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Registered",
+                        "canBeDeployed": false,
+                        "device": {
+                          "__type": "dk.cachet.carp.common.application.devices.AltBeacon",
+                          "isOptional": true,
+                          "roleName": "Participant's bike"
+                        },
+                        "remainingDevicesToRegisterBeforeDeployment": [],
+                        "remainingDevicesToRegisterToObtainDeployment": []
+                      }
+                    ],
+                    "participantStatusList": [
+                      {
+                        "assignedParticipantRoles": {
+                          "__type": "dk.cachet.carp.common.application.users.AssignedTo.Roles",
+                          "roleNames": [
+                            "Participant"
+                          ]
+                        },
+                        "assignedPrimaryDeviceRoleNames": [
+                          "Participant's phone"
+                        ],
+                        "participantId": "32880e82-01c9-40cf-a6ed-17ff3348f251"
+                      }
+                    ],
+                    "startedOn": "2022-01-18T11:15:00Z",
+                    "studyDeploymentId": "c9cc5317-48da-45f2-958e-58bc07f34681"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

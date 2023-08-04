@@ -1,0 +1,26 @@
+package dk.cachet.carp.webservices.deployment.domain
+
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.PropertyNamingStrategies
+import com.fasterxml.jackson.databind.annotation.JsonNaming
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType
+import dk.cachet.carp.webservices.common.audit.Auditable
+import jakarta.persistence.*
+import org.hibernate.annotations.JdbcTypeCode
+import org.hibernate.annotations.Type
+import org.hibernate.type.SqlTypes
+
+@Entity
+@Table(name = "participant_groups")
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
+data class ParticipantGroup
+(
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        val id: Int = 0,
+
+        @JdbcTypeCode(SqlTypes.JSON)
+        @Column(columnDefinition = "jsonb")
+        @Type(JsonBinaryType::class)
+        var snapshot: JsonNode? = null,
+): Auditable()

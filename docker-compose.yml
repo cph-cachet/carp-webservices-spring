@@ -1,0 +1,156 @@
+version: '3.8'
+
+x-carp-base-config: &carp-base-config
+  networks:
+    - carp
+  restart: always
+  
+x-keycloak-dev-commands: &keycloak-dev-commands
+  command:
+    - start-dev
+    - --db=postgres
+    - --features=token-exchange
+    - "--db-url=jdbc:postgresql://carp-postgres-${PROFILE}:5432/keycloak"
+    - "--db-username=${ADMIN_USER}"
+    - "--db-password=${ADMIN_PASSWORD}"
+    - "--import-realm"
+
+x-keycloak-prod-commands: &keycloak-prod-commands
+  command:
+    - start
+    - --db=postgres
+    - --features=token-exchange
+    - "--db-url=jdbc:postgresql://carp-postgres-${PROFILE}:5432/keycloak"
+    - "--db-username=${ADMIN_USER}"
+    - "--db-password=${ADMIN_PASSWORD}"
+    - "--hostname-url=${KEYCLOAK_HOSTNAME_URL}"
+    - "--hostname-admin-url=${KEYCLOAK_HOSTNAME_ADMIN_URL}"
+    - "--import-realm"
+
+# Apply the following configuration if hosting behind a reverse proxy
+#    - "--hostname-url=${KEYCLOAK_HOSTNAME_URL}"
+#    - "--hostname-admin-url=${KEYCLOAK_HOSTNAME_ADMIN_URL}"
+#    - "--proxy ${KEYCLOAK_PROXY_MODE}"
+
+services:
+  carp-ws:
+    <<: *carp-base-config
+    build:
+      dockerfile: Dockerfile
+    container_name: "carp-ws-${PROFILE}"
+    depends_on:
+      - postgres
+      - rabbitmq
+      - keycloak
+    environment:
+      - "SPRING_PROFILES_ACTIVE=${PROFILE}"
+      - "JAVA_OPTS=-Xmx1g -Xms1g -XX:MaxPermSize=512m"
+      - "ADMIN_USER=${ADMIN_USER}"
+      - "ADMIN_PASSWORD=${ADMIN_PASSWORD}"
+    image: "carp-ws:${PROFILE}"
+    ports:
+      - "${CARP_WS_PORT}:8080"
+    profiles:
+      - production
+      - staging
+      - testing
+      - development
+    volumes:
+      - "/data/carp/storage/${PROFILE}:/root/home/carp/storage/${PROFILE}"
+
+  rabbitmq: &rabbitmq
+    <<: *carp-base-config
+    container_name: "carp-rabbitmq-${PROFILE}"
+    environment:
+      - "RABBITMQ_DEFAULT_USER=${ADMIN_USER}"
+      - "RABBITMQ_DEFAULT_PASS=${ADMIN_PASSWORD}"
+    hostname: "rabbitmq-${PROFILE}"
+    image: rabbitmq:3-management
+    profiles:
+      - production
+      - staging
+      - testing
+      - development
+    volumes:
+      - rabbitmq:/var/lib/rabbitmq/data
+      - ./deployment/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - ./deployment/rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins
+
+  rabbitmq-local:
+    <<: *rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+      - "15692:15692"
+    profiles:
+      - local
+
+  postgres: &postgres
+    <<: *carp-base-config
+    container_name: "carp-postgres-${PROFILE}"
+    environment:
+      - "POSTGRES_USER=${ADMIN_USER}"
+      - "POSTGRES_PASSWORD=${ADMIN_PASSWORD}"
+      - PGDATA=/data/postgres
+    hostname: "carp-postgres-${PROFILE}"
+    image: postgres:latest
+    profiles:
+      - production
+      - staging
+      - testing
+      - development
+    volumes:
+      - postgres:/var/lib/postgresql/data
+      - ./deployment/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  postgres-local:
+    <<: *postgres
+    ports:
+      - "5432:5432"
+    profiles:
+      - local
+
+  keycloak: &keycloak
+    <<: [*carp-base-config]
+    container_name: "carp-keycloak-${PROFILE}"
+    depends_on:
+      - postgres
+    environment:
+      - "KEYCLOAK_ADMIN=${ADMIN_USER}"
+      - "KEYCLOAK_ADMIN_PASSWORD=${ADMIN_PASSWORD}"
+    image: quay.io/keycloak/keycloak:22.0.1
+    ports:
+      - "${KEYCLOAK_PORT}:8080"
+    profiles:
+      - base
+    volumes:
+      - ./deployment/keycloak/carp-realm.json:/opt/keycloak/data/import/carp-realm.json
+      - keycloak:/opt/keycloak/data
+
+  keycloak-dev:
+    <<: [*keycloak, *keycloak-dev-commands]
+    profiles:
+      - staging
+      - testing
+      - development
+      - local
+
+  keycloak-prod:
+    <<: [*keycloak, *keycloak-prod-commands]
+    profiles:
+      - production
+
+networks:
+  carp:
+    external: true
+    name: "carp-${PROFILE}"
+    driver: bridge
+
+volumes:
+  rabbitmq:
+    name: "rabbitmq-${PROFILE}"
+  postgres:
+    name: "postgres-${PROFILE}"
+  keycloak:
+    name: "keycloak-${PROFILE}"
+

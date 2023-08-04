@@ -1,0 +1,282 @@
+server:
+  port: 8080
+  max-http-request-header-size: 48KB
+  tomcat:
+    uri-encoding: UTF-8
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+  forward-headers-strategy: native
+
+spring:
+  application:
+    name: carp-webservices
+    version: 1.0.0
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 8MB
+      max-request-size: 8MB
+  output:
+    ansi:
+      enabled: always
+
+  datasource:
+    name: carp_local
+    url: jdbc:postgresql://carp-postgres-${spring.profiles.active}:5432/carp?serverTimezone=UTC&characterEncoding=utf-8
+    username: "${ADMIN_USER}"
+    password: "${ADMIN_PASSWORD}"
+    driver-class-name: org.postgresql.Driver
+
+    # HikariCP settings
+    # https://github.com/brettwooldridge/HikariCP#configuration-knobs-baby
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      driver-class-name: org.postgresql.Driver
+      maximum-pool-size: 20
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      minimum-idle: 5
+      connection-timeout: 30000
+      leak-detection-threshold: 30000
+      pool-name: CarpHikariCP
+
+  jpa:
+    properties:
+      hibernate:
+        types:
+          print:
+            banner: false
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          lob:
+            non_contextual_creation: true
+    generate-ddl: false
+    open-in-view: false
+
+  sql:
+    init:
+      mode: always
+
+  rabbitmq:
+    host: carp-rabbitmq-${spring.profiles.active}
+    port: 5672
+    username: "${ADMIN_USER}"
+    password: "${ADMIN_PASSWORD}"
+    listener:
+      simple:
+        retry:
+          enabled: true
+          initial-interval: 1s
+          max-attempts: 3
+          max-interval: 10s
+          multiplier: 3
+
+  mail:
+    host: ...
+    port: ...
+    address: ...
+    password: ...
+    from: ... <${spring.mail.address}>
+    properties:
+      mail.smtp.starttls.enable: true
+      mail.smtp.starttls.required: true
+      mail.transport.protocol: smtp
+      mail.smtp.auth: true
+      mail.smtp.connectiontimeout: 60000
+      mail.smtp.timeout: 60000
+      mail.smtp.writetimeout: 60000
+
+  messages:
+    basename: messages/messages
+    encoding: UTF-8
+
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    encoding: UTF-8
+    servlet:
+      content-type: text/html
+    cache: true
+
+  main:
+    banner-mode: off
+
+  flyway:
+    enabled: true
+
+  jackson:
+    default-property-inclusion: NON_NULL
+
+caffeine:
+  expire-after-write: 300000
+
+keycloak:
+  auth-server-url: ...
+  realm: Carp
+  admin:
+    client-id: ...
+    client-secret: ...
+
+com:
+  c4-soft:
+    springaddons:
+      security:
+        cors:
+          - path: /**
+            allowed-origins: "*"
+        issuers:
+          - location: ${keycloak.auth-server-url}/realms/${keycloak.realm}
+            username-claim: preferred_username
+            authorities:
+              - path: $.realm_access.roles
+              - path: $.resource_access.*.roles
+        permit-all:
+          - /actuator/**
+          - /swagger-ui/**
+          - /v3/api-docs/**
+
+springdoc:
+  swagger-ui:
+    disable-swagger-default-url: true
+    url: ${environment.subfolder}/v3/api-docs
+    config-url: ${environment.subfolder}/v3/api-docs/swagger-config
+
+rabbit:
+  data-point:
+    processing:
+      queue: data-point-processing-${spring.profiles.active}
+      direct-ex: data-point-direct-${spring.profiles.active}
+      dlq: ${rabbit.data-point.processing.queue}.dlq
+      dlx: ${rabbit.data-point.processing.queue}.dlx
+      plq: ${rabbit.data-point.processing.queue}.plq
+      plx: ${rabbit.data-point.processing.queue}.plx
+
+  email:
+    sending:
+      queue: email-sending-queue-${spring.profiles.active}
+      direct-ex: email-sending-direct-exchange-${spring.profiles.active}
+      dlq: ${rabbit.email.sending.queue}.dlq
+      dlx: ${rabbit.email.sending.queue}.dlx
+      plq: ${rabbit.email.sending.queue}.plq
+      plx: ${rabbit.email.sending.queue}.plx
+
+  third-party:
+    processing:
+      queue: third-party-queue-${spring.profiles.active}
+      direct-ex: third-party-direct-exchange-${spring.profiles.active}
+      dlq: ${rabbit.third-party.processing.queue}.dlq
+      dlx: ${rabbit.third-party.processing.queue}.dlx
+      plq: ${rabbit.third-party.processing.queue}.plq
+      plx: ${rabbit.third-party.processing.queue}.plx
+
+  study:
+    queue: study-queue-${spring.profiles.active}
+    direct-ex: study-direct-exchange-${spring.profiles.active}
+    dlq: ${rabbit.study.queue}.dlq
+    dlx: ${rabbit.study.queue}.dlx
+
+  deployment:
+    queue: deployment-queue-${spring.profiles.active}
+    direct-ex: deployment-direct-exchange-${spring.profiles.active}
+    dlq: ${rabbit.deployment.queue}.dlq
+    dlx: ${rabbit.deployment.queue}.dlx
+
+# s3 settings for image storage
+# Future versions of CARP will ship with a self-hosted s3 container
+s3:
+  space:
+    key: ...
+    secret: ...
+    endpoint: ...
+    region: ...
+    bucket: ...
+
+management:
+  endpoints:
+    web:
+      exposure:
+        exclude: env,beans
+        include: '*'
+  endpoint:
+    mappings:
+      enabled: true
+    prometheus:
+      enabled: true
+    health:
+      enabled: true
+      cache:
+        time-to-live: 5000
+      show-details: always
+    info:
+      enabled: true
+    shutdown:
+      enabled: false
+    metrics:
+      enabled: true
+
+  info:
+    build:
+      enabled: true
+    defaults:
+      enabled: true
+    env:
+      enabled: true
+    git:
+      enabled: true
+      mode: full
+
+  health:
+    defaults:
+      enabled: true
+    db:
+      enabled: true
+    diskspace:
+      enabled: true
+    redis:
+      enabled: false
+  server:
+    ssl:
+      enabled: false
+
+logging:
+  level:
+    org.hibernate.sql: INFO
+    com.zaxxer.hikari.HikariConfig: INFO
+    org.hibernate.type.descriptor.sql.BasicBinder: INFO
+    org.keycloak: INFO
+    org.springframework.web: INFO
+    org.springframework.security: INFO
+
+slack:
+  channel:
+    name: '#carp-notifications'
+    server: '#carp-server-errors'
+    heartbeat: '#carp-heartbeat'
+  webhook: ...
+
+storage:
+  directory: /home/carp/storage/${spring.profiles.active}/
+
+environment:
+  server: ...
+  subfolder:
+  portal-subfolder: /portal
+
+
+alert:
+  # The email address to send alerts to
+  admin-email: ...
+  subject: WARNING! DATABASE CONNECTION PROBLEMS!
+
+info:
+  app:
+    name: ${spring.application.name}
+    description: This is CARP Webservices API.
+    version: ${spring.application.version}
+    java:
+      version: 17
+    environment: ${spring.profiles.active}

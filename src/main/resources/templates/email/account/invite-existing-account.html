@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <div th:replace="~{fragments/header :: header-css}"></div>
+    <div th:replace="~{fragments/footer :: footer-css}"></div>
+    <style type="text/css">
+        .body-container {
+            background-color: #f1f9fa;
+            color: #1D1D1B;
+            margin: 0;
+        }
+
+        .content {
+            padding: 20px 50px 20px 50px;
+            box-sizing: border-box;
+            width: 100%;
+            margin: auto;
+            background-color: #fff;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body class="body-container">
+<div th:replace="~{fragments/header-logo-only :: header-logo-only}"></div>
+
+<div th:with="study_invitation_id=${T(dk.cachet.carp.webservices.common.email.util.EmailTemplateUtil).INLINE_STUDY_INVITATION_ID},
+              study_description_id=${T(dk.cachet.carp.webservices.common.email.util.EmailTemplateUtil).INLINE_STUDY_DESCRIPTION_ID}">
+    <div class="content">
+        <h3 style="text-align: center;"><br><strong>Welcome to the CACHET Research Platform</strong></h3>
+        <p style="text-align: center;">(information på dansk nedenfor)</p>
+        <p>You are invited to the "<span th:text="*{__${study_invitation_id}__}"></span>" study.
+            Here is a short description of the study: "<span th:text="*{__${study_description_id}__}"></span>"
+        </p>
+        <p>You have already registered to the CACHET Research Platform. Please use your existing username and password to log in.</p>
+        <p>You will receive an email shortly after this with which you can reset your password, if you have forgotten it.</p>
+    </div>
+    <div class="content">Thank you.
+        <p><a href="https://www.cachet.dk">Copenhagen Center for Health Technology</a> -&nbsp;<a href="https://www.dtu.dk/english">Technical University of Denmark</a></p>
+        <p><a href="https://carp.cachet.dk">CACHET Research Platform (CARP)</a> – <a href="https://carp.cachet.dk/privacy-policy-service/">Privacy Policy</a></p>
+    </div>
+
+    <hr>
+
+    <div class="content">
+        <p>Du er hermed inviteret til at deltage i "<span th:text="*{__${study_invitation_id}__}"></span>" studiet.
+            Dette er en kort beskrivelse af studiet:
+            "<span th:text="*{__${study_description_id}__}"></span>"
+        </p>
+        <p>Du er allerede registreret i systemet og du skal bruge dit nuværende brugernavn og password til a logge ind.</p>
+        <p>Du vil kort efter dette modtage en e-mail, hvormed du kan forny dit password, hvis du har glemt det.</p>
+        Tak for din deltagelse.
+        <p><a href="https://www.cachet.dk">Copenhagen Center for Health Technology</a> -&nbsp;<a href="https://www.dtu.dk/">Danmarks Tekniske Universitet</a></p>
+        <p><a href="https://carp.cachet.dk">CACHET Research Platform (CARP)</a> – <a href="https://carp.cachet.dk/privacy-policy-service/">Privacy Policy</a></p>
+    </div>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

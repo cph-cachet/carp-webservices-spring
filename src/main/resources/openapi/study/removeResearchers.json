@@ -1,0 +1,16 @@
+{
+  "tags": [
+    "study-controller"
+  ],
+  "description": "removeResearchers",
+  "parameters": [
+    {
+      "name": "email",
+      "in": "query",
+      "schema": {
+        "type": "string",
+        "example": "{{EMAIL}}"
+      }
+    }
+  ]
+}

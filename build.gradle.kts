@@ -1,0 +1,180 @@
+import org.springframework.boot.gradle.tasks.bundling.BootJar
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
+plugins {
+    idea
+
+    kotlin("jvm")
+    kotlin("plugin.spring")
+    kotlin("plugin.serialization")
+
+    id("org.springframework.boot")
+    id("io.spring.dependency-management")
+    id("org.flywaydb.flyway")
+    id("org.jetbrains.kotlin.plugin.allopen")
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+
+    maven("https://plugins.gradle.org/m2/")
+    maven("https://kotlin.bintray.com/kotlinx")
+
+    maven("https://repo.spring.io/snapshot")
+    maven("https://repo.spring.io/milestone")
+    maven("https://repo.spring.io/plugins-snapshot")
+    maven("https://repo.spring.io/plugins-release")
+}
+
+tasks.withType<Test> {
+    environment("SPRING.PROFILES.ACTIVE", "test")
+    useJUnitPlatform()
+}
+
+tasks.withType<BootJar> {
+    archiveFileName.set("carp-platform.jar")
+}
+
+tasks.withType<KotlinCompile>().configureEach {
+    kotlinOptions {
+        freeCompilerArgs = listOf("-Xjsr305=strict")
+        jvmTarget = "17"
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom(configurations.annotationProcessor.get())
+    }
+}
+
+allprojects {
+    group = "dk.cachet"
+    version = "v1.0.0-alpha.28.infra.1"
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+dependencies {
+    // KOTLIN
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:${property("kotlinVersion")}")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${property("serializationJSONVersion")}")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${property("kotlinCoroutinesVersion")}")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:${property("kotlinCoroutinesVersion")}")
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:${property("kotlinDatetimeVersion")}")
+
+    // JACKSON
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:${property("jacksonVersion")}")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${property("jacksonVersion")}")
+
+    // CARP CORE
+    implementation("dk.cachet.carp.common:carp.common-jvm:${property("carpCoreVersion")}")
+    implementation("dk.cachet.carp.protocols:carp.protocols.core-jvm:${property("carpCoreVersion")}")
+    implementation("dk.cachet.carp.deployments:carp.deployments.core-jvm:${property("carpCoreVersion")}")
+    implementation("dk.cachet.carp.studies:carp.studies.core-jvm:${property("carpCoreVersion")}")
+    implementation("dk.cachet.carp.data:carp.data.core-jvm:${property("carpCoreVersion")}")
+
+    // SPRING STARTERS
+    implementation("org.springframework.boot:spring-boot-maven-plugin:${property("springBootVersion")}")
+    implementation("org.springframework.boot:spring-boot-starter")
+    implementation("org.springframework.boot:spring-boot-starter-amqp")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa") {
+        exclude(module="org.apache.tomcat:tomcat-jdbc")
+    }
+    implementation("org.springframework.boot:spring-boot-starter-data-rest")
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.springframework.boot:spring-boot-starter-jdbc")
+    implementation("org.springframework.boot:spring-boot-starter-mail")
+    implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
+    implementation("org.springframework.boot:spring-boot-starter-freemarker")
+    implementation("org.springframework.boot:spring-boot-configuration-processor")
+    implementation("org.springframework.boot:spring-boot-devtools")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+
+    // SECURITY
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.security:spring-security-config")
+    implementation("org.springframework.security:spring-security-taglibs")
+    implementation("org.springframework.security:spring-security-core")
+    implementation("com.c4-soft.springaddons:spring-addons-webmvc-jwt-resource-server:${property("springAddonsVersion")}")
+
+    // SPRING CLOUD
+    implementation("org.springframework.cloud:spring-cloud-starter-config")
+    implementation("org.springframework.cloud:spring-cloud-starter-bootstrap:${property("springCloudStarterVersion")}")
+
+    // SPRINGDOC
+    implementation("org.springdoc:springdoc-openapi:${property("springdocVersion")}")
+    implementation("org.springdoc:springdoc-openapi-kotlin:${property("springdocVersion")}")
+    implementation("org.springdoc:springdoc-openapi-ui:${property("springdocVersion")}")
+    implementation("org.springdoc:springdoc-openapi-security:${property("springdocVersion")}")
+    implementation("io.swagger.core.v3:swagger-annotations:${property("swaggerCoreVersion")}")
+
+    // RSQL
+    implementation("cz.jirutka.rsql:rsql-parser:${property("rsqlParserVersion")}")
+
+    // COMMONS-IO
+    implementation("commons-io:commons-io:${property("commonsIOVersion")}")
+
+    // HIBERNATE
+    implementation("org.hibernate:hibernate-core:${property("hibernateVersion")}")
+    implementation("com.vladmihalcea:hibernate-types-60:${property("hibernateTypesVersion")}")
+
+    // POSTGRESQL
+    runtimeOnly("org.postgresql:postgresql")
+
+    // FLYWAY
+    implementation("org.flywaydb:flyway-core")
+
+    // S3
+    implementation("com.amazonaws:aws-java-sdk-s3:${property("awsSDKVersion")}")
+
+    // SLACK
+    implementation("com.github.seratch:jslack:${property("jslackVersion")}")
+
+    // MICROMETER
+    runtimeOnly("io.micrometer:micrometer-registry-prometheus")
+
+    // PASSAY - for password validation
+    implementation("org.passay:passay:${property("passayVersion")}")
+
+    // GOOGLE Core Libraries
+    implementation("com.google.guava:guava:${property("guavaVersion")}")
+
+    // Webflux
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
+
+    // Caching
+    implementation("org.springframework.boot:spring-boot-starter-cache")
+    implementation("com.github.ben-manes.caffeine:caffeine:${property("caffeineVersion")}")
+
+    // Unit Test
+    testImplementation(kotlin("test"))
+    testImplementation(kotlin("test-junit5"))
+    testImplementation(kotlin("test-common"))
+    testImplementation(kotlin("test-annotations-common"))
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:${property("kotlinCoroutinesVersion")}")
+
+    testImplementation("com.c4-soft.springaddons:spring-addons-webmvc-jwt-test:${property("springAddonsVersion")}")
+    testImplementation("com.ninja-squad:springmockk:${property("springMockkVersion")}")
+    testImplementation("com.squareup.okhttp3:mockwebserver:${property("okhttpVersion")}")
+    testImplementation("org.springframework.security:spring-security-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-test") {
+        exclude("org.junit.vintage", "junit-vintage-engine")
+        exclude("org.mockito", "mockito-core")
+    }
+
+    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+}
+
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}")
+    }
+}

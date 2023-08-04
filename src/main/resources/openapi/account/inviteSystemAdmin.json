@@ -1,0 +1,15 @@
+{
+  "tags": [
+    "account-controller"
+  ],
+  "description": "> `Description`: `invite study owner` Creates a new [Account] for the specified [emailAddress] with the `System Admin` role. A corresponding invitational e-mail will be sent out to the invited [emailAddress].\n\n* permission for this invitation has a study owner and system administrator.\n\n> `Request`: (Http Method: [POST]) https://cans.cachet.dk:443/api/accounts/study-admin\n\nThis request must be authenticated using a HTTP OAuth 2.0 Authentication header.\n\n> `Response`:\n\n- This request doesn't return a response body. \n- On failure status code `400` (bad request) is returned.\n- On failure status code `401` (unauthorized) is returned.\n- On failure status code `500` (internal server error) is returned.",
+  "requestBody": {
+    "content": {
+      "application/json": {
+        "example": {
+          "emailAddress": "[example]@dtu.dk"
+        }
+      }
+    }
+  }
+}

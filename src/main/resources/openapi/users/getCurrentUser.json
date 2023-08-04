@@ -1,0 +1,133 @@
+{
+  "tags": [
+    "user-controller"
+  ],
+  "description": "> `Description`: `Current user` enpoint returns the information of the current authenticated user.\n\n> `Request`: (Http Method: [GET]) https://cans.cachet.dk:443/api/users/current\n\nThis request must be authenticated using a HTTP OAuth 2.0 Authentication header.\n   \n> `Response`:\n\n- On success a JSON object is returned with a fields `id`, `firstName`, `lastName`, `isActivated`, `accountId`, and `role` list. \n- On failure status code `400` (bad request) is returned.\n- On failure status code `401` (unauthorized) is returned.\n- On failure status code `500` (internal server error) is returned.",
+  "responses": {
+    "200": {
+      "description": "current user",
+      "headers": {
+        "Cache-Control": {
+          "schema": {
+            "type": "string",
+            "example": "no-cache, no-store, max-age=0, must-revalidate"
+          }
+        },
+        "Connection": {
+          "schema": {
+            "type": "string",
+            "example": "keep-alive"
+          }
+        },
+        "Date": {
+          "schema": {
+            "type": "string",
+            "example": "Thu, 04 Feb 2021 19:01:27 GMT"
+          }
+        },
+        "Expires": {
+          "schema": {
+            "type": "string",
+            "example": "0"
+          }
+        },
+        "Pragma": {
+          "schema": {
+            "type": "string",
+            "example": "no-cache"
+          }
+        },
+        "Server": {
+          "schema": {
+            "type": "string",
+            "example": "nginx/1.18.0"
+          }
+        },
+        "Strict-Transport-Security": {
+          "schema": {
+            "type": "string",
+            "example": "max-age=63072000; includeSubDomains; preload"
+          }
+        },
+        "Transfer-Encoding": {
+          "schema": {
+            "type": "string",
+            "example": "chunked"
+          }
+        },
+        "X-Content-Type-Options": {
+          "schema": {
+            "type": "string",
+            "example": "nosniff"
+          }
+        },
+        "X-Frame-Options": {
+          "schema": {
+            "type": "string",
+            "example": "DENY"
+          }
+        },
+        "X-XSS-Protection": {
+          "schema": {
+            "type": "string",
+            "example": "1; mode=block"
+          }
+        }
+      },
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "accountId": {
+                "type": "string",
+                "example": "2b79c86c-1546-4e62-a819-7c1388c65d40"
+              },
+              "firstName": {
+                "type": "string",
+                "example": "CarpSystemAdmin"
+              },
+              "id": {
+                "type": "number",
+                "example": 1
+              },
+              "isActivated": {
+                "type": "boolean",
+                "example": true
+              },
+              "lastName": {
+                "type": "string",
+                "example": "CarpSystemAdmin"
+              },
+              "role": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "example": "SYSTEM_ADMIN"
+                },
+                "example": [
+                  "SYSTEM_ADMIN"
+                ]
+              }
+            }
+          },
+          "examples": {
+            "current user": {
+              "value": {
+                "accountId": "2b79c86c-1546-4e62-a819-7c1388c65d40",
+                "email": "admin@admin.dk",
+                "firstName": "CarpSystemAdmin",
+                "id": 1,
+                "isActivated": true,
+                "lastName": "CarpSystemAdmin",
+                "role": [
+                  "SYSTEM_ADMIN"
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

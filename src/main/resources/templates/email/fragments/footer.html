@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <style type="text/css" th:fragment="footer-css">
+        .footer-content {
+            padding: 20px 30px;
+            max-width: 100%;
+            background: #1D1D1B;
+            color: #fff;
+            text-align: center;
+        }
+
+        .footer-desc {
+            text-align: center;
+            margin: 0 auto;
+        }
+
+        .footer-logos {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+<div th:fragment="footer">
+    <div class="footer-content">
+        <p>COPENHAGEN CENTER FOR HEALTH TECHNOLOGY</p>
+        <div class="footer-logos">
+            <img th:src="|cid:${h_logo_id}|" th:with="h_logo_id=${T(dk.cachet.carp.webservices.common.email.util.EmailTemplateUtil).INLINE_H_LOGO_ID}"/>
+            <img th:src="|cid:${cph_logo_id}|" th:with="cph_logo_id=${T(dk.cachet.carp.webservices.common.email.util.EmailTemplateUtil).INLINE_CPH_LOGO_ID}"/>
+            <img th:src="|cid:${dtu_logo_id}|" th:with="dtu_logo_id=${T(dk.cachet.carp.webservices.common.email.util.EmailTemplateUtil).INLINE_DTU_LOGO_ID}"/>
+            <img th:src="|cid:${ku_logo_id}|" th:with="ku_logo_id=${T(dk.cachet.carp.webservices.common.email.util.EmailTemplateUtil).INLINE_KU_LOGO_ID}"/>
+        </div>
+        <p class="footer-desc">The Copenhagen Center for Health Technology [cachet] is a strategic partnership between the
+            Capital Health Region
+            of Denmark, the City of Copenhagen, the University of Copenhagen, and the Technical University of Denmark. The
+            strategic objective is to strengthen interdisciplinary and cross-organizational research and development within
+            personalized health technology.</p>
+    </div>
+</div>
+</body>
+</html>

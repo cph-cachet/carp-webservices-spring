@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <style type="text/css" th:fragment="header-logo-only-css">
+        .header-content {
+            margin-top: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .logo {
+            margin-left: auto;
+            margin-right: auto;
+            width: 50%;
+        }
+    </style>
+</head>
+<body>
+<div th:fragment="header-logo-only">
+    <div class="header-content">
+        <img th:src="|cid:${cachet_logo_id}|" th:with="cachet_logo_id=${T(dk.cachet.carp.webservices.common.email.util.EmailTemplateUtil).INLINE_CACHET_LOGO_ID}" class="logo"/>
+    </div>
+</div>
+</body>
+</html>

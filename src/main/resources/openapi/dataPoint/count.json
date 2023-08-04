@@ -1,0 +1,99 @@
+{
+  "tags": [
+    "data-point-controller"
+  ],
+  "description": "> `Description`: `create one` \n\nReturns the total number of data points for the given deployment. In the request parameters, a `query` parameter can be used to filter the data. It accepts standard RSQL queries like the `getAll` endpoint. Can also be null.\n\n> `Response`:\n\n- On success, a JSON object is returned with a created data point.\n- On failure status code `400` (bad request) is returned.\n- On failure status code `401` (unauthorized) is returned.\n- On failure status code `500` (internal server error) is returned.",
+  "parameters": [
+    {
+      "name": "query",
+      "in": "query",
+      "schema": {
+        "type": "string",
+        "example": ""
+      },
+      "description": "Standard RSQL query. Can be null."
+    }
+  ],
+  "responses": {
+    "200": {
+      "description": "get count of data points",
+      "headers": {
+        "Cache-Control": {
+          "schema": {
+            "type": "string",
+            "example": "no-cache, no-store, max-age=0, must-revalidate"
+          }
+        },
+        "Connection": {
+          "schema": {
+            "type": "string",
+            "example": "keep-alive"
+          }
+        },
+        "Date": {
+          "schema": {
+            "type": "string",
+            "example": "Tue, 13 Jul 2021 11:52:31 GMT"
+          }
+        },
+        "Expires": {
+          "schema": {
+            "type": "string",
+            "example": "0"
+          }
+        },
+        "Keep-Alive": {
+          "schema": {
+            "type": "string",
+            "example": "timeout=60"
+          }
+        },
+        "Pragma": {
+          "schema": {
+            "type": "string",
+            "example": "no-cache"
+          }
+        },
+        "Transfer-Encoding": {
+          "schema": {
+            "type": "string",
+            "example": "chunked"
+          }
+        },
+        "Vary": {
+          "schema": {
+            "type": "string",
+            "example": "Access-Control-Request-Headers"
+          }
+        },
+        "X-Content-Type-Options": {
+          "schema": {
+            "type": "string",
+            "example": "nosniff"
+          }
+        },
+        "X-Frame-Options": {
+          "schema": {
+            "type": "string",
+            "example": "DENY"
+          }
+        },
+        "X-XSS-Protection": {
+          "schema": {
+            "type": "string",
+            "example": "1; mode=block"
+          }
+        }
+      },
+      "content": {
+        "application/octet-stream": {
+          "examples": {
+            "get count of data points": {
+              "value": "0"
+            }
+          }
+        }
+      }
+    }
+  }
+}

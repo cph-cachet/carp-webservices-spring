@@ -1,0 +1,13 @@
+{
+  "tags": [
+    "summary-controller"
+  ],
+  "description": "getAll",
+  "requestBody": {
+    "content": {
+      "text/plain": {
+        "example": ""
+      }
+    }
+  }
+}

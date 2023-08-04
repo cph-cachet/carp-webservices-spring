@@ -1,0 +1,15 @@
+{
+  "tags": [
+    "account-controller"
+  ],
+  "description": "unlockAccounts",
+  "requestBody": {
+    "content": {
+      "application/json": {
+        "example": {
+          "emailAddress": ""
+        }
+      }
+    }
+  }
+}

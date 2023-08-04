@@ -1,0 +1,21 @@
+{
+  "tags": [
+    "data-point-controller"
+  ],
+  "description": "> `Description`: `create many` \n\nThis endpoint creates several data points with the given [DEPLOYMENT_ID].\n\n> `Request`: (Http Method: [POST]) https://cans.cachet.dk:443/api/deployments/{{DEPLYOMENT_ID}}/data-points/batch\n\nThis request must be authenticated using a HTTP OAuth 2.0 Authentication header.\n\n> `Response`:\n\n- On success, a JSON object is returned with a created data points.\n- On failure status code `400` (bad request) is returned.\n- On failure status code `401` (unauthorized) is returned.\n- On failure status code `500` (internal server error) is returned.\n",
+  "requestBody": {
+    "content": {
+      "multipart/form-data": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "file": {
+              "type": "string",
+              "format": "binary"
+            }
+          }
+        }
+      }
+    }
+  }
+}

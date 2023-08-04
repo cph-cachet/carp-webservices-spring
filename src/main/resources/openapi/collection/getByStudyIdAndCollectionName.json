@@ -1,0 +1,6 @@
+{
+  "tags": [
+    "collection-controller"
+  ],
+  "description": "> `Description`: `get collection by study ID and collection name` \n\nThis endpoint allows retrieving collection with the given [STUDY_ID] and [COLLECTION_NAME] as the request parameters.\n\n> `Request`: (Http Method: [GET]) https://cans.cachet.dk:443/api/studies/{{STUDY_ID}}/collections/{{COLLECTION_NAME}}\n\nThis request must be authenticated using a HTTP OAuth 2.0 Authentication header.\n\n> `Response`:\n\n- On success a JSON object is returned with a fields `id`, `name`, `created_by_user_id`, `collection_id`, `collections`, `data`, `created_at` and `updated_at` list. \n- On failure status code `400` (bad request) is returned.\n- On failure status code `401` (unauthorized) is returned.\n- On failure status code `500` (internal server error) is returned."
+}
