@@ -16,9 +16,9 @@ import { useFormik } from 'formik';
 import { useEffect, useState } from 'react';
 import * as yup from 'yup';
 
-import AppleLogo from '@Assets/images/logo-apple.png';
-import GoogleLogo from '@Assets/images/logo-google.png';
-import PasskeyLogo from '@Assets/images/logo-passkey.png';
+import AppleLogo from '../../assets/images/logo-apple.png';
+import GoogleLogo from '../../assets/images/logo-google.png';
+import PasskeyLogo from '../../assets/images/logo-passkey.png';
 import AuthActionButton from '../../components/Buttons/AuthActionButton';
 import LoginOauthOption from '../../components/Buttons/OauthOptions';
 import AuthPageLayout from '../../components/Layout/PublicPageLayout/AuthPageLayout';
@@ -41,7 +41,7 @@ const validationSchema = yup.object({
 });
 export default function Login(props: PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18n>) {
     const { kcContext, Template } = props;
-    const { social, realm, url, usernameEditDisabled, login, auth, registrationDisabled } = kcContext;
+    const { social, realm, url, login, auth } = kcContext;
 
     const [isLoginButtonDisabled, setIsLoginButtonDisabled] = useState(false);
 
@@ -51,14 +51,7 @@ export default function Login(props: PageProps<Extract<KcContext, { pageId: "log
             password: '',
         },
         validationSchema,
-        onSubmit: (values) => {
-            const sessionLoginParams: SessionLoginParams = {
-                password: values.password,
-                username: values.email,
-            } as unknown as SessionLoginParams;
-            // loginMutation.mutate(sessionLoginParams);
-            // authenticator.storeStaySignedIn(staySignedIn);
-        },
+        onSubmit: () => { }
     });
 
     const [staySignedIn, setStaySignedIn] = useState(false);
@@ -81,7 +74,7 @@ export default function Login(props: PageProps<Extract<KcContext, { pageId: "log
     return (
         <PublicPageLayout>
             <AuthPageLayout title="Log in">
-                <form onSubmit={formik.handleSubmit}>
+                <form onSubmit={onSubmit}>
                     <CarpInput
                         name="email"
                         label="Email Address"
@@ -103,9 +96,13 @@ export default function Login(props: PageProps<Extract<KcContext, { pageId: "log
                             <FormControlLabel
                                 control={
                                     <Checkbox
-                                        checked={staySignedIn}
+                                        {...(login.rememberMe
+                                            ? {
+                                                "checked": true
+                                            }
+                                            : {})}
                                         onChange={toggleSignedIn}
-                                        name="staySignedin"
+                                        name="rememberMe"
                                         inputProps={{ 'aria-label': 'controlled' }}
                                     />
                                 }
@@ -113,7 +110,7 @@ export default function Login(props: PageProps<Extract<KcContext, { pageId: "log
                             />
                         </FormGroup>
                         <AuthInfoText variant="h4_web">
-                            <StyledLink to="/forgotten">Forgot your password?</StyledLink>
+                            <StyledLink to={url.loginResetCredentialsUrl}>Forgot your password?</StyledLink>
                         </AuthInfoText>
                     </LoginAdditionalActions>
                     <AuthActionButton loading={false} text="Log in" />

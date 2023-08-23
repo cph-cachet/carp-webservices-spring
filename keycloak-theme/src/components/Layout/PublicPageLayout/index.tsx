@@ -1,19 +1,19 @@
-import StyledLink from '@Components/StyledLink';
-import { ReactNode } from 'react';
-import { useLocation } from 'react-router-dom';
-import { BannerActionText, PublicPageBanner, StyledLogo } from './styles';
+import StyledLink from "../../StyledLink";
+import { ReactNode } from "react";
+import { BannerActionText, PublicPageBanner, StyledLogo } from "./styles";
 
 type Props = {
   children: ReactNode;
 };
 
 const PublicPageLayout = ({ children }: Props) => {
-  const location = useLocation();
-
   return (
     <>
       <PublicPageBanner>
         <StyledLogo type="flat-colored" />
+        {/* 
+          TODO: fix
+
         {location.pathname.includes('/register') ? (
           <BannerActionText>
             Already have an account?{' '}
@@ -22,13 +22,14 @@ const PublicPageLayout = ({ children }: Props) => {
             </StyledLink>
           </BannerActionText>
         ) : (
-          <BannerActionText>
-            New to CARP?{' '}
-            <StyledLink to="/register" isBold>
-              Sign up
-            </StyledLink>
-          </BannerActionText>
-        )}
+        */}
+        <BannerActionText>
+          New to CARP?{" "}
+          <StyledLink to="/register" isBold>
+            Sign up
+          </StyledLink>
+        </BannerActionText>
+        {/*         )} */}
       </PublicPageBanner>
       {children}
     </>

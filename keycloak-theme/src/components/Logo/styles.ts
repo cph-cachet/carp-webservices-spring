@@ -1,7 +1,6 @@
-import { styled } from '@Utils/theme';
-import { NavLink } from 'react-router-dom';
+import { styled } from '../../utils/theme';
 
-export const DefaultLogo = styled(NavLink)({
+export const DefaultLogo = styled('a')({
   boxSizing: 'border-box',
   display: 'flex',
   height: 60,
@@ -18,7 +17,7 @@ export const DefaultLogo = styled(NavLink)({
   },
 });
 
-export const FlatLogo = styled(NavLink)({
+export const FlatLogo = styled('a')({
   boxSizing: 'border-box',
   display: 'flex',
   margin: '5px auto',
@@ -31,7 +30,7 @@ export const FlatLogo = styled(NavLink)({
   },
 });
 
-export const FlatColoredLogo = styled(NavLink)({
+export const FlatColoredLogo = styled('a')({
   boxSizing: 'border-box',
   display: 'flex',
   alignItems: 'center',
@@ -48,7 +47,7 @@ export const FlatColoredLogo = styled(NavLink)({
   },
 });
 
-export const FlatWhiteLogo = styled(NavLink)({
+export const FlatWhiteLogo = styled('a')({
   boxSizing: 'border-box',
   '& img': {
     height: 28,

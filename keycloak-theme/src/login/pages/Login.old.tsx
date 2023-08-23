@@ -83,8 +83,6 @@ export default function Login(props: PageProps<Extract<KcContext, { pageId: "log
                                             </label>
                                             <input
                                                 tabIndex={1}
-                                                id={autoCompleteHelper}
-                                                className={getClassName("kcInputClass")}
                                                 //NOTE: This is used by Google Chrome auto fill so we use it to tell
                                                 //the browser how to pre fill the form but before submit we put it back
                                                 //to username because it is what keycloak expects.

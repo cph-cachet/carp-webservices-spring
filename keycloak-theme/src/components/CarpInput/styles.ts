@@ -1,5 +1,5 @@
 import { TextField } from '@mui/material';
-import { styled } from '@Utils/theme';
+import { styled } from '../../utils/theme';
 
 const StyledInput = styled(TextField)({
   paddingBottom: 20,
