@@ -1,10 +1,13 @@
 package dk.cachet.carp.webservices.account.controller
 
 import dk.cachet.carp.common.application.EmailAddress
+import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.common.application.users.AccountIdentity
 import dk.cachet.carp.webservices.account.controller.AccountController.Companion.ACCOUNT_BASE
 import dk.cachet.carp.webservices.account.domain.AccountRequest
 import dk.cachet.carp.webservices.account.service.AccountService
+import dk.cachet.carp.webservices.common.constants.PathVariableName
+import dk.cachet.carp.webservices.security.authentication.domain.Account
 import jakarta.validation.Valid
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -23,6 +26,7 @@ class AccountController(private val accountService: AccountService)
         const val ACCOUNT_BASE = "/api/accounts"
         const val INVITE = "/invite"
         const val ROLE = "/role"
+        const val ACCOUNT = "/{${PathVariableName.ACCOUNT_ID}}"
     }
 
     @PostMapping(INVITE)
@@ -41,5 +45,14 @@ class AccountController(private val accountService: AccountService)
     {
         LOGGER.info("Start POST: $ACCOUNT_BASE$ROLE")
         accountService.hasRoleByEmail(EmailAddress(request.emailAddress), request.role)
+    }
+
+    @GetMapping(ACCOUNT)
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("@accountAuthorizationService.isAccountResearcher()")
+    suspend fun info(@PathVariable() accountId: String): Account?
+    {
+        LOGGER.info("Start GET: $ACCOUNT_BASE$ACCOUNT")
+        return accountService.findByUUID(UUID.parse(accountId))
     }
 }
