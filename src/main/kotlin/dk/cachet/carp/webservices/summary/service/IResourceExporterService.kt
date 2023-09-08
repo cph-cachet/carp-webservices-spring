@@ -26,9 +26,6 @@ interface IResourceExporterService
     /** Exports data stream sequences serialized into the specified [rootFolder]. */
     fun exportDataStreamSequences(deploymentIds: List<String>, rootFolder: Path, summaryLog: SummaryLog)
 
-    /** Exports consent documents serialized into the specified [rootFolder]. */
-    fun exportConsents(deploymentIds: List<String>, rootFolder: Path, summaryLog: SummaryLog)
-
     /** Exports files serialized into the specified [rootFolder]. */
     fun exportFiles(studyId: String, deploymentIds: List<String>, rootFolder: Path, summaryLog: SummaryLog)
 

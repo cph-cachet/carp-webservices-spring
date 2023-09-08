@@ -11,7 +11,6 @@ import dk.cachet.carp.studies.domain.StudySnapshot
 import dk.cachet.carp.webservices.account.service.AccountService
 import dk.cachet.carp.webservices.collection.repository.CollectionRepository
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
-import dk.cachet.carp.webservices.consent.repository.ConsentDocumentRepository
 import dk.cachet.carp.webservices.dataPoint.repository.DataPointRepository
 import dk.cachet.carp.webservices.deployment.repository.CoreDeploymentRepository
 import dk.cachet.carp.webservices.document.repository.DocumentRepository
@@ -34,7 +33,6 @@ class CoreStudyRepository
     private val deploymentRepository: CoreDeploymentRepository,
     private val dataPointRepository: DataPointRepository,
     private val collectionRepository: CollectionRepository,
-    private val consentDocumentRepository: ConsentDocumentRepository,
     private val documentRepository: DocumentRepository,
     private val summaryRepository: SummaryRepository,
     private val filesRepository: FileRepository,
@@ -117,7 +115,6 @@ class CoreStudyRepository
         val collectionIds = collectionRepository.getCollectionIdsByStudyId(studyId.stringRepresentation)
 
         summaryRepository.deleteByStudyId(studyId.stringRepresentation)
-        consentDocumentRepository.deleteAllByDeploymentIds(deploymentIdsString)
         documentRepository.deleteAllByCollectionIds(collectionIds)
         collectionRepository.deleteAllByDeploymentIds(deploymentIdsString)
         studyRepository.deleteByStudyId(studyId.stringRepresentation)
