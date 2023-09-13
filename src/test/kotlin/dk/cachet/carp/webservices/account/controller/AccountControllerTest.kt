@@ -1,6 +1,7 @@
 package dk.cachet.carp.webservices.account.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.webservices.account.domain.AccountRequest
 import dk.cachet.carp.webservices.account.service.AccountService
 import io.mockk.coEvery
@@ -101,6 +102,21 @@ class AccountControllerTest {
                 post(endpoint)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(accountRequest)))
+                .andExpect(status().isOk)
+        }
+    }
+
+    @Nested
+    inner class Info {
+        private val validUUIDEndpoint = "/api/accounts/${UUID.randomUUID().stringRepresentation}"
+
+        @Test
+        fun `should relay task to account service`() = runTest {
+            coEvery { accountService.findByUUID(any()) } returns mockk()
+
+            mockMvc.perform(
+                get(validUUIDEndpoint)
+                    .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk)
         }
     }
