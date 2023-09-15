@@ -78,7 +78,7 @@ For API documentation we use [Swagger](https://cans.cachet.dk/dev/swagger-ui/ind
    - Set up a client for service accounts (Note: this client will only be used by the backend services, not a custom CAWS fronted)
      - Set up a new client by selecting the `Carp` realm after opening `<server>/admin/master/console/`, and click `Create client` under the `Clients` tab.
      - Fill in the general information and then toggle `Client authentication` as well as the `Authorization` options on. Then fill the URL settings.
-     - Under the Service account roles tab assign the following roles:
+     - Under the Service account roles tab assign the following roles (filter by clients to find them):
        - `manage-users`
        - `view-users`
        - `query-users`
