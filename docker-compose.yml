@@ -45,11 +45,11 @@ services:
     environment:
       - "SPRING_PROFILES_ACTIVE=${PROFILE}"
       - "JAVA_OPTS=-Xmx1g -Xms1g -XX:MaxPermSize=512m"
-      - "ADMIN_USER=${ADMIN_USER}"
-      - "ADMIN_PASSWORD=${ADMIN_PASSWORD}"
+    env_file:
+      - ./deployment/.env
     image: "carp-ws:${PROFILE}"
     ports:
-      - "${CARP_WS_PORT}:8080"
+      - "${CAWS_PORT}:8080"
     profiles:
       - production
       - staging
@@ -120,7 +120,7 @@ services:
       - "KEYCLOAK_ADMIN_PASSWORD=${ADMIN_PASSWORD}"
     image: quay.io/keycloak/keycloak:22.0.1
     ports:
-      - "${KEYCLOAK_PORT}:8080"
+      - "${KC_PORT}:8080"
     profiles:
       - base
     volumes:
