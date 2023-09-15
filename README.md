@@ -69,13 +69,13 @@ For API documentation we use [Swagger](https://cans.cachet.dk/dev/swagger-ui/ind
 # Deployment
 
 1. Edit the [.env file](deployment/.env). Choose a profile from the list of [Profiles](#profiles).
-2. Copy over the contents of the [template configuration file](src/main/resources/config/application-local.yml) to the environment specific [configuration file](src/main/resources/config) and replace the placeholders marked with `...`
-   - ignore the `keycloak` section for now
+   - Ignore the properties starting with KC_ for now
+2. Copy over the contents of the [template configuration file](src/main/resources/config/application-local.yml) to the environment specific [configuration file](src/main/resources/config) 
 3. Run `bash deployment.sh`
 4. Configure keycloak
    - If you are hosting the stack behind a reverse proxy (e.g. nginx), make sure to read the [official keycloak documentation](https://www.keycloak.org/docs/latest/server_installation/#_setting-up-a-load-balancer-or-proxy) on the subject.
      - uncomment the lines in the [environment file](deployment/.env) and also in the [docker-compose file](docker-compose.yml) to enable the proxy (add them to the dev and prod commands if necessary).
-   - Set up a client for service accounts
+   - Set up a client for service accounts (Note: this client will only be used by the backend services, not a custom CAWS fronted)
      - Set up a new client by selecting the `Carp` realm after opening `<server>/admin/master/console/`, and click `Create client` under the `Clients` tab.
      - Fill in the general information and then toggle `Client authentication` as well as the `Authorization` options on. Then fill the URL settings.
      - Under the Service account roles tab assign the following roles:
@@ -97,11 +97,12 @@ For API documentation we use [Swagger](https://cans.cachet.dk/dev/swagger-ui/ind
   
 - Make sure you have Docker (and Java 17) installed on your system.
 - Clone the project and run `bash deployment.sh`
-- Fill the placeholders (`...`) in the [application-local.yml](src/main/resources/config/application-local.yml) file with your local configuration. Note: the different urls for database connections and rabbitMQ etc. are container references. Either run the containers on the host network and modify the hosts file to reach them, or specify localhost everywhere.
-- We use IntelliJ IDEA as our IDE, we recommend using it for development.
+- Create a .local.env file and copy over the contents of the [.env file](deployment/.env) to it and fill in the missing values.
+- We use IntelliJ IDEA as our IDE, we recommend using it for development. Set up the EnvFile plugin to be able to use the .local.env file.
 - Add a new spring boot run configuration with the following parameters:
   - Main class: `dk.cachet.carp.webservices.Application`
   - Active profiles: `local`
+  - Tick in the "Enable EnvFile", as well as the "Substitute environment variables" checkbox. Add the .local.env file to the list of env files.
 
 ## Database migrations
 
