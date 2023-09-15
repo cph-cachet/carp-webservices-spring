@@ -26,7 +26,6 @@
     "license": "MIT",
     "keywords": [],
     "dependencies": {
-        "@cph-cachet/carp.httpclient-ts": "1.1.1-dev.16",
         "@emotion/react": "^11.11.1",
         "@emotion/styled": "^11.11.0",
         "@mui/material": "^5.14.5",

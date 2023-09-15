@@ -596,3 +596,5 @@ gradle-app.setting
 *.hprof
 
 # End of https://www.toptal.com/developers/gitignore/api/git,java,linux,macos,maven,gradle,eclipse,windows,intellij,netbeans,intellij+all,visualstudiocode,node,react,yarn
+
+keycloak-theme/build_keycloak

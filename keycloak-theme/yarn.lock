@@ -1207,11 +1207,6 @@
   resolved "https://registry.npmjs.org/@colors/colors/-/colors-1.5.0.tgz"
   integrity sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ==
 
-"@cph-cachet/carp.httpclient-ts@1.1.1-dev.16":
-  version "1.1.1-dev.16"
-  resolved "https://npm.pkg.github.com/download/@cph-cachet/carp.httpclient-ts/1.1.1-dev.16/25302e28966109b7169798a64004a3d780ee8244#25302e28966109b7169798a64004a3d780ee8244"
-  integrity sha512-KruXMXdvLJRcgnG5+l2W6fHvy1aLtxf92it5P8n+xXQl5N0dCtl4K1ykg6qrBZKmQcgAMD2XNTlcO65GXgh4og==
-
 "@csstools/normalize.css@*":
   version "12.0.0"
   resolved "https://registry.npmjs.org/@csstools/normalize.css/-/normalize.css-12.0.0.tgz"

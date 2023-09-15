@@ -7,7 +7,6 @@ import type { KcContext } from "../kcContext";
 import type { I18n } from "../i18n";
 import { Typography } from "@mui/material";
 
-import { SessionLoginParams } from '@cph-cachet/carp.httpclient-ts';
 import { Checkbox, FormControlLabel, FormGroup } from '@mui/material';
 
 import CarpInput from '../../components/CarpInput';
