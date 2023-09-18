@@ -7,8 +7,7 @@ import { evtTermMarkdown } from "keycloakify/login/lib/useDownloadTerms";
 import type { KcContext } from "../kcContext";
 import type { I18n } from "../i18n";
 import { useDownloadTerms } from "keycloakify/login";
-import tos_en_url from "../assets/tos_en.md";
-import tos_fr_url from "../assets/tos_fr.md";
+import tos_en_url from "../assets/tos.md";
 
 export default function Terms(props: PageProps<Extract<KcContext, { pageId: "terms.ftl" }>, I18n>) {
     const { kcContext, i18n, doUseDefaultCss, Template, classes } = props;
@@ -28,7 +27,6 @@ export default function Terms(props: PageProps<Extract<KcContext, { pageId: "ter
 
             const tos_url = (() => {
                 switch (currentLanguageTag) {
-                    case "fr": return tos_fr_url;
                     default: return tos_en_url;
                 }
             })();
