@@ -1,5 +1,5 @@
 {
-    "name": "keycloakify-starter",
+    "name": "carpy",
     "homepage": "https://starter.keycloakify.dev",
     "version": "4.6.5",
     "description": "A starter/demo project for keycloakify",
@@ -13,14 +13,6 @@
         "build": "react-scripts build",
         "build-keycloak-theme": "yarn build && keycloakify",
         "storybook": "start-storybook -p 6006"
-    },
-    "keycloakify": {
-        "extraThemeProperties": [
-            "foo=bar"
-        ],
-        "extraThemeNames": [
-            "keycloakify-starter-variant-1"
-        ]
     },
     "author": "u/garronej",
     "license": "MIT",

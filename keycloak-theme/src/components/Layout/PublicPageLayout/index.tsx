@@ -4,7 +4,7 @@ import { BannerActionText, PublicPageBanner, StyledLogo } from "./styles";
 
 type Props = {
   loginUrl: string;
-  registrationUrl: string;
+  registrationUrl?: string;
   children: ReactNode;
 };
 
@@ -13,24 +13,24 @@ const PublicPageLayout = ({ children, registrationUrl, loginUrl }: Props) => {
     <>
       <PublicPageBanner>
         <StyledLogo type="flat-colored" />
-          {
-            // eslint-disable-next-line
-            location.pathname.includes('registration') ? (
-              <BannerActionText>
-                Already have an account?{' '}
-                <StyledLink to="/" isBold>
-                  Login
-                </StyledLink>
-              </BannerActionText>
-            ) : (
-              <BannerActionText>
-                New to CARP?{" "}
-                <StyledLink to={registrationUrl} isBold>
-                  Sign up
-                </StyledLink>
-              </BannerActionText>
-            )
-          }
+        {
+          // eslint-disable-next-line
+          registrationUrl === undefined ? (
+            <BannerActionText>
+              Already have an account?{" "}
+              <StyledLink to={loginUrl} isBold>
+                Login
+              </StyledLink>
+            </BannerActionText>
+          ) : (
+            <BannerActionText>
+              New to CARP?{" "}
+              <StyledLink to={registrationUrl} isBold>
+                Sign up
+              </StyledLink>
+            </BannerActionText>
+          )
+        }
       </PublicPageBanner>
       {children}
     </>

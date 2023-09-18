@@ -1,5 +1,5 @@
 
-import { type FormEventHandler } from "react";
+import { useEffect, type FormEventHandler } from "react";
 import { useConstCallback } from "keycloakify/tools/useConstCallback";
 import type { PageProps } from "keycloakify/login/pages/PageProps";
 import type { KcContext } from "../kcContext";
@@ -30,6 +30,7 @@ import {
   LoginSeparator,
   LoginSeparatorText,
 } from './styles';
+import CustomizedSnackbar, { SnackbarType } from "src/components/Snackbar";
 
 const validationSchema = yup.object({
   username: yup
@@ -40,8 +41,18 @@ const validationSchema = yup.object({
 });
 export default function Login(props: PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18n>) {
   const { kcContext, Template } = props;
-  const { social, realm, url, login, auth } = kcContext;
-  console.log(kcContext)
+  const { social, url, login, message } = kcContext;
+  const [snackbarState, setSnackbarState] = useState<SnackbarType>({
+    snackbarOpen: false,
+    snackbarType: 'error',
+    snackbarMessage: 'Unexpected error',
+  });
+
+  useEffect(() => {
+    if (message) {
+      setSnackbarState({ snackbarType: message.type, snackbarOpen: true, snackbarMessage: message.summary })
+    }
+  }, [message])
 
   const onSubmit = useConstCallback<FormEventHandler<HTMLFormElement>>(e => {
     e.preventDefault();
@@ -67,7 +78,7 @@ export default function Login(props: PageProps<Extract<KcContext, { pageId: "log
   const toggleSignedIn = () => setStaySignedIn(!staySignedIn);
 
   return (
-    <PublicPageLayout loginUrl={url.loginUrl} registrationUrl={url.registrationUrl}>
+    <PublicPageLayout registrationUrl={url.registrationUrl} loginUrl={url.loginUrl}>
       <AuthPageLayout title="Log in">
         <form id="kc-form-login" onSubmit={onSubmit} action={url.loginAction} method="post">
           <CarpInput
@@ -109,9 +120,6 @@ export default function Login(props: PageProps<Extract<KcContext, { pageId: "log
             </AuthInfoText>
           </LoginAdditionalActions>
           <AuthActionButton loading={isLoginButtonDisabled} text="Log in" />
-          {/*
-                    // <AuthActionButton loading={loginMutation.isLoading} text="Log in" />
-                    */}
           <AuthInfoText variant="h4_web" hideOnMobile>
             By logging in, you agree to the{' '}
             <StyledLink to={privacy_policy_url}>
@@ -136,6 +144,7 @@ export default function Login(props: PageProps<Extract<KcContext, { pageId: "log
             </>
           )
         }
+        <CustomizedSnackbar {...snackbarState} setSnackbarState={setSnackbarState}/>
       </AuthPageLayout>
     </PublicPageLayout>
   )

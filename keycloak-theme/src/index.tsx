@@ -11,8 +11,10 @@ import { themeInstance } from "./utils/theme";
 
 const KcLoginThemeApp = lazy(() => import("./login/KcApp"));
 const KcAccountThemeApp = lazy(() => import("./account/KcApp"));
+const container = document.getElementById('root');
+const root = createRoot(container);
 
-createRoot(document.getElementById("root")!).render(
+root.render(
   <Suspense>
     <StyledEngineProvider injectFirst>
       <ThemeProvider theme={themeInstance}>
