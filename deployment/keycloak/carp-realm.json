@@ -28,7 +28,7 @@
   "enabled": true,
   "sslRequired": "external",
   "registrationAllowed": true,
-  "registrationEmailAsUsername": false,
+  "registrationEmailAsUsername": true,
   "rememberMe": false,
   "verifyEmail": true,
   "loginWithEmailAllowed": true,
