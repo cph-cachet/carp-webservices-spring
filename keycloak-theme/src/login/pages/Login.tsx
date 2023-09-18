@@ -40,7 +40,7 @@ const validationSchema = yup.object({
   password: yup.string().required('Password is required'),
 });
 export default function Login(props: PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18n>) {
-  const { kcContext, Template } = props;
+  const { kcContext } = props;
   const { social, url, login, message } = kcContext;
   const [snackbarState, setSnackbarState] = useState<SnackbarType>({
     snackbarOpen: false,

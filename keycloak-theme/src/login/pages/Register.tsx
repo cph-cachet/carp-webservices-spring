@@ -1,4 +1,4 @@
-import { type FormEventHandler } from "react";
+import { useEffect, type FormEventHandler } from "react";
 import { useConstCallback } from "keycloakify/tools/useConstCallback";
 import type { PageProps } from "keycloakify/login/pages/PageProps";
 import type { KcContext } from "../kcContext";
@@ -10,6 +10,7 @@ import AuthPageLayout from "src/components/Layout/PublicPageLayout/AuthPageLayou
 import CarpInput from "src/components/CarpInput";
 import { useState } from "react";
 import AuthActionButton from "src/components/Buttons/AuthActionButton";
+import CustomizedSnackbar, { SnackbarType } from "src/components/Snackbar";
 
 const validationSchema = yup.object({
   firstName: yup.string().required("First name is required"),
@@ -48,7 +49,20 @@ export default function Register(
     url,
     realm,
     passwordRequired,
+    message
   } = kcContext;
+
+  const [snackbarState, setSnackbarState] = useState<SnackbarType>({
+    snackbarOpen: false,
+    snackbarType: 'error',
+    snackbarMessage: 'Unexpected error',
+  });
+
+  useEffect(() => {
+    if (message) {
+      setSnackbarState({ snackbarType: message.type, snackbarOpen: true, snackbarMessage: message.summary })
+    }
+  }, [message])
 
   const [isRegisterButtonDisabled, setIsRegisterButtonDisabled] = useState(false);
   const onSubmit = useConstCallback<FormEventHandler<HTMLFormElement>>(e => {
@@ -117,7 +131,7 @@ export default function Register(
                 variant="outlined"
               />
               <CarpInput
-                name="confirmPassword"
+                name="password-confirm"
                 label="Confirm Password"
                 type="password"
                 formikConfig={formik}
@@ -128,6 +142,7 @@ export default function Register(
           )}
           <AuthActionButton text="Sign up" loading={isRegisterButtonDisabled} />
         </form>
+        <CustomizedSnackbar {...snackbarState} setSnackbarState={setSnackbarState} />
       </AuthPageLayout>
     </PublicPageLayout>
   );
