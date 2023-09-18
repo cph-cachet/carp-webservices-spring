@@ -38,10 +38,6 @@ services:
     build:
       dockerfile: Dockerfile
     container_name: "carp-ws-${PROFILE}"
-    depends_on:
-      - postgres
-      - rabbitmq
-      - keycloak
     environment:
       - "SPRING_PROFILES_ACTIVE=${PROFILE}"
       - "JAVA_OPTS=-Xmx1g -Xms1g -XX:MaxPermSize=512m"
@@ -113,8 +109,6 @@ services:
   keycloak: &keycloak
     <<: [*carp-base-config]
     container_name: "carp-keycloak-${PROFILE}"
-    depends_on:
-      - postgres
     environment:
       - "KEYCLOAK_ADMIN=${ADMIN_USER}"
       - "KEYCLOAK_ADMIN_PASSWORD=${ADMIN_PASSWORD}"
