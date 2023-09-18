@@ -10,7 +10,6 @@ import org.apache.logging.log4j.Logger
 import org.springframework.amqp.core.Message
 import org.springframework.amqp.rabbit.annotation.RabbitListener
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.messaging.support.GenericMessage
 import org.springframework.stereotype.Component
 
 /**
@@ -33,9 +32,10 @@ class EmailSendingPLQListener
     fun receive(message: Message)
     {
         val emailRequest: EmailRequest = JSON.decodeFromString(message.body.decodeToString())
-        LOGGER.info("New Email message for ${emailRequest.destinationEmail} with id ${emailRequest.id} has arrived in the Email Parking Lot.")
+        LOGGER.info("New Email message for ${emailRequest.address} has arrived in the Email Parking Lot.")
+
         notificationService.sendRandomOrAlertNotificationToSlack(
-                "New Email message for ${emailRequest.destinationEmail} with id ${emailRequest.id} has arrived in the Parking Lot.",
+                "New Email message for ${emailRequest.address}  has arrived in the Parking Lot.",
                 SlackChannel.SERVER_ERRORS
         )
     }

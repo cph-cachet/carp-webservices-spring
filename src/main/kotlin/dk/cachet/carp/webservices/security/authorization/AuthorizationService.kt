@@ -12,7 +12,6 @@ import dk.cachet.carp.webservices.security.authentication.service.Authentication
 import dk.cachet.carp.webservices.study.domain.Study
 import dk.cachet.carp.webservices.study.repository.CoreStudyRepository
 import kotlinx.coroutines.runBlocking
-import org.springframework.dao.PermissionDeniedDataAccessException
 
 open class AuthorizationService(
     // TODO: authorization service shouldn't access the repositories directly
@@ -23,6 +22,12 @@ open class AuthorizationService(
     protected val authenticationService: AuthenticationService
 )
 {
+    fun getAccountId(): String
+    {
+        val accountId = authenticationService.getCurrentPrincipal().id
+        requireNotNull(accountId)
+        return accountId
+    }
 
     fun isAccountSystemAdmin(): Boolean
     {
@@ -39,14 +44,14 @@ open class AuthorizationService(
         return authenticationService.getCurrentPrincipal().role!! >= Role.RESEARCHER
     }
 
-    fun isResearcherPartOfTheDeployment(deploymentId: String): Boolean = runBlocking {
+    fun isResearcherPartOfTheDeployment(deploymentId: String, accountId: String): Boolean = runBlocking {
         if (!isAccountResearcher()) return@runBlocking false
 
         val deployment = deploymentRepository.getWSDeploymentById(UUID(deploymentId))?: return@runBlocking false
-        return@runBlocking isResearcherPartOfTheStudy(deployment.deployedFromStudyId!!)
+        return@runBlocking isResearcherPartOfTheStudy(deployment.deployedFromStudyId!!, accountId)
     }
 
-    fun isParticipantPartOfTheDeployment(deploymentId: String): Boolean
+    fun isParticipantPartOfTheDeployment(deploymentId: String, accountId: String): Boolean
     {
         val participantGroup = participantGroupRepository.findByStudyDeploymentId(deploymentId)
         if (!participantGroup.isPresent) throw UnauthorizedException("Could not find participant group with deploymentId: $deploymentId")
@@ -54,12 +59,14 @@ open class AuthorizationService(
                 .toSet()
                 .map { it.get("accountId").textValue() }
 
-        return accountIds.contains(authenticationService.getCurrentPrincipal().id)
+        return accountIds.contains(getAccountId())
     }
 
     fun isParticipantOrResearcherOfTheStudy(studyId: String): Boolean
     {
-        return isParticipantPartOfStudy(studyId) || isResearcherPartOfTheStudy(studyId)
+        val accountId = getAccountId()
+
+        return isParticipantPartOfStudy(studyId) || isResearcherPartOfTheStudy(studyId, accountId)
     }
 
     fun isParticipantPartOfStudy(studyId: String): Boolean
@@ -67,12 +74,11 @@ open class AuthorizationService(
         return isParticipantAccountPartOfTheStudy(authenticationService.getCurrentPrincipal(), studyId)
     }
 
-    fun isResearcherPartOfTheStudy(studyId: String): Boolean = runBlocking {
+    fun isResearcherPartOfTheStudy(studyId: String, accountId: String): Boolean = runBlocking {
         if (!isAccountResearcher()) return@runBlocking false
 
         val study = studyRepository.getWSStudyById(UUID(studyId))
-        val user = authenticationService.getCurrentPrincipal()
-        return@runBlocking isUserAccountOwnerOfTheStudy(user, study) || isUserAccountResearcherInTheStudy(user, study)
+        return@runBlocking isAccountOwnerOfTheStudy(accountId, study) || isAccountResearcherInTheStudy(accountId, study)
     }
 
     private fun isParticipantAccountPartOfTheStudy(account: Account, studyId: String): Boolean = runBlocking {
@@ -85,14 +91,14 @@ open class AuthorizationService(
         return@runBlocking accounts.contains(account.id)
     }
 
-    private fun isUserAccountOwnerOfTheStudy(account: Account, study: Study): Boolean
+    private fun isAccountOwnerOfTheStudy(accountId: String, study: Study): Boolean
     {
         val studyOwner = study.snapshot!!.get("ownerId").textValue()
-        return account.id == studyOwner
+        return accountId == studyOwner
     }
 
-    private fun isUserAccountResearcherInTheStudy(account: Account, study: Study): Boolean
+    private fun isAccountResearcherInTheStudy(accountId: String, study: Study): Boolean
     {
-        return study.researcherAccountIds.contains(account.id)
+        return study.researcherAccountIds.contains(accountId)
     }
 }

@@ -63,7 +63,7 @@ class CoreAccountServiceTest
             coEvery { deploymentRepository.getStudyDeploymentBy(any()) } returns null
             coEvery { accountService.findByUUID(any()) } returns mockk()
             coEvery { accountService.invite(any(), any(), any()) } returns mockk()
-            every { emailInvitationService.inviteToStudy(any(), any(), any(), any()) } returns mockk()
+            every { emailInvitationService.inviteToStudy(any(), any(), any()) } returns mockk()
             val sut = CoreAccountService( accountService, deploymentRepository, emailInvitationService )
 
             assertFailsWith<IllegalArgumentException> {
@@ -73,7 +73,7 @@ class CoreAccountServiceTest
             coVerify(exactly = 1) { deploymentRepository.getStudyDeploymentBy(any()) }
             coVerify(exactly = 0) { accountService.findByUUID(any()) }
             coVerify(exactly = 0) { accountService.invite(any(), any(), any()) }
-            verify(exactly = 0) { emailInvitationService.inviteToStudy(any(), any(), any(), any())  }
+            verify(exactly = 0) { emailInvitationService.inviteToStudy(any(), any(), any())  }
         }
 
         @Test
@@ -84,7 +84,7 @@ class CoreAccountServiceTest
             coEvery { accountService.findByUUID(any()) } returns null
             coEvery { deploymentRepository.getStudyDeploymentBy(any()) } returns mockk()
             coEvery { accountService.invite(any(), any(), any()) } returns mockk()
-            every { emailInvitationService.inviteToStudy(any(), any(), any(), any()) } returns mockk()
+            every { emailInvitationService.inviteToStudy(any(), any(), any()) } returns mockk()
             val sut = CoreAccountService( accountService, deploymentRepository, emailInvitationService )
 
             assertFailsWith<IllegalArgumentException> {
@@ -94,7 +94,7 @@ class CoreAccountServiceTest
             coVerify(exactly = 1) { deploymentRepository.getStudyDeploymentBy(any()) }
             coVerify(exactly = 1) { accountService.findByUUID(any()) }
             coVerify(exactly = 0) { accountService.invite(any(), any(), any()) }
-            verify(exactly = 0) { emailInvitationService.inviteToStudy(any(), any(), any(), any())  }
+            verify(exactly = 0) { emailInvitationService.inviteToStudy(any(), any(), any())  }
         }
 
         @Test
@@ -108,7 +108,7 @@ class CoreAccountServiceTest
             coEvery { deploymentRepository.getStudyDeploymentBy(any()) } returns mockk()
             coEvery { accountService.findByUUID(any()) } returns foundAccount
             coEvery { accountService.invite(any(), any(), any()) } returns mockk()
-            every { emailInvitationService.inviteToStudy(any(), any(), any(), any()) } returns mockk()
+            every { emailInvitationService.inviteToStudy(any(), any(), any()) } returns mockk()
             val sut = CoreAccountService( accountService, deploymentRepository, emailInvitationService )
 
             assertFailsWith<IllegalArgumentException> {
@@ -118,7 +118,7 @@ class CoreAccountServiceTest
             coVerify(exactly = 1) { deploymentRepository.getStudyDeploymentBy(any()) }
             coVerify(exactly = 1) { accountService.findByUUID(any()) }
             coVerify(exactly = 0) { accountService.invite(any(), any(), any()) }
-            verify(exactly = 0) { emailInvitationService.inviteToStudy(any(), any(), any(), any())  }
+            verify(exactly = 0) { emailInvitationService.inviteToStudy(any(), any(), any())  }
         }
 
         @Test
@@ -139,7 +139,7 @@ class CoreAccountServiceTest
             coEvery { deploymentRepository.getStudyDeploymentBy(any()) } returns foundDeployment
             coEvery { accountService.findByUUID(any()) } returns foundAccount
             coEvery { accountService.invite(any(), any(), any()) } returns mockk()
-            every { emailInvitationService.inviteToStudy(any(), any(), any(), any()) } returns mockk()
+            every { emailInvitationService.inviteToStudy(any(), any(), any()) } returns mockk()
             val sut = CoreAccountService( accountService, deploymentRepository, emailInvitationService )
 
             sut.inviteExistingAccount( UUID.randomUUID(), mockk(), mockParticipation, mockk() )
@@ -147,7 +147,7 @@ class CoreAccountServiceTest
             coVerify(exactly = 1) { deploymentRepository.getStudyDeploymentBy(any()) }
             coVerify(exactly = 1) { accountService.findByUUID(any()) }
             coVerify(exactly = 1) { accountService.invite(any(), any(), any()) }
-            verify(exactly = 1) { emailInvitationService.inviteToStudy(any(), any(), any(), any())  }
+            verify(exactly = 1) { emailInvitationService.inviteToStudy(any(), any(), any())  }
         }
     }
 
@@ -177,7 +177,7 @@ class CoreAccountServiceTest
             coEvery { deploymentRepository.getStudyDeploymentBy(any()) } returns foundDeployment
             coEvery { accountService.findByAccountIdentity(any()) } returns null
             coEvery { accountService.invite(any(), any()) } returns invitedAccount
-            every { emailInvitationService.inviteToStudy(any(), any(), any(), any()) } returns mockk()
+            every { emailInvitationService.inviteToStudy(any(), any(), any()) } returns mockk()
             val sut = CoreAccountService( accountService, deploymentRepository, emailInvitationService )
 
             assertFailsWith<IllegalArgumentException> {
@@ -187,7 +187,7 @@ class CoreAccountServiceTest
             coVerify(exactly = 1) { deploymentRepository.getStudyDeploymentBy(any()) }
             coVerify(exactly = 0) { accountService.findByAccountIdentity(any()) }
             coVerify(exactly = 0) { accountService.invite(any(), any()) }
-            verify(exactly = 0) { emailInvitationService.inviteToStudy(any(), any(), any(), any())  }
+            verify(exactly = 0) { emailInvitationService.inviteToStudy(any(), any(), any())  }
         }
 
         @Test
@@ -202,7 +202,7 @@ class CoreAccountServiceTest
             val foundAccount = mockk<Account>()
             coEvery { deploymentRepository.getStudyDeploymentBy(any()) } returns foundDeployment
             coEvery { accountService.findByAccountIdentity(any()) } returns foundAccount
-            every { emailInvitationService.inviteToStudy(any(), any(), any(), any()) } returns mockk()
+            every { emailInvitationService.inviteToStudy(any(), any(), any()) } returns mockk()
             val sut = CoreAccountService( accountService, deploymentRepository, emailInvitationService )
 
             assertFailsWith<IllegalArgumentException> {
@@ -211,7 +211,7 @@ class CoreAccountServiceTest
             coVerify(exactly = 1) { deploymentRepository.getStudyDeploymentBy(any()) }
             coVerify(exactly = 1) { accountService.findByAccountIdentity(any()) }
             coVerify(exactly = 0) { accountService.invite(any(), any()) }
-            verify(exactly = 0) { emailInvitationService.inviteToStudy(any(), any(), any(), any())  }
+            verify(exactly = 0) { emailInvitationService.inviteToStudy(any(), any(), any())  }
         }
 
         @Test
@@ -233,7 +233,7 @@ class CoreAccountServiceTest
             coEvery { deploymentRepository.getStudyDeploymentBy(any()) } returns foundDeployment
             coEvery { accountService.invite(any(), any()) } returns invitedAccount
             coEvery { accountService.findByAccountIdentity(any()) } returns null
-            every { emailInvitationService.inviteToStudy(any(), any(), any(), any()) } returns mockk()
+            every { emailInvitationService.inviteToStudy(any(), any(), any()) } returns mockk()
             val sut = CoreAccountService( accountService, deploymentRepository, emailInvitationService )
 
             val coreAccount = sut.inviteNewAccount( accountIdentity, mockk(), mockParticipation, mockk() )
@@ -241,7 +241,7 @@ class CoreAccountServiceTest
             coVerify(exactly = 1) { deploymentRepository.getStudyDeploymentBy(any()) }
             coVerify(exactly = 1) { accountService.findByAccountIdentity(any()) }
             coVerify(exactly = 1) { accountService.invite(any(), any()) }
-            verify(exactly = 1) { emailInvitationService.inviteToStudy(any(), any(), any(), any())  }
+            verify(exactly = 1) { emailInvitationService.inviteToStudy(any(), any(), any())  }
             expect( CoreAccount( accountIdentity, UUID.parse(invitedAccount.id!!) ) ) { coreAccount }
         }
     }

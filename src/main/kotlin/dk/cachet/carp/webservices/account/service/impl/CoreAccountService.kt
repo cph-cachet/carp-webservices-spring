@@ -62,7 +62,6 @@ class CoreAccountService(
 
         emailInvitationService.inviteToStudy(
             email,
-            participation.studyDeploymentId,
             invitation,
             EmailType.INVITE_EXISTING_ACCOUNT
         )
@@ -91,7 +90,6 @@ class CoreAccountService(
 
         emailInvitationService.inviteToStudy(
             email,
-            participation.studyDeploymentId,
             invitation,
             EmailType.INVITE_NEW_ACCOUNT
         )

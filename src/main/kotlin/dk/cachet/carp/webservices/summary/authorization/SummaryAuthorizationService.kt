@@ -20,12 +20,17 @@ class SummaryAuthorizationService(
 ): AuthorizationService(studyService, deploymentRepository, participantGroupRepository, objectMapper, authenticationService)
 {
     fun canCreateSummary(studyId: String): Boolean {
-        return isResearcherPartOfTheStudy(studyId)
+        val accountId = getAccountId()
+
+        return isResearcherPartOfTheStudy(studyId, accountId)
     }
 
     fun canDownloadSummary(id: String): Boolean {
         val summary = summaryService.getSummaryById(id)
-        return isResearcherPartOfTheStudy(summary.studyId)
+
+        val accountId = getAccountId()
+
+        return isResearcherPartOfTheStudy(summary.studyId, accountId)
     }
 
     fun canListSummaries(studyId: String?): Boolean {
@@ -33,6 +38,8 @@ class SummaryAuthorizationService(
             return isAccountResearcher()
         }
 
-        return isResearcherPartOfTheStudy(studyId)
+        val accountId = getAccountId()
+
+        return isResearcherPartOfTheStudy(studyId, accountId)
     }
 }

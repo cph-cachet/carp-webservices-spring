@@ -11,39 +11,48 @@ import org.springframework.stereotype.Service
 
 @Service
 class FileAuthorizationService(
-        private val fileRepository: FileRepository,
-        studyService: CoreStudyRepository,
-        deploymentRepository: CoreDeploymentRepository,
-        participantGroupRepository: ParticipantGroupRepository,
-        objectMapper: ObjectMapper,
-        authenticationService: AuthenticationService,
-): AuthorizationService(studyService, deploymentRepository, participantGroupRepository, objectMapper, authenticationService)
-{
+    private val fileRepository: FileRepository,
+    studyService: CoreStudyRepository,
+    deploymentRepository: CoreDeploymentRepository,
+    participantGroupRepository: ParticipantGroupRepository,
+    objectMapper: ObjectMapper,
+    authenticationService: AuthenticationService,
+) : AuthorizationService(
+    studyService,
+    deploymentRepository,
+    participantGroupRepository,
+    objectMapper,
+    authenticationService
+) {
     fun canViewAllFiles(studyId: String): Boolean {
         if (isAccountSystemAdmin()) return true
 
-        return isResearcherPartOfTheStudy(studyId)
+        val accountId = getAccountId()
+
+        return isResearcherPartOfTheStudy(studyId, accountId)
     }
 
     fun canViewFile(studyId: String, fileId: Int): Boolean {
         if (isAccountSystemAdmin()) return true
 
-        return isResearcherPartOfTheStudy(studyId) || isCreator(fileId)
+        val accountId = getAccountId()
+
+        return isResearcherPartOfTheStudy(studyId, accountId) || isCreator(fileId)
     }
 
     fun canCreateFile(studyId: String): Boolean {
         if (isAccountSystemAdmin()) return true
 
-        return isResearcherPartOfTheStudy(studyId) || isParticipantPartOfStudy(studyId)
+        val accountId = getAccountId()
+
+        return isResearcherPartOfTheStudy(studyId, accountId) || isParticipantPartOfStudy(studyId)
     }
 
-    fun isCreator(fileId: Int): Boolean
-    {
-        val userAccountId = authenticationService.getCurrentPrincipal().id
-        return fileRepository.findById(fileId)
-                .map { file ->
-                    file.createdBy == userAccountId
-                }
-                .orElse(false)
-    }
+    fun isCreator(fileId: Int): Boolean =
+        fileRepository.findById(fileId)
+            .map { file ->
+                file.createdBy == getAccountId()
+            }
+            .orElse(false)
+
 }

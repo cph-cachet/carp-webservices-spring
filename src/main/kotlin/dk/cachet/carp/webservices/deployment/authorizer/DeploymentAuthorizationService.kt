@@ -67,14 +67,18 @@ class DeploymentAuthorizationService(
     {
         if (isAccountSystemAdmin()) return true
 
-        return isResearcherPartOfTheDeployment(deploymentId) || isParticipantPartOfTheDeployment(deploymentId)
+        val accountId = getAccountId()
+
+        return isResearcherPartOfTheDeployment(deploymentId, accountId) || isParticipantPartOfTheDeployment(deploymentId, accountId)
     }
 
     fun canViewDeployment(deploymentId: String): Boolean
     {
         if (isAccountSystemAdmin()) return true
 
-        return isResearcherPartOfTheDeployment(deploymentId) || isParticipantPartOfTheDeployment(deploymentId)
+        val accountId = getAccountId()
+
+        return isResearcherPartOfTheDeployment(deploymentId, accountId) || isParticipantPartOfTheDeployment(deploymentId, accountId)
     }
 
     fun canGetDeploymentSuccessfulStatus(deploymentId: String): Boolean
@@ -104,8 +108,10 @@ class DeploymentAuthorizationService(
         if (isAccountSystemAdmin()) return true
         if (!isAccountResearcher()) return false
 
+        val accountId = getAccountId()
+
         val uuids = deploymentIds.map { UUID(it) }.toSet()
-        return canResearcherAccessDeployments(uuids)
+        return canResearcherAccessDeployments(uuids, accountId)
     }
 
     fun canDeleteDeployments(deploymentIds: Set<UUID>): Boolean
@@ -126,10 +132,12 @@ class DeploymentAuthorizationService(
         return true
     }
 
-    private fun canResearcherAccessDeployments(ids: Set<UUID>): Boolean = runBlocking {
+    private fun canResearcherAccessDeployments(ids: Set<UUID>, accountId: String): Boolean = runBlocking {
+
+
         val deployments = coreDeploymentRepository.getWSStudyDeploymentsBy(ids)
         deployments.map { it.deployedFromStudyId!! }.forEach {
-            if (!isResearcherPartOfTheStudy((it)))
+            if (!isResearcherPartOfTheStudy((it), accountId))
             {
                 return@runBlocking false
             }

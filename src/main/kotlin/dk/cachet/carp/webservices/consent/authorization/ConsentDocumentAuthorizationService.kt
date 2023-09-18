@@ -22,19 +22,26 @@ class ConsentDocumentAuthorizationService(
     fun canViewAllConsentDocuments(deploymentId: String): Boolean {
         if (isAccountSystemAdmin()) return true
 
-        return isResearcherPartOfTheDeployment(deploymentId)
+        val accountId = getAccountId()
+
+        return isResearcherPartOfTheDeployment(deploymentId, accountId)
     }
 
     fun canViewConsentDocument(deploymentId: String, consentDocumentId: Int): Boolean {
         if (isAccountSystemAdmin()) return true
 
-        return isResearcherPartOfTheDeployment(deploymentId) || isCreator(consentDocumentId)
+        val accountId = getAccountId()
+
+        return isResearcherPartOfTheDeployment(deploymentId, accountId) || isCreator(consentDocumentId)
     }
 
     fun canCreateConsentDocument(deploymentId: String): Boolean {
         if (isAccountSystemAdmin()) return true
 
-        return isResearcherPartOfTheDeployment(deploymentId) || isParticipantPartOfTheDeployment(deploymentId)
+        val accountId = getAccountId()
+
+        return isResearcherPartOfTheDeployment(deploymentId, accountId) ||
+                isParticipantPartOfTheDeployment(deploymentId, accountId)
     }
 
     private fun isCreator(dataPointId: Int): Boolean =

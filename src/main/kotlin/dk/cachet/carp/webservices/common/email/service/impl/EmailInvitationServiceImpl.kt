@@ -2,6 +2,7 @@ package dk.cachet.carp.webservices.common.email.service.impl
 
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.deployments.application.users.StudyInvitation
+import dk.cachet.carp.webservices.account.service.AccountService
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.email.domain.EmailRequest
 import dk.cachet.carp.webservices.common.email.domain.EmailType
@@ -32,7 +33,6 @@ class EmailInvitationServiceImpl(
 
     override fun inviteToStudy(
         email: String,
-        deploymentId: UUID,
         invitation: StudyInvitation,
         emailType: EmailType
     ) {
@@ -45,20 +45,18 @@ class EmailInvitationServiceImpl(
         )
 
         val request = EmailRequest(
-            destinationEmail = emailAddress,
+            address = emailAddress,
             subject = invitation.name,
-            content = mailContent,
-            deploymentId = deploymentId.stringRepresentation,
-            id = UUID.randomUUID().stringRepresentation
+            message = mailContent,
         )
 
         emailSendingJob.send(request)
     }
 
-    override fun sendNotificationEmail(recipient: String?, subject: String?, message: String?) {
-        val emailAddress = validateEmailAddress(recipient)
+    override fun sendEmail(address: String, subject: String, message: String) {
+        val emailAddress = validateEmailAddress(address)
         val mailContent = emailTemplate.sendNotificationEmail(message)
-        emailService.invoke(emailAddress, subject!!, mailContent)
+        emailService.invoke(emailAddress, subject, mailContent)
     }
 
     private fun validateEmailAddress(emailAddress: String?): String {

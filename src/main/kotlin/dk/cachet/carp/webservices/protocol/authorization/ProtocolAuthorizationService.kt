@@ -35,7 +35,7 @@ class ProtocolAuthorizationService(
     {
         if (isAccountSystemAdmin()) return true
 
-        return protocol.ownerId.stringRepresentation == authenticationService.getCurrentPrincipal().id
+        return protocol.ownerId.stringRepresentation == getAccountId()
     }
 
     fun canGetAllForAnOwner(): Boolean
@@ -68,6 +68,6 @@ class ProtocolAuthorizationService(
     private suspend fun isUserOwnerOfTheProtocol(id: UUID, versionTag: String): Boolean  {
         val protocol = protocolService.getBy(id, versionTag)
 
-        return protocol.ownerId.stringRepresentation == authenticationService.getCurrentPrincipal().id
+        return protocol.ownerId.stringRepresentation == getAccountId()
     }
 }

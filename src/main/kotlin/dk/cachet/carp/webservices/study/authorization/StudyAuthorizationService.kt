@@ -28,6 +28,8 @@ class StudyAuthorizationService(
     {
         if (isAccountSystemAdmin()) return true
 
-        return isResearcherPartOfTheStudy(studyId)
+        val accountId = getAccountId()
+
+        return isResearcherPartOfTheStudy(studyId, accountId)
     }
 }

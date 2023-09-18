@@ -54,7 +54,7 @@ class DiskSpaceAlert
                     String.format("WARNING: HDD has reached %d%% disk space usage!", (usablePercentage * 100).toInt())
                 LOGGER.warn("WARNING: Disk space has reached {} of usage!", (usablePercentage * 100).toInt())
                 notificationService.sendRandomOrAlertNotificationToSlack(spaceUsageNotification, SlackChannel.HEARTBEAT)
-                emailNotificationService.sendNotificationEmail(alertEmail, alertWarning, spaceUsageNotification)
+                emailNotificationService.sendEmail(alertEmail, alertWarning, spaceUsageNotification)
             }
         }
     }

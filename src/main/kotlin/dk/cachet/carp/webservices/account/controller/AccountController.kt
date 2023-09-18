@@ -50,7 +50,7 @@ class AccountController(private val accountService: AccountService)
     @GetMapping(ACCOUNT)
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("@accountAuthorizationService.isAccountResearcher()")
-    suspend fun info(@PathVariable() accountId: String): Account?
+    suspend fun info(@PathVariable(PathVariableName.ACCOUNT_ID) accountId: String): Account?
     {
         LOGGER.info("Start GET: $ACCOUNT_BASE$ACCOUNT")
         return accountService.findByUUID(UUID.parse(accountId))

@@ -75,7 +75,7 @@ spring:
           multiplier: 3
 
   mail:
-    host: "${MAIL_HOST}}"
+    host: "${MAIL_HOST}"
     port: "${MAIL_PORT}"
     address: "${MAIL_USERNAME}"
     password: "${MAIL_PASSWORD}"

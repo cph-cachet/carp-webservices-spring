@@ -9,18 +9,21 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class EmailRequest
 (
-    /** The email request [id]. */
-    val id: String,
+    val address: String,
 
-    /** The email request [destinationEmail]. */
-    val destinationEmail: String,
-
-    /** The email request [subject]. */
     val subject: String,
 
-    /** The email request [content]. */
-    val content: String,
+    val message: String
+)
 
-    /** The email request [deploymentId]. */
-    val deploymentId: String?
+@Serializable
+data class NotificationRequest
+(
+    val recipientAccountId: String,
+
+    val subject: String,
+
+    val message: String,
+
+    val deploymentId: String
 )

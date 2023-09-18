@@ -31,6 +31,7 @@ class EmailTemplateUtil(private val templateEngine: TemplateEngine)
         {
             EmailType.INVITE_NEW_ACCOUNT -> templateEngine.process("account/invite-new-account.html", context)
             EmailType.INVITE_EXISTING_ACCOUNT -> templateEngine.process("account/invite-existing-account.html", context)
+            else -> throw IllegalArgumentException("Email type $emailType is not supported.")
         }
     }
 
@@ -44,7 +45,7 @@ class EmailTemplateUtil(private val templateEngine: TemplateEngine)
         val context = getContextWithDefaults()
         context.setVariable(NOTIFICATION_EMAIL, message)
 
-        return templateEngine.process("alert/notification.html", context)
+        return templateEngine.process("notification/notification.html", context)
     }
 
     private fun getContextWithDefaults(): Context

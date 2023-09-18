@@ -20,7 +20,9 @@ class DocumentAuthorizationService(
     fun canViewAllDocuments(studyId: String): Boolean {
         if (isAccountSystemAdmin()) return true
 
-        return isResearcherPartOfTheStudy(studyId)
+        val accountId = getAccountId()
+
+        return isResearcherPartOfTheStudy(studyId, accountId)
     }
 
     fun canViewDocument(studyId: String): Boolean {

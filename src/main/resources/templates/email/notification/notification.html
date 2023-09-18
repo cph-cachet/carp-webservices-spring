@@ -5,7 +5,7 @@
 
     <div th:replace="fragments/header-logo-only :: header-logo-only-css"></div>
     <div th:replace="fragments/footer :: footer-css"></div>
-    <style type="text/css">
+    <style>
         .body-container {
             background-color: #f1f9fa;
             color: #1D1D1B;
@@ -26,13 +26,16 @@
 <body class="body-container">
 <div th:replace="fragments/header-logo-only :: header-logo-only"></div>
 
-<div class="content">
-    <p>CARP Research Platform.</p>
+<div class="content"
+     th:with="email_body=${T(dk.cachet.carp.webservices.common.email.util.EmailTemplateUtil).NOTIFICATION_EMAIL}">
+    <p>Dear Participant!</p>
     <p></p>
     <p></p>
-    <p>WARNING ALERT: </p>
+    <p>You are receiving this message because you are partaking in a study on the Copenhagen Research Platform.</p>
     <p></p>
-    <p><strong><span th:text="*{__${T(dk.cachet.carp.webservices.common.email.util.EmailTemplateUtil).NOTIFICATION_EMAIL}__}"></span></strong></p>
+    <p>The content of the message: </p>
+    <p></p>
+    <p><strong><span th:text="*{__${email_body}__}"></span></strong></p>
     <p></p>
     <p></p>
     <p>Thank you!</p>

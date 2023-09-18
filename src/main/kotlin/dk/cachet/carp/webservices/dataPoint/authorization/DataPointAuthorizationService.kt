@@ -22,20 +22,24 @@ class DataPointAuthorizationService(
     fun canCreateDataPoint(deploymentId: String): Boolean {
         if (isAccountSystemAdmin()) return true
 
-        return isResearcherPartOfTheDeployment(deploymentId) || isParticipantPartOfTheDeployment(deploymentId)
+        val accountId = getAccountId()
+
+        return isResearcherPartOfTheDeployment(deploymentId, accountId) || isParticipantPartOfTheDeployment(deploymentId, accountId)
     }
 
     fun canViewDataPoint(deploymentId: String, dataPointId: Int): Boolean {
         if (isAccountSystemAdmin()) return true
 
-        return isResearcherPartOfTheDeployment(deploymentId) || isCreator(dataPointId)
+        val accountId = getAccountId()
+
+        return isResearcherPartOfTheDeployment(deploymentId, accountId) || isCreator(dataPointId)
     }
 
     private fun isCreator(dataPointId: Int): Boolean
     {
-        val userAccountId = authenticationService.getCurrentPrincipal().id
+        val accountId = getAccountId()
 
         return dataPointRepository.findById(dataPointId)
-            .map { dataPoint -> dataPoint.createdBy == userAccountId }.orElse(false)
+            .map { dataPoint -> dataPoint.createdBy == accountId }.orElse(false)
     }
 }

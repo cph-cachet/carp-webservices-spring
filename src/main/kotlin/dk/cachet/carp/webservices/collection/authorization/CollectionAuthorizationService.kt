@@ -32,11 +32,13 @@ class CollectionAuthorizationService(
     {
         if (isAccountSystemAdmin()) return true
 
-        return isCreatorById(collectionId) || isResearcherPartOfTheStudy(studyId)
+        val accountId = getAccountId()
+
+        return isCreatorById(collectionId) || isResearcherPartOfTheStudy(studyId, accountId)
     }
 
     private fun isCreatorById(collectionId: Int): Boolean =
         collectionRepository.findById(collectionId)
-            .map { collection -> collection.createdBy == authenticationService.getCurrentPrincipal().id }
+            .map { collection -> collection.createdBy == getAccountId() }
             .orElse(false)
 }

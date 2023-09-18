@@ -48,7 +48,7 @@ class DatabaseConnectionAlert
                 SlackChannel.HEARTBEAT
             )
 
-            emailNotificationService.sendNotificationEmail(
+            emailNotificationService.sendEmail(
                 alertEmail,
                 alertWarning,
                 databaseConnectionStatusNotification
