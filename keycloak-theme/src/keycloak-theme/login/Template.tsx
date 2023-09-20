@@ -7,6 +7,7 @@ import { type TemplateProps } from "keycloakify/login/TemplateProps";
 import { useGetClassName } from "keycloakify/login/lib/useGetClassName";
 import type { KcContext } from "./kcContext";
 import type { I18n } from "./i18n";
+import PublicPageLayout from "components/Layout/PublicPageLayout";
 
 export const Template = (props: TemplateProps<KcContext, I18n>) => {
   const {
@@ -48,7 +49,7 @@ export const Template = (props: TemplateProps<KcContext, I18n>) => {
   }
 
   return (
-    <div className={getClassName("kcLoginClass")}>
+    <PublicPageLayout loginUrl="">
       <div id="kc-header" className={getClassName("kcHeaderClass")}>
         <div id="kc-header-wrapper" className={getClassName("kcHeaderWrapperClass")}>
           {msg("loginTitleHtml", realm.displayNameHtml)}
@@ -57,18 +58,16 @@ export const Template = (props: TemplateProps<KcContext, I18n>) => {
 
       <div className={clsx(getClassName("kcFormCardClass"), displayWide && getClassName("kcFormCardAccountClass"))}>
         <header className={getClassName("kcFormHeaderClass")}>
-          {realm.internationalizationEnabled && (assert(locale !== undefined), true) && locale.supported.length > 1 && (
+          {/* realm.internationalizationEnabled && (assert(locale !== undefined), true) && locale.supported.length > 1 && (
             <div id="kc-locale">
               <div id="kc-locale-wrapper" className={getClassName("kcLocaleWrapperClass")}>
                 <div className="kc-dropdown" id="kc-locale-dropdown">
-                  {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
                   <a href="#" id="kc-current-locale-link">
                     {labelBySupportedLanguageTag[currentLanguageTag]}
                   </a>
                   <ul>
                     {locale.supported.map(({ languageTag }) => (
                       <li key={languageTag} className="kc-dropdown-item">
-                        {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
                         <a href="#" onClick={() => changeLocale(languageTag)}>
                           {labelBySupportedLanguageTag[languageTag]}
                         </a>
@@ -78,7 +77,7 @@ export const Template = (props: TemplateProps<KcContext, I18n>) => {
                 </div>
               </div>
             </div>
-          )}
+          )*/ }
           {!(auth !== undefined && auth.showUsername && !auth.showResetCredentials) ? (
             displayRequiredFields ? (
               <div className={getClassName("kcContentWrapperClass")}>
@@ -191,7 +190,7 @@ export const Template = (props: TemplateProps<KcContext, I18n>) => {
           </div>
         </div>
       </div>
-    </div>
+    </PublicPageLayout>
   );
 }
 

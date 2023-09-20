@@ -9,8 +9,8 @@ import logo from './logo.svg';
 import myimg from './myimg.png';
 import { createOidcClientProvider, useOidcClient } from './oidc';
 
-//On older Keycloak version you need the /auth (e.g: http://localhost:8080/auth)
-//On newer version you must remove it (e.g: http://localhost:8080 )
+// On older Keycloak version you need the /auth (e.g: http://localhost:8080/auth)
+// On newer version you must remove it (e.g: http://localhost:8080 )
 const keycloakUrl = 'https://auth.code.gouv.fr/auth';
 const keycloakRealm = 'keycloakify';
 const keycloakClient = 'starter';
@@ -19,14 +19,14 @@ const { OidcClientProvider } = createOidcClientProvider({
   url: keycloakUrl,
   realm: keycloakRealm,
   clientId: keycloakClient,
-  //This function will be called just before redirecting,
-  //it should return the current langue.
-  //kcContext.locale.currentLanguageTag will be what this function returned just before redirecting.
+  // This function will be called just before redirecting,
+  // it should return the current langue.
+  // kcContext.locale.currentLanguageTag will be what this function returned just before redirecting.
   getUiLocales: () => 'en',
   transformUrlBeforeRedirect: (url) =>
     [url]
-      //Instead of foo and bar you could have isDark for example or any other state that you wish to
-      //transfer from the main app to the login pages.
+      // Instead of foo and bar you could have isDark for example or any other state that you wish to
+      // transfer from the main app to the login pages.
       .map((url) => addFooToQueryParams({ url, value: { foo: 42 } }))
       .map((url) =>
         addBarToQueryParams({
@@ -45,7 +45,7 @@ export default function App() {
   );
 }
 
-function ContextualizedApp() {
+const ContextualizedApp = () => {
   const { oidcClient } = useOidcClient();
 
   let accountUrl = `${keycloakUrl}/realms/${keycloakRealm}/account`;
@@ -87,15 +87,13 @@ function ContextualizedApp() {
             </button>
           </>
         ) : (
-          <>
-            <button
-              onClick={() =>
-                oidcClient.login({ doesCurrentHrefRequiresAuth: false })
-              }
-            >
-              Login
-            </button>
-          </>
+          <button
+            onClick={() =>
+              oidcClient.login({ doesCurrentHrefRequiresAuth: false })
+            }
+          >
+            Login
+          </button>
         )}
         <img src={logo} className="App-logo" alt="logo" />
         <img src={myimg} alt="test_image" />
@@ -111,4 +109,4 @@ function ContextualizedApp() {
       </header>
     </div>
   );
-}
+};

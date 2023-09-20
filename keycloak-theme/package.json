@@ -1,5 +1,5 @@
 {
-  "name": "keycloakify-starter",
+  "name": "carpy",
   "homepage": "https://starter.keycloakify.dev",
   "version": "4.7.0",
   "description": "A starter/demo project for keycloakify",
@@ -17,10 +17,7 @@
   },
   "keycloakify": {
     "extraThemeProperties": [
-      "foo=bar"
-    ],
-    "extraThemeNames": [
-      "keycloakify-starter-variant-1"
+      "locales=en"
     ]
   },
   "author": "u/garronej",
