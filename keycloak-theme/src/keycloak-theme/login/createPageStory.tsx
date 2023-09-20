@@ -1,24 +1,24 @@
+import type { DeepPartial } from "keycloakify/tools/DeepPartial";
 import { getKcContext, type KcContext } from "./kcContext";
 import KcApp from "./KcApp";
-import type { DeepPartial } from "keycloakify/tools/DeepPartial";
 
 export function createPageStory<PageId extends KcContext["pageId"]>(params: {
-    pageId: PageId;
+  pageId: PageId;
 }) {
 
-    const { pageId } = params;
+  const { pageId } = params;
 
-    function PageStory(params: { kcContext?: DeepPartial<Extract<KcContext, { pageId: PageId }>>; }) {
+  const PageStory = (params: { kcContext?: DeepPartial<Extract<KcContext, { pageId: PageId }>>; }) => {
 
-        const { kcContext } = getKcContext({
-            mockPageId: pageId,
-            storyPartialKcContext: params.kcContext
-        });
+    const { kcContext } = getKcContext({
+      mockPageId: pageId,
+      storyPartialKcContext: params.kcContext
+    });
 
-        return <KcApp kcContext={kcContext} />;
+    return <KcApp kcContext={kcContext} />;
 
-    }
+  }
 
-    return { PageStory };
+  return { PageStory };
 
 }
