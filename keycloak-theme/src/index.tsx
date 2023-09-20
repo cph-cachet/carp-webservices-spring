@@ -1,39 +1,26 @@
-import { createRoot } from "react-dom/client";
-import { lazy, Suspense } from "react";
-import { kcContext as kcLoginThemeContext } from "./login/kcContext";
-import { kcContext as kcAccountThemeContext } from "./account/kcContext";
-import {
-  CssBaseline,
-  StyledEngineProvider,
-  ThemeProvider,
-} from "@mui/material";
-import { themeInstance } from "./utils/theme";
+import { lazy, StrictMode, Suspense } from 'react';
+import { createRoot } from 'react-dom/client';
+import { kcContext as kcAccountThemeContext } from './keycloak-theme/account/kcContext';
+import { kcContext as kcLoginThemeContext } from './keycloak-theme/login/kcContext';
 
-const KcLoginThemeApp = lazy(() => import("./login/KcApp"));
-const KcAccountThemeApp = lazy(() => import("./account/KcApp"));
-const container = document.getElementById('root');
-const root = createRoot(container);
+const KcLoginThemeApp = lazy(() => import('./keycloak-theme/login/KcApp'));
+const KcAccountThemeApp = lazy(() => import('./keycloak-theme/account/KcApp'));
+const App = lazy(() => import('./App'));
 
-root.render(
-  <Suspense>
-    <StyledEngineProvider injectFirst>
-      <ThemeProvider theme={themeInstance}>
-        <CssBaseline />
-        {(() => {
-          if (kcLoginThemeContext !== undefined) {
-            return <KcLoginThemeApp kcContext={kcLoginThemeContext} />;
-          }
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <Suspense>
+      {(() => {
+        if (kcLoginThemeContext !== undefined) {
+          return <KcLoginThemeApp kcContext={kcLoginThemeContext} />;
+        }
 
-          if (kcAccountThemeContext !== undefined) {
-            return <KcAccountThemeApp kcContext={kcAccountThemeContext} />;
-          }
+        if (kcAccountThemeContext !== undefined) {
+          return <KcAccountThemeApp kcContext={kcAccountThemeContext} />;
+        }
 
-          throw new Error(
-            "This app is a Keycloak theme" +
-              "It isn't meant to be deployed outside of Keycloak"
-          );
-        })()}
-      </ThemeProvider>
-    </StyledEngineProvider>
-  </Suspense>
+        return <App />;
+      })()}
+    </Suspense>
+  </StrictMode>
 );
