@@ -4,14 +4,36 @@ import { useConstCallback } from "keycloakify/tools/useConstCallback";
 import type { PageProps } from "keycloakify/login/pages/PageProps";
 import { useGetClassName } from "keycloakify/login/lib/useGetClassName";
 import {
+  Checkbox,
   CssBaseline,
+  FormControlLabel,
+  FormGroup,
   StyledEngineProvider,
   ThemeProvider,
 } from '@mui/material';
+import * as yup from 'yup';
+import AppleLogo from '../../assets/images/logo-apple.png';
+import GoogleLogo from '../../assets/images/logo-google.png';
+import PasskeyLogo from '../../assets/images/logo-passkey.png';
 import type { KcContext } from "../kcContext";
 import type { I18n } from "../i18n";
 import { themeInstance } from '../../utils/theme';
 import BannerRegister from '../../components/Layout/PublicPageLayout/BannerRegister'
+import { useFormik } from "formik";
+import CarpInput from "src/components/CarpInput";
+import { LoginAdditionalActions, LoginOauthOptions, LoginSeparator, LoginSeparatorText } from "./styles";
+import { AuthInfoText } from "src/components/Layout/PublicPageLayout/AuthPageLayout/styles";
+import StyledLink from "src/components/StyledLink";
+import LoginOauthOption from "src/components/Buttons/OauthOptions";
+import AuthActionButton from "src/components/Buttons/AuthActionButton";
+
+const validationSchema = yup.object({
+  username: yup
+    .string()
+    .email('Enter a valid email')
+    .required('Email is required'),
+  password: yup.string().required('Password is required'),
+});
 
 export default function Login(props: PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18n>) {
   const { kcContext, i18n, doUseDefaultCss, Template, classes } = props;
@@ -41,6 +63,19 @@ export default function Login(props: PageProps<Extract<KcContext, { pageId: "log
     formElement.submit();
   });
 
+  const formik = useFormik({
+    initialValues: {
+      username: '',
+      password: '',
+    },
+    validationSchema,
+    onSubmit: () => { }
+  });
+
+  const [staySignedIn, setStaySignedIn] = useState(false);
+  const toggleSignedIn = () => setStaySignedIn(!staySignedIn);
+
+
   return (
     <Template
       {...{ kcContext, i18n, doUseDefaultCss, classes }}
@@ -64,136 +99,78 @@ export default function Login(props: PageProps<Extract<KcContext, { pageId: "log
             >
               {realm.password && (
                 <form id="kc-form-login" onSubmit={onSubmit} action={url.loginAction} method="post">
-                  <div className={getClassName("kcFormGroupClass")}>
-                    {!usernameHidden &&
-                      (() => {
-                        const label = !realm.loginWithEmailAllowed
-                          ? "username"
-                          : realm.registrationEmailAsUsername
-                            ? "email"
-                            : "usernameOrEmail";
 
-                        const autoCompleteHelper: typeof label = label === "usernameOrEmail" ? "username" : label;
-
-                        return (
-                          <>
-                            <label htmlFor={autoCompleteHelper} className={getClassName("kcLabelClass")}>
-                              {msg(label)}
-                            </label>
-                            <input
-                              tabIndex={1}
-                              id={autoCompleteHelper}
-                              className={getClassName("kcInputClass")}
-                              // NOTE: This is used by Google Chrome auto fill so we use it to tell
-                              // the browser how to pre fill the form but before submit we put it back
-                              // to username because it is what keycloak expects.
-                              name={autoCompleteHelper}
-                              defaultValue={login.username ?? ""}
-                              type="text"
-                              autoFocus
-                              autoComplete="off"
-                            />
-                          </>
-                        );
-                      })()}
-                  </div>
-                  <div className={getClassName("kcFormGroupClass")}>
-                    <label htmlFor="password" className={getClassName("kcLabelClass")}>
-                      {msg("password")}
-                    </label>
-                    <input
-                      tabIndex={2}
-                      id="password"
-                      className={getClassName("kcInputClass")}
-                      name="password"
-                      type="password"
-                      autoComplete="off"
+                  {!usernameHidden &&
+                    <CarpInput
+                      name="username"
+                      label="Email Address"
+                      type="email"
+                      formikConfig={formik}
+                      autoComplete="email section-blue"
+                      variant="outlined"
                     />
-                  </div>
-                  <div className={clsx(getClassName("kcFormGroupClass"), getClassName("kcFormSettingClass"))}>
-                    <div id="kc-form-options">
-                      {realm.rememberMe && !usernameHidden && (
-                        <div className="checkbox">
-                          <label>
-                            <input
-                              tabIndex={3}
-                              id="rememberMe"
-                              name="rememberMe"
-                              type="checkbox"
-                              {...(login.rememberMe === "on"
-                                ? {
-                                  "checked": true
-                                }
-                                : {})}
-                            />
-                            {msg("rememberMe")}
-                          </label>
-                        </div>
-                      )}
-                    </div>
-                    <div className={getClassName("kcFormOptionsWrapperClass")}>
-                      {realm.resetPasswordAllowed && (
-                        <span>
-                          <a tabIndex={5} href={url.loginResetCredentialsUrl}>
-                            {msg("doForgotPassword")}
-                          </a>
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div id="kc-form-buttons" className={getClassName("kcFormGroupClass")}>
-                    <input
-                      type="hidden"
-                      id="id-hidden-input"
-                      name="credentialId"
-                      {...(auth?.selectedCredential !== undefined
-                        ? {
-                          "value": auth.selectedCredential
+                  }
+
+                  <CarpInput
+                    name="password"
+                    label="Password"
+                    type="password"
+                    formikConfig={formik}
+                    autoComplete="current-password section-blue"
+                    variant="outlined"
+                  />
+                  <LoginAdditionalActions>
+                    <FormGroup>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            {...(login.rememberMe
+                              ? {
+                                "checked": true
+                              }
+                              : {})}
+                            onChange={toggleSignedIn}
+                            name="rememberMe"
+                            inputProps={{ 'aria-label': 'controlled' }}
+                          />
                         }
-                        : {})}
-                    />
-                    <input
-                      tabIndex={4}
-                      className={clsx(
-                        getClassName("kcButtonClass"),
-                        getClassName("kcButtonPrimaryClass"),
-                        getClassName("kcButtonBlockClass"),
-                        getClassName("kcButtonLargeClass")
-                      )}
-                      name="login"
-                      id="kc-login"
-                      type="submit"
-                      value={msgStr("doLogIn")}
-                      disabled={isLoginButtonDisabled}
-                    />
-                  </div>
+                        label="Stay signed in"
+                      />
+                    </FormGroup>
+                    <AuthInfoText variant="h4_web">
+                      <StyledLink to={url.loginResetCredentialsUrl}>Forgot your password?</StyledLink>
+                    </AuthInfoText>
+                  </LoginAdditionalActions>
+                  <AuthActionButton loading={isLoginButtonDisabled} text="Log in" />
+                  <AuthInfoText variant="h4_web" hideOnMobile>
+                    By logging in, you agree to the{' '}
+                    <StyledLink to="https://carp.cachet.dk/privacy-policy-service/">
+                      Cachet Privacy Statement
+                    </StyledLink>{' '}
+                    and <StyledLink to="https://carp.cachet.dk/privacy-policy-service/">Terms of Service</StyledLink>.
+                  </AuthInfoText>
                 </form>
               )}
             </div>
-            {realm.password && social.providers !== undefined && (
-              <div
-                id="kc-social-providers"
-                className={clsx(getClassName("kcFormSocialAccountContentClass"), getClassName("kcFormSocialAccountClass"))}
-              >
-                <ul
-                  className={clsx(
-                    getClassName("kcFormSocialAccountListClass"),
-                    social.providers.length > 4 && getClassName("kcFormSocialAccountDoubleListClass")
-                  )}
-                >
-                  {social.providers.map(p => (
-                    <li key={p.providerId} className={getClassName("kcFormSocialAccountListLinkClass")}>
-                      <a href={p.loginUrl} id={`zocial-${p.alias}`} className={clsx("zocial", p.providerId)}>
-                        <span>{p.displayName}</span>
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            {
+              social.providers !== undefined && (
+                <>
+                  <LoginSeparator>
+                    <LoginSeparatorText variant="h4_web" component="span">
+                      Or log in with
+                    </LoginSeparatorText>
+                  </LoginSeparator>
+                  <LoginOauthOptions>
+                    <LoginOauthOption logoSrc={AppleLogo} name="Apple" />
+                    <LoginOauthOption logoSrc={PasskeyLogo} name="Passkey" />
+                    <LoginOauthOption logoSrc={GoogleLogo} name="Google" />
+                  </LoginOauthOptions>
+                </>
+              )
+            }
           </div>
         </ThemeProvider>
       </StyledEngineProvider>
-    </Template>
+    </Template >
   );
 }
