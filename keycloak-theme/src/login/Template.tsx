@@ -4,6 +4,7 @@ import { clsx } from "keycloakify/tools/clsx";
 import { usePrepareTemplate } from "keycloakify/lib/usePrepareTemplate";
 import { type TemplateProps } from "keycloakify/login/TemplateProps";
 import { useGetClassName } from "keycloakify/login/lib/useGetClassName";
+import AuthPageLayout from "src/components/Layout/PublicPageLayout/AuthPageLayout";
 import type { KcContext } from "./kcContext";
 import type { I18n } from "./i18n";
 import PublicPageLayout from "../components/Layout/PublicPageLayout";
@@ -44,8 +45,10 @@ export const Template = (props: TemplateProps<KcContext, I18n>) => {
   }
 
   return (
-    <PublicPageLayout loginUrl="">
+    <PublicPageLayout infoNode={infoNode}>
       <div className={clsx(getClassName("kcFormCardClass"), displayWide && getClassName("kcFormCardAccountClass"))}>
+        <AuthPageLayout title={headerNode}>
+          {/* 
         <header className={getClassName("kcFormHeaderClass")}>
           {!(auth !== undefined && auth.showUsername && !auth.showResetCredentials) ? (
             displayRequiredFields ? (
@@ -56,9 +59,12 @@ export const Template = (props: TemplateProps<KcContext, I18n>) => {
                     {msg("requiredFields")}
                   </span>
                 </div>
+                <div className="col-md-10">
+                  <h1 id="kc-page-title">{headerNode}</h1>
+                </div>
               </div>
             ) : (
-              null
+              <h1 id="kc-page-title">{headerNode}</h1>
             )
           ) : displayRequiredFields ? (
             <div className={getClassName("kcContentWrapperClass")}>
@@ -99,62 +105,57 @@ export const Template = (props: TemplateProps<KcContext, I18n>) => {
             </>
           )}
         </header>
-        <div id="kc-content">
-          <div id="kc-content-wrapper">
-            {/* App-initiated actions should not see warning messages about the need to complete the action during login. */}
-            {displayMessage && message !== undefined && (message.type !== "warning" || !isAppInitiatedAction) && (
-              <div className={clsx("alert", `alert-${message.type}`)}>
-                {message.type === "success" && <span className={getClassName("kcFeedbackSuccessIcon")} />}
-                {message.type === "warning" && <span className={getClassName("kcFeedbackWarningIcon")} />}
-                {message.type === "error" && <span className={getClassName("kcFeedbackErrorIcon")} />}
-                {message.type === "info" && <span className={getClassName("kcFeedbackInfoIcon")} />}
-                <span
-                  className="kc-feedback-text"
-                  dangerouslySetInnerHTML={{
-                    "__html": message.summary
-                  }}
-                />
-              </div>
-            )}
-            {children}
-            {auth !== undefined && auth.showTryAnotherWayLink && showAnotherWayIfPresent && (
-              <form
-                id="kc-select-try-another-way-form"
-                action={url.loginAction}
-                method="post"
-                className={clsx(displayWide && getClassName("kcContentWrapperClass"))}
-              >
-                <div
-                  className={clsx(
-                    displayWide && [getClassName("kcFormSocialAccountContentClass"), getClassName("kcFormSocialAccountClass")]
-                  )}
+        */}
+          <div id="kc-content">
+            <div id="kc-content-wrapper">
+              {/* App-initiated actions should not see warning messages about the need to complete the action during login. */}
+              {displayMessage && message !== undefined && (message.type !== "warning" || !isAppInitiatedAction) && (
+                <div className={clsx("alert", `alert-${message.type}`)}>
+                  {message.type === "success" && <span className={getClassName("kcFeedbackSuccessIcon")} />}
+                  {message.type === "warning" && <span className={getClassName("kcFeedbackWarningIcon")} />}
+                  {message.type === "error" && <span className={getClassName("kcFeedbackErrorIcon")} />}
+                  {message.type === "info" && <span className={getClassName("kcFeedbackInfoIcon")} />}
+                  <span
+                    className="kc-feedback-text"
+                    dangerouslySetInnerHTML={{
+                      "__html": message.summary
+                    }}
+                  />
+                </div>
+              )}
+              {children}
+              {auth !== undefined && auth.showTryAnotherWayLink && showAnotherWayIfPresent && (
+                <form
+                  id="kc-select-try-another-way-form"
+                  action={url.loginAction}
+                  method="post"
+                  className={clsx(displayWide && getClassName("kcContentWrapperClass"))}
                 >
-                  <div className={getClassName("kcFormGroupClass")}>
-                    <input type="hidden" name="tryAnotherWay" value="on" />
-                    {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-                    <a
-                      href="#"
-                      id="try-another-way"
-                      onClick={() => {
-                        document.forms["kc-select-try-another-way-form" as never].submit();
-                        return false;
-                      }}
-                    >
-                      {msg("doTryAnotherWay")}
-                    </a>
+                  <div
+                    className={clsx(
+                      displayWide && [getClassName("kcFormSocialAccountContentClass"), getClassName("kcFormSocialAccountClass")]
+                    )}
+                  >
+                    <div className={getClassName("kcFormGroupClass")}>
+                      <input type="hidden" name="tryAnotherWay" value="on" />
+                      {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+                      <a
+                        href="#"
+                        id="try-another-way"
+                        onClick={() => {
+                          document.forms["kc-select-try-another-way-form" as never].submit();
+                          return false;
+                        }}
+                      >
+                        {msg("doTryAnotherWay")}
+                      </a>
+                    </div>
                   </div>
-                </div>
-              </form>
-            )}
-            {displayInfo && (
-              <div id="kc-info" className={getClassName("kcSignUpClass")}>
-                <div id="kc-info-wrapper" className={getClassName("kcInfoAreaWrapperClass")}>
-                  {infoNode}
-                </div>
-              </div>
-            )}
+                </form>
+              )}
+            </div>
           </div>
-        </div>
+        </AuthPageLayout>
       </div>
     </PublicPageLayout>
   );

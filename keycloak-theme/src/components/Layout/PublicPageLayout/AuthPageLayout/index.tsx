@@ -3,7 +3,7 @@ import { AuthCenter, AuthContainer, AuthTitle } from './styles';
 
 type Props = {
   children: ReactNode;
-  title: string;
+  title: ReactNode;
 };
 
 const AuthPageLayout = ({ children, title }: Props) => {
