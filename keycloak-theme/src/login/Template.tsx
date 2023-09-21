@@ -1,13 +1,12 @@
 // Copy pasted from: https://github.com/InseeFrLab/keycloakify/blob/main/src/login/Template.tsx
 
-import { assert } from "keycloakify/tools/assert";
 import { clsx } from "keycloakify/tools/clsx";
 import { usePrepareTemplate } from "keycloakify/lib/usePrepareTemplate";
 import { type TemplateProps } from "keycloakify/login/TemplateProps";
 import { useGetClassName } from "keycloakify/login/lib/useGetClassName";
 import type { KcContext } from "./kcContext";
 import type { I18n } from "./i18n";
-import PublicPageLayout from "components/Layout/PublicPageLayout";
+import PublicPageLayout from "../components/Layout/PublicPageLayout";
 
 export const Template = (props: TemplateProps<KcContext, I18n>) => {
   const {
@@ -28,17 +27,13 @@ export const Template = (props: TemplateProps<KcContext, I18n>) => {
 
   const { getClassName } = useGetClassName({ doUseDefaultCss, classes });
 
-  const { msg, changeLocale, labelBySupportedLanguageTag, currentLanguageTag } = i18n;
+  const { msg } = i18n;
 
-  const { realm, locale, auth, url, message, isAppInitiatedAction } = kcContext;
+  const { realm, auth, url, message, isAppInitiatedAction } = kcContext;
 
   const { isReady } = usePrepareTemplate({
     "doFetchDefaultThemeResources": doUseDefaultCss,
     "styles": [
-      `${url.resourcesCommonPath}/node_modules/patternfly/dist/css/patternfly.min.css`,
-      `${url.resourcesCommonPath}/node_modules/patternfly/dist/css/patternfly-additions.min.css`,
-      `${url.resourcesCommonPath}/lib/zocial/zocial.css`,
-      `${url.resourcesPath}/css/login.css`
     ],
     "htmlClassName": getClassName("kcHtmlClass"),
     "bodyClassName": undefined
@@ -50,34 +45,8 @@ export const Template = (props: TemplateProps<KcContext, I18n>) => {
 
   return (
     <PublicPageLayout loginUrl="">
-      <div id="kc-header" className={getClassName("kcHeaderClass")}>
-        <div id="kc-header-wrapper" className={getClassName("kcHeaderWrapperClass")}>
-          {msg("loginTitleHtml", realm.displayNameHtml)}
-        </div>
-      </div>
-
       <div className={clsx(getClassName("kcFormCardClass"), displayWide && getClassName("kcFormCardAccountClass"))}>
         <header className={getClassName("kcFormHeaderClass")}>
-          {/* realm.internationalizationEnabled && (assert(locale !== undefined), true) && locale.supported.length > 1 && (
-            <div id="kc-locale">
-              <div id="kc-locale-wrapper" className={getClassName("kcLocaleWrapperClass")}>
-                <div className="kc-dropdown" id="kc-locale-dropdown">
-                  <a href="#" id="kc-current-locale-link">
-                    {labelBySupportedLanguageTag[currentLanguageTag]}
-                  </a>
-                  <ul>
-                    {locale.supported.map(({ languageTag }) => (
-                      <li key={languageTag} className="kc-dropdown-item">
-                        <a href="#" onClick={() => changeLocale(languageTag)}>
-                          {labelBySupportedLanguageTag[languageTag]}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-          )*/ }
           {!(auth !== undefined && auth.showUsername && !auth.showResetCredentials) ? (
             displayRequiredFields ? (
               <div className={getClassName("kcContentWrapperClass")}>
@@ -87,12 +56,9 @@ export const Template = (props: TemplateProps<KcContext, I18n>) => {
                     {msg("requiredFields")}
                   </span>
                 </div>
-                <div className="col-md-10">
-                  <h1 id="kc-page-title">{headerNode}</h1>
-                </div>
               </div>
             ) : (
-              <h1 id="kc-page-title">{headerNode}</h1>
+              null
             )
           ) : displayRequiredFields ? (
             <div className={getClassName("kcContentWrapperClass")}>

@@ -1,7 +1,6 @@
 import type { PageProps } from 'keycloakify/account';
 import { lazy, Suspense } from 'react';
 import { useI18n } from './i18n';
-import './KcApp.css';
 import type { KcContext } from './kcContext';
 
 const Template = lazy(() => import('./Template'));
@@ -32,21 +31,21 @@ export default function KcApp(props: { kcContext: KcContext }) {
             return (
               <Password
                 {...{ kcContext, i18n, Template, classes }}
-                doUseDefaultCss={true}
+                doUseDefaultCss
               />
             );
           case 'my-extra-page-1.ftl':
             return (
               <MyExtraPage1
                 {...{ kcContext, i18n, Template, classes }}
-                doUseDefaultCss={true}
+                doUseDefaultCss
               />
             );
           case 'my-extra-page-2.ftl':
             return (
               <MyExtraPage2
                 {...{ kcContext, i18n, Template, classes }}
-                doUseDefaultCss={true}
+                doUseDefaultCss
               />
             );
           default:
@@ -54,7 +53,7 @@ export default function KcApp(props: { kcContext: KcContext }) {
               <Fallback
                 {...{ kcContext, i18n, classes }}
                 Template={Template}
-                doUseDefaultCss={true}
+                doUseDefaultCss
               />
             );
         }

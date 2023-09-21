@@ -3,7 +3,7 @@ import { addParamToUrl } from 'powerhooks/tools/urlSearchParams';
 import {
   addBarToQueryParams,
   addFooToQueryParams,
-} from '../keycloak-theme/login/valuesTransferredOverUrl';
+} from '../login/valuesTransferredOverUrl';
 import './App.css';
 import logo from './logo.svg';
 import myimg from './myimg.png';
