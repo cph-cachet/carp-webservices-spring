@@ -21,19 +21,18 @@ class KeycloakFacadeTest {
     private val clientId = "test"
     private val clientSecret = "test"
     private val objectMapper = mockk<ObjectMapper>()
-    private val environmentUtil = mockk<EnvironmentUtil>()
 
     @Test
     fun `updateAccount is not supported`() = runTest {
         assertThrows<UnsupportedOperationException> {
-            KeycloakFacade("", realm, clientId, clientSecret, objectMapper, environmentUtil).updateAccount(mockk())
+            KeycloakFacade("", realm, clientId, clientSecret, objectMapper).updateAccount(mockk())
         }
     }
 
     @Test
     fun `deleteAccount is not supported`() = runTest {
         assertThrows<UnsupportedOperationException> {
-            KeycloakFacade("", realm, clientId, clientSecret, objectMapper, environmentUtil).deleteAccount("test")
+            KeycloakFacade("", realm, clientId, clientSecret, objectMapper).deleteAccount("test")
         }
     }
 }

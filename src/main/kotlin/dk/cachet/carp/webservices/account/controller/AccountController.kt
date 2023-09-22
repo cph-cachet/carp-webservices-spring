@@ -4,7 +4,8 @@ import dk.cachet.carp.common.application.EmailAddress
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.common.application.users.AccountIdentity
 import dk.cachet.carp.webservices.account.controller.AccountController.Companion.ACCOUNT_BASE
-import dk.cachet.carp.webservices.account.domain.AccountRequest
+import dk.cachet.carp.webservices.account.domain.InviteRequest
+import dk.cachet.carp.webservices.account.domain.QueryRoleRequest
 import dk.cachet.carp.webservices.account.service.AccountService
 import dk.cachet.carp.webservices.common.constants.PathVariableName
 import dk.cachet.carp.webservices.security.authentication.domain.Account
@@ -32,16 +33,16 @@ class AccountController(private val accountService: AccountService)
     @PostMapping(INVITE)
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("@accountAuthorizationService.canInvite(#request)")
-    suspend fun invite(@Valid @RequestBody request: AccountRequest)
+    suspend fun invite(@Valid @RequestBody request: InviteRequest)
     {
         LOGGER.info("Start POST: $ACCOUNT_BASE$INVITE")
-        accountService.invite(AccountIdentity.fromEmailAddress(request.emailAddress), request.role)
+        accountService.invite(AccountIdentity.fromEmailAddress(request.emailAddress), request.role, request.redirectUri)
     }
 
     @PostMapping(ROLE)
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("@accountAuthorizationService.canQueryRole(#request)")
-    suspend fun role(@Valid @RequestBody request: AccountRequest)
+    @PreAuthorize("@accountAuthorizationService.isAccountResearcher()")
+    suspend fun role(@Valid @RequestBody request: QueryRoleRequest)
     {
         LOGGER.info("Start POST: $ACCOUNT_BASE$ROLE")
         accountService.hasRoleByEmail(EmailAddress(request.emailAddress), request.role)
@@ -50,7 +51,7 @@ class AccountController(private val accountService: AccountService)
     @GetMapping(ACCOUNT)
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("@accountAuthorizationService.isAccountResearcher()")
-    suspend fun info(@PathVariable() accountId: String): Account?
+    suspend fun info(@PathVariable(PathVariableName.ACCOUNT_ID) accountId: String): Account?
     {
         LOGGER.info("Start GET: $ACCOUNT_BASE$ACCOUNT")
         return accountService.findByUUID(UUID.parse(accountId))

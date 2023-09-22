@@ -4,7 +4,7 @@ import dk.cachet.carp.webservices.security.authorization.Role
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
 
-data class AccountRequest(
+data class QueryRoleRequest (
     @field:NotBlank
     @field:Email
     val emailAddress: String,

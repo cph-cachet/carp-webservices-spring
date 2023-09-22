@@ -1,6 +1,6 @@
 package dk.cachet.carp.webservices.account.authorization
 
-import dk.cachet.carp.webservices.account.domain.AccountRequest
+import dk.cachet.carp.webservices.account.domain.InviteRequest
 import dk.cachet.carp.webservices.security.authentication.domain.Account
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
 import dk.cachet.carp.webservices.security.authorization.Role
@@ -37,7 +37,7 @@ class AccountAuthorizationServiceTest
             // arrange
             val requestedRole = Role.UNKNOWN
             val requesterRole = Role.PARTICIPANT
-            val accountRequest = AccountRequest("", requestedRole)
+            val accountRequest = InviteRequest("", requestedRole, "uri")
             val sut = AccountAuthorizationService(mockk(), mockk(), mockk(), mockk(), authenticationService)
             every { mockAccount!!.role } returns requesterRole
 
@@ -54,7 +54,7 @@ class AccountAuthorizationServiceTest
             // arrange
             val requestedRole = Role.SYSTEM_ADMIN
             val requesterRole = Role.RESEARCHER
-            val accountRequest = AccountRequest("", requestedRole)
+            val accountRequest = InviteRequest("", requestedRole, "uri")
             val sut = AccountAuthorizationService(mockk(), mockk(), mockk(), mockk(), authenticationService)
             every { mockAccount!!.role } returns requesterRole
 
@@ -71,7 +71,7 @@ class AccountAuthorizationServiceTest
             // arrange
             val requestedRole = Role.RESEARCHER
             val requesterRole = Role.RESEARCHER
-            val accountRequest = AccountRequest("", requestedRole)
+            val accountRequest = InviteRequest("", requestedRole, "uri")
             val sut = AccountAuthorizationService(mockk(), mockk(), mockk(), mockk(), authenticationService)
             every { mockAccount!!.role } returns requesterRole
 

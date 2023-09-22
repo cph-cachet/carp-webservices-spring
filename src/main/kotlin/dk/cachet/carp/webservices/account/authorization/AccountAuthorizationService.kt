@@ -1,7 +1,7 @@
 package dk.cachet.carp.webservices.account.authorization
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import dk.cachet.carp.webservices.account.domain.AccountRequest
+import dk.cachet.carp.webservices.account.domain.InviteRequest
 import dk.cachet.carp.webservices.deployment.repository.CoreDeploymentRepository
 import dk.cachet.carp.webservices.deployment.repository.ParticipantGroupRepository
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
@@ -19,13 +19,10 @@ class AccountAuthorizationService(
     authenticationService: AuthenticationService
 ): AuthorizationService( studyService, deploymentRepository, participantGroupRepository, objectMapper, authenticationService )
 {
-    fun canInvite(accountRequest: AccountRequest): Boolean = canAccountRequestInfoOfAnother( accountRequest )
-    fun canQueryRole(accountRequest: AccountRequest) : Boolean = canAccountRequestInfoOfAnother( accountRequest )
-
-    private fun canAccountRequestInfoOfAnother(accountRequest: AccountRequest) : Boolean
+    fun canInvite( request: InviteRequest ) : Boolean
     {
         val requesterRole = authenticationService.getCurrentPrincipal().role!!
 
-        return requesterRole >= Role.RESEARCHER && requesterRole >= accountRequest.role
+        return requesterRole >= Role.RESEARCHER && requesterRole >= request.role
     }
 }

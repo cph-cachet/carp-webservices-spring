@@ -2,7 +2,8 @@ package dk.cachet.carp.webservices.account.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import dk.cachet.carp.common.application.UUID
-import dk.cachet.carp.webservices.account.domain.AccountRequest
+import dk.cachet.carp.webservices.account.domain.InviteRequest
+import dk.cachet.carp.webservices.account.domain.QueryRoleRequest
 import dk.cachet.carp.webservices.account.service.AccountService
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -39,7 +40,7 @@ class AccountControllerTest {
 
         @Test
         fun `should return 400 if email is invalid`() = runTest {
-            val accountRequest = AccountRequest("invalid", AccountRole.PARTICIPANT)
+            val accountRequest = InviteRequest("invalid", AccountRole.PARTICIPANT, "uri")
 
             mockMvc.perform(
                 post(endpoint)
@@ -59,7 +60,7 @@ class AccountControllerTest {
         @Test
         fun `should relay task to account service`() = runTest {
             coEvery { accountService.invite(any(), any()) } returns mockk()
-            val accountRequest = AccountRequest("address@domain.org", AccountRole.PARTICIPANT)
+            val accountRequest = InviteRequest("address@domain.org", AccountRole.PARTICIPANT, "uri")
 
             mockMvc.perform(
                 post(endpoint)
@@ -76,7 +77,7 @@ class AccountControllerTest {
 
         @Test
         fun `should return 400 if email is invalid`() = runTest {
-            val accountRequest = AccountRequest("invalid", AccountRole.PARTICIPANT)
+            val accountRequest = QueryRoleRequest("invalid", AccountRole.PARTICIPANT)
 
             mockMvc.perform(
                 post(endpoint)
@@ -96,7 +97,7 @@ class AccountControllerTest {
         @Test
         fun `should relay task to account service`() = runTest {
             coEvery { accountService.hasRoleByEmail(any(), any()) } returns mockk()
-            val accountRequest = AccountRequest("address@domain.org", AccountRole.PARTICIPANT)
+            val accountRequest = QueryRoleRequest("address@domain.org", AccountRole.PARTICIPANT)
 
             mockMvc.perform(
                 post(endpoint)

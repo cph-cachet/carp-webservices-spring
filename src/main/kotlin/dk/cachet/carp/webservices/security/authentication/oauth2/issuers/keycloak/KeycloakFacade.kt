@@ -6,8 +6,6 @@ import dk.cachet.carp.common.application.users.AccountIdentity
 import dk.cachet.carp.common.application.users.EmailAccountIdentity
 import dk.cachet.carp.webservices.common.configuration.cache.CachingConfig.Companion.ADMIN_BEARER_TOKEN
 import dk.cachet.carp.webservices.common.configuration.cache.CachingConfig.Companion.TOKEN_CACHE
-import dk.cachet.carp.webservices.common.environment.EnvironmentProfile
-import dk.cachet.carp.webservices.common.environment.EnvironmentUtil
 import dk.cachet.carp.webservices.security.authentication.domain.Account
 import dk.cachet.carp.webservices.security.authentication.oauth2.IssuerFacade
 import dk.cachet.carp.webservices.security.authentication.oauth2.issuers.keycloak.domain.RequiredActions
@@ -41,7 +39,6 @@ class KeycloakFacade(
     @Value("\${keycloak.admin.client-id}") private val clientId: String,
     @Value("\${keycloak.admin.client-secret}") private val clientSecret: String,
     private val objectMapper: ObjectMapper,
-    private val environmentUtil: EnvironmentUtil
 ) : IssuerFacade {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
@@ -198,8 +195,8 @@ class KeycloakFacade(
         adminClient.put().uri("/users/${account.id}/execute-actions-email")
         { uriBuilder: UriBuilder ->
             var builder = uriBuilder.queryParam("client_id", clientId)
-            if (environmentUtil.profile != EnvironmentProfile.LOCAL) {
-                builder = builder.queryParam("redirect_uri", redirectUri ?: environmentUtil.portalUrl)
+            if ( redirectUri != null ) {
+                builder = builder.queryParam("redirect_uri", redirectUri)
             }
 
             builder.build()
