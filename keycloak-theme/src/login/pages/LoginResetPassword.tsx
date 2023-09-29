@@ -1,5 +1,4 @@
 import { useFormik } from 'formik';
-import { useGetClassName } from 'keycloakify/login/lib/useGetClassName';
 import type { PageProps } from 'keycloakify/login/pages/PageProps';
 import { useState, type FormEventHandler } from "react";
 import { useConstCallback } from "keycloakify/tools/useConstCallback";
@@ -8,8 +7,6 @@ import { AuthInfoText } from 'src/components/Layout/PublicPageLayout/AuthPageLay
 import * as yup from 'yup';
 import AuthActionButton from 'src/components/Buttons/AuthActionButton';
 import BannerLogin from 'src/components/Layout/PublicPageLayout/BannerLogin';
-import { CssBaseline, StyledEngineProvider, ThemeProvider } from '@mui/material';
-import { themeInstance } from 'src/utils/theme';
 import type { KcContext } from '../kcContext';
 import type { I18n } from '../i18n';
 
@@ -28,10 +25,6 @@ const LoginResetPassword = (
 ) => {
   const { kcContext, i18n, doUseDefaultCss, Template, classes } = props;
 
-  const { getClassName } = useGetClassName({
-    doUseDefaultCss,
-    classes,
-  });
   const [isLoginButtonDisabled, setIsLoginButtonDisabled] = useState(false);
   const onSubmit = useConstCallback<FormEventHandler<HTMLFormElement>>(e => {
     e.preventDefault();
@@ -57,7 +50,7 @@ const LoginResetPassword = (
 
   const { url, realm, auth } = kcContext;
 
-  const { msg, msgStr } = i18n;
+  const { msg } = i18n;
 
   return (
     <Template
@@ -74,23 +67,18 @@ const LoginResetPassword = (
       </AuthInfoText>
       <form
         id="kc-reset-password-form"
-        className={getClassName('kcFormClass')}
         action={url.loginAction}
         method="post"
         onSubmit={onSubmit}
       >
-        <div className={getClassName('kcFormGroupClass')}>
-          <div className={getClassName('kcLabelWrapperClass')}>
-            <CarpInput
-              name="username"
-              type="email"
-              label="Email"
-              formikConfig={formik}
-              autoComplete="email"
-              variant="outlined"
-            />
-          </div>
-        </div>
+        <CarpInput
+          name="username"
+          type="email"
+          label="Email"
+          formikConfig={formik}
+          autoComplete="email"
+          variant="outlined"
+        />
         <AuthActionButton loading={isLoginButtonDisabled} text="Submit" />
       </form>
     </Template >
