@@ -7,19 +7,19 @@ import {
   FormGroup,
 } from '@mui/material';
 import * as yup from 'yup';
+import { useFormik } from "formik";
+import CarpInput from "src/components/CarpInput";
+import { AuthInfoText } from "src/components/Layout/PublicPageLayout/AuthPageLayout/styles";
+import StyledLink from "src/components/StyledLink";
+import LoginOauthOption from "src/components/Buttons/OauthOptions";
+import AuthActionButton from "src/components/Buttons/AuthActionButton";
 import AppleLogo from '../../assets/images/logo-apple.png';
 import GoogleLogo from '../../assets/images/logo-google.png';
 import PasskeyLogo from '../../assets/images/logo-passkey.png';
 import type { KcContext } from "../kcContext";
 import type { I18n } from "../i18n";
 import BannerRegister from '../../components/Layout/PublicPageLayout/BannerRegister'
-import { useFormik } from "formik";
-import CarpInput from "src/components/CarpInput";
 import { LoginAdditionalActions, LoginOauthOptions, LoginSeparator, LoginSeparatorText } from "./styles";
-import { AuthInfoText } from "src/components/Layout/PublicPageLayout/AuthPageLayout/styles";
-import StyledLink from "src/components/StyledLink";
-import LoginOauthOption from "src/components/Buttons/OauthOptions";
-import AuthActionButton from "src/components/Buttons/AuthActionButton";
 
 const validationSchema = yup.object({
   username: yup
@@ -29,26 +29,23 @@ const validationSchema = yup.object({
   password: yup.string().required('Password is required'),
 });
 
-export default function Login(props: PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18n>) {
+const Login = (props: PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18n>) => {
   const { kcContext, i18n, doUseDefaultCss, Template, classes } = props;
 
   const { social, realm, url, usernameHidden, login, registrationDisabled } = kcContext;
 
   const { msg } = i18n;
 
-  const [isLoginButtonDisabled, setIsLoginButtonDisabled] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const onSubmit = useConstCallback<FormEventHandler<HTMLFormElement>>(e => {
     e.preventDefault();
-
-    setIsLoginButtonDisabled(true);
-
+    setIsLoading(true);
     const formElement = e.target as HTMLFormElement;
 
     // NOTE: Even if we login with email Keycloak expect username and password in
     // the POST request.
     formElement.querySelector("input[name='email']")?.setAttribute("name", "username");
-
     formElement.submit();
   });
 
@@ -122,7 +119,7 @@ export default function Login(props: PageProps<Extract<KcContext, { pageId: "log
               </AuthInfoText>
             )}
           </LoginAdditionalActions>
-          <AuthActionButton loading={isLoginButtonDisabled} text="Log in" />
+          <AuthActionButton loading={isLoading} text="Log in" />
           <AuthInfoText variant="h4_web" hideOnMobile>
             By logging in, you agree to the{' '}
             <StyledLink to="https://carp.cachet.dk/privacy-policy-service/">
@@ -153,3 +150,5 @@ export default function Login(props: PageProps<Extract<KcContext, { pageId: "log
     </Template >
   );
 }
+
+export default Login;

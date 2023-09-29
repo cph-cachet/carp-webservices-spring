@@ -25,11 +25,11 @@ const LoginResetPassword = (
 ) => {
   const { kcContext, i18n, doUseDefaultCss, Template, classes } = props;
 
-  const [isLoginButtonDisabled, setIsLoginButtonDisabled] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const onSubmit = useConstCallback<FormEventHandler<HTMLFormElement>>(e => {
     e.preventDefault();
 
-    setIsLoginButtonDisabled(true);
+    setIsLoading(true);
 
     const formElement = e.target as HTMLFormElement;
 
@@ -79,7 +79,7 @@ const LoginResetPassword = (
           autoComplete="email"
           variant="outlined"
         />
-        <AuthActionButton loading={isLoginButtonDisabled} text="Submit" />
+        <AuthActionButton loading={isLoading} text="Submit" />
       </form>
     </Template >
   );

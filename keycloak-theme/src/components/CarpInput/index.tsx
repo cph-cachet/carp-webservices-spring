@@ -10,7 +10,6 @@ interface FormikConfigProps {
 }
 
 interface Props {
-  id: string;
   type: string;
   name: keyof FormikConfigProps;
   label: string;
@@ -23,7 +22,6 @@ interface Props {
 }
 
 const CarpInput = ({
-  id,
   type,
   name,
   label,
@@ -53,7 +51,7 @@ const CarpInput = ({
         'data-testid': rows ? 'single-line-input' : 'multi-line-input',
         onAnimationStart: handleAnimationStart,
       }}
-      id={id || (name as string)}
+      id={name as string}
       placeholder={placeholder}
       error={formikConfig.touched[name] && Boolean(formikConfig.errors[name])}
       value={formikConfig.values[name]}

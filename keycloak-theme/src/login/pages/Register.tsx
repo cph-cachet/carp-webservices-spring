@@ -38,11 +38,11 @@ const Register = (
     classes,
   });
 
-  const [isLoginButtonDisabled, setIsLoginButtonDisabled] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const onSubmit = useConstCallback<FormEventHandler<HTMLFormElement>>(e => {
     e.preventDefault();
-    setIsLoginButtonDisabled(true);
+    setIsLoading(true);
     const formElement = e.target as HTMLFormElement;
     formElement.submit();
   });
@@ -132,7 +132,7 @@ const Register = (
           </div>
         )}
 
-        <AuthActionButton text="Sign up" loading={isLoginButtonDisabled} />
+        <AuthActionButton text="Sign up" loading={isLoading} />
         <AuthInfoText variant="h4_web" hideOnMobile>
           By registering, you agree to the{' '}
           <StyledLink to="/forgot-password">
