@@ -1,0 +1,100 @@
+import { useFormik } from 'formik';
+import { useGetClassName } from 'keycloakify/login/lib/useGetClassName';
+import type { PageProps } from 'keycloakify/login/pages/PageProps';
+import { useState, type FormEventHandler } from "react";
+import { useConstCallback } from "keycloakify/tools/useConstCallback";
+import CarpInput from 'src/components/CarpInput';
+import { AuthInfoText } from 'src/components/Layout/PublicPageLayout/AuthPageLayout/styles';
+import * as yup from 'yup';
+import AuthActionButton from 'src/components/Buttons/AuthActionButton';
+import BannerLogin from 'src/components/Layout/PublicPageLayout/BannerLogin';
+import { CssBaseline, StyledEngineProvider, ThemeProvider } from '@mui/material';
+import { themeInstance } from 'src/utils/theme';
+import type { KcContext } from '../kcContext';
+import type { I18n } from '../i18n';
+
+const validationSchema = yup.object({
+  username: yup
+    .string()
+    .email('Enter a valid email')
+    .required('Email is required'),
+});
+
+const LoginResetPassword = (
+  props: PageProps<
+    Extract<KcContext, { pageId: 'login-reset-password.ftl' }>,
+    I18n
+  >
+) => {
+  const { kcContext, i18n, doUseDefaultCss, Template, classes } = props;
+
+  const { getClassName } = useGetClassName({
+    doUseDefaultCss,
+    classes,
+  });
+  const [isLoginButtonDisabled, setIsLoginButtonDisabled] = useState(false);
+  const onSubmit = useConstCallback<FormEventHandler<HTMLFormElement>>(e => {
+    e.preventDefault();
+
+    setIsLoginButtonDisabled(true);
+
+    const formElement = e.target as HTMLFormElement;
+
+    // NOTE: Even if we login with email Keycloak expect username and password in
+    // the POST request.
+    formElement.querySelector("input[name='email']")?.setAttribute("name", "username");
+
+    formElement.submit();
+  });
+
+  const formik = useFormik({
+    initialValues: {
+      username: '',
+    },
+    validationSchema,
+    onSubmit: () => { },
+  });
+
+  const { url, realm, auth } = kcContext;
+
+  const { msg, msgStr } = i18n;
+
+  return (
+    <Template
+      {...{ kcContext, i18n, doUseDefaultCss, classes }}
+      displayMessage={false}
+      headerNode={msg("emailForgotTitle")}
+      infoNode={
+        <BannerLogin loginUrl={url.loginUrl} />
+      }
+    >
+      <AuthInfoText variant="h4_web">
+        Enter your email address. If an account is found, a password reset link
+        will be sent to your email.
+      </AuthInfoText>
+      <form
+        id="kc-reset-password-form"
+        className={getClassName('kcFormClass')}
+        action={url.loginAction}
+        method="post"
+        onSubmit={onSubmit}
+      >
+        <div className={getClassName('kcFormGroupClass')}>
+          <div className={getClassName('kcLabelWrapperClass')}>
+            <CarpInput
+              name="username"
+              type="email"
+              label="Email"
+              formikConfig={formik}
+              autoComplete="email"
+              variant="outlined"
+            />
+          </div>
+        </div>
+        <AuthActionButton loading={isLoginButtonDisabled} text="Submit" />
+      </form>
+    </Template >
+  );
+};
+
+export default LoginResetPassword;

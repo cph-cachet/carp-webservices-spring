@@ -6,7 +6,6 @@ import {
 } from '../login/valuesTransferredOverUrl';
 import './App.css';
 import logo from './logo.svg';
-import myimg from './myimg.png';
 import { createOidcClientProvider, useOidcClient } from './oidc';
 
 // On older Keycloak version you need the /auth (e.g: http://localhost:8080/auth)
@@ -87,16 +86,9 @@ const ContextualizedApp = () => {
             </button>
           </>
         ) : (
-          <button
-            onClick={() =>
-              oidcClient.login({ doesCurrentHrefRequiresAuth: false })
-            }
-          >
-            Login
-          </button>
+          <button>Login</button>
         )}
         <img src={logo} className="App-logo" alt="logo" />
-        <img src={myimg} alt="test_image" />
         <p style={{ fontFamily: '"Work Sans"' }}>Hello world</p>
         <p>
           Check out all keycloak pages in the{' '}

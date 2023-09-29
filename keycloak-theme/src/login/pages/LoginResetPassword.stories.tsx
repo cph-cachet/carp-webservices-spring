@@ -14,10 +14,3 @@ export default {
 
 export const Default: ComponentStory<typeof PageStory> = () => <PageStory />;
 
-export const WithEmailAsUsername: ComponentStory<typeof PageStory> = () => (
-  <PageStory
-    kcContext={{
-      realm: { loginWithEmailAllowed: true, registrationEmailAsUsername: true },
-    }}
-  />
-);
