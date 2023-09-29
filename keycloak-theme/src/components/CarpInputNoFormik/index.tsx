@@ -1,7 +1,6 @@
 import { InputLabelProps } from '@mui/material';
 import * as React from 'react';
 
-import { FormikProps } from 'formik';
 import { useState } from 'react';
 import StyledInput from './styles';
 
@@ -11,27 +10,35 @@ interface FormikConfigProps {
 
 interface Props {
   id: string;
+  value: string;
   type: string;
   name: keyof FormikConfigProps;
   label: string;
   placeholder?: string;
   autoComplete?: string;
-  formikConfig: FormikProps<FormikConfigProps>;
   rows?: number;
   variant?: 'standard' | 'filled' | 'outlined';
   inputLabelProps?: InputLabelProps;
+  disabled?: boolean;
+  required?: boolean;
+  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onBlur: (event: React.FocusEvent<HTMLInputElement>) => void;
 }
 
-const CarpInput = ({
+const CarpInputNoFormik = ({
   id,
+  value,
   type,
   name,
   label,
   placeholder,
   autoComplete,
-  formikConfig,
   rows,
   variant,
+  disabled = false,
+  required = false,
+  onChange,
+  onBlur,
   inputLabelProps,
 }: Props) => {
   const [isAutoFilled, setIsAutoFilled] = useState(false);
@@ -55,23 +62,23 @@ const CarpInput = ({
       }}
       id={id || (name as string)}
       placeholder={placeholder}
-      error={formikConfig.touched[name] && Boolean(formikConfig.errors[name])}
-      value={formikConfig.values[name]}
-      onChange={formikConfig.handleChange}
-      onBlur={formikConfig.handleBlur}
+      value={value}
+      onChange={onChange}
+      onBlur={onBlur}
       fullWidth
-      helperText={formikConfig.touched[name] && formikConfig.errors[name]}
       type={type}
       variant={variant || 'standard'}
       autoComplete={autoComplete}
       rows={rows}
       multiline={!!rows}
+      disabled={disabled}
       InputLabelProps={{
-        shrink: isAutoFilled || formikConfig.values[name] !== '',
+        shrink: isAutoFilled || name !== '',
         ...inputLabelProps,
       }}
+      required={required}
     />
   );
 };
 
-export default CarpInput;
+export default CarpInputNoFormik;

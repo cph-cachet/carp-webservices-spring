@@ -5,6 +5,7 @@ import { useI18n } from "./i18n";
 import LoginResetPassword from "./pages/LoginResetPassword";
 import { CssBaseline, StyledEngineProvider, ThemeProvider } from "@mui/material";
 import { themeInstance } from "src/utils/theme";
+import LoginUpdatePassword from "./pages/LoginUpdatePassword";
 
 const Template = lazy(() => import("./Template"));
 const DefaultTemplate = lazy(() => import("keycloakify/login/Template"));
@@ -58,6 +59,7 @@ export default function KcApp(props: { kcContext: KcContext; }) {
           case "login.ftl": return <Login {...{ kcContext, i18n, Template, classes }} doUseDefaultCss />;
           case "register.ftl": return <Register {...{ kcContext, i18n, Template, classes }} doUseDefaultCss />;
           case "register-user-profile.ftl": return <RegisterUserProfile {...{ kcContext, i18n, Template, classes }} doUseDefaultCss />
+          case "login-update-password.ftl": return <LoginUpdatePassword {...{ kcContext, i18n, Template, classes }} doUseDefaultCss />;
           case "login-reset-password.ftl": return <LoginResetPassword {...{ kcContext, i18n, Template, classes }} doUseDefaultCss />;
           case "terms.ftl": return <Terms {...{ kcContext, i18n, Template, classes }} doUseDefaultCss />;
           case "my-extra-page-1.ftl": return <MyExtraPage1 {...{ kcContext, i18n, Template, classes }} doUseDefaultCss />;
