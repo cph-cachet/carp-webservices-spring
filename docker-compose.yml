@@ -23,14 +23,12 @@ x-keycloak-prod-commands: &keycloak-prod-commands
     - "--db-url=jdbc:postgresql://carp-postgres-${PROFILE}:5432/keycloak"
     - "--db-username=${ADMIN_USER}"
     - "--db-password=${ADMIN_PASSWORD}"
-    - "--hostname-url=${KEYCLOAK_HOSTNAME_URL}"
-    - "--hostname-admin-url=${KEYCLOAK_HOSTNAME_ADMIN_URL}"
     - "--import-realm"
 
 # Apply the following configuration if hosting behind a reverse proxy
-#    - "--hostname-url=${KEYCLOAK_HOSTNAME_URL}"
-#    - "--hostname-admin-url=${KEYCLOAK_HOSTNAME_ADMIN_URL}"
-#    - "--proxy ${KEYCLOAK_PROXY_MODE}"
+#    - "--hostname-url=${KC_URL}"
+#    - "--hostname-admin-url=${KC_URL}"
+#    - "--proxy edge
 
 services:
   carp-ws:
