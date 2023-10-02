@@ -1,0 +1,72 @@
+{
+  "name": "carpy",
+  "homepage": "https://starter.keycloakify.dev",
+  "version": "4.7.0",
+  "description": "A starter/demo project for keycloakify",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/codegouvfr/keycloakify-starter.git"
+  },
+  "scripts": {
+    "postinstall": "copy-keycloak-resources-to-public",
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "build-keycloak-theme": "DISABLE_ESLINT_PLUGIN=true react-scripts build && keycloakify",
+    "storybook": "start-storybook -p 6006"
+  },
+  "keycloakify": {
+    "extraThemeProperties": [
+      "locales=en"
+    ]
+  },
+  "author": "u/garronej",
+  "license": "MIT",
+  "keywords": [],
+  "dependencies": {
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@mui/material": "^5.14.10",
+    "evt": "^2.4.15",
+    "formik": "^2.4.5",
+    "jwt-decode": "^3.1.2",
+    "keycloak-js": "^21.0.1",
+    "keycloakify": "8.0.0-rc.2",
+    "powerhooks": "^0.26.8",
+    "react": "18.1.0",
+    "react-dom": "18.1.0",
+    "tsafe": "^1.6.0",
+    "yup": "^1.2.0"
+  },
+  "devDependencies": {
+    "@cph-cachet/eslint-config": "1.0.4",
+    "@storybook/addon-actions": "^6.5.16",
+    "@storybook/addon-essentials": "^6.5.16",
+    "@storybook/addon-interactions": "^6.5.16",
+    "@storybook/addon-links": "^6.5.16",
+    "@storybook/builder-webpack5": "^6.5.16",
+    "@storybook/manager-webpack5": "^6.5.16",
+    "@storybook/node-logger": "^6.5.16",
+    "@storybook/preset-create-react-app": "^4.1.2",
+    "@storybook/react": "^6.5.16",
+    "@storybook/testing-library": "^0.0.13",
+    "@types/node": "^15.3.1",
+    "@types/react": "18.0.9",
+    "@types/react-dom": "18.0.4",
+    "prettier": "^3.0.3",
+    "prettier-plugin-organize-imports": "^3.2.3",
+    "react-scripts": "5.0.1",
+    "typescript": "^5.2.2"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
