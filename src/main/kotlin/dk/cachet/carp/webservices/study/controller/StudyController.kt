@@ -108,11 +108,11 @@ class StudyController
     @DeleteMapping(value = [RESEARCHERS])
     @PreAuthorize("@studyAuthorizationService.canAccessStudy(#studyId)")
     @Operation(tags = ["study/removeResearchers.json"])
-    fun removeResearchers(
+    fun removeResearcher(
         @PathVariable(PathVariableName.STUDY_ID) studyId: String,
         @RequestParam(RequestParamName.EMAIL) email: String
     ): Boolean {
-        return runBlocking { coreStudyRepository.removeResearcherFromStudy(studyId, email) }
+        return coreStudyRepository.removeResearcherFromStudy(studyId, email)
     }
 
     @GetMapping(value = [GET_PARTICIPANT_INFO])
