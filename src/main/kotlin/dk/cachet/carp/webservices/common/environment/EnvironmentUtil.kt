@@ -20,6 +20,7 @@ class EnvironmentUtil(
         UriComponentsBuilder
             .fromUriString(BASE_SERVER)
             .pathSegment(PORTAL_SUBFOLDER, SUBFOLDER)
+            .path("/")
             .build()
             .toUri()
     }
