@@ -49,7 +49,19 @@ The project can be set up using different profiles for different environments. T
 
 # Services
 
-The main services of the application are the following: Collections/Documents/Files/Consents/Datapoints/Studies/Protocols/Deployments. All of them have a dedicated package with their own controller, service, and persistence layers, however, there are differences in their management.
+The main services of the application are the following: 
+
+* Collections
+* Documents
+* Files
+* Consents
+* Datapoints
+* Studies
+* Protocols
+* Deployments.
+* Data
+  
+All of them have a dedicated package with their own controller, service, and persistence layers, however, there are differences in their management.
 
 ## CARP-Core services
 
