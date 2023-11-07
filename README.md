@@ -97,6 +97,7 @@ Follow these steps to deploy CAWS:
        - `manage-users`
        - `view-users`
        - `query-users`
+     - Note: this client is used by Spring to communicate with keycloak for managing accounts; if your application relies on a client that authorizes via the Keycloak service, you will need to create it depending on your application's requirements
    - Regenerate the secret of the `admin-cli` client
      - Disable the client
      - Under the `Credentials` tab of the client settings click `Regenerate` next to the Client Secret.
@@ -111,12 +112,14 @@ Follow these steps to deploy CAWS:
 ## Local development 
   
 - Make sure you have Docker (and Java 17) installed on your system.
+- Ensure Docker is able to mount the volume specified under carp-ws (/data/carp/storage/local); you may need to configure Docker File Sharing options to enable this
 - Clone the project and run `bash deployment.sh`
 - Fill the placeholders (`...`) in the [application-local.yml](src/main/resources/config/application-local.yml) file with your local configuration. Note: the different URLs for database connections and rabbitMQ etc. are container references. Either run the containers on the host network and modify the host's file to reach them, or specify localhost everywhere.
 - We use IntelliJ IDEA as our IDE, we recommend using it for development.
-- Add a new spring boot run configuration with the following parameters:
+- Add a new spring boot run configuration in IntelliJ with the following parameters:
   - Main class: `dk.cachet.carp.webservices.Application`
   - Active profiles: `local`
+  - Note: The current gradle wrapper that is in the repository is not working as intended so you might want to download your own gradle version (7.4.2), and build it using that until issue [#5](https://github.com/cph-cachet/carp-webservices-spring/issues/5) is resolved
 
 ## Database migrations
 
