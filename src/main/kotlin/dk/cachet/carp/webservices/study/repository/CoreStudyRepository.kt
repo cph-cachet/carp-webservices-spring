@@ -104,7 +104,7 @@ class CoreStudyRepository
                     studyStatus.canSetStudyProtocol,
                     studyStatus.canDeployToParticipants,
                     study.description)
-        }.toList()
+        }.distinctBy { it.studyId }.toList()
     }
 
     @Transactional( rollbackFor = [Exception::class])
