@@ -16,7 +16,7 @@ interface DataStreamSequenceRepository: JpaRepository<DataStreamSequence, Int>
     fun findAllBySequenceIdRange(@Param("dataStreamId") dataStreamId: Int, @Param("from") from: Int, @Param("to") to: Int): List<DataStreamSequence>
 
     @Query(nativeQuery = true,
-            value = "SELECT dsi.study_deployment_id, ds.data_stream_id, ds.snapshot, ds.first_sequence_id, ds.last_sequence_id \n" +
+            value = "SELECT dsi.id, ds.data_stream_id, ds.snapshot, ds.first_sequence_id, ds.last_sequence_id, ds.updated_at, ds.created_at, ds.created_by, ds.updated_by \n" +
                     "FROM data_stream_sequence ds\n" +
                     "left join data_stream_ids dsi on ds.data_stream_id = dsi.id\n" +
                     "WHERE dsi.study_deployment_id IN (:deploymentIds)")
