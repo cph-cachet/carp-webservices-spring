@@ -25,7 +25,7 @@ spring:
 
   datasource:
     name: carp_local
-    url: jdbc:postgresql://carp-postgres-${spring.profiles.active}:5432/carp?serverTimezone=UTC&characterEncoding=utf-8
+    url: "jdbc:postgresql://${PG_HOST}:${PG_PORT}/carp?serverTimezone=UTC&characterEncoding=utf-8"
     username: "${ADMIN_USER}"
     password: "${ADMIN_PASSWORD}"
     driver-class-name: org.postgresql.Driver
@@ -61,8 +61,8 @@ spring:
       mode: always
 
   rabbitmq:
-    host: carp-rabbitmq-${spring.profiles.active}
-    port: 5672
+    host: "${RABBIT_HOST}"
+    port: "${RABBIT_PORT}"
     username: "${ADMIN_USER}"
     password: "${ADMIN_PASSWORD}"
     listener:
@@ -75,11 +75,11 @@ spring:
           multiplier: 3
 
   mail:
-    host: ...
-    port: ...
-    address: ...
-    password: ...
-    from: ... <${spring.mail.address}>
+    host: "${MAIL_HOST}}"
+    port: "${MAIL_PORT}"
+    address: "${MAIL_USERNAME}"
+    password: "${MAIL_PASSWORD}"
+    from: "${MAIL_FROM} <${spring.mail.address}>"
     properties:
       mail.smtp.starttls.enable: true
       mail.smtp.starttls.required: true
@@ -115,11 +115,11 @@ caffeine:
   expire-after-write: 300000
 
 keycloak:
-  auth-server-url: ...
+  auth-server-url: "${KC_URL}"
   realm: Carp
   admin:
-    client-id: ...
-    client-secret: ...
+    client-id: "${KC_CLIENT_ID}"
+    client-secret: "${KC_CLIENT_SECRET}"
 
 com:
   c4-soft:
@@ -142,8 +142,8 @@ com:
 springdoc:
   swagger-ui:
     disable-swagger-default-url: true
-    url: ${environment.subfolder}/v3/api-docs
-    config-url: ${environment.subfolder}/v3/api-docs/swagger-config
+    url: /${environment.subfolder}/v3/api-docs
+    config-url: /${environment.subfolder}/v3/api-docs/swagger-config
 
 rabbit:
   data-point:
@@ -189,11 +189,11 @@ rabbit:
 # Future versions of CARP will ship with a self-hosted s3 container
 s3:
   space:
-    key: ...
-    secret: ...
-    endpoint: ...
-    region: ...
-    bucket: ...
+    key: "${S3_KEY}"
+    secret: "${S3_SECRET}"
+    endpoint: "${S3_ENDPOINT}"
+    region: "${S3_REGION}"
+    bucket: "${S3_BUCKET}"
 
 management:
   endpoints:
@@ -256,20 +256,20 @@ slack:
     name: '#carp-notifications'
     server: '#carp-server-errors'
     heartbeat: '#carp-heartbeat'
-  webhook: ...
+  webhook: "${SLACK_WEBHOOK_URL}"
 
 storage:
   directory: /home/carp/storage/${spring.profiles.active}/
 
 environment:
-  server: ...
-  subfolder:
-  portal-subfolder: /portal
+  server: "${CAWS_SERVER_URL}"
+  subfolder: "${CAWS_SUBFOLDER}"
+  portal-subfolder: "${CAWS_PORTAL_SUBFOLDER}"
 
 
 alert:
   # The email address to send alerts to
-  admin-email: ...
+  admin-email: "${CAWS_ADMIN_EMAIL}"
   subject: WARNING! DATABASE CONNECTION PROBLEMS!
 
 info:

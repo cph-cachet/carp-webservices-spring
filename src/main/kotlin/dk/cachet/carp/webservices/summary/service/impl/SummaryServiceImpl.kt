@@ -14,15 +14,13 @@ import dk.cachet.carp.webservices.summary.repository.SummaryRepository
 import dk.cachet.carp.webservices.summary.service.IResourceExporterService
 import dk.cachet.carp.webservices.summary.service.ISummaryService
 import jakarta.annotation.PreDestroy
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.core.io.Resource
 import org.springframework.stereotype.Service
 import java.nio.file.Path
+import java.util.concurrent.Executors
 
 @Service
 class SummaryServiceImpl
@@ -36,9 +34,14 @@ class SummaryServiceImpl
 
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
-        private val exportScope = CoroutineScope(Dispatchers.IO)
+        private val threadPoolExecutor = Executors.newCachedThreadPool()
     }
 
+    /**
+     * NOTE: TODO this should depend on kotlin coroutines. Zip creation should be handled by the Dispatchers.IO context
+     * Currently, the persistence layer that we use, doesn't provide native support for kotlin coroutines so we
+     * should switch to something that does, like R2DBC. (The issue manifests in the fact the updates dont work in a reactive context)
+     * */
     override fun createSummaryForStudy(studyId: String, deploymentIds: List<String>?): Summary {
         var summary = summaryFactory.create(UUID(studyId), deploymentIds)
         val existingSummary = getSummary(summary.id)
@@ -49,7 +52,7 @@ class SummaryServiceImpl
 
         summary = summaryRepository.save(summary)
 
-        exportScope.launch {
+        threadPoolExecutor.execute {
             LOGGER.info("Creating summary...")
             val summaryLog = SummaryLog(studyId, summary.createdAt)
 
@@ -122,9 +125,9 @@ class SummaryServiceImpl
         }
     }
 
-    private suspend fun exportStudyOrThrow(studyId: String, deploymentIds: List<String>?, path: Path, log: SummaryLog) {
+    private fun exportStudyOrThrow(studyId: String, deploymentIds: List<String>?, path: Path, log: SummaryLog) {
         try {
-            resourceExporter.exportAllForStudy(studyId, deploymentIds, path, log)
+            runBlocking { resourceExporter.exportAllForStudy(studyId, deploymentIds, path, log) }
         } catch (ex: Exception) {
             LOGGER.info("Data collection failed due to an error: ${ex.message}")
             throw FileStorageException(ex.message)
@@ -145,10 +148,5 @@ class SummaryServiceImpl
         }
 
         return null
-    }
-
-    @PreDestroy
-    fun onDestroy() {
-        exportScope.cancel()
     }
 }

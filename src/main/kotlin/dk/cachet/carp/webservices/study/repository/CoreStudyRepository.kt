@@ -104,7 +104,7 @@ class CoreStudyRepository
                     studyStatus.canSetStudyProtocol,
                     studyStatus.canDeployToParticipants,
                     study.description)
-        }.toList()
+        }.distinctBy { it.studyId }.toList()
     }
 
     @Transactional( rollbackFor = [Exception::class])
@@ -199,11 +199,11 @@ class CoreStudyRepository
         return accountIds.mapNotNull { accountService.findByUUID(UUID(it)) }
     }
 
-    suspend fun removeResearcherFromStudy(studyId: String, email: String): Boolean
+    fun removeResearcherFromStudy(studyId: String, email: String): Boolean
     {
         val study = getWSStudyById(UUID(studyId))
-        val account = accountService.findByAccountIdentity(AccountIdentity.fromEmailAddress(email))
-            ?: throw IllegalArgumentException("Account with email $email is not found.")
+        val account = runBlocking { accountService.findByAccountIdentity(AccountIdentity.fromEmailAddress(email))
+            ?: throw IllegalArgumentException("Account with email $email is not found.") }
         val isDeleted = study.researcherAccountIds.remove(account.id)
         if (isDeleted) LOGGER.info("Researcher with id ${account.id} is removed from the study with id $studyId.")
         return isDeleted
