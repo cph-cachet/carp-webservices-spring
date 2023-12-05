@@ -10,7 +10,7 @@ import dk.cachet.carp.webservices.collection.service.ICollectionService
 import dk.cachet.carp.webservices.common.exception.file.FileStorageException
 import dk.cachet.carp.webservices.consent.service.IConsentDocumentService
 import dk.cachet.carp.webservices.data.repository.DataStreamSequenceRepository
-import dk.cachet.carp.webservices.dataPoint.service.IDataPointService
+import dk.cachet.carp.webservices.dataPoint.service.DataPointService
 import dk.cachet.carp.webservices.deployment.repository.CoreDeploymentRepository
 import dk.cachet.carp.webservices.deployment.repository.StudyDeploymentRepository
 import dk.cachet.carp.webservices.deployment.service.CoreParticipationService
@@ -43,7 +43,7 @@ class ResourceExporterServiceImpl
     private val studyDeploymentRepository: StudyDeploymentRepository,
     coreParticipationService: CoreParticipationService,
     private val coreDataStreamService: DataStreamService,
-    private val dataPointService: IDataPointService,
+    private val dataPointService: DataPointService,
     private val consentDocumentService: IConsentDocumentService,
     private val fileService: FileService,
     private val fileStorage: FileStorage,

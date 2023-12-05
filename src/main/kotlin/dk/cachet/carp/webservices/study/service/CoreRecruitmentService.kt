@@ -6,6 +6,7 @@ import dk.cachet.carp.studies.application.RecruitmentService
 import dk.cachet.carp.studies.application.RecruitmentServiceHost
 import dk.cachet.carp.webservices.account.service.AccountService
 import dk.cachet.carp.webservices.common.eventbus.CoreEventBus
+import dk.cachet.carp.webservices.dataPoint.service.DataPointService
 import dk.cachet.carp.webservices.deployment.service.CoreDeploymentService
 import dk.cachet.carp.webservices.security.authentication.domain.Account
 import dk.cachet.carp.webservices.security.authentication.domain.AccountFactory
@@ -19,10 +20,11 @@ import org.springframework.stereotype.Component
 class CoreRecruitmentService
 (
     participantRepository: CoreParticipantRepository,
-    coreDeploymentService: CoreDeploymentService,
     coreEventBus: CoreEventBus,
+    private val coreDeploymentService: CoreDeploymentService,
+    private val dataPointService: DataPointService,
     private val accountService: AccountService,
-    private val accountFactory: AccountFactory
+    private val accountFactory: AccountFactory,
 )
 {
     final val instance: RecruitmentService = RecruitmentServiceHost(
@@ -53,16 +55,19 @@ class CoreRecruitmentService
         for (participantGroupStatus in participantGroupStatusList) {
 
             val participantAccounts = arrayListOf<ParticipantAccount>()
+            val deploymentStatus = coreDeploymentService.instance.getStudyDeploymentStatus(participantGroupStatus.id)
             participantGroupStatus.participants.map {
                 val participantAccount = ParticipantAccount.fromParticipant(it)
                 val account = accountService.findByAccountIdentity(it.accountIdentity)
                 if (account != null) {
+                    val lastDataUpload = dataPointService.getLatestUpdatedAt(participantGroupStatus.id)
                     participantAccount.lateInitFrom(account)
+                    participantAccount.dateOfLastDataUpload = lastDataUpload
                 }
                 participantAccounts.add(participantAccount)
             }
 
-            val info = ParticipantGroupInfo(participantGroupStatus.id, participantAccounts)
+            val info = ParticipantGroupInfo(participantGroupStatus.id, deploymentStatus, participantAccounts)
             participantGroupInfoList.add(info)
         }
         return ParticipantGroupsStatus(participantGroupInfoList, participantGroupStatusList)

@@ -1,12 +1,14 @@
 package dk.cachet.carp.webservices.dataPoint.service
 
+import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.webservices.dataPoint.domain.DataPoint
 import dk.cachet.carp.webservices.dataPoint.dto.CreateDataPointRequestDto
 import dk.cachet.carp.webservices.deployment.dto.DeploymentStatisticsResponseDto
+import kotlinx.datetime.Instant
 import org.springframework.data.domain.PageRequest
 import org.springframework.web.multipart.MultipartFile
 
-interface IDataPointService
+interface DataPointService
 {
     suspend fun getAll(deploymentId: String, pageRequest: PageRequest, query: String?): List<DataPoint>
 
@@ -17,6 +19,8 @@ interface IDataPointService
     fun getStatistics(deploymentIds: List<String>): DeploymentStatisticsResponseDto
 
     fun getOne(id: Int): DataPoint
+
+    fun getLatestUpdatedAt(deploymentId: UUID): Instant?
 
     fun create(deploymentId: String, file: MultipartFile?, request: CreateDataPointRequestDto): DataPoint
 

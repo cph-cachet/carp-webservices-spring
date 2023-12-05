@@ -2,9 +2,11 @@ package dk.cachet.carp.webservices.study.domain
 
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.common.application.users.EmailAccountIdentity
+import dk.cachet.carp.deployments.application.StudyDeploymentStatus
 import dk.cachet.carp.studies.application.users.Participant
 import dk.cachet.carp.studies.application.users.ParticipantGroupStatus
 import dk.cachet.carp.webservices.security.authentication.domain.Account
+import kotlinx.datetime.Instant
 
 data class ParticipantGroupsStatus
 (
@@ -15,15 +17,18 @@ data class ParticipantGroupsStatus
 data class ParticipantGroupInfo
 (
     val participantGroupId: UUID,
+    val deploymentStatus: StudyDeploymentStatus,
     val participants: List<ParticipantAccount>
 )
 
 data class ParticipantAccount
 (
     val participantId: UUID,
-    val firstName: String? = null,
-    val lastName: String? = null,
-    val email: String? = null
+    var firstName: String? = null,
+    var lastName: String? = null,
+    var email: String? = null,
+    var role: String? = null,
+    var dateOfLastDataUpload: Instant? = null
 ) {
     companion object {
 
@@ -35,8 +40,9 @@ data class ParticipantAccount
     }
 
     fun lateInitFrom( account: Account ) {
-        firstName ?: account.firstName
-        lastName ?: account.lastName
-        email ?: account.email
+        (firstName ?: account.firstName).also { firstName = it }
+        (lastName ?: account.lastName).also { lastName = it }
+        (email ?: account.email).also { email = it }
+        (role ?: account.role).also { role = it.toString() }
     }
 }

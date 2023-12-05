@@ -64,7 +64,6 @@ class StudyController
 
     private val studyService = coreStudyService.instance
 
-
     private val recruitmentService = coreRecruitmentService.instance
 
     @PostMapping(value = [ADD_RESEARCHER])
@@ -77,7 +76,6 @@ class StudyController
         LOGGER.info("Start POST: /api/studies/$studyId/researchers")
         return coreStudyRepository.inviteResearcherToStudy(studyId, email)
     }
-
 
     @GetMapping(value = [GET_PARTICIPANTS_ACCOUNTS])
     @PreAuthorize("@studyAuthorizationService.canAccessStudy(#studyId)")

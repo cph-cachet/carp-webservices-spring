@@ -1,22 +1,26 @@
 package dk.cachet.carp.webservices.dataPoint.service.impl
 
 import cz.jirutka.rsql.parser.RSQLParser
+import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.exception.responses.BadRequestException
 import dk.cachet.carp.webservices.common.exception.responses.ResourceNotFoundException
 import dk.cachet.carp.webservices.common.query.QueryUtil.Companion.validateQuery
 import dk.cachet.carp.webservices.common.query.QueryVisitor
 import dk.cachet.carp.webservices.dataPoint.authorization.DataPointAuthorizationService
+import dk.cachet.carp.webservices.dataPoint.controller.DataPointController
 import dk.cachet.carp.webservices.dataPoint.domain.DataPoint
 import dk.cachet.carp.webservices.dataPoint.dto.CreateDataPointRequestDto
 import dk.cachet.carp.webservices.dataPoint.listener.DataPointBatchProcessorJob
 import dk.cachet.carp.webservices.dataPoint.repository.DataPointRepository
-import dk.cachet.carp.webservices.dataPoint.service.IDataPointService
+import dk.cachet.carp.webservices.dataPoint.service.DataPointService
 import dk.cachet.carp.webservices.deployment.dto.DeploymentStatisticsResponseDto
 import dk.cachet.carp.webservices.deployment.dto.StatisticsDto
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.MeterRegistry
+import kotlinx.datetime.Instant
+import kotlinx.datetime.toKotlinInstant
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.data.domain.PageRequest
@@ -34,7 +38,7 @@ class DataPointServiceImpl(
     private val authenticationService: AuthenticationService,
     private val authorizationService: DataPointAuthorizationService,
     meterRegistry: MeterRegistry
-): IDataPointService
+): DataPointService
 {
     companion object
     {
@@ -177,6 +181,18 @@ class DataPointServiceImpl(
             throw ResourceNotFoundException(validateMessage.get("datapoint.not_found", id))
         }
         return optionalDataPoint.get()
+    }
+
+    override fun getLatestUpdatedAt(deploymentId: UUID): Instant?
+    {
+        val pageRequest = PageRequest.of(0, DataPointController.DEFAULT_PAGE_SIZE)
+        val dataPoints = dataPointRepository.findByDeploymentId(
+            deploymentId.stringRepresentation, pageable = pageRequest
+        ).content
+        val sortedDataPoint = dataPoints.sortedByDescending { it.updatedAt }.firstOrNull()
+            ?: return null
+
+        return sortedDataPoint.updatedAt?.toKotlinInstant()
     }
 
     override fun create(deploymentId: String, file: MultipartFile?, request: CreateDataPointRequestDto): DataPoint
