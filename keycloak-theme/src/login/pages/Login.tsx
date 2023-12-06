@@ -123,9 +123,9 @@ const Login = (props: PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18
           <AuthInfoText variant="h4_web" hideOnMobile>
             By logging in, you agree to the{' '}
             <StyledLink to="https://carp.cachet.dk/privacy-policy-service/">
-              Cachet Privacy Statement
-            </StyledLink>{' '}
-            and <StyledLink to="https://carp.cachet.dk/privacy-policy-service/">Terms of Service</StyledLink>.
+              CARP Privacy Policy
+            </StyledLink>.
+
           </AuthInfoText>
         </form>
       )}

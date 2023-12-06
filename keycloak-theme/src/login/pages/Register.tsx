@@ -135,8 +135,8 @@ const Register = (
         <AuthActionButton text="Sign up" loading={isLoading} />
         <AuthInfoText variant="h4_web" hideOnMobile>
           By registering, you agree to the{' '}
-          <StyledLink to="/forgot-password">
-            Cachet Privacy Statement
+          <StyledLink to="https://carp.cachet.dk/privacy-policy-service/">
+            CARP Privacy Policy
           </StyledLink>{' '}
           and <StyledLink to="/forgot-password">Terms of Service</StyledLink>.
         </AuthInfoText>
