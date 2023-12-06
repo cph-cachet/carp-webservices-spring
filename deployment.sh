@@ -18,7 +18,7 @@ source "./deployment/.env"
 
 # Create volumes used by the profile
 # https://stackoverflow.com/a/45674488/13179591
-VOLUMES=("rabbitmq" "postgres" "keycloak")
+VOLUMES=("rabbitmq" "postgres" "keycloak" "prometheus")
 for volume in "${VOLUMES[@]}"
 do
   docker volume create --name "${volume}"-"${PROFILE}"

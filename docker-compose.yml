@@ -50,7 +50,7 @@ services:
       - testing
       - development
     volumes:
-      - "/data/carp/storage/${PROFILE}:/root/home/carp/storage/${PROFILE}"
+      - "/data/carp/storage/${PROFILE}:/home/carp/storage/${PROFILE}"
 
   rabbitmq: &rabbitmq
     <<: *carp-base-config
@@ -134,6 +134,50 @@ services:
     profiles:
       - production
 
+  prometheus:
+    <<: *carp-base-config
+    container_name: "carp-prometheus"
+    image: prom/prometheus:latest
+    ports:
+      - "${PROMETHEUS_PORT}:9090"
+    volumes:
+      - ./deployment/monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+
+  grafana:
+    <<: *carp-base-config
+    container_name: "carp-grafana"
+    image: grafana/grafana:latest
+    ports:
+      - "${GRAFANA_PORT}:3000"
+    environment:
+      - "GF_SECURITY_ADMIN_USER=${ADMIN_USER}"
+      - "GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD}"
+    volumes:
+      - ./deployment/monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - ./deployment/monitoring/grafana/dashboards:/var/lib/grafana/dashboards
+      - ./deployment/monitoring/grafana/grafana.ini:/etc/grafana/grafana.ini
+
+  node-exporter:
+    <<: *carp-base-config
+    container_name: "carp-node-exporter"
+    image: prom/node-exporter:latest
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+
 networks:
   carp:
     external: true
@@ -150,4 +194,6 @@ volumes:
   keycloak:
     name: "keycloak-${PROFILE}"
     external: true
-
+  prometheus:
+    name: "prometheus-${PROFILE}"
+    external: true
