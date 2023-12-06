@@ -140,6 +140,8 @@ services:
     image: prom/prometheus:latest
     ports:
       - "${PROMETHEUS_PORT}:9090"
+    profiles:
+      - production
     volumes:
       - ./deployment/monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus:/prometheus
@@ -153,12 +155,14 @@ services:
   grafana:
     <<: *carp-base-config
     container_name: "carp-grafana"
-    image: grafana/grafana:latest
-    ports:
-      - "${GRAFANA_PORT}:3000"
     environment:
       - "GF_SECURITY_ADMIN_USER=${ADMIN_USER}"
       - "GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD}"
+    image: grafana/grafana:latest
+    ports:
+      - "${GRAFANA_PORT}:3000"
+    profiles:
+      - production
     volumes:
       - ./deployment/monitoring/grafana/provisioning:/etc/grafana/provisioning
       - ./deployment/monitoring/grafana/dashboards:/var/lib/grafana/dashboards
@@ -166,17 +170,19 @@ services:
 
   node-exporter:
     <<: *carp-base-config
-    container_name: "carp-node-exporter"
-    image: prom/node-exporter:latest
-    volumes:
-      - /proc:/host/proc:ro
-      - /sys:/host/sys:ro
-      - /:/rootfs:ro
     command:
       - '--path.procfs=/host/proc'
       - '--path.rootfs=/rootfs'
       - '--path.sysfs=/host/sys'
       - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    container_name: "carp-node-exporter"
+    image: prom/node-exporter:latest
+    profiles:
+      - production
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
 
 networks:
   carp:
@@ -196,4 +202,4 @@ volumes:
     external: true
   prometheus:
     name: "prometheus-${PROFILE}"
-    external: true
+    external: True
