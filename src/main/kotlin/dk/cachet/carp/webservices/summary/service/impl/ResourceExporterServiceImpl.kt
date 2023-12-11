@@ -311,21 +311,21 @@ class ResourceExporterServiceImpl
         return fileUtil.resolveFileStorage(fileName)
     }
 
-    private fun createFileForResourceOnPath(path: Path, resource: Any, summaryLog: SummaryLog)
-    {
-        try
-        {
-            val serializedResource = objectMapper.writeValueAsString(resource)
-            val resourceStream = ByteArrayInputStream(serializedResource.encodeToByteArray())
-            Files.copy(resourceStream, path)
+    private fun createFileForResourceOnPath(path: Path, resource: Any, summaryLog: SummaryLog) {
+        try {
+            val jsonGenerator = objectMapper.factory.createGenerator(path.toFile().outputStream())
+
+            jsonGenerator.use {
+                objectMapper.writeValue(it, resource)
+            }
+
             LOGGER.info("A new file is created for zipping with name ${path.fileName}.")
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.info("Failed to store the file ${path.fileName}.", ex)
             summaryLog.errorLogs.add("An error occurred while storing the file ${path.fileName}: ${ex.message}")
         }
     }
+
 
     private fun createSummaryLogFileOnPath(path: Path, summaryLog: SummaryLog)
     {
