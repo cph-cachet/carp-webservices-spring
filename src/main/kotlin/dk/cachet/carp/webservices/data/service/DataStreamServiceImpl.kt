@@ -25,7 +25,6 @@ class DataStreamServiceImpl(
         val pageRequest = PageRequest.of(0, DataPointController.DEFAULT_PAGE_SIZE)
         val dataStreamInputs = dataStreamIdRepository.getAllByDeploymentId(
             deploymentId.stringRepresentation, pageRequest)
-        print("smt")
         val sortedDataPoint = dataStreamInputs.sortedByDescending {it.updatedAt}.firstOrNull()
             ?: return null
 

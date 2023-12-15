@@ -1,14 +1,12 @@
 package dk.cachet.carp.webservices.dataPoint.service.impl
 
 import cz.jirutka.rsql.parser.RSQLParser
-import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.exception.responses.BadRequestException
 import dk.cachet.carp.webservices.common.exception.responses.ResourceNotFoundException
 import dk.cachet.carp.webservices.common.query.QueryUtil.Companion.validateQuery
 import dk.cachet.carp.webservices.common.query.QueryVisitor
 import dk.cachet.carp.webservices.dataPoint.authorization.DataPointAuthorizationService
-import dk.cachet.carp.webservices.dataPoint.controller.DataPointController
 import dk.cachet.carp.webservices.dataPoint.domain.DataPoint
 import dk.cachet.carp.webservices.dataPoint.dto.CreateDataPointRequestDto
 import dk.cachet.carp.webservices.dataPoint.listener.DataPointBatchProcessorJob
@@ -19,8 +17,6 @@ import dk.cachet.carp.webservices.deployment.dto.StatisticsDto
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.MeterRegistry
-import kotlinx.datetime.Instant
-import kotlinx.datetime.toKotlinInstant
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.data.domain.PageRequest

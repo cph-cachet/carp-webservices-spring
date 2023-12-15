@@ -1,10 +1,8 @@
 package dk.cachet.carp.webservices.dataPoint.service
 
-import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.webservices.dataPoint.domain.DataPoint
 import dk.cachet.carp.webservices.dataPoint.dto.CreateDataPointRequestDto
 import dk.cachet.carp.webservices.deployment.dto.DeploymentStatisticsResponseDto
-import kotlinx.datetime.Instant
 import org.springframework.data.domain.PageRequest
 import org.springframework.web.multipart.MultipartFile
 
