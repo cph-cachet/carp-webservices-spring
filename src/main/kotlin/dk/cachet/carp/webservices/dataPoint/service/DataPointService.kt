@@ -20,8 +20,6 @@ interface DataPointService
 
     fun getOne(id: Int): DataPoint
 
-    fun getLatestUpdatedAt(deploymentId: UUID): Instant?
-
     fun create(deploymentId: String, file: MultipartFile?, request: CreateDataPointRequestDto): DataPoint
 
     fun create(dataPoint: DataPoint): DataPoint

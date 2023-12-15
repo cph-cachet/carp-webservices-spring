@@ -6,7 +6,7 @@ import dk.cachet.carp.studies.application.RecruitmentService
 import dk.cachet.carp.studies.application.RecruitmentServiceHost
 import dk.cachet.carp.webservices.account.service.AccountService
 import dk.cachet.carp.webservices.common.eventbus.CoreEventBus
-import dk.cachet.carp.webservices.dataPoint.service.DataPointService
+import dk.cachet.carp.webservices.data.service.IDataStreamService
 import dk.cachet.carp.webservices.deployment.service.CoreDeploymentService
 import dk.cachet.carp.webservices.security.authentication.domain.Account
 import dk.cachet.carp.webservices.security.authentication.domain.AccountFactory
@@ -22,7 +22,7 @@ class CoreRecruitmentService
     participantRepository: CoreParticipantRepository,
     coreEventBus: CoreEventBus,
     private val coreDeploymentService: CoreDeploymentService,
-    private val dataPointService: DataPointService,
+    private val idataStreamService: IDataStreamService,
     private val accountService: AccountService,
     private val accountFactory: AccountFactory,
 )
@@ -60,7 +60,7 @@ class CoreRecruitmentService
                 val participantAccount = ParticipantAccount.fromParticipant(it)
                 val account = accountService.findByAccountIdentity(it.accountIdentity)
                 if (account != null) {
-                    val lastDataUpload = dataPointService.getLatestUpdatedAt(participantGroupStatus.id)
+                    val lastDataUpload = idataStreamService.getLatestUpdatedAt(participantGroupStatus.id)
                     participantAccount.lateInitFrom(account)
                     participantAccount.dateOfLastDataUpload = lastDataUpload
                 }

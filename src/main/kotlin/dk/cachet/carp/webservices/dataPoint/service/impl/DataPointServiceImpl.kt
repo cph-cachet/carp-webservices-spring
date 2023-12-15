@@ -183,18 +183,6 @@ class DataPointServiceImpl(
         return optionalDataPoint.get()
     }
 
-    override fun getLatestUpdatedAt(deploymentId: UUID): Instant?
-    {
-        val pageRequest = PageRequest.of(0, DataPointController.DEFAULT_PAGE_SIZE)
-        val dataPoints = dataPointRepository.findByDeploymentId(
-            deploymentId.stringRepresentation, pageable = pageRequest
-        ).content
-        val sortedDataPoint = dataPoints.sortedByDescending { it.updatedAt }.firstOrNull()
-            ?: return null
-
-        return sortedDataPoint.updatedAt?.toKotlinInstant()
-    }
-
     override fun create(deploymentId: String, file: MultipartFile?, request: CreateDataPointRequestDto): DataPoint
     {
         val currentAccountId = authenticationService.getCurrentPrincipal().id
