@@ -3,7 +3,7 @@ package dk.cachet.carp.webservices.dataPoint.listener
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.gson.JsonParseException
 import dk.cachet.carp.webservices.dataPoint.domain.DataPoint
-import dk.cachet.carp.webservices.dataPoint.service.IDataPointService
+import dk.cachet.carp.webservices.dataPoint.service.DataPointService
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.amqp.rabbit.annotation.RabbitHandler
@@ -33,7 +33,7 @@ class DataPointBatchProcessorJob(private val environment: Environment)
 
     @Autowired
     @Lazy
-    lateinit var dataPointService: IDataPointService
+    lateinit var dataPointService: DataPointService
 
     @Autowired
     lateinit var objectMapper: ObjectMapper

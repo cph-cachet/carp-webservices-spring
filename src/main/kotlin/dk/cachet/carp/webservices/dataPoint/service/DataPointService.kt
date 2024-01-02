@@ -6,7 +6,7 @@ import dk.cachet.carp.webservices.deployment.dto.DeploymentStatisticsResponseDto
 import org.springframework.data.domain.PageRequest
 import org.springframework.web.multipart.MultipartFile
 
-interface IDataPointService
+interface DataPointService
 {
     suspend fun getAll(deploymentId: String, pageRequest: PageRequest, query: String?): List<DataPoint>
 

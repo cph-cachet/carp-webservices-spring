@@ -4,7 +4,7 @@ import dk.cachet.carp.deployments.infrastructure.DeploymentServiceRequest
 import dk.cachet.carp.deployments.infrastructure.ParticipationServiceRequest
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.exception.responses.BadRequestException
-import dk.cachet.carp.webservices.dataPoint.service.IDataPointService
+import dk.cachet.carp.webservices.dataPoint.service.DataPointService
 import dk.cachet.carp.webservices.deployment.authorizer.DeploymentAuthorizationService
 import dk.cachet.carp.webservices.deployment.dto.DeploymentStatisticsRequestDto
 import dk.cachet.carp.webservices.deployment.dto.DeploymentStatisticsResponseDto
@@ -28,7 +28,7 @@ class StudyDeploymentController
 (
     private val validationMessages: MessageBase,
     private val deploymentAuthorizationService: DeploymentAuthorizationService,
-    private val dataPointService: IDataPointService,
+    private val dataPointService: DataPointService,
     coreParticipationService: CoreParticipationService,
     coreDeploymentService: CoreDeploymentService
 )

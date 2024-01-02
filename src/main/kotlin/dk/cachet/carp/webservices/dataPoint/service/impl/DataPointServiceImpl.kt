@@ -11,7 +11,7 @@ import dk.cachet.carp.webservices.dataPoint.domain.DataPoint
 import dk.cachet.carp.webservices.dataPoint.dto.CreateDataPointRequestDto
 import dk.cachet.carp.webservices.dataPoint.listener.DataPointBatchProcessorJob
 import dk.cachet.carp.webservices.dataPoint.repository.DataPointRepository
-import dk.cachet.carp.webservices.dataPoint.service.IDataPointService
+import dk.cachet.carp.webservices.dataPoint.service.DataPointService
 import dk.cachet.carp.webservices.deployment.dto.DeploymentStatisticsResponseDto
 import dk.cachet.carp.webservices.deployment.dto.StatisticsDto
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
@@ -34,7 +34,7 @@ class DataPointServiceImpl(
     private val authenticationService: AuthenticationService,
     private val authorizationService: DataPointAuthorizationService,
     meterRegistry: MeterRegistry
-): IDataPointService
+): DataPointService
 {
     companion object
     {

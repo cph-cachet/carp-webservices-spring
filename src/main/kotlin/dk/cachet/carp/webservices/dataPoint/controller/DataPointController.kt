@@ -6,7 +6,7 @@ import dk.cachet.carp.webservices.common.query.QueryUtil
 import dk.cachet.carp.webservices.dataPoint.controller.DataPointController.Companion.DATA_POINT_BASE
 import dk.cachet.carp.webservices.dataPoint.domain.DataPoint
 import dk.cachet.carp.webservices.dataPoint.dto.CreateDataPointRequestDto
-import dk.cachet.carp.webservices.dataPoint.service.IDataPointService
+import dk.cachet.carp.webservices.dataPoint.service.DataPointService
 import io.swagger.v3.oas.annotations.Operation
 import jakarta.validation.Valid
 import kotlinx.coroutines.runBlocking
@@ -20,7 +20,7 @@ import org.springframework.web.multipart.MultipartFile
 
 @RestController
 @RequestMapping(value = [DATA_POINT_BASE])
-class DataPointController(private val dataPointService: IDataPointService)
+class DataPointController(private val dataPointService: DataPointService)
 {
     companion object
     {
