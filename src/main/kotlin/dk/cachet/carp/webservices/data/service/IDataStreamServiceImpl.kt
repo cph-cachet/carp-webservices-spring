@@ -4,10 +4,8 @@ import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.webservices.data.domain.DataStreamSequence
 import dk.cachet.carp.webservices.data.repository.DataStreamIdRepository
 import dk.cachet.carp.webservices.data.repository.DataStreamSequenceRepository
-import dk.cachet.carp.webservices.dataPoint.controller.DataPointController
 import kotlinx.datetime.Instant
 import kotlinx.datetime.toKotlinInstant
-import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 
 @Service
