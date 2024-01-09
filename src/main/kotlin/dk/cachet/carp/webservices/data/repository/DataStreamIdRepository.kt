@@ -1,8 +1,6 @@
 package dk.cachet.carp.webservices.data.repository
 
 import dk.cachet.carp.webservices.data.domain.DataStreamId
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
@@ -38,7 +36,7 @@ interface DataStreamIdRepository: JpaRepository<DataStreamId, Int>
     fun getAllByDeploymentIds(@Param("deploymentIds") ids: Collection<String>): List<Int>
 
     @Query(nativeQuery = true,
-            value = "SELECT * FROM data_stream_ids WHERE study_deployment_id = :deploymentId ")
-    fun getAllByDeploymentId(@Param("deploymentId") id: String, pageable: Pageable): Page<DataStreamId>
+        value = "SELECT * FROM data_stream_ids WHERE study_deployment_id = :deploymentId ")
+    fun getAllByDeploymentId(@Param("deploymentId") id: String): List<DataStreamId>
 
 }

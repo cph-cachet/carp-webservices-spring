@@ -11,7 +11,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 
 @Service
-class DataStreamServiceImpl(
+class IDataStreamServiceImpl(
         private val dataStreamSequenceRepository: DataStreamSequenceRepository,
         private val dataStreamIdRepository: DataStreamIdRepository
 ): IDataStreamService {
@@ -22,9 +22,8 @@ class DataStreamServiceImpl(
 
     override fun getLatestUpdatedAt(deploymentId: UUID): Instant?
     {
-        val pageRequest = PageRequest.of(0, DataPointController.DEFAULT_PAGE_SIZE)
         val dataStreamInputs = dataStreamIdRepository.getAllByDeploymentId(
-            deploymentId.stringRepresentation, pageRequest)
+            deploymentId.toString())
         val sortedDataPoint = dataStreamInputs.sortedByDescending {it.updatedAt}.firstOrNull()
             ?: return null
 
