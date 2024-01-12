@@ -2,13 +2,11 @@ package dk.cachet.carp.webservices.summary.service.impl
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import dk.cachet.carp.common.application.UUID
-import dk.cachet.carp.data.application.DataStreamService
 import dk.cachet.carp.deployments.application.ParticipationService
 import dk.cachet.carp.deployments.application.users.ParticipantData
 import dk.cachet.carp.deployments.domain.StudyDeploymentSnapshot
 import dk.cachet.carp.webservices.collection.service.ICollectionService
 import dk.cachet.carp.webservices.common.exception.file.FileStorageException
-import dk.cachet.carp.webservices.consent.service.IConsentDocumentService
 import dk.cachet.carp.webservices.data.repository.DataStreamSequenceRepository
 import dk.cachet.carp.webservices.dataPoint.service.IDataPointService
 import dk.cachet.carp.webservices.deployment.repository.CoreDeploymentRepository
@@ -20,7 +18,6 @@ import dk.cachet.carp.webservices.file.domain.File
 import dk.cachet.carp.webservices.file.service.FileService
 import dk.cachet.carp.webservices.file.service.FileStorage
 import dk.cachet.carp.webservices.file.util.FileUtil
-import dk.cachet.carp.webservices.study.repository.CoreParticipantRepository
 import dk.cachet.carp.webservices.study.repository.CoreStudyRepository
 import dk.cachet.carp.webservices.summary.domain.SummaryLog
 import dk.cachet.carp.webservices.summary.service.IResourceExporterService
@@ -38,13 +35,10 @@ class ResourceExporterServiceImpl
 (
     private val objectMapper: ObjectMapper,
     private val studyRepository: CoreStudyRepository,
-    private val studyParticipantRepository: CoreParticipantRepository,
     private val deploymentRepository: CoreDeploymentRepository,
     private val studyDeploymentRepository: StudyDeploymentRepository,
     coreParticipationService: CoreParticipationService,
-    private val coreDataStreamService: DataStreamService,
     private val dataPointService: IDataPointService,
-    private val consentDocumentService: IConsentDocumentService,
     private val fileService: FileService,
     private val fileStorage: FileStorage,
     private val fileUtil: FileUtil,
@@ -76,7 +70,6 @@ class ResourceExporterServiceImpl
         exportParticipantData(studyDeploymentIds, rootFolder, summaryLog)
         exportDataPoints(studyDeploymentIds, rootFolder, summaryLog)
         exportDataStreamSequences(studyDeploymentIds, rootFolder, summaryLog)
-        exportConsents(studyDeploymentIds, rootFolder, summaryLog)
         exportFiles(studyId, studyDeploymentIds, rootFolder, summaryLog)
         exportDocuments(studyId, studyDeploymentIds, rootFolder, summaryLog)
     }
@@ -179,26 +172,6 @@ class ResourceExporterServiceImpl
         }
         val dataPointsPath = resolveFullPathForFilename("${rootFolder.fileName}/dataPointSequences.json")
         createFileForResourceOnPath(dataPointsPath, dataStreamSequences, summaryLog)
-    }
-
-    /**
-     * Exports consent documents serialized into the specified [rootFolder].
-     *
-     * @param deploymentIds ID's of the deployments the resources belong to.
-     * @param rootFolder [Path] of the destination directory.
-     * @param summaryLog A [SummaryLog] instance to audit meta data.
-     */
-    override fun exportConsents(deploymentIds: List<String>, rootFolder: Path, summaryLog: SummaryLog)
-    {
-        val consents = consentDocumentService.getAll(deploymentIds)
-        if (consents.isEmpty())
-        {
-            LOGGER.info("No consent document data was found.")
-            summaryLog.infoLogs.add("No consent document data was found.")
-            return
-        }
-        val consentsPath = resolveFullPathForFilename("${rootFolder.fileName}/consent_documents.txt")
-        createFileForResourceOnPath(consentsPath, consents, summaryLog)
     }
 
     /**
