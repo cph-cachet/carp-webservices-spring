@@ -32,7 +32,11 @@ interface DataStreamIdRepository: JpaRepository<DataStreamId, Int>
     fun deleteAllByDeploymentIds(@Param(value = "deploymentIds") deploymentIds: Collection<String>)
 
     @Query(nativeQuery = true,
-            value = "SELECT id FROM data_stream_ids WHERE study_deployment_id IN (:deploymentIds)")
+        value = "SELECT id FROM data_stream_ids WHERE study_deployment_id IN (:deploymentIds)")
     fun getAllByDeploymentIds(@Param("deploymentIds") ids: Collection<String>): List<Int>
+
+    @Query(nativeQuery = true,
+        value = "SELECT * FROM data_stream_ids WHERE study_deployment_id = :deploymentId ")
+    fun getAllByDeploymentId(@Param("deploymentId") id: String): List<DataStreamId>
 
 }
