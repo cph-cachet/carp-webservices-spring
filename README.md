@@ -82,9 +82,6 @@ For API documentation we use [Swagger](https://cans.cachet.dk/dev/swagger-ui/ind
        - `manage-users`
        - `view-users`
        - `query-users`
-   - Regenerate the secret of the `admin-cli` client
-     - Disable the client
-     - Under the `Credentials` tab of the client settings click `Regenerate` next to the Client Secret.
    - Under `Users` add a new Admin user and assign the `system-admin` role to it. This user will be used to invite the first researcher. Can be deactivated afterwards.
    - Under `Realm settings` -> `Email` configure the email settings. This is used to send out invitations to researchers/participants. The same email server can be used as the on specified in the [configuration file](src/main/resources/config/application-local.yml).
    - Under `Realm settings` -> `Themes` configure the theme settings. There will be a default CARP theme available soon, which will be customizable.
