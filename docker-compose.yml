@@ -40,7 +40,7 @@ services:
       - "SPRING_PROFILES_ACTIVE=${PROFILE}"
       - "JAVA_OPTS=-Xmx1g -Xms1g -XX:MaxPermSize=512m"
     env_file:
-      - ./deployment/.env
+      - .env
     image: "carp-ws:${PROFILE}"
     ports:
       - "${CAWS_PORT}:8080"

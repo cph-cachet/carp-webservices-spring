@@ -242,7 +242,7 @@ storage:
   directory: /home/carp/storage/${spring.profiles.active}/
 
 environment:
-  server: "${CAWS_SERVER_URL}"
+  server: "${CAWS_HOST}"
   subfolder: "${CAWS_SUBFOLDER}"
   portal-subfolder: "${CAWS_PORTAL_SUBFOLDER}"
 
