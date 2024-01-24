@@ -83,9 +83,9 @@ For API documentation we use [Swagger](https://cans.cachet.dk/dev/swagger-ui/ind
        - `view-users`
        - `query-users`
    - Under `Users` add a new Admin user and assign the `system-admin` role to it. This user will be used to invite the first researcher. Can be deactivated afterwards.
-   - Under `Realm settings` -> `Email` configure the email settings. This is used to send out invitations to researchers/participants. The same email server can be used as the on specified in the [configuration file](src/main/resources/config/application-local.yml).
+   - Under `Realm settings` -> `Email` configure the email settings. This is used to send out invitations to researchers/participants.
    - Under `Realm settings` -> `Themes` configure the theme settings. There will be a default CARP theme available soon, which will be customizable.
-   - Change the setting for the newly created client under the `keycloak` section in the [configuration file](src/main/resources/config/application-local.yml) to match the newly created client.
+   - Update the [environment file](deployment/.env) to match the newly created client.
 5. Rebuild the carp-ws image and restart the stack.
 
 # Developer Guide 
