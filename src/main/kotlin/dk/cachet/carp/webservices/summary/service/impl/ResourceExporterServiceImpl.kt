@@ -177,7 +177,7 @@ class ResourceExporterServiceImpl
             summaryLog.infoLogs.add("No dataStreamSequences was found.")
             return
         }
-        val dataPointsPath = resolveFullPathForFilename("${rootFolder.fileName}/dataPointSequences.json")
+        val dataPointsPath = resolveFullPathForFilename("${rootFolder.fileName}/data-streams.json")
         createFileForResourceOnPath(dataPointsPath, dataStreamSequences, summaryLog)
     }
 
