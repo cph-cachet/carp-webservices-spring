@@ -12,7 +12,6 @@ import dk.cachet.carp.webservices.security.authentication.service.Authentication
 import dk.cachet.carp.webservices.study.domain.Study
 import dk.cachet.carp.webservices.study.repository.CoreStudyRepository
 import kotlinx.coroutines.runBlocking
-import org.springframework.dao.PermissionDeniedDataAccessException
 
 open class AuthorizationService(
     // TODO: authorization service shouldn't access the repositories directly

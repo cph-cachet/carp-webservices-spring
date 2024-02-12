@@ -1,5 +1,5 @@
-import org.springframework.boot.gradle.tasks.bundling.BootJar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
     idea
@@ -153,6 +153,10 @@ dependencies {
     // Caching
     implementation("org.springframework.boot:spring-boot-starter-cache")
     implementation("com.github.ben-manes.caffeine:caffeine:${property("caffeineVersion")}")
+
+    // CSV Library
+    dependencies {
+        implementation("com.github.doyaaaaaken:kotlin-csv-jvm:1.9.3")}
 
     // Unit Test
     testImplementation(kotlin("test"))

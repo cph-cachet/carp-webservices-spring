@@ -5,10 +5,13 @@ import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.common.application.users.AccountIdentity
 import dk.cachet.carp.webservices.account.controller.AccountController.Companion.ACCOUNT_BASE
 import dk.cachet.carp.webservices.account.domain.AccountRequest
+import dk.cachet.carp.webservices.account.domain.MagicLinkRequest
 import dk.cachet.carp.webservices.account.service.AccountService
 import dk.cachet.carp.webservices.common.constants.PathVariableName
 import dk.cachet.carp.webservices.security.authentication.domain.Account
 import jakarta.validation.Valid
+import kotlinx.coroutines.runBlocking
+import kotlinx.datetime.Instant
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.http.HttpStatus
@@ -27,6 +30,7 @@ class AccountController(private val accountService: AccountService)
         const val INVITE = "/invite"
         const val ROLE = "/role"
         const val ACCOUNT = "/{${PathVariableName.ACCOUNT_ID}}"
+        const val MAGICLINK = "/magic-links"
     }
 
     @PostMapping(INVITE)
@@ -54,5 +58,14 @@ class AccountController(private val accountService: AccountService)
     {
         LOGGER.info("Start GET: $ACCOUNT_BASE$ACCOUNT")
         return accountService.findByUUID(UUID.parse(accountId))
+    }
+    @PostMapping(MAGICLINK)
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("@accountAuthorizationService.isResearcherPartOfTheStudy(#request.studyId)")
+    fun sendLinks(@Valid @RequestBody request: MagicLinkRequest)
+    {
+        LOGGER.info("Start POST: $ACCOUNT_BASE$ACCOUNT")
+        val expiryInstant: Instant = request.expiryDate.let { Instant.parse(it) }
+        return runBlocking { accountService.sendMagicLinks(UUID(request.studyId), request.numberOfAccounts, expiryInstant)  }
     }
 }

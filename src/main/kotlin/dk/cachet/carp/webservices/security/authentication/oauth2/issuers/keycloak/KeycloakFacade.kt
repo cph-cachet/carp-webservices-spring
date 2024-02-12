@@ -225,6 +225,22 @@ class KeycloakFacade(
         throw UnsupportedOperationException("Account deletion is not supported by Carp Webservices.")
     }
 
+    suspend fun generateMagicLink(studyId: UUID): String {
+        val token = authenticate().accessToken
+        print("check")
+
+        LOGGER.info("Generating magic links with $studyId")
+
+        val link = authClient.get().uri("/magic-link")
+            .headers {
+                it.setBearerAuth(token!!)
+            }
+            .retrieve()
+            .awaitBody<String>()
+
+        return link
+    }
+
     @Cacheable(value = [TOKEN_CACHE], key = ADMIN_BEARER_TOKEN)
     suspend fun authenticate(): TokenResponse =
         authClient.post().uri("/protocol/openid-connect/token")
