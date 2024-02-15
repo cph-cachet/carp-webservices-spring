@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.gson.JsonParseException
 import dk.cachet.carp.webservices.common.exception.serialization.SerializationException
 import dk.cachet.carp.webservices.dataPoint.domain.DataPoint
-import dk.cachet.carp.webservices.dataPoint.service.IDataPointService
+import dk.cachet.carp.webservices.dataPoint.service.DataPointService
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.amqp.core.Message
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component
 class ThirdPartyProcessorJob
 (
         private val objectMapper: ObjectMapper,
-        private val dataPointService: IDataPointService
+        private val dataPointService: DataPointService
 )
 {
     companion object

@@ -13,12 +13,12 @@ if [[ ! -S /var/run/docker.sock ]] ; then
       exit 1
 fi
 
-ENV="./deployment/.env"
-source "./deployment/.env"
+ENV=".env"
+source ".env"
 
 # Create volumes used by the profile
 # https://stackoverflow.com/a/45674488/13179591
-VOLUMES=("rabbitmq" "postgres" "keycloak")
+VOLUMES=("rabbitmq" "postgres" "keycloak" "prometheus")
 for volume in "${VOLUMES[@]}"
 do
   docker volume create --name "${volume}"-"${PROFILE}"
@@ -39,4 +39,4 @@ fi
 # Instantiate containers
 # https://docs.docker.com/compose/environment-variables/
 # https://docs.docker.com/compose/profiles/
-docker compose --env-file ${ENV} --profile "${PROFILE}" -p "carp-webservices-${PROFILE}" up -d
+docker compose --profile "${PROFILE}" -p "carp-webservices-${PROFILE}" up -d

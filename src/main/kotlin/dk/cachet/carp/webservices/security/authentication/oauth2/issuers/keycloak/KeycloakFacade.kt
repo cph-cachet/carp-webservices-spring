@@ -45,7 +45,9 @@ class KeycloakFacade(
 ) : IssuerFacade {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
+        private const val INVITATION_LIFESPAN = 24 * 60 * 60 * 30 // 30 days
     }
+
 
     private val serializationStrategies: ExchangeStrategies =
         ExchangeStrategies.builder()
@@ -197,7 +199,10 @@ class KeycloakFacade(
 
         adminClient.put().uri("/users/${account.id}/execute-actions-email")
         { uriBuilder: UriBuilder ->
-            var builder = uriBuilder.queryParam("client_id", clientId)
+            var builder = uriBuilder
+                .queryParam("client_id", clientId)
+                .queryParam("lifespan", INVITATION_LIFESPAN)
+
             if (environmentUtil.profile != EnvironmentProfile.LOCAL) {
                 builder = builder.queryParam("redirect_uri", redirectUri ?: environmentUtil.portalUrl)
             }

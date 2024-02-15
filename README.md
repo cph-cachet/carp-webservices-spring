@@ -68,13 +68,21 @@ For API documentation we use [Swagger](https://cans.cachet.dk/dev/swagger-ui/ind
 
 # Deployment
 
+<<<<<<< HEAD
 1. Edit the [.env file](deployment/.env). Choose a profile from the list of [Profiles](#profiles).
+=======
+1. Edit the [.env file](.env). Choose a profile from the list of [Profiles](#profiles).
+>>>>>>> develop
    - Ignore the properties starting with KC_ for now
 2. Copy over the contents of the [template configuration file](src/main/resources/config/application-local.yml) to the environment specific [configuration file](src/main/resources/config) 
 3. Run `bash deployment.sh`
 4. Configure keycloak
    - If you are hosting the stack behind a reverse proxy (e.g. nginx), make sure to read the [official keycloak documentation](https://www.keycloak.org/docs/latest/server_installation/#_setting-up-a-load-balancer-or-proxy) on the subject.
+<<<<<<< HEAD
      - uncomment the lines in the [environment file](deployment/.env) and also in the [docker-compose file](docker-compose.yml) to enable the proxy (add them to the dev and prod commands if necessary).
+=======
+     - uncomment the lines in the [environment file](.env) and also in the [docker-compose file](docker-compose.yml) to enable the proxy (add them to the dev and prod commands if necessary).
+>>>>>>> develop
    - Set up a client for service accounts (Note: this client will only be used by the backend services, not a custom CAWS fronted)
      - Set up a new client by selecting the `Carp` realm after opening `<server>/admin/master/console/`, and click `Create client` under the `Clients` tab.
      - Fill in the general information and then toggle `Client authentication` as well as the `Authorization` options on. Then fill the URL settings.
@@ -82,13 +90,10 @@ For API documentation we use [Swagger](https://cans.cachet.dk/dev/swagger-ui/ind
        - `manage-users`
        - `view-users`
        - `query-users`
-   - Regenerate the secret of the `admin-cli` client
-     - Disable the client
-     - Under the `Credentials` tab of the client settings click `Regenerate` next to the Client Secret.
    - Under `Users` add a new Admin user and assign the `system-admin` role to it. This user will be used to invite the first researcher. Can be deactivated afterwards.
-   - Under `Realm settings` -> `Email` configure the email settings. This is used to send out invitations to researchers/participants. The same email server can be used as the on specified in the [configuration file](src/main/resources/config/application-local.yml).
+   - Under `Realm settings` -> `Email` configure the email settings. This is used to send out invitations to researchers/participants.
    - Under `Realm settings` -> `Themes` configure the theme settings. There will be a default CARP theme available soon, which will be customizable.
-   - Change the setting for the newly created client under the `keycloak` section in the [configuration file](src/main/resources/config/application-local.yml) to match the newly created client.
+   - Update the [environment file](.env) to match the newly created client.
 5. Rebuild the carp-ws image and restart the stack.
 
 # Developer Guide 
@@ -97,7 +102,11 @@ For API documentation we use [Swagger](https://cans.cachet.dk/dev/swagger-ui/ind
   
 - Make sure you have Docker (and Java 17) installed on your system.
 - Clone the project and run `bash deployment.sh`
+<<<<<<< HEAD
 - Create a .local.env file and copy over the contents of the [.env file](deployment/.env) to it and fill in the missing values.
+=======
+- Create a .local.env file and copy over the contents of the [.env file](.env) to it and fill in the missing values.
+>>>>>>> develop
 - We use IntelliJ IDEA as our IDE, we recommend using it for development. Set up the EnvFile plugin to be able to use the .local.env file.
 - Add a new spring boot run configuration with the following parameters:
   - Main class: `dk.cachet.carp.webservices.Application`

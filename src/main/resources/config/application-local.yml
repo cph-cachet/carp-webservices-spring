@@ -199,24 +199,12 @@ management:
   endpoints:
     web:
       exposure:
-        exclude: env,beans
-        include: '*'
+        include: ["health", "info", "prometheus", "metrics"]
   endpoint:
-    mappings:
-      enabled: true
-    prometheus:
-      enabled: true
     health:
-      enabled: true
       cache:
         time-to-live: 5000
       show-details: always
-    info:
-      enabled: true
-    shutdown:
-      enabled: false
-    metrics:
-      enabled: true
 
   info:
     build:
@@ -225,9 +213,6 @@ management:
       enabled: true
     env:
       enabled: true
-    git:
-      enabled: true
-      mode: full
 
   health:
     defaults:
@@ -236,11 +221,6 @@ management:
       enabled: true
     diskspace:
       enabled: true
-    redis:
-      enabled: false
-  server:
-    ssl:
-      enabled: false
 
 logging:
   level:
@@ -262,7 +242,7 @@ storage:
   directory: /home/carp/storage/${spring.profiles.active}/
 
 environment:
-  server: "${CAWS_SERVER_URL}"
+  server: "${CAWS_HOST}"
   subfolder: "${CAWS_SUBFOLDER}"
   portal-subfolder: "${CAWS_PORTAL_SUBFOLDER}"
 
