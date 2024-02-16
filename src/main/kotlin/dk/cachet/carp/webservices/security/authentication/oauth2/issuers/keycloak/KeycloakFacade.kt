@@ -26,6 +26,7 @@ import org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE
 import org.springframework.http.codec.json.Jackson2JsonDecoder
 import org.springframework.http.codec.json.Jackson2JsonEncoder
 import org.springframework.stereotype.Service
+import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.ExchangeStrategies
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBodilessEntity
@@ -231,14 +232,28 @@ class KeycloakFacade(
 
         LOGGER.info("Generating magic links with $studyId")
 
-        val link = authClient.get().uri("/magic-link")
+        val requestBody = """
+        {
+            "email": "asdfa-asdf-as-df-asd-fa-sd-fa-sdf-asdf@definetelyamail.com",
+            "expiration_seconds": 2000000,
+            "client_id": "caws-client",
+            "redirect_uri": "https://carp.computerome.dk/icat/dev/",
+            "force_create": true,
+            "send_email": false
+        }
+    """.trimIndent()
+
+        val generateUser = authClient.post()
+            .uri("/magic-link")
             .headers {
                 it.setBearerAuth(token!!)
+                it.contentType = MediaType.APPLICATION_JSON // Set content type for JSON
             }
+            .body(BodyInserters.fromValue(requestBody))
             .retrieve()
             .awaitBody<String>()
 
-        return link
+        return generateUser
     }
 
     @Cacheable(value = [TOKEN_CACHE], key = ADMIN_BEARER_TOKEN)

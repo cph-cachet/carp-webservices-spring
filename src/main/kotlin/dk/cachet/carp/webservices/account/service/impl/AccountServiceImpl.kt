@@ -100,7 +100,6 @@ class AccountServiceImpl(
         val nowTimeFormatted = nowTime.format(formatter)
 
         val csvFile = "\"magic_links.${studyId.toString().take(8)}.$nowTimeFormatted.csv\""/*        val link = keycloakFacade.generateMagicLink(studyId)*/
-        print("check")
 
         val magicLink = keycloakFacade.generateMagicLink(studyId)
         print("check")
