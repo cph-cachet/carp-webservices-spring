@@ -6,6 +6,7 @@ import dk.cachet.carp.deployments.domain.DeploymentRepository
 import dk.cachet.carp.deployments.domain.StudyDeployment
 import dk.cachet.carp.deployments.domain.StudyDeploymentSnapshot
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
+import kotlinx.coroutines.runBlocking
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.stereotype.Service
@@ -25,8 +26,7 @@ class CoreDeploymentRepository(
         private const val VERSION: Int = 0
     }
 
-    override suspend fun add(studyDeployment: StudyDeployment)
-    {
+    override suspend fun add(studyDeployment: StudyDeployment) = runBlocking {
         if (studyDeploymentRepository.findByDeploymentId(studyDeployment.id.stringRepresentation).isPresent)
         {
             LOGGER.warn("Deployment already exists, id: ${studyDeployment.id.stringRepresentation}")
@@ -41,37 +41,32 @@ class CoreDeploymentRepository(
         LOGGER.info("Deployment saved, id: ${studyDeployment.id.stringRepresentation}")
     }
 
-    override suspend fun getStudyDeploymentBy(id: UUID): StudyDeployment?
-    {
-        val result = getWSDeploymentById(id) ?: return null
+    override suspend fun getStudyDeploymentBy(id: UUID): StudyDeployment? = runBlocking {
+        val result = getWSDeploymentById(id) ?: return@runBlocking null
         val snapshot = objectMapper.treeToValue(result.snapshot, StudyDeploymentSnapshot::class.java)
-        return StudyDeployment.fromSnapshot(snapshot)
+        return@runBlocking StudyDeployment.fromSnapshot(snapshot)
     }
 
-    override suspend fun getStudyDeploymentsBy(ids: Set<UUID>): List<StudyDeployment>
-    {
+    override suspend fun getStudyDeploymentsBy(ids: Set<UUID>): List<StudyDeployment> = runBlocking {
         val idStrings = ids.map { it.toString() }.toSet()
-        return studyDeploymentRepository.findAllByStudyDeploymentIds(idStrings).map { mapWSDeploymentToCore(it) }
+        return@runBlocking studyDeploymentRepository.findAllByStudyDeploymentIds(idStrings).map { mapWSDeploymentToCore(it) }
     }
 
-    override suspend fun remove(studyDeploymentIds: Set<UUID>): Set<UUID>
-    {
+    override suspend fun remove(studyDeploymentIds: Set<UUID>): Set<UUID> = runBlocking {
         val ids = studyDeploymentIds.map { it.stringRepresentation }.toSet()
         val idsPresent = studyDeploymentRepository.findAllByStudyDeploymentIds(ids)
                 .map { mapWSDeploymentToCore(it).id.stringRepresentation }
         studyDeploymentRepository.deleteByDeploymentIds(idsPresent)
         LOGGER.info("Deployments removed with ids: ${idsPresent.joinToString(", ")}")
-        return idsPresent.map { UUID(it) }.toSet()
+        return@runBlocking idsPresent.map { UUID(it) }.toSet()
     }
 
-    suspend fun getWSStudyDeploymentsBy(ids: Set<UUID>): List<dk.cachet.carp.webservices.deployment.domain.StudyDeployment>
-    {
+    suspend fun getWSStudyDeploymentsBy(ids: Set<UUID>): List<dk.cachet.carp.webservices.deployment.domain.StudyDeployment> = runBlocking {
         val idStrings = ids.map { it.toString() }.toSet()
-        return studyDeploymentRepository.findAllByStudyDeploymentIds(idStrings)
+        return@runBlocking studyDeploymentRepository.findAllByStudyDeploymentIds(idStrings)
     }
 
-    override suspend fun update(studyDeployment: StudyDeployment)
-    {
+    override suspend fun update(studyDeployment: StudyDeployment) = runBlocking {
         val deploymentId = studyDeployment.id
         val stored = getWSDeploymentById(deploymentId)
 

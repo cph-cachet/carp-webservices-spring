@@ -48,8 +48,7 @@ class CoreStudyRepository
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
-    override suspend fun add(study: Study)
-    {
+    override suspend fun add(study: Study) = runBlocking {
         if (studyRepository.getByStudyId(study.id.stringRepresentation).isPresent)
         {
             LOGGER.warn("Study already exists, id: ${study.id.stringRepresentation}")
@@ -68,31 +67,28 @@ class CoreStudyRepository
         LOGGER.info("Study saved, id: ${study.id.stringRepresentation}")
     }
 
-    override suspend fun getById(studyId: UUID): Study?
-    {
+    override suspend fun getById(studyId: UUID): Study? = runBlocking {
         val optionalStudy = studyRepository.getByStudyId(studyId.stringRepresentation)
         if (!optionalStudy.isPresent)
         {
             LOGGER.info("Study is not found, id: ${studyId.stringRepresentation}")
-            return null
+            return@runBlocking null
         }
 
         val foundStudy = optionalStudy.get()
-        return convertStudySnapshotNodeToStudy(foundStudy.snapshot!!)
+        return@runBlocking convertStudySnapshotNodeToStudy(foundStudy.snapshot!!)
     }
 
-    override suspend fun getForOwner(ownerId: UUID): List<Study>
-    {
+    override suspend fun getForOwner(ownerId: UUID): List<Study> = runBlocking {
         val studies = studyRepository.findAllByOwnerId(ownerId.stringRepresentation)
-        return studies.map { convertStudySnapshotNodeToStudy(it.snapshot!!) }.toList()
+        return@runBlocking studies.map { convertStudySnapshotNodeToStudy(it.snapshot!!) }.toList()
     }
 
-    suspend fun getStudiesOverview(accountId: String): List<StudyOverview>
-    {
+    suspend fun getStudiesOverview(accountId: String): List<StudyOverview> = runBlocking {
         val studiesAsOwner = studyRepository.findAllByOwnerId(accountId)
         val studiesAsGuestResearcher = studyRepository.getForGuestResearcher(accountId)
         val studies = studiesAsOwner + studiesAsGuestResearcher
-        return studies.map {
+        return@runBlocking studies.map {
             val study = convertStudySnapshotNodeToStudy(it.snapshot!!)
             val studyStatus = study.getStatus()
             StudyOverview(
@@ -108,9 +104,8 @@ class CoreStudyRepository
     }
 
     @Transactional( rollbackFor = [Exception::class])
-    override suspend fun remove(studyId: UUID): Boolean
-    {
-        this.getById(studyId) ?: return false
+    override suspend fun remove(studyId: UUID): Boolean = runBlocking {
+        getById(studyId) ?: return@runBlocking false
         val deploymentSnapshots =  deploymentRepository.getDeploymentSnapshotsByStudyId(studyId.stringRepresentation)
         val deploymentIds = deploymentSnapshots.map { d -> d.id}.toSet()
         val deploymentIdsString = deploymentIds.map { it.stringRepresentation }.toSet()
@@ -125,11 +120,10 @@ class CoreStudyRepository
         dataPointRepository.deleteAllByDeploymentIds(deploymentIdsString)
 
         LOGGER.info("Study with id ${studyId.stringRepresentation} and all associated data deleted.")
-        return true
+        return@runBlocking true
     }
 
-    override suspend fun update(study: Study)
-    {
+    override suspend fun update(study: Study) = runBlocking {
         val optionalStudy = studyRepository.getByStudyId(study.id.stringRepresentation)
         if (!optionalStudy.isPresent)
         {
@@ -179,10 +173,9 @@ class CoreStudyRepository
         return optionalStudy.get()
     }
 
-    suspend fun getStudySnapshotById(id: String): StudySnapshot
-    {
+    suspend fun getStudySnapshotById(id: String): StudySnapshot = runBlocking {
         val study = getWSStudyById(UUID(id))
-        return objectMapper.treeToValue(study.snapshot, StudySnapshot::class.java)
+        return@runBlocking objectMapper.treeToValue(study.snapshot, StudySnapshot::class.java)
     }
 
     suspend fun convertStudySnapshotNodeToStudy(node: JsonNode): Study
@@ -191,12 +184,11 @@ class CoreStudyRepository
         return Study.fromSnapshot(snapshot)
     }
 
-    suspend fun getResearcherAccountsForStudy(studyId: String): List<Account>
-    {
+    suspend fun getResearcherAccountsForStudy(studyId: String): List<Account> = runBlocking {
         val ownerId = convertStudySnapshotNodeToStudy(getWSStudyById(UUID(studyId)).snapshot!!).ownerId.stringRepresentation
         val accountIds = getWSStudyById(UUID(studyId)).researcherAccountIds.toMutableList()
         accountIds.add(ownerId)
-        return accountIds.mapNotNull { accountService.findByUUID(UUID(it)) }
+        return@runBlocking accountIds.mapNotNull { accountService.findByUUID(UUID(it)) }
     }
 
     fun removeResearcherFromStudy(studyId: String, email: String): Boolean

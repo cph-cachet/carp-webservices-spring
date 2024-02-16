@@ -9,6 +9,7 @@ import dk.cachet.carp.protocols.domain.*
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.protocol.domain.Protocol
 import dk.cachet.carp.webservices.protocol.dto.GetLatestProtocolResponseDto
+import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Instant
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -37,8 +38,7 @@ class CoreProtocolRepository(
      * @param version Identifies this first initial version of the [protocol].
      * @throws IllegalArgumentException when a [protocol] with the same owner and name already exists.
      */
-    override suspend fun add(protocol: StudyProtocol, version: ProtocolVersion)
-    {
+    override suspend fun add(protocol: StudyProtocol, version: ProtocolVersion) = runBlocking {
         val protocolById = protocolRepository.findByIdParam(protocol.id.stringRepresentation)
 
         if (protocolById.isNotEmpty())
@@ -66,10 +66,9 @@ class CoreProtocolRepository(
      *
      * @return This returns the last version of each [StudyProtocol] owned by the requested owner.
      */
-    override suspend fun getAllForOwner(ownerId: UUID): Sequence<StudyProtocol>
-    {
+    override suspend fun getAllForOwner(ownerId: UUID): Sequence<StudyProtocol> = runBlocking {
         val result = protocolRepository.findAllByOwnerId(ownerId.stringRepresentation)
-        return result
+        return@runBlocking result
                 .map { p -> convertJsonNodeToStudyProtocol(p.snapshot!!) }
                 .asSequence()
     }
@@ -79,8 +78,7 @@ class CoreProtocolRepository(
      *
      * @param versionTag The tag of the specific version of the protocol to return. The latest version is returned when not specified.
      */
-    override suspend fun getBy(id: UUID, versionTag: String?): StudyProtocol?
-    {
+    override suspend fun getBy(id: UUID, versionTag: String?): StudyProtocol? = runBlocking {
         val result = protocolRepository.findByParams(
                 id.stringRepresentation,
                 versionTag
@@ -88,9 +86,9 @@ class CoreProtocolRepository(
 
         if (result.isEmpty())
         {
-            return null
+            return@runBlocking null
         }
-        return convertJsonNodeToStudyProtocol(result[0].snapshot!!)
+        return@runBlocking convertJsonNodeToStudyProtocol(result[0].snapshot!!)
     }
 
     /**
@@ -98,15 +96,14 @@ class CoreProtocolRepository(
      *
      * @throws IllegalArgumentException when a protocol with the specified [protocol] does not exist.
      */
-    override suspend fun getVersionHistoryFor(id: UUID): List<ProtocolVersion>
-    {
+    override suspend fun getVersionHistoryFor(id: UUID): List<ProtocolVersion> = runBlocking {
         val protocols = protocolRepository.findByParams(id.stringRepresentation, null)
         if (protocols.isEmpty())
         {
             LOGGER.warn("Protocol is not found with id: {}", id.stringRepresentation)
             throw IllegalArgumentException(validationMessages.get("protocol.version_history.not_found", id.stringRepresentation))
         }
-        return protocols.map { ProtocolVersion(it.versionTag, Instant.fromEpochMilliseconds(it.createdAt!!.toEpochMilli())) }
+        return@runBlocking protocols.map { ProtocolVersion(it.versionTag, Instant.fromEpochMilliseconds(it.createdAt!!.toEpochMilli())) }
     }
 
     /**
@@ -114,8 +111,7 @@ class CoreProtocolRepository(
      *
      * @throws IllegalArgumentException when the [protocol] with [version] to replace is not found.
      */
-    override suspend fun replace(protocol: StudyProtocol, version: ProtocolVersion)
-    {
+    override suspend fun replace(protocol: StudyProtocol, version: ProtocolVersion) = runBlocking {
         val storedProtocols = protocolRepository.findByParams(protocol.id.stringRepresentation, version.tag)
         if (storedProtocols.isEmpty())
         {
@@ -139,8 +135,7 @@ class CoreProtocolRepository(
      *   - the [protocol] is not yet stored in the repository
      *   - the tag specified in [version] is already in use
      */
-    override suspend fun addVersion(protocol: StudyProtocol, version: ProtocolVersion)
-    {
+    override suspend fun addVersion(protocol: StudyProtocol, version: ProtocolVersion) = runBlocking {
         val protocolsStoredWithGivenParams = protocolRepository.findByIdParam(protocol.id.stringRepresentation)
 
         if (protocolsStoredWithGivenParams.isEmpty())
