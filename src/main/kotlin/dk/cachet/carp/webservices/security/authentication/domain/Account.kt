@@ -33,11 +33,11 @@ class AccountFactory(
                 }
 
                 Account(
-                    id = claims["sub"] as String,
-                    username = claims["preferred_username"] as String,
-                    firstName = claims["given_name"] as String,
-                    lastName = claims["family_name"] as String,
-                    email = claims["email"] as String,
+                    id = claims["sub"] as? String ?: "",
+                    username = claims["preferred_username"] as? String ?: "",
+                    firstName = claims["given_name"] as? String ?: "",
+                    lastName = claims["family_name"] as? String ?: "",
+                    email = claims["email"] as? String ?: "",
                     role = role
                 )
             }
