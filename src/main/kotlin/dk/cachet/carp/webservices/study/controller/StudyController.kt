@@ -13,6 +13,7 @@ import dk.cachet.carp.webservices.deployment.repository.CoreDeploymentRepository
 import dk.cachet.carp.webservices.security.authentication.domain.Account
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
 import dk.cachet.carp.webservices.study.authorization.StudyAuthorizationService
+import dk.cachet.carp.webservices.study.domain.MagicLinkRequest
 import dk.cachet.carp.webservices.study.domain.ParticipantGroupsStatus
 import dk.cachet.carp.webservices.study.domain.StudyOverview
 import dk.cachet.carp.webservices.study.dto.AddParticipantsRequestDto
@@ -23,6 +24,7 @@ import dk.cachet.carp.webservices.study.service.CoreStudyService
 import io.swagger.v3.oas.annotations.Operation
 import jakarta.validation.Valid
 import kotlinx.coroutines.runBlocking
+import kotlinx.datetime.Instant
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.http.HttpStatus
@@ -60,6 +62,7 @@ class StudyController
         const val GET_PARTICIPANTS_ACCOUNTS = "/api/studies/{${PathVariableName.STUDY_ID}}/participants/accounts"
         const val GET_PARTICIPANT_GROUP_STATUS = "/api/studies/{${PathVariableName.STUDY_ID}}/participantGroup/status"
         const val ADD_PARTICIPANTS = "/api/studies/{${PathVariableName.STUDY_ID}}/participants/add"
+        const val MAGIC_LINK = "/api/studies/magic-links"
     }
 
     private val studyService = coreStudyService.instance
@@ -296,7 +299,7 @@ class StudyController
 
     @PostMapping(value = [ADD_PARTICIPANTS])
     @PreAuthorize("@studyAuthorizationService.canAccessStudy(#studyId)")
-    fun addParticipants (
+    suspend fun addParticipants (
         @PathVariable(PathVariableName.STUDY_ID) studyId: String,
         @Valid @RequestBody request: AddParticipantsRequestDto
     )
@@ -306,6 +309,27 @@ class StudyController
             request.emails.forEach { e -> recruitmentService.addParticipant(UUID(studyId), EmailAddress(e)) }
         }
     }
+
+    @PostMapping(MAGIC_LINK)
+    @PreAuthorize("@accountAuthorizationService.isResearcherPartOfTheStudy(#request.studyId)")
+    fun sendLinks(@Valid @RequestBody request: MagicLinkRequest): ResponseEntity<String> {
+        try {
+            LOGGER.info("Start POST: /api/studies/magic-links")
+
+            val expiryInstant: Instant = request.expiryDate.let { Instant.parse(it) }
+            runBlocking {
+                coreRecruitmentService.sendMagicLinks(
+                    UUID(request.studyId),
+                    request.numberOfAccounts,
+                    expiryInstant
+                )
+            }
+
+            val successMessage = "Magic links generation is successful."
+            return ResponseEntity.ok(successMessage)
+        } catch (e: Exception) {
+            val errorMessage = "Failed to send magic links: ${e.message}"
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorMessage)
+        }
+    }
 }
-
-

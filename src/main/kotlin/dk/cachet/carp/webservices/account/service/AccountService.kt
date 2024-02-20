@@ -14,5 +14,4 @@ interface AccountService
     suspend fun findByAccountIdentity(identity: AccountIdentity): Account?
     suspend fun hasRoleByEmail(email: EmailAddress, role: Role): Boolean
     suspend fun addRole(identity: AccountIdentity, role: Role)
-    suspend fun sendMagicLinks(studyId: UUID, numberOfAccounts: Number, expiryDate: Instant?)
 }

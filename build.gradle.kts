@@ -154,6 +154,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-cache")
     implementation("com.github.ben-manes.caffeine:caffeine:${property("caffeineVersion")}")
 
+    // GSON Library
+    implementation("com.google.code.gson:gson:2.10.1")
+
     // CSV Library
     dependencies {
         implementation("com.github.doyaaaaaken:kotlin-csv-jvm:1.9.3")}
