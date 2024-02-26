@@ -5,8 +5,10 @@ import com.google.gson.JsonParser
 import dk.cachet.carp.common.application.EmailAddress
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.common.application.services.createApplicationServiceAdapter
+import dk.cachet.carp.common.application.users.AssignedTo
 import dk.cachet.carp.studies.application.RecruitmentService
 import dk.cachet.carp.studies.application.RecruitmentServiceHost
+import dk.cachet.carp.studies.application.users.AssignedParticipantRoles
 import dk.cachet.carp.webservices.account.service.AccountService
 import dk.cachet.carp.webservices.common.eventbus.CoreEventBus
 import dk.cachet.carp.webservices.data.service.IDataStreamService
@@ -19,11 +21,15 @@ import dk.cachet.carp.webservices.study.domain.ParticipantAccount
 import dk.cachet.carp.webservices.study.domain.ParticipantGroupInfo
 import dk.cachet.carp.webservices.study.domain.ParticipantGroupsStatus
 import dk.cachet.carp.webservices.study.repository.CoreParticipantRepository
+import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.concurrent.Executors
 
 @Component
 class CoreRecruitmentService
@@ -34,9 +40,7 @@ class CoreRecruitmentService
     private val dataStreamService: IDataStreamService,
     private val accountService: AccountService,
     private val accountFactory: AccountFactory,
-/*    private val recruitmentService: RecruitmentService,*/
     private val keycloakFacade: KeycloakFacade
-
 )
 {
     final val instance: RecruitmentService = RecruitmentServiceHost(
@@ -44,6 +48,11 @@ class CoreRecruitmentService
             coreDeploymentService.instance,
             coreEventBus.createApplicationServiceAdapter(RecruitmentService::class)
     )
+
+    companion object {
+        private val LOGGER: Logger = LogManager.getLogger()
+        private val threadPoolExecutor = Executors.newCachedThreadPool()
+    }
 
     suspend fun getParticipantAccounts(studyId: UUID) : List<Account>
     {
@@ -87,22 +96,28 @@ class CoreRecruitmentService
 
     suspend fun sendMagicLinks(studyId: UUID, numberOfAccounts: Number, expiryDate: Instant?) {
 
-        // Example data, replace this with your actual data
-        val csvDataList = listOf(
-            MagicLink("https://example.com/magiclink1", UUID("8076f1cd-ce2a-4f98-bbdc-619de87e9f07")
-                ,"94b89928-e8c2-4ece-96d6-7a03bd2e5f71", Clock.System.now()),
-            MagicLink("https://example.com/magiclink2", UUID("8076f1cd-ce2a-4f98-bbdc-619de87e9f07")
-                ,"94b89928-e8c2-4ece-96d6-7a03bd2e5f71", Clock.System.now())
-        )
-
-        // Output CSV file path with study ID, /w time of generation
+        // CSV file path with study ID, /w time of generation
         val nowTime = LocalDateTime.now()
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
         val nowTimeFormatted = nowTime.format(formatter)
 
         val csvFile = "\"magic_links.${studyId.toString().take(8)}.$nowTimeFormatted.csv\""
 
-        print("check")
+        /*TODO dummy data to delete after it generates user with right attributes*/
+        // Example data, replace this with your actual data
+        val csvDataList = listOf(
+            MagicLink("https://example.com/magiclink1",
+                UUID("8076f1cd-ce2a-4f98-bbdc-619de87e9f07")
+                ,"94b89928-e8c2-4ece-96d6-7a03bd2e5f71",
+                    Clock.System.now()),
+            MagicLink("https://example.com/magiclink2",
+                UUID("8076f1cd-ce2a-4f98-bbdc-619de87e9f07")
+                ,"94b89928-e8c2-4ece-96d6-7a03bd2e5f71",
+                    Clock.System.now())
+        )
+
+
+        /*TODO move this part at the end of cycle (!)*/
 
         // Writing CSV file
         CsvWriter().open(csvFile) {
@@ -117,18 +132,54 @@ class CoreRecruitmentService
                 ))
             }}
 
-        val magicLink = keycloakFacade.generateMagicLink(studyId)
+        // Execute the code in a separate thread
+        threadPoolExecutor.execute {
+            LOGGER.info("Generating users...")
 
-        // Parse the JSON string into a JSONObject
-        val jsonObject = JsonParser.parseString(magicLink).asJsonObject
-        val userId = jsonObject.get("user_id").asString
-        val link = jsonObject.get("link").asString
+            try {
 
-        val dummyEmail = EmailAddress("${userId}@catchet.dk")
-        instance.addParticipant(studyId, dummyEmail)
+                for (i in 0 until numberOfAccounts.toInt()-1) {
+                    // Use runBlocking to call the suspending function generateMagicLink
+                    val generatedLinkUser = runBlocking {
+                        keycloakFacade.generateMagicLink(studyId)
+                    }
+                    // Parse the JSON string into a JSONObject
+                    val jsonObject = JsonParser.parseString(generatedLinkUser).asJsonObject
 
-/*                runBlocking {recruitmentService.inviteNewParticipantGroup(studyId, )
+                    val link = jsonObject.get("link").asString
+                    val userId = UUID(jsonObject.get("user_id").asString)
 
-                }*/
+                    val dummyEmail = EmailAddress("${userId}@catchet.dk")
+
+                    // adding a generated user to being a participant in the study
+                    runBlocking{
+                        val participant = instance.addParticipant(studyId, dummyEmail)
+                        print(participant)
+/*
+                        val group = setOf("AssignedParticipantRoles.ROLE1", "AssignedParticipantRoles.ROLE2") // Replace with your set of roles
+*/
+                        /* change */
+                        val assignedParticipantRoles = AssignedParticipantRoles(participant.id, AssignedTo.Roles(setOf("Participant")))
+
+                        val assignedRolesSet: Set<AssignedParticipantRoles> = setOf(assignedParticipantRoles)
+
+                        val participantGroupStatus = instance.inviteNewParticipantGroup(studyId, assignedRolesSet)
+
+                        print(participantGroupStatus)
+
+                    }
+
+                    val csvDataList = listOf(MagicLink(link, userId , studyDeploymentId = "Need to retrieve", expiryDate))
+                }
+
+
+            } catch (ex: Exception) {
+                // Handle exceptions
+                throw ex
+            } finally {
+                // Cleanup or finalization code
+            }
+
+        }
     }
 }

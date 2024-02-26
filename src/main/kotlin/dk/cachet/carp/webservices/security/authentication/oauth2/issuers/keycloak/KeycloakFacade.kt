@@ -228,8 +228,6 @@ class KeycloakFacade(
 
     suspend fun generateMagicLink(studyId: UUID): String {
         val token = authenticate().accessToken
-        print("check")
-
         LOGGER.info("Generating magic links with $studyId")
 
         val requestBody = """
@@ -247,7 +245,7 @@ class KeycloakFacade(
             .uri("/magic-link")
             .headers {
                 it.setBearerAuth(token!!)
-                it.contentType = MediaType.APPLICATION_JSON // Set content type for JSON
+                it.contentType = MediaType.APPLICATION_JSON
             }
             .body(BodyInserters.fromValue(requestBody))
             .retrieve()

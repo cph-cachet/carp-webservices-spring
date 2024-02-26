@@ -325,10 +325,10 @@ class StudyController
                 )
             }
 
-            val successMessage = "Magic links generation is successful."
+            val successMessage = "Magic links request for generating users is successful."
             return ResponseEntity.ok(successMessage)
         } catch (e: Exception) {
-            val errorMessage = "Failed to send magic links: ${e.message}"
+            val errorMessage = "Failed to request magic links: ${e.message}"
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorMessage)
         }
     }
