@@ -99,6 +99,7 @@ class CoreStudyRepository
                     studyStatus.studyId,
                     studyStatus.name,
                     studyStatus.createdOn,
+                    UUID(it.createdBy.toString()),
                     studyStatus.studyProtocolId,
                     studyStatus.canSetInvitation,
                     studyStatus.canSetStudyProtocol,
@@ -190,6 +191,12 @@ class CoreStudyRepository
         val snapshot = objectMapper.treeToValue(node, StudySnapshot::class.java)
         return Study.fromSnapshot(snapshot)
     }
+
+    // Updated convertStudySnapshotNodeToStudy function
+/*    suspend fun convertStudySnapshotNodeToStudyNEW(node: JsonNode, createdBy: String? = ""): Study {
+        val snapshot = objectMapper.treeToValue(node, StudySnapshot::class.java)
+        return Study.fromSnapshot(snapshot, createdBy)
+    }*/
 
     suspend fun getResearcherAccountsForStudy(studyId: String): List<Account>
     {
