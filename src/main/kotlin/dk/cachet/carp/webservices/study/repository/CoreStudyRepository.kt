@@ -192,12 +192,6 @@ class CoreStudyRepository
         return Study.fromSnapshot(snapshot)
     }
 
-    // Updated convertStudySnapshotNodeToStudy function
-/*    suspend fun convertStudySnapshotNodeToStudyNEW(node: JsonNode, createdBy: String? = ""): Study {
-        val snapshot = objectMapper.treeToValue(node, StudySnapshot::class.java)
-        return Study.fromSnapshot(snapshot, createdBy)
-    }*/
-
     suspend fun getResearcherAccountsForStudy(studyId: String): List<Account>
     {
         val ownerId = convertStudySnapshotNodeToStudy(getWSStudyById(UUID(studyId)).snapshot!!).ownerId.stringRepresentation
