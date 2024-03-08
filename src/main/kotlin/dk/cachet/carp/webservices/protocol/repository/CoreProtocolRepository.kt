@@ -23,7 +23,7 @@ import org.springframework.stereotype.Service
 class CoreProtocolRepository(
         private val protocolRepository: ProtocolRepository,
         private val objectMapper: ObjectMapper,
-        private val validationMessages: MessageBase,
+        private val validationMessages: MessageBase
 ): StudyProtocolRepository
 {
     companion object

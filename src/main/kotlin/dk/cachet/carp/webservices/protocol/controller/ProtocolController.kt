@@ -27,7 +27,7 @@ class ProtocolController
 (
     private val coreProtocolRepository: CoreProtocolRepository,
     private val protocolAuthorizationService: ProtocolAuthorizationService,
-    private val validationMessages: MessageBase,
+    private val validationMessages: MessageBase
 )
 {
     companion object
