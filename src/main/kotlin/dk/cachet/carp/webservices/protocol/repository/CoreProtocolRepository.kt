@@ -9,7 +9,7 @@ import dk.cachet.carp.protocols.domain.*
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.protocol.domain.Protocol
 import dk.cachet.carp.webservices.protocol.dto.*
-import dk.cachet.carp.webservices.protocol.dto.ProtocolOverviewDto.Companion.toProtocolOverviewDto
+import dk.cachet.carp.webservices.protocol.dto.LatestProtocolOverview.Companion.toLatestProtocolOverview
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Instant
 import org.apache.logging.log4j.LogManager
@@ -210,13 +210,13 @@ class CoreProtocolRepository(
      * The [getLatestProtocols] function sorts Protocols conditionally by latest Protocols.versionTag
      * converts a [JsonNode] to a [GetLatestProtocolResponseDto].
      *
-     * @return A [toProtocolOverviewDto] object containing the ProtocolOverviewDto.
+     * @return A [toLatestProtocolOverview] object containing the ProtocolOverviewDto.
      */
 
-    suspend fun getLatestProtocols(): List<ProtocolOverviewDto?>
+    suspend fun getLatestProtocols(): List<LatestProtocolOverview?>
     {
         val protocols = protocolRepository.findAll()
-        val latestProtocols = mutableListOf<ProtocolOverviewDto?>()
+        val latestProtocols = mutableListOf<LatestProtocolOverview?>()
         for (i in protocols)
         {
             val protocolSnapshotId = (i.snapshot)!!.firstOrNull()
@@ -230,7 +230,7 @@ class CoreProtocolRepository(
                                 it?.lastVersionCreatedDate == latestProtocol?.lastVersionCreatedDate
                     })
                 {
-                    val protocol: ProtocolOverviewDto = latestProtocol!!.toProtocolOverviewDto()
+                    val protocol: LatestProtocolOverview = latestProtocol!!.toLatestProtocolOverview()
                     latestProtocols += protocol
                 }
             }
