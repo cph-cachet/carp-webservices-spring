@@ -8,7 +8,8 @@ import dk.cachet.carp.protocols.application.StudyProtocolSnapshot
 import dk.cachet.carp.protocols.domain.*
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.protocol.domain.Protocol
-import dk.cachet.carp.webservices.protocol.dto.GetLatestProtocolResponseDto
+import dk.cachet.carp.webservices.protocol.dto.*
+import dk.cachet.carp.webservices.protocol.dto.ProtocolOverviewDto.Companion.toProtocolOverviewDto
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Instant
 import org.apache.logging.log4j.LogManager
@@ -23,7 +24,7 @@ import org.springframework.stereotype.Service
 class CoreProtocolRepository(
         private val protocolRepository: ProtocolRepository,
         private val objectMapper: ObjectMapper,
-        private val validationMessages: MessageBase
+        private val validationMessages: MessageBase,
 ): StudyProtocolRepository
 {
     companion object
@@ -205,4 +206,35 @@ class CoreProtocolRepository(
         return null
     }
 
+    /**
+     * The [getLatestProtocols] function sorts Protocols conditionally by latest Protocols.versionTag
+     * converts a [JsonNode] to a [GetLatestProtocolResponseDto].
+     *
+     * @return A [toProtocolOverviewDto] object containing the ProtocolOverviewDto.
+     */
+
+    suspend fun getLatestProtocols(): List<ProtocolOverviewDto?>
+    {
+        val protocols = protocolRepository.findAll()
+        val latestProtocols = mutableListOf<ProtocolOverviewDto?>()
+        for (i in protocols)
+        {
+            val protocolSnapshotId = (i.snapshot)!!.firstOrNull()
+            if (protocolSnapshotId != null)
+            {
+                val latestProtocol = getLatestProtocolById(protocolSnapshotId.textValue())
+                if (latestProtocols.none
+                    {
+                        it?.ownerName == latestProtocol?.snapshot?.name &&
+                                it?.snapshot == latestProtocol?.snapshot &&
+                                it?.lastVersionCreatedDate == latestProtocol?.lastVersionCreatedDate
+                    })
+                {
+                    val protocol: ProtocolOverviewDto = latestProtocol!!.toProtocolOverviewDto()
+                    latestProtocols += protocol
+                }
+            }
+        }
+        return latestProtocols
+    }
 }

@@ -11,6 +11,7 @@ import dk.cachet.carp.webservices.common.constants.PathVariableName
 import dk.cachet.carp.webservices.common.exception.responses.BadRequestException
 import dk.cachet.carp.webservices.protocol.authorization.ProtocolAuthorizationService
 import dk.cachet.carp.webservices.protocol.dto.GetLatestProtocolResponseDto
+import dk.cachet.carp.webservices.protocol.dto.ProtocolOverviewDto
 import dk.cachet.carp.webservices.protocol.repository.CoreProtocolRepository
 import io.swagger.v3.oas.annotations.Operation
 import kotlinx.coroutines.runBlocking
@@ -26,7 +27,10 @@ class ProtocolController
 (
     private val coreProtocolRepository: CoreProtocolRepository,
     private val protocolAuthorizationService: ProtocolAuthorizationService,
-    private val validationMessages: MessageBase
+    private val validationMessages: MessageBase,
+/*
+        private val protocolOverview: ProtocolOverview
+*/
 )
 {
     companion object
@@ -37,6 +41,7 @@ class ProtocolController
         const val PROTOCOL_SERVICE = "/api/protocol-service"
         const val PROTOCOL_FACTORY_SERVICE = "/api/protocol-factory-service"
         const val GET_LATEST_PROTOCOL = "/api/protocols/{${PathVariableName.PROTOCOL_ID}}/latest"
+        const val GET_PROTOCOLS_OVERVIEW = "/api/protocols"
     }
 
     private val protocolService: ProtocolService = ProtocolServiceHost(coreProtocolRepository)
@@ -152,4 +157,16 @@ class ProtocolController
             return@runBlocking coreProtocolRepository.getLatestProtocolById(protocolId)
         }
     }
+
+    @GetMapping(value = [GET_PROTOCOLS_OVERVIEW])
+    @PreAuthorize("@protocolAuthorizationService.canViewProtocol()")
+    @Operation(tags = ["protocols/get"])
+    fun getProtocolsOverview (): List<ProtocolOverviewDto?> {
+
+        return runBlocking {
+            LOGGER.info("Start GET: /api/protocols")
+            return@runBlocking coreProtocolRepository.getLatestProtocols()
+        }
+    }
+
 }
