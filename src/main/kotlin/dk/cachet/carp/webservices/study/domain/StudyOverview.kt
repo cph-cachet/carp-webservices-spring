@@ -11,7 +11,7 @@ data class StudyOverview
       val createdOn: Instant,
 
       /** StudyCreatedBy */
-      val createdBy: UUID,
+      val createdBy: UUID?,
 
       val studyProtocolId: UUID?,
       val canSetInvitation: Boolean,

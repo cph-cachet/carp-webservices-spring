@@ -123,7 +123,7 @@ class StudyController
 
     @GetMapping(value = [GET_STUDIES_OVERVIEW])
     @PreAuthorize("@studyAuthorizationService.canCreateStudy()")
-    fun getStudiesOverview(): List<StudyOverview> {
+    fun getStudiesOverview(): List<StudyOverview?> {
         LOGGER.info("Start POST: /api/studies/studies-overview")
         return runBlocking { coreStudyRepository.getStudiesOverview(authenticationService.getCurrentPrincipal().id!!) }
     }

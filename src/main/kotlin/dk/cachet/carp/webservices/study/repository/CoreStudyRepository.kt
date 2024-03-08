@@ -86,25 +86,29 @@ class CoreStudyRepository
         val studies = studyRepository.findAllByOwnerId(ownerId.stringRepresentation)
         return studies.map { convertStudySnapshotNodeToStudy(it.snapshot!!) }.toList()
     }
-
     suspend fun getStudiesOverview(accountId: String): List<StudyOverview>
     {
         val studiesAsOwner = studyRepository.findAllByOwnerId(accountId)
         val studiesAsGuestResearcher = studyRepository.getForGuestResearcher(accountId)
         val studies = studiesAsOwner + studiesAsGuestResearcher
-        return studies.map {
+        return studies.map { it ->
             val study = convertStudySnapshotNodeToStudy(it.snapshot!!)
             val studyStatus = study.getStatus()
+            val createdByUUID = it.createdBy?.toString()?.let {
+                try { UUID(it) }
+                catch (ex: IllegalArgumentException) { null }
+            }
             StudyOverview(
-                    studyStatus.studyId,
-                    studyStatus.name,
-                    studyStatus.createdOn,
-                    UUID(it.createdBy.toString()),
-                    studyStatus.studyProtocolId,
-                    studyStatus.canSetInvitation,
-                    studyStatus.canSetStudyProtocol,
-                    studyStatus.canDeployToParticipants,
-                    study.description)
+                studyStatus.studyId,
+                studyStatus.name,
+                studyStatus.createdOn,
+                createdByUUID,
+                studyStatus.studyProtocolId,
+                studyStatus.canSetInvitation,
+                studyStatus.canSetStudyProtocol,
+                studyStatus.canDeployToParticipants,
+                study.description
+            )
         }.distinctBy { it.studyId }.toList()
     }
 
