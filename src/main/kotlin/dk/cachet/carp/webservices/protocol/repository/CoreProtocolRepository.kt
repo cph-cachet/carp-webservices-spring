@@ -9,7 +9,6 @@ import dk.cachet.carp.protocols.domain.*
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.protocol.domain.Protocol
 import dk.cachet.carp.webservices.protocol.dto.*
-import dk.cachet.carp.webservices.protocol.dto.LatestProtocolOverview.Companion.toLatestProtocolOverview
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Instant
 import org.apache.logging.log4j.LogManager
@@ -207,34 +206,20 @@ class CoreProtocolRepository(
     }
 
     /**
-     * The [getLatestProtocols] function sorts Protocols conditionally by latest Protocols.versionTag
+     * The [getLatestProtocols] function sorts Protocols conditionally by  getLatestProtocolById()
+     * which results of having the latest updated Protocols.versionTag
      * converts a [JsonNode] to a [GetLatestProtocolResponseDto].
      *
-     * @return A [toLatestProtocolOverview] object containing the ProtocolOverviewDto.
+     * @return A [GetLatestProtocolOverviewResponseDto] object containing the ProtocolOverviewDto.
      */
 
-    suspend fun getLatestProtocols(): List<LatestProtocolOverview?>
-    {
-        val protocols = protocolRepository.findAll()
-        val latestProtocols = mutableListOf<LatestProtocolOverview?>()
-        for (i in protocols)
-        {
-            val protocolSnapshotId = (i.snapshot)!!.firstOrNull()
-            if (protocolSnapshotId != null)
-            {
-                val latestProtocol = getLatestProtocolById(protocolSnapshotId.textValue())
-                if (latestProtocols.none
-                    {
-                        it?.ownerName == latestProtocol?.snapshot?.name &&
-                                it?.snapshot == latestProtocol?.snapshot &&
-                                it?.lastVersionCreatedDate == latestProtocol?.lastVersionCreatedDate
-                    })
-                {
-                    val protocol: LatestProtocolOverview = latestProtocol!!.toLatestProtocolOverview()
-                    latestProtocols += protocol
-                }
+    suspend fun getLatestProtocols(): List<GetLatestProtocolOverviewResponseDto?> =
+        protocolRepository.findAll().mapNotNull { protocol ->
+            val protocolSnapshotId = protocol.snapshot?.firstOrNull()
+            protocolSnapshotId?.let { snapshotId ->
+                getLatestProtocolById(snapshotId.textValue())?.let { GetLatestProtocolOverviewResponseDto.from(it) }
             }
+        }.distinctBy {
+            Triple(it.ownerName, it.snapshot, it.lastVersionCreatedDate)
         }
-        return latestProtocols
-    }
 }
