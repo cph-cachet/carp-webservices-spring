@@ -15,7 +15,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
-import java.util.*
 
 @RestController
 @RequestMapping(SUMMARY_BASE)
@@ -57,7 +56,7 @@ class SummaryController(
         val file = summaryService.downloadSummary(summaryId)
         return ResponseEntity.ok().header(
             HttpHeaders.CONTENT_DISPOSITION,
-            "attachment; filename=\"$summaryId.zip\""
+            "attachment; filename=\"${file.filename}\""
         ).body(file)
     }
 
