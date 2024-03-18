@@ -223,12 +223,21 @@ class StudyController
     @Operation(tags = ["study/recruitments.json"])
     fun recruitments(@RequestBody request: RecruitmentServiceRequest<*>): ResponseEntity<*> = runBlocking {
         return@runBlocking when (request) {
-            is RecruitmentServiceRequest.AddParticipant -> {
+            is RecruitmentServiceRequest.AddParticipantByEmailAddress -> {
                 if (!studyAuthorizationService.canAccessStudy(request.studyId.stringRepresentation)) {
                     return@runBlocking ResponseEntity(HttpStatus.FORBIDDEN)
                 }
                 LOGGER.info("Start POST: $RECRUITMENT_SERVICE -> AddParticipant")
                 val result = recruitmentService.addParticipant(request.studyId, request.email)
+                ResponseEntity.ok(result)
+            }
+
+            is RecruitmentServiceRequest.AddParticipantByUsername -> {
+                if (!studyAuthorizationService.canAccessStudy(request.studyId.stringRepresentation)) {
+                    return@runBlocking ResponseEntity(HttpStatus.FORBIDDEN)
+                }
+                LOGGER.info("Start POST: $RECRUITMENT_SERVICE -> AddParticipant")
+                val result = recruitmentService.addParticipant(request.studyId, request.username)
                 ResponseEntity.ok(result)
             }
 
