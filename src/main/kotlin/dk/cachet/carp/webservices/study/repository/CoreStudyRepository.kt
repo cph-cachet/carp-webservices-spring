@@ -91,15 +91,21 @@ class CoreStudyRepository
         return@runBlocking studies.map {
             val study = convertStudySnapshotNodeToStudy(it.snapshot!!)
             val studyStatus = study.getStatus()
+            val createdByUUID = it.createdBy?.toString()?.let {
+                try { UUID(it) }
+                catch (ex: IllegalArgumentException) { null }
+            }
             StudyOverview(
-                    studyStatus.studyId,
-                    studyStatus.name,
-                    studyStatus.createdOn,
-                    studyStatus.studyProtocolId,
-                    studyStatus.canSetInvitation,
-                    studyStatus.canSetStudyProtocol,
-                    studyStatus.canDeployToParticipants,
-                    study.description)
+                studyStatus.studyId,
+                studyStatus.name,
+                studyStatus.createdOn,
+                createdByUUID,
+                studyStatus.studyProtocolId,
+                studyStatus.canSetInvitation,
+                studyStatus.canSetStudyProtocol,
+                studyStatus.canDeployToParticipants,
+                study.description
+            )
         }.distinctBy { it.studyId }.toList()
     }
 
