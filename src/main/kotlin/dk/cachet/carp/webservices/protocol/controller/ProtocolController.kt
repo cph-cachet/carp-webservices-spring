@@ -2,16 +2,16 @@ package dk.cachet.carp.webservices.protocol.controller
 
 import dk.cachet.carp.protocols.application.ProtocolFactoryService
 import dk.cachet.carp.protocols.application.ProtocolFactoryServiceHost
-import dk.cachet.carp.protocols.application.ProtocolService
-import dk.cachet.carp.protocols.application.ProtocolServiceHost
 import dk.cachet.carp.protocols.infrastructure.ProtocolFactoryServiceRequest
 import dk.cachet.carp.protocols.infrastructure.ProtocolServiceRequest
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.constants.PathVariableName
 import dk.cachet.carp.webservices.common.exception.responses.BadRequestException
 import dk.cachet.carp.webservices.protocol.authorization.ProtocolAuthorizationService
+import dk.cachet.carp.webservices.protocol.dto.GetLatestProtocolOverviewResponseDto
 import dk.cachet.carp.webservices.protocol.dto.GetLatestProtocolResponseDto
 import dk.cachet.carp.webservices.protocol.repository.CoreProtocolRepository
+import dk.cachet.carp.webservices.protocol.service.CoreProtocolService
 import io.swagger.v3.oas.annotations.Operation
 import kotlinx.coroutines.runBlocking
 import org.apache.logging.log4j.LogManager
@@ -26,7 +26,13 @@ class ProtocolController
 (
     private val coreProtocolRepository: CoreProtocolRepository,
     private val protocolAuthorizationService: ProtocolAuthorizationService,
-    private val validationMessages: MessageBase
+    private val validationMessages: MessageBase,
+    coreProtocolService: CoreProtocolService,
+    /**
+     * This is a hack to resolve the circular dependencies. I hate to do this, but the webservices
+     * is in a very sorry state and I cannot emphasize enough how much I want to refactor it.
+     * I just want to have the surrounding infrastructure ready.
+     */
 )
 {
     companion object
@@ -37,9 +43,10 @@ class ProtocolController
         const val PROTOCOL_SERVICE = "/api/protocol-service"
         const val PROTOCOL_FACTORY_SERVICE = "/api/protocol-factory-service"
         const val GET_LATEST_PROTOCOL = "/api/protocols/{${PathVariableName.PROTOCOL_ID}}/latest"
+        const val GET_PROTOCOLS_OVERVIEW = "/api/protocols"
     }
 
-    private val protocolService: ProtocolService = ProtocolServiceHost(coreProtocolRepository)
+    private val protocolService = coreProtocolService.instance
 
     private val protocolFactoryService: ProtocolFactoryService = ProtocolFactoryServiceHost()
 
@@ -139,7 +146,6 @@ class ProtocolController
         }
     }
 
-
     @GetMapping(value = [GET_LATEST_PROTOCOL])
     @PreAuthorize("@protocolAuthorizationService.canViewProtocol()")
     @Operation(tags = ["protocol/getLatestProtocolById.json"])
@@ -150,6 +156,18 @@ class ProtocolController
         return runBlocking {
             LOGGER.info("/api/protocols/$protocolId/latest")
             return@runBlocking coreProtocolRepository.getLatestProtocolById(protocolId)
+        }
+    }
+
+    @GetMapping(value = [GET_PROTOCOLS_OVERVIEW])
+    @PreAuthorize("@protocolAuthorizationService.canViewProtocol()")
+    @Operation(tags = ["protocols/get"])
+    fun getProtocolsOverview (
+    ): List<GetLatestProtocolOverviewResponseDto?>
+    {
+        return runBlocking {
+            LOGGER.info("Start GET: /api/protocols")
+            return@runBlocking coreProtocolRepository.getLatestProtocols()
         }
     }
 }
