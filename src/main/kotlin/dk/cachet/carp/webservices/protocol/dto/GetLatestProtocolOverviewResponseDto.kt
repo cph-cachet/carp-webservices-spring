@@ -16,10 +16,8 @@ data class GetLatestProtocolOverviewResponseDto(
      */
     companion object {
         fun from(dto: GetLatestProtocolResponseDto): GetLatestProtocolOverviewResponseDto {
-            val snapshotOwnerName = dto.snapshot.name
-
             return GetLatestProtocolOverviewResponseDto(
-                ownerName = snapshotOwnerName,
+                ownerName = dto.snapshot!!.name,
                 snapshot = dto.snapshot,
                 lastVersionCreatedDate = dto.lastVersionCreatedDate
             )

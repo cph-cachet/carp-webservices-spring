@@ -2,8 +2,6 @@ package dk.cachet.carp.webservices.protocol.controller
 
 import dk.cachet.carp.protocols.application.ProtocolFactoryService
 import dk.cachet.carp.protocols.application.ProtocolFactoryServiceHost
-import dk.cachet.carp.protocols.application.ProtocolService
-import dk.cachet.carp.protocols.application.ProtocolServiceHost
 import dk.cachet.carp.protocols.infrastructure.ProtocolFactoryServiceRequest
 import dk.cachet.carp.protocols.infrastructure.ProtocolServiceRequest
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
@@ -13,6 +11,7 @@ import dk.cachet.carp.webservices.protocol.authorization.ProtocolAuthorizationSe
 import dk.cachet.carp.webservices.protocol.dto.GetLatestProtocolOverviewResponseDto
 import dk.cachet.carp.webservices.protocol.dto.GetLatestProtocolResponseDto
 import dk.cachet.carp.webservices.protocol.repository.CoreProtocolRepository
+import dk.cachet.carp.webservices.protocol.service.CoreProtocolService
 import io.swagger.v3.oas.annotations.Operation
 import kotlinx.coroutines.runBlocking
 import org.apache.logging.log4j.LogManager
@@ -27,7 +26,13 @@ class ProtocolController
 (
     private val coreProtocolRepository: CoreProtocolRepository,
     private val protocolAuthorizationService: ProtocolAuthorizationService,
-    private val validationMessages: MessageBase
+    private val validationMessages: MessageBase,
+    coreProtocolService: CoreProtocolService,
+    /**
+     * This is a hack to resolve the circular dependencies. I hate to do this, but the webservices
+     * is in a very sorry state and I cannot emphasize enough how much I want to refactor it.
+     * I just want to have the surrounding infrastructure ready.
+     */
 )
 {
     companion object
@@ -41,7 +46,7 @@ class ProtocolController
         const val GET_PROTOCOLS_OVERVIEW = "/api/protocols"
     }
 
-    private val protocolService: ProtocolService = ProtocolServiceHost(coreProtocolRepository)
+    private val protocolService = coreProtocolService.instance
 
     private val protocolFactoryService: ProtocolFactoryService = ProtocolFactoryServiceHost()
 
