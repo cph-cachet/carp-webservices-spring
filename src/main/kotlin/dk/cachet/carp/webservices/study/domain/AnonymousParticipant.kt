@@ -3,13 +3,9 @@ package dk.cachet.carp.webservices.study.domain
 import dk.cachet.carp.common.application.UUID
 import kotlinx.datetime.Instant
 
-data class MagicLink (
-    val magicLink: String,
-
+data class AnonymousParticipant (
     val accountId: UUID,
-
-    val studyDeploymentId: String,
-
+    val studyDeploymentId: UUID,
+    val magicLink: String,
     val expiryDate: Instant?
-
 )
