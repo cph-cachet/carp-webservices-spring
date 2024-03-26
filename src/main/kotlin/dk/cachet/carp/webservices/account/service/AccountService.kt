@@ -6,11 +6,16 @@ import dk.cachet.carp.common.application.users.AccountIdentity
 import dk.cachet.carp.webservices.security.authentication.domain.Account
 import dk.cachet.carp.webservices.security.authorization.Role
 
-interface AccountService
-{
+interface AccountService {
     suspend fun invite(identity: AccountIdentity, role: Role, redirectUri: String? = null): Account
     suspend fun findByUUID(uuid: UUID): Account?
     suspend fun findByAccountIdentity(identity: AccountIdentity): Account?
     suspend fun hasRoleByEmail(email: EmailAddress, role: Role): Boolean
     suspend fun addRole(identity: AccountIdentity, role: Role)
+    suspend fun recoverAccount(
+        identity: AccountIdentity,
+        redirectUri: String?,
+        expirationSeconds: Long?,
+        forceCreate: Boolean?
+    ): Pair<UUID, String>
 }
