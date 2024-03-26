@@ -4,16 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.common.application.users.AccountIdentity
 import dk.cachet.carp.common.application.users.EmailAccountIdentity
-import dk.cachet.carp.webservices.common.configuration.cache.CachingConfig.Companion.ADMIN_BEARER_TOKEN
-import dk.cachet.carp.webservices.common.configuration.cache.CachingConfig.Companion.TOKEN_CACHE
+import dk.cachet.carp.common.application.users.UsernameAccountIdentity
 import dk.cachet.carp.webservices.common.environment.EnvironmentProfile
 import dk.cachet.carp.webservices.common.environment.EnvironmentUtil
 import dk.cachet.carp.webservices.security.authentication.domain.Account
 import dk.cachet.carp.webservices.security.authentication.oauth2.IssuerFacade
-import dk.cachet.carp.webservices.security.authentication.oauth2.issuers.keycloak.domain.RequiredActions
-import dk.cachet.carp.webservices.security.authentication.oauth2.issuers.keycloak.domain.RoleRepresentation
-import dk.cachet.carp.webservices.security.authentication.oauth2.issuers.keycloak.domain.TokenResponse
-import dk.cachet.carp.webservices.security.authentication.oauth2.issuers.keycloak.domain.UserRepresentation
+import dk.cachet.carp.webservices.security.authentication.oauth2.issuers.keycloak.domain.*
 import dk.cachet.carp.webservices.security.authorization.Role
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -25,7 +21,6 @@ import org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE
 import org.springframework.http.codec.json.Jackson2JsonDecoder
 import org.springframework.http.codec.json.Jackson2JsonEncoder
 import org.springframework.stereotype.Service
-import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.ExchangeStrategies
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBodilessEntity
@@ -48,7 +43,6 @@ class KeycloakFacade(
         private const val INVITATION_LIFESPAN = 24 * 60 * 60 * 30 // 30 days
     }
 
-
     private val serializationStrategies: ExchangeStrategies =
         ExchangeStrategies.builder()
             .codecs { configurer ->
@@ -63,33 +57,25 @@ class KeycloakFacade(
             }
             .build()
 
-    private val authClient: WebClient = WebClient.builder()
-        .baseUrl("$authServerUrl/realms/$realm")
-        .exchangeStrategies(serializationStrategies)
-        .defaultHeaders {
+    private val adminClient: WebClient = buildWebClient("$authServerUrl/admin/realms/$realm")
+
+    private val resourceClient: WebClient = buildWebClient("$authServerUrl/realms/$realm")
+
+    private val authClient: WebClient = buildWebClient("$authServerUrl/realms/$realm")
+        .mutate().defaultHeaders {
             it.contentType = MediaType.parseMediaType(APPLICATION_FORM_URLENCODED_VALUE)
             it.accept = listOf(MediaType.APPLICATION_JSON)
             it.setBasicAuth(clientId, clientSecret)
-        }
-        .build()
+        }.build()
 
-    private val adminClient: WebClient = WebClient.builder()
-        .baseUrl("$authServerUrl/admin/realms/$realm")
-        .exchangeStrategies(serializationStrategies)
-        .defaultHeaders {
-            it.contentType = MediaType.APPLICATION_JSON
-            it.accept = listOf(MediaType.APPLICATION_JSON)
-        }
-        .build()
 
-    override suspend fun createAccount(account: Account) {
+    override suspend fun createAccount(account: Account, accountType: AccountType): Account {
         val token = authenticate().accessToken
 
-        LOGGER.info("Creating account with email: ${account.email}")
+        LOGGER.debug("Creating account {}", account)
 
         val userRepresentation = UserRepresentation
-            .createFromAccount(account)
-            .setDefaultActions()
+            .createFromAccount(account, accountType)
 
         adminClient.post().uri("/users")
             .headers {
@@ -98,13 +84,14 @@ class KeycloakFacade(
             .bodyValue(userRepresentation)
             .retrieve()
             .awaitBodilessEntity()
+
+        return account
     }
 
-    // TODO: change the baked in strings to using resources
     override suspend fun addRole(account: Account, role: Role) {
         val token = authenticate().accessToken
 
-        LOGGER.info("Updating role of account with id: $account")
+        LOGGER.debug("Updating role of account: {}", account)
 
         // getting role representation with id
         val roleRepresentation: RoleRepresentation =
@@ -130,7 +117,7 @@ class KeycloakFacade(
     override suspend fun getRoles(id: UUID): Set<Role> {
         val token = authenticate().accessToken
 
-        LOGGER.info("Getting roles of account with id: $id")
+        LOGGER.debug("Getting roles of account with id: {}", id)
 
         val roleRepresentations = adminClient.get().uri("/users/${id}/role-mappings/realm")
             .headers {
@@ -146,7 +133,7 @@ class KeycloakFacade(
     override suspend fun getAccount(uuid: UUID): Account? {
         val token = authenticate().accessToken
 
-        LOGGER.info("Getting account with id: $uuid")
+        LOGGER.debug("Getting account with id: {}", uuid)
 
         val userRepresentation = adminClient.get().uri("/users/${uuid}")
             .headers {
@@ -164,10 +151,11 @@ class KeycloakFacade(
         val token = auth.accessToken
         val queryString = when (identity) {
             is EmailAccountIdentity -> "email=${identity.emailAddress}"
+            is UsernameAccountIdentity -> "username=${identity.username}"
             else -> throw IllegalArgumentException("Unsupported account identity type: ${identity::class.simpleName}.")
         }
 
-        LOGGER.info("Getting account with identity: $identity")
+        LOGGER.debug("Getting account with identity: {}", identity)
 
         val userRepresentation = adminClient.get().uri("/users?$queryString&exact=true")
             .headers {
@@ -178,7 +166,7 @@ class KeycloakFacade(
             .firstOrNull()
 
         if (userRepresentation == null) {
-            LOGGER.info("No account found with identity: $identity")
+            LOGGER.debug("No account found with identity: {}", identity)
             return null
         }
 
@@ -186,16 +174,12 @@ class KeycloakFacade(
         return userRepresentation.toAccount(roles)
     }
 
-    override suspend fun sendInvitation(account: Account, redirectUri: String?, isNewAccount: Boolean) {
+    override suspend fun sendInvitation(account: Account, redirectUri: String?, accountType: AccountType) {
         val token = authenticate().accessToken
 
-        LOGGER.info("Sending invitation to account with id: ${account.id}")
+        LOGGER.debug("Sending invitation to account with id: ${account.id}")
 
-        val requiredActions =
-            if (isNewAccount)
-                RequiredActions.getActionsForNewAccount()
-            else
-                RequiredActions.getActionsForExistingAccount()
+        val requiredActions = RequiredActions.getForAccountType(accountType)
 
         adminClient.put().uri("/users/${account.id}/execute-actions-email")
         { uriBuilder: UriBuilder ->
@@ -225,32 +209,34 @@ class KeycloakFacade(
         throw UnsupportedOperationException("Account deletion is not supported by Carp Webservices.")
     }
 
-    suspend fun generateMagicLink(studyId: UUID): String {
+    override suspend fun recoverAccount(
+        account: Account,
+        redirectUri: String?,
+        expirationSeconds: Long?,
+        forceCreate: Boolean?
+    ): Pair<UUID, String> {
         val token = authenticate().accessToken
-        LOGGER.info("Generating magic links with $studyId")
 
-        val requestBody = """
-        {
-            "email": "asdfa-asdf-as-df-asd-fa-sd-fa-sdf-asdf@definetelyamail.com",
-            "expiration_seconds": 2000000,
-            "client_id": "caws-client",
-            "redirect_uri": "https://carp.computerome.dk/icat/dev/",
-            "force_create": true,
-            "send_email": false
-        }
-    """.trimIndent()
+        LOGGER.debug("Generating recovery link for account: {}", account)
 
-        val generateUser = authClient.post()
-            .uri("/magic-link")
+        val request = MagicLinkRequest(
+            account.email,
+            account.username,
+            clientId,
+            expirationSeconds,
+            redirectUri,
+            forceCreate
+        )
+
+        val magicLinkResponse = resourceClient.post().uri("/magic-link")
             .headers {
                 it.setBearerAuth(token!!)
-                it.contentType = MediaType.APPLICATION_JSON
             }
-            .body(BodyInserters.fromValue(requestBody))
+            .bodyValue(request)
             .retrieve()
-            .awaitBody<String>()
+            .awaitBody<MagicLinkResponse>()
 
-        return generateUser
+        return Pair(UUID(magicLinkResponse.accountId), magicLinkResponse.link)
     }
 
     suspend fun authenticate(): TokenResponse =
@@ -258,4 +244,13 @@ class KeycloakFacade(
             .bodyValue("grant_type=client_credentials")
             .retrieve()
             .awaitBody()
+
+    private fun buildWebClient(baseUrl: String): WebClient = WebClient.builder()
+        .baseUrl(baseUrl)
+        .exchangeStrategies(serializationStrategies)
+        .defaultHeaders {
+            it.contentType = MediaType.APPLICATION_JSON
+            it.accept = listOf(MediaType.APPLICATION_JSON)
+        }
+        .build()
 }
