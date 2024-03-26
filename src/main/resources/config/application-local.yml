@@ -111,9 +111,6 @@ spring:
   jackson:
     default-property-inclusion: NON_NULL
 
-caffeine:
-  expire-after-write: 300000
-
 keycloak:
   auth-server-url: "${KC_URL}"
   realm: Carp

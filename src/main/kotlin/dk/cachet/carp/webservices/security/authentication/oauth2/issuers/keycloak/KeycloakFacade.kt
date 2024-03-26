@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.common.application.users.AccountIdentity
 import dk.cachet.carp.common.application.users.EmailAccountIdentity
-import dk.cachet.carp.webservices.common.configuration.cache.CachingConfig.Companion.ADMIN_BEARER_TOKEN
-import dk.cachet.carp.webservices.common.configuration.cache.CachingConfig.Companion.TOKEN_CACHE
 import dk.cachet.carp.webservices.common.environment.EnvironmentProfile
 import dk.cachet.carp.webservices.common.environment.EnvironmentUtil
 import dk.cachet.carp.webservices.security.authentication.domain.Account
@@ -18,7 +16,6 @@ import dk.cachet.carp.webservices.security.authorization.Role
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.cache.annotation.Cacheable
 import org.springframework.context.annotation.PropertySource
 import org.springframework.context.annotation.PropertySources
 import org.springframework.http.MediaType
@@ -225,7 +222,6 @@ class KeycloakFacade(
         throw UnsupportedOperationException("Account deletion is not supported by Carp Webservices.")
     }
 
-    @Cacheable(value = [TOKEN_CACHE], key = ADMIN_BEARER_TOKEN)
     suspend fun authenticate(): TokenResponse =
         authClient.post().uri("/protocol/openid-connect/token")
             .bodyValue("grant_type=client_credentials")
