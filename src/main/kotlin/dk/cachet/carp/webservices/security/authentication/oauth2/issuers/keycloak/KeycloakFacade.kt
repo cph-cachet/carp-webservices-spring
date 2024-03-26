@@ -213,8 +213,7 @@ class KeycloakFacade(
         account: Account,
         redirectUri: String?,
         expirationSeconds: Long?,
-        forceCreate: Boolean?
-    ): Pair<UUID, String> {
+    ): String {
         val token = authenticate().accessToken
 
         LOGGER.debug("Generating recovery link for account: {}", account)
@@ -224,8 +223,7 @@ class KeycloakFacade(
             account.username,
             clientId,
             expirationSeconds,
-            redirectUri,
-            forceCreate
+            redirectUri
         )
 
         val magicLinkResponse = resourceClient.post().uri("/magic-link")
@@ -236,7 +234,7 @@ class KeycloakFacade(
             .retrieve()
             .awaitBody<MagicLinkResponse>()
 
-        return Pair(UUID(magicLinkResponse.accountId), magicLinkResponse.link)
+        return magicLinkResponse.link
     }
 
     suspend fun authenticate(): TokenResponse =

@@ -12,10 +12,8 @@ interface AccountService {
     suspend fun findByAccountIdentity(identity: AccountIdentity): Account?
     suspend fun hasRoleByEmail(email: EmailAddress, role: Role): Boolean
     suspend fun addRole(identity: AccountIdentity, role: Role)
-    suspend fun recoverAccount(
+    suspend fun generateTemporaryAccount(
         identity: AccountIdentity,
-        redirectUri: String?,
-        expirationSeconds: Long?,
-        forceCreate: Boolean?
-    ): Pair<UUID, String>
+        expirationSeconds: Long?
+    ): String
 }

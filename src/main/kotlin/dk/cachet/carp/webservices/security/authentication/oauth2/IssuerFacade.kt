@@ -7,7 +7,7 @@ import dk.cachet.carp.webservices.security.authentication.oauth2.issuers.keycloa
 import dk.cachet.carp.webservices.security.authorization.Role
 
 interface IssuerFacade {
-    suspend fun createAccount(account: Account, accountType: AccountType = AccountType.NEW_ACCOUNT): Account
+    suspend fun createAccount(account: Account, accountType: AccountType = AccountType.NEW): Account
     suspend fun getAccount(uuid: UUID): Account?
     suspend fun getAccount(identity: AccountIdentity): Account?
     suspend fun updateAccount(account: Account)
@@ -17,12 +17,11 @@ interface IssuerFacade {
     suspend fun sendInvitation(
         account: Account,
         redirectUri: String?,
-        accountType: AccountType = AccountType.NEW_ACCOUNT
+        accountType: AccountType = AccountType.NEW
     )
     suspend fun recoverAccount(
         account: Account,
         redirectUri: String?,
-        expirationSeconds: Long?,
-        forceCreate: Boolean?
-    ): Pair<UUID, String>
+        expirationSeconds: Long?
+    ): String
 }

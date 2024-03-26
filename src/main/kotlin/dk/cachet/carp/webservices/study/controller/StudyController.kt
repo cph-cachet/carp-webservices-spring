@@ -13,6 +13,7 @@ import dk.cachet.carp.webservices.deployment.repository.CoreDeploymentRepository
 import dk.cachet.carp.webservices.security.authentication.domain.Account
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
 import dk.cachet.carp.webservices.study.authorization.StudyAuthorizationService
+import dk.cachet.carp.webservices.study.domain.AnonymousLinkRequest
 import dk.cachet.carp.webservices.study.domain.ParticipantGroupsStatus
 import dk.cachet.carp.webservices.study.domain.StudyOverview
 import dk.cachet.carp.webservices.study.dto.AddParticipantsRequestDto
@@ -25,6 +26,7 @@ import jakarta.validation.Valid
 import kotlinx.coroutines.runBlocking
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
@@ -60,10 +62,10 @@ class StudyController
         const val GET_PARTICIPANTS_ACCOUNTS = "/api/studies/{${PathVariableName.STUDY_ID}}/participants/accounts"
         const val GET_PARTICIPANT_GROUP_STATUS = "/api/studies/{${PathVariableName.STUDY_ID}}/participantGroup/status"
         const val ADD_PARTICIPANTS = "/api/studies/{${PathVariableName.STUDY_ID}}/participants/add"
+        const val GENERATE_ANONYMOUS_PARTICIPANTS  = "/api/studies/{${PathVariableName.STUDY_ID}}/generate"
     }
 
     private val studyService = coreStudyService.instance
-
     private val recruitmentService = coreRecruitmentService.instance
 
     @PostMapping(value = [ADD_RESEARCHER])
@@ -305,16 +307,41 @@ class StudyController
 
     @PostMapping(value = [ADD_PARTICIPANTS])
     @PreAuthorize("@studyAuthorizationService.canAccessStudy(#studyId)")
-    fun addParticipants (
+    suspend fun addParticipants(
         @PathVariable(PathVariableName.STUDY_ID) studyId: String,
         @Valid @RequestBody request: AddParticipantsRequestDto
-    )
-    {
+    ) {
         runBlocking {
             LOGGER.info("Start POST: /api/studies/$studyId/participants/add")
             request.emails.forEach { e -> recruitmentService.addParticipant(UUID(studyId), EmailAddress(e)) }
         }
     }
+
+    @PostMapping(GENERATE_ANONYMOUS_PARTICIPANTS)
+    @PreAuthorize("@accountAuthorizationService.isResearcherPartOfTheStudy(#studyId)")
+    suspend fun generateAnonymousParticipants(
+        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
+        @Valid @RequestBody request: AnonymousLinkRequest
+    ): ResponseEntity<ByteArray> {
+        LOGGER.info("Start POST: /api/studies/$studyId/generate")
+
+        val anonymousParticipants = coreRecruitmentService.createAnonymousParticipants(
+            studyId,
+            request.amountOfAccounts,
+            request.expirationSeconds,
+            request.participantRoleName,
+        )
+
+        val responseHeaders = HttpHeaders()
+        responseHeaders.set(HttpHeaders.CONTENT_TYPE, "text/csv")
+        responseHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=${studyId}_accounts.csv")
+
+        val header = "account_id,study_deployment_id,access_link,expiry_date\n"
+        val body = anonymousParticipants.joinToString("") { participant ->
+            val url = "\"${participant.magicLink}?deviceRedirectUri=${request.redirectUri}\""
+            "${participant.accountId},${participant.studyDeploymentId},${url},${participant.expiryDate}\n"
+        }
+
+        return ResponseEntity((header+body).toByteArray(Charsets.ISO_8859_1), responseHeaders, HttpStatus.OK)
+    }
 }
-
-
