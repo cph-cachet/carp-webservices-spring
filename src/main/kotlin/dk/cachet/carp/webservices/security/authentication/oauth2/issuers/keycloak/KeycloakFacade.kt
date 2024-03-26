@@ -18,7 +18,6 @@ import dk.cachet.carp.webservices.security.authorization.Role
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.cache.annotation.Cacheable
 import org.springframework.context.annotation.PropertySource
 import org.springframework.context.annotation.PropertySources
 import org.springframework.http.MediaType
@@ -254,7 +253,6 @@ class KeycloakFacade(
         return generateUser
     }
 
-    @Cacheable(value = [TOKEN_CACHE], key = ADMIN_BEARER_TOKEN)
     suspend fun authenticate(): TokenResponse =
         authClient.post().uri("/protocol/openid-connect/token")
             .bodyValue("grant_type=client_credentials")
