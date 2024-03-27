@@ -10,7 +10,6 @@ import dk.cachet.carp.studies.application.RecruitmentServiceHost
 import dk.cachet.carp.studies.application.users.AssignedParticipantRoles
 import dk.cachet.carp.studies.application.users.ParticipantGroupStatus
 import dk.cachet.carp.webservices.account.service.AccountService
-import dk.cachet.carp.webservices.common.environment.EnvironmentUtil
 import dk.cachet.carp.webservices.common.eventbus.CoreEventBus
 import dk.cachet.carp.webservices.data.service.IDataStreamService
 import dk.cachet.carp.webservices.deployment.service.CoreDeploymentService
@@ -35,7 +34,6 @@ class CoreRecruitmentService(
     private val dataStreamService: IDataStreamService,
     private val accountService: AccountService,
     private val accountFactory: AccountFactory,
-    private val environmentUtil: EnvironmentUtil
 ) {
     final val instance: RecruitmentService = RecruitmentServiceHost(
         participantRepository,
@@ -107,24 +105,21 @@ class CoreRecruitmentService(
         for (i in 0 until amount) {
             val username = UUID.randomUUID()
 
-            // Add a participant to the study and invite it
+            val link = accountService.generateTemporaryAccount(
+                UsernameAccountIdentity(username.toString()),
+                expirationSeconds
+            )
+
+            //Add a participant to the study and invite it
             val participant = instance.addParticipant(studyId, Username(username.toString()))
             val groupStatus = instance.inviteNewParticipantGroup(
                 studyId,
                 setOf(AssignedParticipantRoles(participant.id, AssignedTo.Roles(setOf(participantRoleName))))
             ) as ParticipantGroupStatus.InDeployment
 
-            // Create an account and an access link for it
-            val (accountId, link) = accountService.recoverAccount(
-                UsernameAccountIdentity(username.toString()),
-                environmentUtil.portalUrl,
-                expirationSeconds,
-                true
-            )
-
             participants.add(
                 AnonymousParticipant(
-                    accountId,
+                    username,
                     groupStatus.studyDeploymentStatus.studyDeploymentId,
                     link,
                     Instant.fromEpochSeconds(expirationSeconds)

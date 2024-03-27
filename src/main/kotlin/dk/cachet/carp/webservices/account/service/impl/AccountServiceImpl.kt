@@ -4,6 +4,7 @@ import dk.cachet.carp.common.application.EmailAddress
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.common.application.users.AccountIdentity
 import dk.cachet.carp.webservices.account.service.AccountService
+import dk.cachet.carp.webservices.common.environment.EnvironmentUtil
 import dk.cachet.carp.webservices.security.authentication.domain.Account
 import dk.cachet.carp.webservices.security.authentication.domain.AccountFactory
 import dk.cachet.carp.webservices.security.authentication.oauth2.IssuerFacade
@@ -17,18 +18,19 @@ import org.springframework.stereotype.Service
 @Service
 class AccountServiceImpl(
     private val issuerFacade: IssuerFacade,
-    private val accountFactory: AccountFactory
+    private val accountFactory: AccountFactory,
+    private val environmentUtil: EnvironmentUtil
 ) : AccountService {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
     override suspend fun invite(identity: AccountIdentity, role: Role, redirectUri: String?): Account {
-        var accountType = AccountType.EXISTING_ACCOUNT
+        var accountType = AccountType.EXISTING
         var account = findByAccountIdentity(identity)
 
         if (account == null) {
-            accountType = AccountType.NEW_ACCOUNT
+            accountType = AccountType.NEW
             account = issuerFacade.createAccount(accountFactory.fromAccountIdentity(identity))
             LOGGER.info("User created for account identity: $identity")
         }
@@ -76,16 +78,18 @@ class AccountServiceImpl(
         issuerFacade.addRole(account, role)
     }
 
-    override suspend fun recoverAccount(
+    override suspend fun generateTemporaryAccount(
         identity: AccountIdentity,
-        redirectUri: String?,
-        expirationSeconds: Long?,
-        forceCreate: Boolean?
-    ): Pair<UUID, String> =
-        issuerFacade.recoverAccount(
-            accountFactory.fromAccountIdentity(identity),
-            redirectUri,
-            expirationSeconds,
-            forceCreate
+        expirationSeconds: Long?
+    ): String {
+        // create account
+        val account = issuerFacade.createAccount(accountFactory.fromAccountIdentity(identity), AccountType.GENERATED)
+
+        // generate recovery link for it
+        return issuerFacade.recoverAccount(
+            account,
+            environmentUtil.portalUrl,
+            expirationSeconds
         )
+    }
 }

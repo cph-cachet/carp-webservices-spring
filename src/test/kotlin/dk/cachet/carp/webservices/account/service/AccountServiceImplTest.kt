@@ -92,7 +92,7 @@ class AccountServiceImplTest {
 
             sut.invite(mockk<AccountIdentity>(), Role.PARTICIPANT)
 
-            coVerify(exactly = 1) { issuerFacade.sendInvitation(account, null, AccountType.NEW_ACCOUNT) }
+            coVerify(exactly = 1) { issuerFacade.sendInvitation(account, null, AccountType.NEW) }
         }
 
         @Test

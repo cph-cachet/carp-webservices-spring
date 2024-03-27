@@ -318,7 +318,7 @@ class StudyController
     }
 
     @PostMapping(GENERATE_ANONYMOUS_PARTICIPANTS)
-    @PreAuthorize("@accountAuthorizationService.isResearcherPartOfTheStudy(#studyId)")
+//    @PreAuthorize("@accountAuthorizationService.isResearcherPartOfTheStudy(#studyId)")
     suspend fun generateAnonymousParticipants(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @Valid @RequestBody request: AnonymousLinkRequest

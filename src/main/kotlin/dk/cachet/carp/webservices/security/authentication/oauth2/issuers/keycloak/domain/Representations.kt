@@ -25,7 +25,7 @@ data class UserRepresentation(
                 lastName = account.lastName
                 email = account.email
                 requiredActions = RequiredActions.getForAccountType(accountType)
-                emailVerified = accountType == AccountType.GENERATED_ACCOUNT
+                emailVerified = accountType == AccountType.GENERATED
             }
     }
 
@@ -58,25 +58,25 @@ enum class RequiredActions {
     companion object {
         fun getForAccountType(accountType: AccountType): List<RequiredActions> {
             return when (accountType) {
-                AccountType.NEW_ACCOUNT -> listOf(
+                AccountType.NEW -> listOf(
                     VERIFY_EMAIL,
                     UPDATE_PASSWORD,
                     UPDATE_PROFILE
                 )
 
-                AccountType.EXISTING_ACCOUNT -> listOf(
+                AccountType.EXISTING -> listOf(
                     UPDATE_PASSWORD,
                     UPDATE_PROFILE
                 )
 
-                AccountType.GENERATED_ACCOUNT -> emptyList()
+                AccountType.GENERATED -> emptyList()
             }
         }
     }
 }
 
 enum class AccountType {
-    NEW_ACCOUNT,
-    EXISTING_ACCOUNT,
-    GENERATED_ACCOUNT
+    NEW,
+    EXISTING,
+    GENERATED
 }
