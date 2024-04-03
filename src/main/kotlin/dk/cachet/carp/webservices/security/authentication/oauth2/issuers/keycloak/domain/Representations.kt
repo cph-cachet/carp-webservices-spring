@@ -12,29 +12,21 @@ data class UserRepresentation(
     var firstName: String? = null,
     var lastName: String? = null,
     var email: String? = null,
-    var emailVerified: Boolean? = null,
-    var requiredActions: List<RequiredActions>? = null,
-    var enabled: Boolean? = null
+    var emailVerified: Boolean? = false,
+    var requiredActions: List<RequiredActions>? = emptyList(),
+    var enabled: Boolean? = true
 ) {
     companion object {
-        fun createFromAccount(account: Account): UserRepresentation {
-            val userRepresentation = UserRepresentation()
-            userRepresentation.id = account.id
-            userRepresentation.username = account.username
-            userRepresentation.firstName = account.firstName
-            userRepresentation.lastName = account.lastName
-            userRepresentation.email = account.email
-
-            return userRepresentation
-        }
-    }
-
-    fun setDefaultActions(): UserRepresentation {
-        requiredActions = RequiredActions.getActionsForNewAccount()
-        emailVerified = false
-        enabled = true
-
-        return this
+        fun createFromAccount(account: Account, accountType: AccountType): UserRepresentation =
+            UserRepresentation().apply {
+                id = account.id
+                username = account.username
+                firstName = account.firstName
+                lastName = account.lastName
+                email = account.email
+                requiredActions = RequiredActions.getForAccountType(accountType)
+                emailVerified = accountType == AccountType.GENERATED
+            }
     }
 
     fun toAccount(roles: Set<Role>): Account {
@@ -64,18 +56,27 @@ enum class RequiredActions {
     TERMS_AND_CONDITIONS;
 
     companion object {
-        fun getActionsForNewAccount(): List<RequiredActions> =
-            listOf(
-                VERIFY_EMAIL,
-                UPDATE_PASSWORD,
-                UPDATE_PROFILE
-            )
+        fun getForAccountType(accountType: AccountType): List<RequiredActions> {
+            return when (accountType) {
+                AccountType.NEW -> listOf(
+                    VERIFY_EMAIL,
+                    UPDATE_PASSWORD,
+                    UPDATE_PROFILE
+                )
 
-        fun getActionsForExistingAccount(): List<RequiredActions> =
-            listOf(
-                UPDATE_PASSWORD,
-                UPDATE_PROFILE
-           )
+                AccountType.EXISTING -> listOf(
+                    UPDATE_PASSWORD,
+                    UPDATE_PROFILE
+                )
+
+                AccountType.GENERATED -> emptyList()
+            }
+        }
     }
 }
 
+enum class AccountType {
+    NEW,
+    EXISTING,
+    GENERATED
+}

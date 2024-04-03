@@ -2,6 +2,7 @@ package dk.cachet.carp.webservices.security.authentication.domain
 
 import dk.cachet.carp.common.application.users.AccountIdentity
 import dk.cachet.carp.common.application.users.EmailAccountIdentity
+import dk.cachet.carp.common.application.users.UsernameAccountIdentity
 import dk.cachet.carp.webservices.security.authentication.oauth2.IssuerFacade
 import dk.cachet.carp.webservices.security.authentication.oauth2.issuers.keycloak.KeycloakFacade
 import dk.cachet.carp.webservices.security.authorization.Role
@@ -15,7 +16,13 @@ data class Account(
     var lastName: String? = null,
     var email: String? = null,
     var role: Role? = null,
-)
+) {
+    fun getIdentity(): AccountIdentity = when {
+        !email.isNullOrBlank() -> EmailAccountIdentity(email!!)
+        !username.isNullOrBlank() -> UsernameAccountIdentity(username!!)
+        else -> throw IllegalArgumentException("Account should have an email or username.")
+    }
+}
 
 @Service
 class AccountFactory(
@@ -49,7 +56,11 @@ class AccountFactory(
 
     fun fromAccountIdentity(identity: AccountIdentity): Account = when (identity) {
         is EmailAccountIdentity -> {
-            Account(email = identity.emailAddress.address, username = identity.emailAddress.address)
+            Account( email = identity.emailAddress.address )
+        }
+
+        is UsernameAccountIdentity -> {
+            Account( username = identity.username.name )
         }
 
         else -> {

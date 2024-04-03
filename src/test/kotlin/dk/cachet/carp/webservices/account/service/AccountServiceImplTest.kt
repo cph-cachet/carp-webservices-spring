@@ -7,6 +7,7 @@ import dk.cachet.carp.webservices.account.service.impl.AccountServiceImpl
 import dk.cachet.carp.webservices.security.authentication.domain.Account
 import dk.cachet.carp.webservices.security.authentication.domain.AccountFactory
 import dk.cachet.carp.webservices.security.authentication.oauth2.IssuerFacade
+import dk.cachet.carp.webservices.security.authentication.oauth2.issuers.keycloak.domain.AccountType
 import dk.cachet.carp.webservices.security.authorization.Role
 import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -32,20 +33,19 @@ class AccountServiceImplTest {
             val foundAccount = mockk<Account>()
             every { foundAccount getProperty "role" } answers { callOriginal() }
             every { foundAccount setProperty "role" value any<Role>() } answers { callOriginal() }
+            every { foundAccount getProperty "email" } answers { callOriginal() }
 
             coEvery { issuerFacade.getAccount(any<AccountIdentity>()) } returns foundAccount
-            coEvery { issuerFacade.createAccount(any()) } just runs
+            coEvery { issuerFacade.createAccount(any(), any()) } returns foundAccount
             coEvery { issuerFacade.addRole(any(), any()) } just runs
-            coEvery { issuerFacade.sendInvitation(any(), any(), any()) } just runs
 
-            val sut = AccountServiceImpl(issuerFacade, accountFactory)
+            val sut = AccountServiceImpl(issuerFacade, accountFactory, mockk())
 
             val invitedAccount = sut.invite(accountIdentity, invitedAs)
 
             coVerify(exactly = 1) { issuerFacade.getAccount(accountIdentity) }
             coVerify(exactly = 0) { issuerFacade.createAccount(any()) }
             coVerify(exactly = 1) { issuerFacade.addRole(foundAccount, invitedAs) }
-            coVerify(exactly = 1) { issuerFacade.sendInvitation(foundAccount, null, false) }
             expect(invitedAs) { invitedAccount.role }
         }
 
@@ -58,59 +58,60 @@ class AccountServiceImplTest {
             val createdAccount = mockk<Account>()
             every { createdAccount getProperty "role" } answers { callOriginal() }
             every { createdAccount setProperty "role" value any<Role>() } answers { callOriginal() }
+            every { createdAccount getProperty "email" } answers { callOriginal() }
 
-            coEvery {
-                issuerFacade.getAccount(any<AccountIdentity>())
-            } answers {
-                foundAccount
-            } andThenAnswer {
-                createdAccount
-            }
-            coEvery { issuerFacade.createAccount(any()) } just runs
+            coEvery { issuerFacade.getAccount(any<AccountIdentity>()) } returns foundAccount
+            coEvery { issuerFacade.createAccount(any(), any()) } returns createdAccount
             coEvery { issuerFacade.addRole(any(), any()) } just runs
-            coEvery { issuerFacade.sendInvitation(any(), any(), any()) } just runs
             every { accountFactory.fromAccountIdentity(any()) } returns createdAccount
 
-            val sut = AccountServiceImpl(issuerFacade, accountFactory)
+            val sut = AccountServiceImpl(issuerFacade, accountFactory, mockk())
 
             val invitedAccount = sut.invite(accountIdentity, invitedAs)
 
-            coVerify(exactly = 2) { issuerFacade.getAccount(accountIdentity) }
+            coVerify(exactly = 1) { issuerFacade.getAccount(accountIdentity) }
             coVerify(exactly = 1) { issuerFacade.createAccount(any()) }
             coVerify(exactly = 1) { issuerFacade.addRole(any(), invitedAs) }
-            coVerify(exactly = 1) { issuerFacade.sendInvitation(any(), null, true) }
             expect(invitedAs) { invitedAccount.role }
         }
 
         @Test
-        fun `should throw if account creation fails`() = runTest {
-            val accountIdentity = mockk<AccountIdentity>()
-            val invitedAs = Role.RESEARCHER
+        fun `should send an invitation if the account has an email`() = runTest {
+            val account = mockk<Account>()
 
-            val foundAccount = null
-            val createdAccount = null
+            every { account setProperty "role" value any<Role>() } answers { callOriginal() }
+            every { account.email } returns "test@test.com"
 
-            coEvery {
-                issuerFacade.getAccount(any<AccountIdentity>())
-            } answers {
-                foundAccount
-            } andThenAnswer {
-                createdAccount
-            }
-            coEvery { issuerFacade.createAccount(any()) } just runs
+            coEvery { issuerFacade.getAccount(any<AccountIdentity>()) } returns null
+            coEvery { issuerFacade.createAccount(any(), any()) } returns account
             coEvery { issuerFacade.addRole(any(), any()) } just runs
             coEvery { issuerFacade.sendInvitation(any(), any(), any()) } just runs
-            every { accountFactory.fromAccountIdentity(any()) } returns mockk()
+            every { accountFactory.fromAccountIdentity(any()) } returns account
 
-            val sut = AccountServiceImpl(issuerFacade, accountFactory)
+            val sut = AccountServiceImpl(issuerFacade, accountFactory, mockk())
 
-            assertFailsWith<IllegalArgumentException> {
-                sut.invite(accountIdentity, invitedAs)
-            }
+            sut.invite(mockk<AccountIdentity>(), Role.PARTICIPANT)
 
-            coVerify(exactly = 2) { issuerFacade.getAccount(accountIdentity) }
-            coVerify(exactly = 1) { issuerFacade.createAccount(any()) }
-            coVerify(exactly = 0) { issuerFacade.addRole(any(), invitedAs) }
+            coVerify(exactly = 1) { issuerFacade.sendInvitation(account, null, AccountType.NEW) }
+        }
+
+        @Test
+        fun `should not send an invitation if the account has no email`() = runTest {
+            val account = mockk<Account>()
+
+            every { account setProperty "role" value any<Role>() } answers { callOriginal() }
+            every { account.email } returns "  "
+
+            coEvery { issuerFacade.getAccount(any<AccountIdentity>()) } returns null
+            coEvery { issuerFacade.createAccount(any(), any()) } returns account
+            coEvery { issuerFacade.addRole(any(), any()) } just runs
+            coEvery { issuerFacade.sendInvitation(any(), any(), any()) } just runs
+            every { accountFactory.fromAccountIdentity(any()) } returns account
+
+            val sut = AccountServiceImpl(issuerFacade, accountFactory, mockk())
+
+            sut.invite(mockk<AccountIdentity>(), Role.PARTICIPANT)
+
             coVerify(exactly = 0) { issuerFacade.sendInvitation(any(), any(), any()) }
         }
     }
@@ -122,7 +123,7 @@ class AccountServiceImplTest {
             val uuid = UUID.randomUUID()
             val account = mockk<Account>()
             coEvery { issuerFacade.getAccount(any<UUID>()) } returns account
-            val sut = AccountServiceImpl(issuerFacade, accountFactory)
+            val sut = AccountServiceImpl(issuerFacade, accountFactory, mockk())
 
             val result = sut.findByUUID(uuid)
 
@@ -134,7 +135,7 @@ class AccountServiceImplTest {
         fun `should return null if exception occurred`() = runTest {
             val uuid = UUID.randomUUID()
             coEvery { issuerFacade.getAccount(any<UUID>()) } throws Exception()
-            val sut = AccountServiceImpl(issuerFacade, accountFactory)
+            val sut = AccountServiceImpl(issuerFacade, accountFactory, mockk())
 
             val result = sut.findByUUID(uuid)
 
@@ -150,7 +151,7 @@ class AccountServiceImplTest {
             val accountIdentity = mockk<AccountIdentity>()
             val account = mockk<Account>()
             coEvery { issuerFacade.getAccount(any<AccountIdentity>()) } returns account
-            val sut = AccountServiceImpl(issuerFacade, accountFactory)
+            val sut = AccountServiceImpl(issuerFacade, accountFactory, mockk())
 
             val result = sut.findByAccountIdentity(accountIdentity)
 
@@ -162,7 +163,7 @@ class AccountServiceImplTest {
         fun `should return null if exception occurred`() = runTest {
             val accountIdentity = mockk<AccountIdentity>()
             coEvery { issuerFacade.getAccount(any<AccountIdentity>()) } throws Exception()
-            val sut = AccountServiceImpl(issuerFacade, accountFactory)
+            val sut = AccountServiceImpl(issuerFacade, accountFactory, mockk())
 
             val result = sut.findByAccountIdentity(accountIdentity)
 
@@ -183,7 +184,7 @@ class AccountServiceImplTest {
             val account = mockk<Account>()
             every { account getProperty "role" } answers { Role.PARTICIPANT }
             coEvery { issuerFacade.getAccount(any<AccountIdentity>()) } returns account
-            val sut = AccountServiceImpl(issuerFacade, accountFactory)
+            val sut = AccountServiceImpl(issuerFacade, accountFactory, mockk())
 
             val firstCall = sut.hasRoleByEmail(emailAddress, shouldNotHave)
             val secondCall = sut.hasRoleByEmail(emailAddress, shouldHave)
@@ -200,7 +201,7 @@ class AccountServiceImplTest {
             }
             val role = Role.RESEARCHER
             coEvery { issuerFacade.getAccount(any<AccountIdentity>()) } returns null
-            val sut = AccountServiceImpl(issuerFacade, accountFactory)
+            val sut = AccountServiceImpl(issuerFacade, accountFactory, mockk())
 
             assertFailsWith<IllegalArgumentException> {
                 sut.hasRoleByEmail(emailAddress, role)
@@ -218,7 +219,7 @@ class AccountServiceImplTest {
             val role = Role.RESEARCHER
             coEvery { issuerFacade.getAccount(any<AccountIdentity>()) } returns null
             coEvery { issuerFacade.addRole(any(), any()) } just runs
-            val sut = AccountServiceImpl(issuerFacade, accountFactory)
+            val sut = AccountServiceImpl(issuerFacade, accountFactory, mockk())
 
             assertFailsWith<IllegalArgumentException> {
                 sut.addRole(accountIdentity, role)
@@ -235,7 +236,7 @@ class AccountServiceImplTest {
             val mockAccount = mockk<Account>()
             coEvery { issuerFacade.getAccount(any<AccountIdentity>()) } returns mockAccount
             coEvery { issuerFacade.addRole(any(), any()) } just runs
-            val sut = AccountServiceImpl(issuerFacade, accountFactory)
+            val sut = AccountServiceImpl(issuerFacade, accountFactory, mockk())
 
             sut.addRole(accountIdentity, role)
 

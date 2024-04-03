@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: "${CAWS_PORT}"
   max-http-request-header-size: 48KB
   tomcat:
     uri-encoding: UTF-8
@@ -110,9 +110,6 @@ spring:
 
   jackson:
     default-property-inclusion: NON_NULL
-
-caffeine:
-  expire-after-write: 300000
 
 keycloak:
   auth-server-url: "${KC_URL}"
@@ -242,10 +239,8 @@ storage:
   directory: /home/carp/storage/${spring.profiles.active}/
 
 environment:
-  server: "${CAWS_HOST}"
-  subfolder: "${CAWS_SUBFOLDER}"
-  portal-subfolder: "${CAWS_PORTAL_SUBFOLDER}"
-
+  url: "${CAWS_URL}"
+  portalUrl: "${CAWS_PORTAL_URL}"
 
 alert:
   # The email address to send alerts to
