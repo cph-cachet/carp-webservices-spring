@@ -43,7 +43,7 @@ services:
       - .env
     image: "carp-ws:${PROFILE}"
     ports:
-      - "${CAWS_PORT}:8080"
+      - "${CAWS_PORT}:${CAWS_PORT}"
     profiles:
       - production
       - staging
