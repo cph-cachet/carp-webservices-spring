@@ -1,14 +1,14 @@
 package dk.cachet.carp.webservices.protocol.controller
 
-import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.protocols.infrastructure.ProtocolFactoryServiceRequest
 import dk.cachet.carp.protocols.infrastructure.ProtocolServiceRequest
 import dk.cachet.carp.webservices.common.constants.PathVariableName
+import dk.cachet.carp.webservices.common.exception.responses.ResourceNotFoundException
 import dk.cachet.carp.webservices.common.services.CoreServiceContainer
-import dk.cachet.carp.webservices.protocol.dto.GetLatestProtocolResponseDto
+import dk.cachet.carp.webservices.protocol.dto.ProtocolOverview
 import dk.cachet.carp.webservices.protocol.service.ProtocolService
+import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
 import io.swagger.v3.oas.annotations.Operation
-import kotlinx.coroutines.runBlocking
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.http.ResponseEntity
@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*
 class ProtocolController
 (
     private val services: CoreServiceContainer,
+    private val authenticationService: AuthenticationService,
     private val protocolService: ProtocolService,
 )
 {
@@ -29,7 +30,8 @@ class ProtocolController
         /** Path variables */
         const val PROTOCOL_SERVICE = "/api/protocol-service"
         const val PROTOCOL_FACTORY_SERVICE = "/api/protocol-factory-service"
-        const val GET_LATEST_PROTOCOL = "/api/protocols/{${PathVariableName.PROTOCOL_ID}}/latest"
+        const val GET_PROTOCOL_OVERVIEW = "/api/protocols/{${PathVariableName.PROTOCOL_ID}}/latest"
+        const val GET_PROTOCOLS_OVERVIEW = "/api/protocols-overview"
     }
 
     @PostMapping(value = [PROTOCOL_SERVICE])
@@ -48,16 +50,23 @@ class ProtocolController
         return services.protocolFactoryService.invoke( request ).let { ResponseEntity.ok( it ) }
     }
 
-    @GetMapping(value = [GET_LATEST_PROTOCOL])
-    @PreAuthorize("isProtocolOwner(#protocolId)")
+    @GetMapping(value = [GET_PROTOCOL_OVERVIEW])
+    @PreAuthorize("hasRole('RESEARCHER')")
     @Operation(tags = ["protocol/getLatestProtocolById.json"])
-    fun getLatestProtocolById (
-        @PathVariable(PathVariableName.PROTOCOL_ID) protocolId: UUID
-    ): GetLatestProtocolResponseDto?
+    suspend fun getSingleProtocolOverview(
+        @PathVariable(PathVariableName.PROTOCOL_ID) protocolId: String
+    ): ProtocolOverview
     {
-        return runBlocking {
-            LOGGER.info("/api/protocols/$protocolId/latest")
-            return@runBlocking protocolService.getLatestProtocolById(protocolId.stringRepresentation)
-        }
+        LOGGER.info("/api/protocols/$protocolId/latest")
+        return protocolService.getSingleProtocolOverview(protocolId) ?:
+            throw ResourceNotFoundException("No protocol found with id $protocolId.")
+    }
+
+    @GetMapping(value = [GET_PROTOCOLS_OVERVIEW])
+    @PreAuthorize("hasRole('RESEARCHER')")
+    suspend fun getProtocolsOverview(): List<ProtocolOverview>
+    {
+        LOGGER.info("Start GET: /api/protocols")
+        return protocolService.getProtocolsOverview( authenticationService.getId() )
     }
 }

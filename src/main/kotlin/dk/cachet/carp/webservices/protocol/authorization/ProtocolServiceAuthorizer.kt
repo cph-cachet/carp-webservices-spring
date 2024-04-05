@@ -23,9 +23,13 @@ class ProtocolServiceAuthorizer(
             is ProtocolServiceRequest.AddVersion -> auth.requireOwner( protocol.ownerId )
             is ProtocolServiceRequest.UpdateParticipantDataConfiguration ->
                 auth.require( Claim.ProtocolOwner( protocolId ))
-            is ProtocolServiceRequest.GetBy -> auth.require( Claim.ProtocolOwner( protocolId ) )
-            is ProtocolServiceRequest.GetAllForOwner -> auth.requireOwner( ownerId )
-            is ProtocolServiceRequest.GetVersionHistoryFor -> auth.require( Claim.ProtocolOwner( protocolId ) )
+
+            // NOTE: The required authorities for these requests deviate from CORE's recommendations (ProtocolOwner).
+            // Protocols don't (shouldn't) contain sensitive data, so we don't need to restrict access to the owner.
+            is ProtocolServiceRequest.GetBy,
+            is ProtocolServiceRequest.GetAllForOwner,
+            is ProtocolServiceRequest.GetVersionHistoryFor -> auth.require( Role.RESEARCHER )
+
         }
 
     override suspend fun ProtocolServiceRequest<*>.changeClaimsOnSuccess(result: Any? ) =
