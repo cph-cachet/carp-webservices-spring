@@ -24,6 +24,7 @@ import dk.cachet.carp.webservices.study.service.CoreStudyService
 import io.swagger.v3.oas.annotations.Operation
 import jakarta.validation.Valid
 import kotlinx.coroutines.runBlocking
+import kotlinx.datetime.Clock
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.http.HttpHeaders
@@ -334,7 +335,7 @@ class StudyController
 
         val responseHeaders = HttpHeaders()
         responseHeaders.set(HttpHeaders.CONTENT_TYPE, "text/csv")
-        responseHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=${studyId}_accounts.csv")
+        responseHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=${Clock.System.now()}_${studyId}.csv")
 
         val header = "account_id,study_deployment_id,access_link,expiry_date\n"
         val body = anonymousParticipants.joinToString("") { participant ->
