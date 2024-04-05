@@ -79,13 +79,14 @@ class AccountServiceImpl(
 
     override suspend fun generateTemporaryAccount(
         identity: AccountIdentity,
-        expirationSeconds: Long?
+        expirationSeconds: Long?,
+        redirectUri: String?
     ): String {
         val account = issuerFacade.createAccount(accountFactory.fromAccountIdentity(identity), AccountType.GENERATED)
 
         return issuerFacade.recoverAccount(
             account,
-            environmentUtil.portalUrl,
+            redirectUri,
             expirationSeconds
         )
     }

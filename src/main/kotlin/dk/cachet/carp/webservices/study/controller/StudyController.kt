@@ -63,7 +63,7 @@ class StudyController
         const val GET_PARTICIPANTS_ACCOUNTS = "/api/studies/{${PathVariableName.STUDY_ID}}/participants/accounts"
         const val GET_PARTICIPANT_GROUP_STATUS = "/api/studies/{${PathVariableName.STUDY_ID}}/participantGroup/status"
         const val ADD_PARTICIPANTS = "/api/studies/{${PathVariableName.STUDY_ID}}/participants/add"
-        const val GENERATE_ANONYMOUS_PARTICIPANTS  = "/api/studies/{${PathVariableName.STUDY_ID}}/generate"
+        const val GENERATE_ANONYMOUS_PARTICIPANTS = "/api/studies/{${PathVariableName.STUDY_ID}}/generate"
     }
 
     private val studyService = coreStudyService.instance
@@ -331,6 +331,7 @@ class StudyController
             request.amountOfAccounts,
             request.expirationSeconds,
             request.participantRoleName,
+            request.redirectUri
         )
 
         val responseHeaders = HttpHeaders()
@@ -339,10 +340,9 @@ class StudyController
 
         val header = "account_id,study_deployment_id,access_link,expiry_date\n"
         val body = anonymousParticipants.joinToString("") { participant ->
-            val url = "\"${participant.magicLink}?deviceRedirectUri=${request.redirectUri}\""
-            "${participant.accountId},${participant.studyDeploymentId},${url},${participant.expiryDate}\n"
+            "${participant.accountId},${participant.studyDeploymentId},\"${participant.magicLink}\",${participant.expiryDate}\n"
         }
 
-        return ResponseEntity((header+body).toByteArray(Charsets.ISO_8859_1), responseHeaders, HttpStatus.OK)
+        return ResponseEntity((header + body).toByteArray(Charsets.ISO_8859_1), responseHeaders, HttpStatus.OK)
     }
 }

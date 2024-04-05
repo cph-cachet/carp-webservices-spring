@@ -14,6 +14,7 @@ interface AccountService {
     suspend fun addRole(identity: AccountIdentity, role: Role)
     suspend fun generateTemporaryAccount(
         identity: AccountIdentity,
-        expirationSeconds: Long?
+        expirationSeconds: Long?,
+        redirectUri: String?
     ): String
 }

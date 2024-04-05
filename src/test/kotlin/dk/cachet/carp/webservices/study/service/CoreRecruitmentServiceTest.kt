@@ -58,7 +58,7 @@ class CoreRecruitmentServiceTest {
             )
 
             assertFailsWith<IllegalArgumentException> {
-                sut.createAnonymousParticipants(UUID.randomUUID(), 1, 1, "roleName")
+                sut.createAnonymousParticipants(UUID.randomUUID(), 1, 1, "roleName", "redirect")
             }
 
             coVerify(exactly = 1) { studyService.getStudyDetails(any()) }
@@ -85,7 +85,7 @@ class CoreRecruitmentServiceTest {
             )
 
             assertFailsWith<IllegalArgumentException> {
-                sut.createAnonymousParticipants(UUID.randomUUID(), 1, 1, "notInProtocol")
+                sut.createAnonymousParticipants(UUID.randomUUID(), 1, 1, "notInProtocol", "redirect")
             }
 
             coVerify(exactly = 1) { studyService.getStudyDetails(any()) }

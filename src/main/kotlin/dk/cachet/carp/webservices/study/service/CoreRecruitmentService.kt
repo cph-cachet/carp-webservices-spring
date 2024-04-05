@@ -91,7 +91,8 @@ class CoreRecruitmentService(
         studyId: UUID,
         amount: Int,
         expirationSeconds: Long,
-        participantRoleName: String
+        participantRoleName: String,
+        redirectUri: String?
     ): List<AnonymousParticipant> {
         LOGGER.info("Generating $amount anonymous participants for study $studyId")
 
@@ -110,7 +111,8 @@ class CoreRecruitmentService(
 
             val link = accountService.generateTemporaryAccount(
                 UsernameAccountIdentity(username.toString()),
-                expirationSeconds
+                expirationSeconds,
+                redirectUri
             )
 
             val participant = instance.addParticipant(studyId, Username(username.toString()))
