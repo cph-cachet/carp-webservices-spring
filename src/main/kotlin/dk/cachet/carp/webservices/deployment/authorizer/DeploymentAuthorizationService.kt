@@ -100,13 +100,18 @@ class DeploymentAuthorizationService(
         return canAccessDeployments(studyDeploymentIds)
     }
 
-    fun canGetStatistics(deploymentIds: List<String>): Boolean {
-        if (isAccountSystemAdmin()) return true
-        if (!isAccountResearcher()) return false
-
-        val uuids = deploymentIds.map { UUID(it) }.toSet()
-        return canResearcherAccessDeployments(uuids)
-    }
+    /**
+     * Statistics endpoint is disabled, due to a refactor of the authorization
+     * services with clear service boundaries. Also, none of the current clients
+     * rely on this functionality.
+     *
+     * If there is ever a need for a statistics endpoint, there should probably be
+     * at least two of those: one for study management, that takes in a study ID and
+     * calculates all the relevant statistics for a study, and one which takes a single
+     * deployment ID as parameter, this could be used for displaying study related
+     * statistics for a single participant group.
+     */
+    fun canGetStatistics(deploymentIds: List<String>): Boolean = false
 
     fun canDeleteDeployments(deploymentIds: Set<UUID>): Boolean
     {
