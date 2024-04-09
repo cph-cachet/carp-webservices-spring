@@ -8,11 +8,33 @@ import dk.cachet.carp.webservices.common.exception.responses.UnauthorizedExcepti
 import dk.cachet.carp.webservices.deployment.repository.CoreDeploymentRepository
 import dk.cachet.carp.webservices.deployment.repository.ParticipantGroupRepository
 import dk.cachet.carp.webservices.security.authentication.domain.Account
+import dk.cachet.carp.webservices.security.authentication.getAuthenticationOrThrow
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
 import dk.cachet.carp.webservices.study.domain.Study
 import dk.cachet.carp.webservices.study.repository.CoreStudyRepository
 import kotlinx.coroutines.runBlocking
-import org.springframework.dao.PermissionDeniedDataAccessException
+
+fun requireClaims( vararg claims: Claim ) = requireClaims(*claims) { "Permission denied" }
+fun requireRole( role: Role ) = requireRole( role ) { "Permission denied" }
+fun requireAuthenticated( accountId: UUID ) = requireAuthenticated( accountId ) { "Permission denied" }
+
+inline fun requireClaims( vararg claims: Claim, lazyMessage: () -> Any = {} )
+{
+    val account = getAuthenticationOrThrow()
+    require( !claims.all { account.carpClaims?.contains( it ) == true }, lazyMessage )
+}
+
+inline fun requireRole( role: Role, lazyMessage: () -> Any = {} )
+{
+    val account = getAuthenticationOrThrow()
+    require ( account.role?.let { role >= it } ?: false , lazyMessage )
+}
+
+inline fun requireAuthenticated( accountId: UUID, lazyMessage: () -> Any = {} )
+{
+    val account = getAuthenticationOrThrow()
+    require( account.id == accountId.toString(), lazyMessage )
+}
 
 open class AuthorizationService(
     // TODO: authorization service shouldn't access the repositories directly
@@ -23,27 +45,14 @@ open class AuthorizationService(
     protected val authenticationService: AuthenticationService
 )
 {
-
     fun isAccountSystemAdmin(): Boolean
     {
         return authenticationService.getCurrentPrincipal().role!! >= Role.SYSTEM_ADMIN
     }
 
-    fun isAccountCarpAdmin(): Boolean
-    {
-        return authenticationService.getCurrentPrincipal().role!! >= Role.CARP_ADMIN
-    }
-
     fun isAccountResearcher(): Boolean
     {
         return authenticationService.getCurrentPrincipal().role!! >= Role.RESEARCHER
-    }
-
-    fun isResearcherPartOfTheDeployment(deploymentId: String): Boolean = runBlocking {
-        if (!isAccountResearcher()) return@runBlocking false
-
-        val deployment = deploymentRepository.getWSDeploymentById(UUID(deploymentId))?: return@runBlocking false
-        return@runBlocking isResearcherPartOfTheStudy(deployment.deployedFromStudyId!!)
     }
 
     fun isParticipantPartOfTheDeployment(deploymentId: String): Boolean

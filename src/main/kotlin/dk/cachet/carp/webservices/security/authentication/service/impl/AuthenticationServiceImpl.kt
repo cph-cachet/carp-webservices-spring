@@ -10,13 +10,12 @@ import org.springframework.stereotype.Service
 
 @Service
 class AuthenticationServiceImpl(
-    private val accountFactory: AccountFactory
 ) : AuthenticationService {
     override fun getCurrentPrincipal(): Account {
         val jwt = SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
         if (jwt.token == null) {
             throw UnauthorizedException("No JWT token found in authentication.")
         }
-        return accountFactory.fromJwtAuthenticationToken(jwt)
+        return Account.fromJwt(jwt)
     }
 }

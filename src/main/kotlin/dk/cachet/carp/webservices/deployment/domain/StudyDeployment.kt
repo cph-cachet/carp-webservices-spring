@@ -12,8 +12,7 @@ import org.hibernate.type.SqlTypes
 
 /**
  * The Data Class [StudyDeployment].
- * The [StudyDeployment] represents a study deployment with the given [id], [snapshot], and
- * [deployedFromStudyId] of the study.
+ * The [StudyDeployment] represents a study deployment with the given [id], [snapshot] of the study.
  */
 @Entity
 @Table(name = "deployments")
@@ -29,8 +28,5 @@ data class StudyDeployment
         @JdbcTypeCode(SqlTypes.JSON)
         @Column(columnDefinition = "jsonb")
         @Type(JsonBinaryType::class)
-        var snapshot: JsonNode? = null,
-
-        /** The [deployedFromStudyId] of the deployment. */
-        var deployedFromStudyId: String? = null
+        var snapshot: JsonNode? = null
 ): Auditable()

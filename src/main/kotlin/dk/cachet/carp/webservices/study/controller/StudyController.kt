@@ -12,6 +12,10 @@ import dk.cachet.carp.webservices.common.exception.responses.BadRequestException
 import dk.cachet.carp.webservices.deployment.repository.CoreDeploymentRepository
 import dk.cachet.carp.webservices.security.authentication.domain.Account
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
+import dk.cachet.carp.webservices.security.authorization.Claim
+import dk.cachet.carp.webservices.security.authorization.Role
+import dk.cachet.carp.webservices.security.authorization.requireClaims
+import dk.cachet.carp.webservices.security.authorization.requireRole
 import dk.cachet.carp.webservices.study.authorization.StudyAuthorizationService
 import dk.cachet.carp.webservices.study.domain.AnonymousLinkRequest
 import dk.cachet.carp.webservices.study.domain.ParticipantGroupsStatus
@@ -37,7 +41,6 @@ import org.springframework.web.bind.annotation.*
 class StudyController
     (
     private val coreParticipantRepository: CoreParticipantRepository,
-    private val coreDeploymentRepository: CoreDeploymentRepository,
     private val coreStudyRepository: CoreStudyRepository,
     private val studyAuthorizationService: StudyAuthorizationService,
     private val validationMessages: MessageBase,
@@ -133,31 +136,30 @@ class StudyController
 
     @PostMapping(value = [STUDY_SERVICE])
     @Operation(tags = ["study/studies.json"])
-    fun studies(@RequestBody request: StudyServiceRequest<*>): ResponseEntity<*> = runBlocking {
-        return@runBlocking when (request) {
+    suspend fun studies(@RequestBody request: StudyServiceRequest<*>): ResponseEntity<*> =
+        when (request)
+        {
             is StudyServiceRequest.CreateStudy -> {
-                if (!studyAuthorizationService.canCreateStudy()) {
-                    return@runBlocking ResponseEntity(HttpStatus.FORBIDDEN)
-                }
+                requireRole( Role.RESEARCHER )
+
                 LOGGER.info("Start POST: $STUDY_SERVICE -> CreateStudy")
                 val status =
                     studyService.createStudy(request.ownerId, request.name, request.description, request.invitation)
                 ResponseEntity.status(HttpStatus.CREATED).body(status)
+
+                // grant and manager
             }
 
             is StudyServiceRequest.GetStudyStatus -> {
-                if (!studyAuthorizationService.canAccessStudy(request.studyId.stringRepresentation)) {
-                    return@runBlocking ResponseEntity(HttpStatus.FORBIDDEN)
-                }
+                requireClaims( Claim.ManageStudy( request.studyId ) )
+
                 LOGGER.info("Start POST: $STUDY_SERVICE -> GetStudyStatus")
                 val status = studyService.getStudyStatus(request.studyId)
                 ResponseEntity.ok(status)
             }
 
             is StudyServiceRequest.GetStudiesOverview -> {
-                if (!studyAuthorizationService.canCreateStudy()) {
-                    return@runBlocking ResponseEntity(HttpStatus.FORBIDDEN)
-                }
+                requireClaims( Claim.ManageStudy( request.ownerId ) )
                 LOGGER.info("Start POST: $STUDY_SERVICE -> GetStudiesOverview")
                 val result = studyService.getStudiesOverview(request.ownerId)
                 ResponseEntity.ok(result)
@@ -268,7 +270,6 @@ class StudyController
                 }
                 LOGGER.info("Start POST: $RECRUITMENT_SERVICE -> DeployParticipantGroup")
                 val result = recruitmentService.inviteNewParticipantGroup(request.studyId, request.group)
-                setStudyIdForNewDeployment(result, request.studyId)
                 ResponseEntity.ok(result)
             }
 
@@ -297,13 +298,6 @@ class StudyController
                 )
             )
         }
-    }
-
-    private suspend fun setStudyIdForNewDeployment(participantGroupStatus: ParticipantGroupStatus, studyId: UUID) {
-        val deploymentId = participantGroupStatus.id
-        val newDeployment = coreDeploymentRepository.getWSDeploymentById(deploymentId)
-        newDeployment!!.deployedFromStudyId = studyId.stringRepresentation
-        coreDeploymentRepository.updateWSDeployment(newDeployment)
     }
 
     @PostMapping(value = [ADD_PARTICIPANTS])
