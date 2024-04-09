@@ -26,7 +26,7 @@ class ConsentDocumentController(private val consentDocumentService: IConsentDocu
     }
 
     @GetMapping
-    @PreAuthorize("@consentDocumentAuthorizationService.canViewAllConsentDocuments(#deploymentId)")
+    @PreAuthorize("#{false}")
     @Operation(tags = ["consentDocument/getAll.json"])
     fun getAll(@PathVariable(PathVariableName.DEPLOYMENT_ID) deploymentId: String): List<ConsentDocument>
     {
@@ -35,7 +35,7 @@ class ConsentDocumentController(private val consentDocumentService: IConsentDocu
     }
 
     @GetMapping(CONSENT_BY_ID)
-    @PreAuthorize("@consentDocumentAuthorizationService.canViewConsentDocument(#deploymentId, #consentId)")
+    @PreAuthorize("#{false}")
     @Operation(tags = ["consentDocument/getOne.json"])
     fun getOne(
             @PathVariable(PathVariableName.DEPLOYMENT_ID) deploymentId: String,
@@ -46,7 +46,7 @@ class ConsentDocumentController(private val consentDocumentService: IConsentDocu
     }
 
     @PostMapping
-    @PreAuthorize("@consentDocumentAuthorizationService.canCreateConsentDocument(#deploymentId)")
+    @PreAuthorize("#{false}")
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(tags = ["consentDocument/create.json"])
     fun create(
@@ -58,7 +58,7 @@ class ConsentDocumentController(private val consentDocumentService: IConsentDocu
     }
 
     @DeleteMapping(CONSENT_BY_ID)
-    @PreAuthorize("@consentDocumentAuthorizationService.canViewConsentDocument(#deploymentId, #consentId)")
+    @PreAuthorize("#{false}")
     @Operation(tags = ["consentDocument/delete.json"])
     fun delete(
             @PathVariable(PathVariableName.DEPLOYMENT_ID) deploymentId: String,

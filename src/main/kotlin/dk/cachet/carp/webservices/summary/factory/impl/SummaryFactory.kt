@@ -13,11 +13,11 @@ import java.time.temporal.ChronoUnit
 @Service
 class SummaryFactory(
     private val authenticationService: AuthenticationService
-) : ISummaryFactory {
+): ISummaryFactory {
 
     override fun create(studyId: UUID, deploymentIds: List<String>?): Summary {
         val createdAt = Instant.now()
-        val createdBy = authenticationService.getCurrentPrincipal().username!!
+        val createdBy = authenticationService.getAuthentication().id!!
         val hash = createHash(studyId, deploymentIds, createdAt, createdBy)
 
         // TODO the name is temporarily a studyId until we fix the callBlocking hell so I can actually get Core objects

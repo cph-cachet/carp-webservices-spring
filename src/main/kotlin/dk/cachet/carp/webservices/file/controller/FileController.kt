@@ -38,7 +38,7 @@ class FileController(private val fileStorage: FileStorage, private val fileServi
 
     @GetMapping(FILE_BASE)
     @Operation(tags = ["file/getAll.json"])
-    @PreAuthorize("@fileAuthorizationService.canViewAllFiles(#studyId)")
+    @PreAuthorize("#{false}")
     fun getAll(
         @PathVariable(PathVariableName.STUDY_ID) studyId: String,
         @RequestParam(RequestParamName.QUERY) query: String?): List<File>
@@ -48,7 +48,7 @@ class FileController(private val fileStorage: FileStorage, private val fileServi
     }
 
     @GetMapping(GET_BY_DEPLOYMENT_ID)
-    @PreAuthorize("@fileAuthorizationService.canViewAllFiles(#studyId)")
+    @PreAuthorize("#{false}")
     fun getByStudyIdAndDeploymentId(
         @PathVariable(PathVariableName.STUDY_ID) studyId: String,
         @PathVariable(PathVariableName.DEPLOYMENT_ID) deploymentId: String): List<File>
@@ -59,7 +59,7 @@ class FileController(private val fileStorage: FileStorage, private val fileServi
 
     @GetMapping(FILE_ID)
     @Operation(tags = ["file/getOne.json"])
-    @PreAuthorize("@fileAuthorizationService.canViewFile(#studyId, #fileId)")
+    @PreAuthorize("#{false}")
     fun getOne(
         @PathVariable(PathVariableName.STUDY_ID) studyId: String,
         @PathVariable(PathVariableName.FILE_ID) fileId: Int): File
@@ -71,7 +71,7 @@ class FileController(private val fileStorage: FileStorage, private val fileServi
     @GetMapping(produces = [MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_OCTET_STREAM_VALUE], value = [DOWNLOAD])
     @ResponseBody
     @Operation(tags = ["file/download.json"])
-    @PreAuthorize("@fileAuthorizationService.canViewFile(#studyId, #id)")
+    @PreAuthorize("#{false}")
     fun download(
         @PathVariable(PathVariableName.STUDY_ID) studyId: String,
         @PathVariable(PathVariableName.FILE_ID) id: Int): ResponseEntity<Resource>
@@ -88,7 +88,7 @@ class FileController(private val fileStorage: FileStorage, private val fileServi
                  value = [FILE_BASE])
     @Operation(tags = ["file/create.json"])
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("@fileAuthorizationService.canCreateFile(#studyId)")
+    @PreAuthorize("#{false}")
     fun create(
         @PathVariable(PathVariableName.STUDY_ID) studyId: String,
         @RequestParam(RequestParamName.DEPLOYMENT_ID, required = false) deploymentId: String?,
@@ -102,7 +102,7 @@ class FileController(private val fileStorage: FileStorage, private val fileServi
     @DeleteMapping(FILE_ID)
     @Operation(tags = ["file/delete.json"])
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("@fileAuthorizationService.canViewFile(#studyId, #fileId)")
+    @PreAuthorize("#{false}")
     fun delete(
         @PathVariable(PathVariableName.STUDY_ID) studyId: String,
         @PathVariable(PathVariableName.FILE_ID) fileId: Int)
@@ -113,7 +113,7 @@ class FileController(private val fileStorage: FileStorage, private val fileServi
 
     @PostMapping(UPLOAD_IMAGE)
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("@fileAuthorizationService.canCreateFile(#studyId)")
+    @PreAuthorize("#{false}")
     fun uploadS3(
         @PathVariable(PathVariableName.STUDY_ID) studyId: String,
         @RequestParam(RequestParamName.IMAGE, required = true) image: MultipartFile): String

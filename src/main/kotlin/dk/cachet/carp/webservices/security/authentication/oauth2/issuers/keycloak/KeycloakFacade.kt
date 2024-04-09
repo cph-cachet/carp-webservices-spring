@@ -75,7 +75,7 @@ class KeycloakFacade(
         LOGGER.debug("Creating account {}", account)
 
         val userRepresentation = UserRepresentation
-            .createFromAccount(account, accountType)
+            .createFromAccount(account, RequiredAction.getForAccountType(accountType))
 
         adminClient.post().uri("/users")
             .headers {
@@ -179,7 +179,7 @@ class KeycloakFacade(
 
         LOGGER.debug("Sending invitation to account with id: ${account.id}")
 
-        val requiredActions = RequiredActions.getForAccountType(accountType)
+        val requiredActions = RequiredAction.getForAccountType(accountType)
 
         adminClient.put().uri("/users/${account.id}/execute-actions-email")
         { uriBuilder: UriBuilder ->
@@ -201,8 +201,23 @@ class KeycloakFacade(
             .awaitBodilessEntity()
     }
 
-    override suspend fun updateAccount(account: Account) {
-        throw UnsupportedOperationException("Updating accounts is not supported by Carp Webservices.")
+    override suspend fun updateAccount(account: Account, requiredActions: List<RequiredAction>): Account {
+        val token = authenticate().accessToken
+
+        LOGGER.debug("Updating account: {}", account)
+
+        val userRepresentation = UserRepresentation
+            .createFromAccount(account, requiredActions)
+
+        adminClient.put().uri("/users/${account.id}")
+            .headers {
+                it.setBearerAuth(token!!)
+            }
+            .bodyValue(userRepresentation)
+            .retrieve()
+            .awaitBodilessEntity()
+
+        return account
     }
 
     override suspend fun deleteAccount(id: String) {

@@ -32,7 +32,7 @@ class CollectionController(private val collectionService: ICollectionService)
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("@collectionAuthorizationService.canViewCollection(#studyId)")
+    @PreAuthorize("#{false}")
     fun create(
             @PathVariable(PathVariableName.STUDY_ID) studyId: String,
             @Valid @RequestBody request: CollectionCreateRequestDto): Collection
@@ -42,7 +42,7 @@ class CollectionController(private val collectionService: ICollectionService)
     }
 
     @GetMapping(value = [GET_COLLECTION_BY_ID])
-    @PreAuthorize("@collectionAuthorizationService.canViewCollection(#studyId)")
+    @PreAuthorize("#{false}")
     @Operation(tags = ["collection/getByStudyIdAndCollectionId.json"])
     fun getByStudyIdAndCollectionId(
             @PathVariable(PathVariableName.STUDY_ID) studyId: String,
@@ -53,7 +53,7 @@ class CollectionController(private val collectionService: ICollectionService)
     }
 
     @GetMapping(value = [GET_COLLECTION_BY_NAME])
-    @PreAuthorize("@collectionAuthorizationService.canViewCollection(#studyId)")
+    @PreAuthorize("#{false}")
     @Operation(tags = ["collection/getByStudyIdAndCollectionName.json"])
     fun getByStudyIdAndCollectionName(
             @PathVariable(PathVariableName.STUDY_ID) studyId: String,
@@ -64,7 +64,7 @@ class CollectionController(private val collectionService: ICollectionService)
     }
 
     @GetMapping
-    @PreAuthorize("@collectionAuthorizationService.canViewCollection(#studyId)")
+    @PreAuthorize("#{false}")
     @Operation(tags = ["collection/getAll.json"])
     fun getAll(
             @PathVariable(PathVariableName.STUDY_ID) studyId: String,
@@ -75,7 +75,7 @@ class CollectionController(private val collectionService: ICollectionService)
     }
 
     @GetMapping(value = [GET_COLLECTION_BY_DEPLOYMENT_ID])
-    @PreAuthorize("@collectionAuthorizationService.canViewCollection(#studyId)")
+    @PreAuthorize("#{false}")
     fun getByStudyIdAndDeploymentId(
             @PathVariable(PathVariableName.STUDY_ID) studyId: String,
             @PathVariable(PathVariableName.DEPLOYMENT_ID) deploymentId: String): List<Collection>
@@ -85,7 +85,7 @@ class CollectionController(private val collectionService: ICollectionService)
     }
 
     @DeleteMapping(value = [GET_COLLECTION_BY_ID])
-    @PreAuthorize("@collectionAuthorizationService.canModifyCollection(#studyId, #collectionId)")
+    @PreAuthorize("#{false}")
     @Operation(tags = ["collection/delete.json"])
     fun delete(
             @PathVariable(PathVariableName.STUDY_ID) studyId: String,
@@ -96,7 +96,7 @@ class CollectionController(private val collectionService: ICollectionService)
     }
 
     @PutMapping(value = [GET_COLLECTION_BY_ID])
-    @PreAuthorize("@collectionAuthorizationService.canModifyCollection(#studyId, #collectionId)")
+    @PreAuthorize("#{false}")
     @Operation(tags = ["collection/update.json"])
     fun update(
             @PathVariable(PathVariableName.STUDY_ID) studyId: String,

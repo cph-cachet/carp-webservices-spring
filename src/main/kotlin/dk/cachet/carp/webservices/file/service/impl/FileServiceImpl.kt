@@ -12,12 +12,12 @@ import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.exception.responses.ResourceNotFoundException
 import dk.cachet.carp.webservices.common.query.QueryVisitor
-import dk.cachet.carp.webservices.file.authorization.FileAuthorizationService
 import dk.cachet.carp.webservices.file.domain.File
 import dk.cachet.carp.webservices.file.repository.FileRepository
 import dk.cachet.carp.webservices.file.service.FileService
 import dk.cachet.carp.webservices.file.service.FileStorage
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
+import dk.cachet.carp.webservices.security.authorization.Role
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.beans.factory.annotation.Value
@@ -35,7 +35,6 @@ class FileServiceImpl(
     private val fileStorage: FileStorage,
     private val validateMessages: MessageBase,
     private val s3Client: AmazonS3,
-    private val fileAuthorizationService: FileAuthorizationService,
     private val authenticationService: AuthenticationService,
     @Value("\${s3.space.bucket}") private val s3SpaceBucket: String,
     @Value("\${s3.space.endpoint}") private val s3SpaceEndpoint: String
@@ -48,7 +47,9 @@ class FileServiceImpl(
 
     override fun getAll(query: String?, studyId: String): List<File>
     {
-        val isResearcher = fileAuthorizationService.isAccountResearcher()
+        val account = authenticationService.getAuthentication()
+        val isResearcher = account.role!! >= Role.RESEARCHER
+
 
         if (isResearcher && query == null)
         {
@@ -59,7 +60,7 @@ class FileServiceImpl(
             query?.let {
                 val queryForRole = if (!isResearcher)
                      // Return data relevant to this user only.
-                    "$query;created_by==${authenticationService.getCurrentPrincipal().id};study_id==$studyId"
+                    "$query;created_by==${account.id!!};study_id==$studyId"
                 else
                 {
                     // Return data relevant to this study.
@@ -70,7 +71,7 @@ class FileServiceImpl(
                         .accept(QueryVisitor<File>())
                 return fileRepository.findAll(specification)
             }
-            return fileRepository.findByStudyIdAndCreatedBy(studyId, authenticationService.getCurrentPrincipal().id!!)
+            return fileRepository.findByStudyIdAndCreatedBy(studyId, account.id!!)
         }
     }
 

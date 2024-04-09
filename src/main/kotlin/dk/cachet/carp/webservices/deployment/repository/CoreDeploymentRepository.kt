@@ -102,11 +102,6 @@ class CoreDeploymentRepository(
         return optionalResult.get()
     }
 
-    fun getDeploymentSnapshotsByStudyId(studyId: String): List<StudyDeploymentSnapshot>
-    {
-        return studyDeploymentRepository.findAllByDeployedFromStudyId(studyId)
-                .map { objectMapper.treeToValue(it.snapshot, StudyDeploymentSnapshot::class.java) }
-    }
 
     private fun mapWSDeploymentToCore(deployment: dk.cachet.carp.webservices.deployment.domain.StudyDeployment): StudyDeployment
     {

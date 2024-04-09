@@ -20,8 +20,5 @@ class JpaAuditConfiguration(
      * The function [auditorAware] returns the current auditor of the application.
      */
     @Bean("auditorAware")
-    fun auditorAware(): AuditorAware<String>
-    {
-        return EntityAuditorAware(authenticationService)
-    }
+    fun auditorAware(): AuditorAware<String> = EntityAuditorAware(authenticationService)
 }

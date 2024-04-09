@@ -1,12 +1,13 @@
 package dk.cachet.carp.webservices.summary.controller
 
+import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.webservices.common.constants.PathVariableName
 import dk.cachet.carp.webservices.common.constants.RequestParamName
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
 import dk.cachet.carp.webservices.summary.controller.SummaryController.Companion.SUMMARY_BASE
 import dk.cachet.carp.webservices.summary.domain.CreateSummaryRequest
 import dk.cachet.carp.webservices.summary.domain.Summary
-import dk.cachet.carp.webservices.summary.service.ISummaryService
+import dk.cachet.carp.webservices.summary.service.SummaryService
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.core.io.Resource
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping(SUMMARY_BASE)
 class SummaryController(
-    private val summaryService: ISummaryService,
+    private val summaryService: SummaryService,
     private val authenticationService: AuthenticationService
 ) {
     companion object {
@@ -34,7 +35,7 @@ class SummaryController(
 
     @PostMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
-    @PreAuthorize("@summaryAuthorizationService.canCreateSummary(#request.studyId)")
+    @PreAuthorize("#{false}")
     fun create(@RequestBody request: CreateSummaryRequest): Summary
     {
         LOGGER.info("Start POST: $SUMMARY_BASE")
@@ -43,15 +44,15 @@ class SummaryController(
 
     @DeleteMapping(DELETE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("@summaryAuthorizationService.canDownloadSummary(#summaryId)")
-    fun delete(@PathVariable(PathVariableName.SUMMARY_ID) summaryId: String) {
+    @PreAuthorize("#{false}")
+    fun delete(@PathVariable(PathVariableName.SUMMARY_ID) summaryId: UUID) {
         LOGGER.info("Start DELETE: $DELETE")
         summaryService.deleteSummaryById(summaryId)
     }
 
     @GetMapping(DOWNLOAD)
-    @PreAuthorize("@summaryAuthorizationService.canDownloadSummary(#summaryId)")
-    fun download(@PathVariable(PathVariableName.SUMMARY_ID) summaryId: String): ResponseEntity<Resource> {
+    @PreAuthorize("#{false}")
+    fun download(@PathVariable(PathVariableName.SUMMARY_ID) summaryId: UUID): ResponseEntity<Resource> {
         LOGGER.info("Start GET: $DOWNLOAD")
         val file = summaryService.downloadSummary(summaryId)
         return ResponseEntity.ok().header(
@@ -62,9 +63,10 @@ class SummaryController(
 
     @GetMapping(LIST)
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("@summaryAuthorizationService.canListSummaries(#studyId)")
-    fun list(@RequestParam(RequestParamName.STUDY_ID) studyId: String?): List<Summary> {
+    @PreAuthorize("#{false}")
+    fun list(@RequestParam(RequestParamName.STUDY_ID) studyId: UUID?): List<Summary> {
         LOGGER.info("Start GET: $LIST")
-        return summaryService.listSummaries(authenticationService.getCurrentPrincipal().id!!, studyId)
+        val account = authenticationService.getAuthentication()
+        return summaryService.listSummaries(UUID(account.id!!), studyId)
     }
 }

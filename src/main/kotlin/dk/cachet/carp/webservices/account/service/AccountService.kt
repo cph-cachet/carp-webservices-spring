@@ -4,6 +4,7 @@ import dk.cachet.carp.common.application.EmailAddress
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.common.application.users.AccountIdentity
 import dk.cachet.carp.webservices.security.authentication.domain.Account
+import dk.cachet.carp.webservices.security.authorization.Claim
 import dk.cachet.carp.webservices.security.authorization.Role
 
 interface AccountService {
@@ -12,6 +13,7 @@ interface AccountService {
     suspend fun findByAccountIdentity(identity: AccountIdentity): Account?
     suspend fun hasRoleByEmail(email: EmailAddress, role: Role): Boolean
     suspend fun addRole(identity: AccountIdentity, role: Role)
+    suspend fun grant(identity: AccountIdentity, claims: Set<Claim>): Account
     suspend fun generateTemporaryAccount(
         identity: AccountIdentity,
         expirationSeconds: Long?,

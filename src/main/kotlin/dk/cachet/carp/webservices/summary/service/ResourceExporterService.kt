@@ -1,18 +1,19 @@
 package dk.cachet.carp.webservices.summary.service
 
+import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.webservices.summary.domain.SummaryLog
 import java.nio.file.Path
 
 /**
  * Functions to export serialized application data into the file system.
  */
-interface IResourceExporterService
+interface ResourceExporterService
 {
     /** Exports every application resource serialized into the specified [rootFolder]. */
-    suspend fun exportAllForStudy(studyId: String, deploymentIds: List<String>?, rootFolder: Path, summaryLog: SummaryLog)
+    suspend fun exportAllForStudy(studyId: UUID, deploymentIds: List<String>?, rootFolder: Path, summaryLog: SummaryLog)
 
     /** Exports the study serialized into the specified [rootFolder]. */
-    suspend fun exportStudy(studyId: String, rootFolder: Path, summaryLog: SummaryLog)
+    suspend fun exportStudy(studyId: UUID, rootFolder: Path, summaryLog: SummaryLog)
 
     /** Exports deployments serialized into the specified [rootFolder]. */
     fun exportDeployments(deploymentIds: List<String>, rootFolder: Path, summaryLog: SummaryLog)
@@ -30,10 +31,10 @@ interface IResourceExporterService
     fun exportConsents(deploymentIds: List<String>, rootFolder: Path, summaryLog: SummaryLog)
 
     /** Exports files serialized into the specified [rootFolder]. */
-    fun exportFiles(studyId: String, deploymentIds: List<String>, rootFolder: Path, summaryLog: SummaryLog)
+    fun exportFiles(studyId: UUID, deploymentIds: List<String>, rootFolder: Path, summaryLog: SummaryLog)
 
     /** Exports documents serialized into the specified [rootFolder]. */
-    fun exportDocuments(studyId: String, deploymentIds: List<String>, rootFolder: Path, summaryLog: SummaryLog)
+    fun exportDocuments(studyId: UUID, deploymentIds: List<String>, rootFolder: Path, summaryLog: SummaryLog)
 
     /** Creates a new directory and returns its [Path]. */
     fun createNewDirectory(leafDirName: String): Path
