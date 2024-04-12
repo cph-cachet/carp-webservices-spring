@@ -4,11 +4,9 @@ import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.DeleteObjectRequest
 import com.amazonaws.services.s3.model.PutObjectRequest
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
-import dk.cachet.carp.webservices.file.authorization.FileAuthorizationService
 import dk.cachet.carp.webservices.file.repository.FileRepository
 import dk.cachet.carp.webservices.file.service.FileStorage
 import dk.cachet.carp.webservices.file.service.impl.FileServiceImpl
-import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
 import io.mockk.*
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -23,8 +21,6 @@ class FileServiceTest {
     private val fileRepository: FileRepository = mockk()
     private val fileStorage: FileStorage = mockk()
     private val messageBase: MessageBase = mockk()
-    private val fileAuthorizationService: FileAuthorizationService = mockk()
-    private val authenticationService: AuthenticationService = mockk()
     private val s3Client: AmazonS3 = mockk()
 
     private val s3SpaceBucket = "s3://bucket"
@@ -43,8 +39,6 @@ class FileServiceTest {
                 fileStorage,
                 messageBase,
                 s3Client,
-                fileAuthorizationService,
-                authenticationService,
                 s3SpaceBucket,
                 s3SpaceEndpoint
             )
@@ -68,8 +62,6 @@ class FileServiceTest {
                 fileStorage,
                 messageBase,
                 s3Client,
-                fileAuthorizationService,
-                authenticationService,
                 s3SpaceBucket,
                 s3SpaceEndpoint
             )
@@ -99,8 +91,6 @@ class FileServiceTest {
                 fileStorage,
                 messageBase,
                 s3Client,
-                fileAuthorizationService,
-                authenticationService,
                 s3SpaceBucket,
                 s3SpaceEndpoint
             )
@@ -122,8 +112,6 @@ class FileServiceTest {
                 fileStorage,
                 messageBase,
                 s3Client,
-                fileAuthorizationService,
-                authenticationService,
                 s3SpaceBucket,
                 s3SpaceEndpoint
             )

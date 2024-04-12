@@ -1,6 +1,8 @@
 package dk.cachet.carp.webservices.security.authorization.service.impl
 
 import dk.cachet.carp.common.application.UUID
+import dk.cachet.carp.common.application.services.ApplicationService
+import dk.cachet.carp.common.infrastructure.services.ApplicationServiceRequest
 import dk.cachet.carp.webservices.account.service.AccountService
 import dk.cachet.carp.webservices.common.exception.responses.ForbiddenException
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
@@ -28,7 +30,7 @@ class AuthorizationServiceImpl(
         require( claims.all { account.carpClaims?.contains( it ) == true }, lazyMessage )
     }
 
-    override fun require( role: Role) = require( role ) { PERMISSION_DENIED_MSG }
+    override fun require( role: Role ) = require( role ) { PERMISSION_DENIED_MSG }
     private inline fun require( role: Role, crossinline lazyMessage: () -> Any = {} )
     {
         val account = authenticationService.getAuthentication()

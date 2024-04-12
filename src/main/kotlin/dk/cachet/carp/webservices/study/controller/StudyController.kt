@@ -3,6 +3,7 @@ package dk.cachet.carp.webservices.study.controller
 import dk.cachet.carp.common.application.EmailAddress
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.studies.infrastructure.RecruitmentServiceRequest
+import dk.cachet.carp.studies.infrastructure.StudyServiceDecorator
 import dk.cachet.carp.studies.infrastructure.StudyServiceRequest
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.constants.PathVariableName
@@ -64,7 +65,7 @@ class StudyController
         const val GENERATE_ANONYMOUS_PARTICIPANTS = "/api/studies/{${PathVariableName.STUDY_ID}}/generate"
     }
 
-    private val studyService = coreStudyService.instance
+    private val studyService: StudyServiceDecorator = TODO()
     private val recruitmentService = coreRecruitmentService.instance
 
     @PostMapping(value = [ADD_RESEARCHER])
