@@ -13,7 +13,7 @@ import dk.cachet.carp.webservices.document.dto.UpdateDocumentRequestDto
 import dk.cachet.carp.webservices.document.filter.DocumentSpecification
 import dk.cachet.carp.webservices.document.repository.DocumentRepository
 import dk.cachet.carp.webservices.document.service.IDocumentService
-import dk.cachet.carp.webservices.security.authorization.service.impl.Auth
+import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
 import dk.cachet.carp.webservices.security.authorization.Role
 import jakarta.servlet.http.HttpServletRequest
 import org.apache.logging.log4j.LogManager
@@ -28,6 +28,7 @@ class DocumentServiceImpl(
     private val documentRepository: DocumentRepository,
     private val documentTraverser: DocumentTraverser,
     private val validationMessages: MessageBase,
+    private val authenticationService: AuthenticationService
 ): IDocumentService
 {
     companion object
@@ -38,7 +39,7 @@ class DocumentServiceImpl(
     override fun getAll(pageRequest: PageRequest, query: String?, studyId: String): List<Document>
     {
         try {
-            val account = Auth.getPrincipal()
+            val account = authenticationService.getAuthentication()
             val isAccountResearcher = account.role!! >= Role.RESEARCHER
             val belongsToStudySpec = DocumentSpecification.belongsToStudyId(studyId)
             val belongsToUserSpec = DocumentSpecification.belongsToUserAccountId(account.id!!)

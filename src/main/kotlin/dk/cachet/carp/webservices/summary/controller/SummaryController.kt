@@ -3,7 +3,7 @@ package dk.cachet.carp.webservices.summary.controller
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.webservices.common.constants.PathVariableName
 import dk.cachet.carp.webservices.common.constants.RequestParamName
-import dk.cachet.carp.webservices.security.authorization.service.impl.Auth
+import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
 import dk.cachet.carp.webservices.summary.controller.SummaryController.Companion.SUMMARY_BASE
 import dk.cachet.carp.webservices.summary.domain.CreateSummaryRequest
 import dk.cachet.carp.webservices.summary.domain.Summary
@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping(SUMMARY_BASE)
 class SummaryController(
     private val summaryService: SummaryService,
+    private val authenticationService: AuthenticationService
 ) {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
@@ -65,6 +66,7 @@ class SummaryController(
     @PreAuthorize("#{false}")
     fun list(@RequestParam(RequestParamName.STUDY_ID) studyId: UUID?): List<Summary> {
         LOGGER.info("Start GET: $LIST")
-        return summaryService.listSummaries(UUID(Auth.getPrincipal().id!!), studyId)
+        val account = authenticationService.getAuthentication()
+        return summaryService.listSummaries(UUID(account.id!!), studyId)
     }
 }

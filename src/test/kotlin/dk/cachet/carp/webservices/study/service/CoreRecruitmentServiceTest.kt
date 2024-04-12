@@ -54,7 +54,6 @@ class CoreRecruitmentServiceTest {
                 coreStudyService,
                 mockk(),
                 mockk(),
-                mockk(),
             )
 
             assertFailsWith<IllegalArgumentException> {
@@ -79,7 +78,6 @@ class CoreRecruitmentServiceTest {
                 mockk(),
                 coreDeploymentService,
                 coreStudyService,
-                mockk(),
                 mockk(),
                 mockk(),
             )
