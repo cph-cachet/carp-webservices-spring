@@ -1,10 +1,10 @@
 package dk.cachet.carp.webservices.summary.domain
 
+import dk.cachet.carp.common.application.UUID
 import java.time.Instant
 
-data class SummaryLog
-(
-        var studyId: String,
+data class SummaryLog(
+        var studyId: UUID,
 
         val createdAt: Instant?,
 

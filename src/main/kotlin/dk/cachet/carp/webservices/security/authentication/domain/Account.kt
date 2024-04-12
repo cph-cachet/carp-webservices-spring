@@ -14,7 +14,7 @@ data class Account(
     var lastName: String? = null,
     var email: String? = null,
     var role: Role? = null,
-    var carpClaims: List<Claim>? = emptyList(),
+    var carpClaims: Set<Claim>? = emptySet(),
 ) {
     companion object Factory {
         fun fromJwt(jwt: JwtAuthenticationToken): Account {
@@ -32,7 +32,10 @@ data class Account(
                 lastName = claims["family_name"] as? String ?: "",
                 email = claims["email"] as? String ?: "",
                 role = role,
-                carpClaims = claims.mapNotNull { Claim.fromTokenClaimObject(it.key to it.value) }
+                carpClaims = claims
+                    .mapNotNull { Claim.fromTokenClaimObject(it.key to it.value) }
+                    .flatten()
+                    .toSet()
             )
         }
 

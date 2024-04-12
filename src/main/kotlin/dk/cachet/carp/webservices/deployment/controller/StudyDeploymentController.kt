@@ -2,19 +2,18 @@ package dk.cachet.carp.webservices.deployment.controller
 
 import dk.cachet.carp.deployments.infrastructure.DeploymentServiceRequest
 import dk.cachet.carp.deployments.infrastructure.ParticipationServiceRequest
+import dk.cachet.carp.webservices.account.service.AccountService
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.exception.responses.BadRequestException
 import dk.cachet.carp.webservices.dataPoint.service.DataPointService
-import dk.cachet.carp.webservices.deployment.authorizer.DeploymentAuthorizationService
 import dk.cachet.carp.webservices.deployment.dto.DeploymentStatisticsRequestDto
 import dk.cachet.carp.webservices.deployment.dto.DeploymentStatisticsResponseDto
 import dk.cachet.carp.webservices.deployment.service.CoreDeploymentService
 import dk.cachet.carp.webservices.deployment.service.CoreParticipationService
-import dk.cachet.carp.webservices.security.authentication.requireAuthenticated
 import dk.cachet.carp.webservices.security.authorization.*
+import dk.cachet.carp.webservices.security.authorization.service.AuthorizationService
 import io.swagger.v3.oas.annotations.Operation
 import jakarta.validation.Valid
-import kotlinx.coroutines.runBlocking
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.http.HttpStatus
@@ -30,6 +29,7 @@ class StudyDeploymentController
 (
     private val validationMessages: MessageBase,
     private val dataPointService: DataPointService,
+    private val authorizationService: AuthorizationService,
     coreParticipationService: CoreParticipationService,
     coreDeploymentService: CoreDeploymentService
 )
@@ -56,8 +56,6 @@ class StudyDeploymentController
         {
             is DeploymentServiceRequest.CreateStudyDeployment ->
             {
-                requireRole( Role.RESEARCHER )
-
                 LOGGER.info("Start POST: $DEPLOYMENT_SERVICE -> CreateStudyDeployment")
                 val result = deploymentService.createStudyDeployment(
                         request.id,
@@ -65,11 +63,19 @@ class StudyDeploymentController
                         request.invitations,
                         request.connectedDevicePreregistrations
                 )
+
+                authorizationService.grantCurrentAuthentication(
+                    setOf(
+                        Claim.ManageDeployment(result.studyDeploymentId),
+                        Claim.InDeployment( result.studyDeploymentId )
+                    )
+                )
+
                 ResponseEntity.status(HttpStatus.CREATED).body(result)
             }
             is DeploymentServiceRequest.RemoveStudyDeployments ->
             {
-                requireClaims( Claim.ManageDeployment( request.studyDeploymentIds ) )
+                authorizationService.require( request.studyDeploymentIds.map { Claim.ManageDeployment(it) }.toSet() )
 
                 LOGGER.info("Start POST: $DEPLOYMENT_SERVICE -> RemoveStudyDeployments")
                 val result = deploymentService.removeStudyDeployments(request.studyDeploymentIds)
@@ -77,7 +83,7 @@ class StudyDeploymentController
             }
             is DeploymentServiceRequest.GetStudyDeploymentStatus ->
             {
-                requireClaims( Claim.InDeployment( request.studyDeploymentId ) )
+                authorizationService.require( Claim.InDeployment( request.studyDeploymentId ) )
 
                 LOGGER.info("Start POST: $DEPLOYMENT_SERVICE -> GetStudyDeploymentStatus")
                 val result = deploymentService.getStudyDeploymentStatus(request.studyDeploymentId)
@@ -85,7 +91,7 @@ class StudyDeploymentController
             }
             is DeploymentServiceRequest.GetStudyDeploymentStatusList ->
             {
-                requireClaims( Claim.InDeployment( request.studyDeploymentIds ) )
+                authorizationService.require( request.studyDeploymentIds.map { Claim.InDeployment(it) }.toSet() )
 
                 LOGGER.info("Start POST: $DEPLOYMENT_SERVICE -> GetStudyDeploymentStatusList")
                 val result = deploymentService.getStudyDeploymentStatusList(request.studyDeploymentIds)
@@ -93,7 +99,7 @@ class StudyDeploymentController
             }
             is DeploymentServiceRequest.RegisterDevice ->
             {
-                requireClaims( Claim.InDeployment( request.studyDeploymentId ) )
+                authorizationService.require( Claim.InDeployment( request.studyDeploymentId ) )
 
                 LOGGER.info("Start POST: $DEPLOYMENT_SERVICE -> RegisterDevice")
                 val result = deploymentService.registerDevice(request.studyDeploymentId, request.deviceRoleName, request.registration)
@@ -101,7 +107,7 @@ class StudyDeploymentController
             }
             is DeploymentServiceRequest.UnregisterDevice ->
             {
-                requireClaims( Claim.InDeployment( request.studyDeploymentId ) )
+                authorizationService.require( Claim.InDeployment( request.studyDeploymentId ) )
 
                 LOGGER.info("Start POST: $DEPLOYMENT_SERVICE -> UnregisterDevice")
                 val result = deploymentService.unregisterDevice(request.studyDeploymentId, request.deviceRoleName)
@@ -109,7 +115,7 @@ class StudyDeploymentController
             }
             is DeploymentServiceRequest.GetDeviceDeploymentFor ->
             {
-                requireClaims( Claim.InDeployment( request.studyDeploymentId ) )
+                authorizationService.require( Claim.InDeployment( request.studyDeploymentId ) )
 
                 LOGGER.info("Start POST: $DEPLOYMENT_SERVICE -> GetDeviceDeploymentFor")
                 val result = deploymentService.getDeviceDeploymentFor(request.studyDeploymentId, request.primaryDeviceRoleName)
@@ -117,7 +123,7 @@ class StudyDeploymentController
             }
             is DeploymentServiceRequest.DeviceDeployed ->
             {
-                requireClaims( Claim.InDeployment( request.studyDeploymentId ) )
+                authorizationService.require( Claim.InDeployment( request.studyDeploymentId ) )
 
                 LOGGER.info("Start POST: $DEPLOYMENT_SERVICE -> DeploymentSuccessful")
                 val result = deploymentService.deviceDeployed(request.studyDeploymentId, request.primaryDeviceRoleName, request.deviceDeploymentLastUpdatedOn)
@@ -125,7 +131,7 @@ class StudyDeploymentController
             }
             is DeploymentServiceRequest.Stop ->
             {
-                requireClaims( Claim.InDeployment( request.studyDeploymentId ) )
+                authorizationService.require( Claim.InDeployment( request.studyDeploymentId ) )
 
                 LOGGER.info("Start POST: $DEPLOYMENT_SERVICE -> Stop")
                 val result = deploymentService.stop(request.studyDeploymentId)
@@ -144,7 +150,7 @@ class StudyDeploymentController
         {
             is ParticipationServiceRequest.GetActiveParticipationInvitations ->
             {
-                requireAuthenticated( request.accountId )
+                authorizationService.requireOwner( request.accountId )
 
                 LOGGER.info("Start POST: $PARTICIPATION_SERVICE -> GetActiveParticipationInvitations")
                 val result = participationService.getActiveParticipationInvitations(request.accountId)
@@ -152,7 +158,7 @@ class StudyDeploymentController
             }
             is ParticipationServiceRequest.GetParticipantData ->
             {
-                requireClaims( Claim.InDeployment( request.studyDeploymentId ) )
+                authorizationService.require( Claim.InDeployment( request.studyDeploymentId ) )
 
                 LOGGER.info("Start POST: $PARTICIPATION_SERVICE -> GetParticipantData")
                 val result = participationService.getParticipantData(request.studyDeploymentId)
@@ -160,7 +166,7 @@ class StudyDeploymentController
             }
             is ParticipationServiceRequest.GetParticipantDataList ->
             {
-                requireClaims( Claim.InDeployment( request.studyDeploymentIds ) )
+                authorizationService.require( request.studyDeploymentIds.map { Claim.InDeployment(it) }.toSet() )
 
                 LOGGER.info("Start POST: $PARTICIPATION_SERVICE -> GetParticipantDataList")
                 val result = participationService.getParticipantDataList(request.studyDeploymentIds)
@@ -168,7 +174,7 @@ class StudyDeploymentController
             }
             is ParticipationServiceRequest.SetParticipantData ->
             {
-                requireClaims( Claim.InDeployment( request.studyDeploymentId ) )
+                authorizationService.require( Claim.InDeployment( request.studyDeploymentId ) )
 
                 LOGGER.info("Start POST: $PARTICIPATION_SERVICE -> SetParticipantData")
                 val result = participationService.setParticipantData(request.studyDeploymentId, request.data, request.inputByParticipantRole)

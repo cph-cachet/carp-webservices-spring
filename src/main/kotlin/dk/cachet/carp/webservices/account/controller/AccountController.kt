@@ -31,7 +31,7 @@ class AccountController(private val accountService: AccountService)
 
     @PostMapping(INVITE)
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("@accountAuthorizationService.canInvite(#request)")
+    @PreAuthorize("#{false}")
     suspend fun invite(@Valid @RequestBody request: AccountRequest)
     {
         LOGGER.info("Start POST: $ACCOUNT_BASE$INVITE")
@@ -40,7 +40,7 @@ class AccountController(private val accountService: AccountService)
 
     @PostMapping(ROLE)
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("@accountAuthorizationService.canQueryRole(#request)")
+    @PreAuthorize("#{false}")
     suspend fun role(@Valid @RequestBody request: AccountRequest)
     {
         LOGGER.info("Start POST: $ACCOUNT_BASE$ROLE")
@@ -49,7 +49,7 @@ class AccountController(private val accountService: AccountService)
 
     @GetMapping(ACCOUNT)
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("@accountAuthorizationService.isAccountResearcher()")
+    @PreAuthorize("#{false}")
     suspend fun info(@PathVariable(PathVariableName.ACCOUNT_ID) accountId: String): Account?
     {
         LOGGER.info("Start GET: $ACCOUNT_BASE$ACCOUNT")

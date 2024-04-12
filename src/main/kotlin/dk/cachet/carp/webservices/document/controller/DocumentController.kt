@@ -41,7 +41,7 @@ class DocumentController(private val documentService: IDocumentService, private 
     }
 
     @GetMapping(value = [DOCUMENTS])
-    @PreAuthorize("@documentAuthorizationService.canViewAllDocuments(#studyId)")
+    @PreAuthorize("#{false}")
     @Operation(tags = ["document/getAll.json"])
     fun getAll(
             @RequestParam(RequestParamName.QUERY) query: String?,
@@ -55,7 +55,7 @@ class DocumentController(private val documentService: IDocumentService, private 
     }
 
     @GetMapping(value = [COLLECTIONS], produces = [MediaType.APPLICATION_JSON_VALUE])
-    @PreAuthorize("@documentAuthorizationService.canViewDocument(#studyId)")
+    @PreAuthorize("#{false}")
     fun getByDocumentPath(@PathVariable(PathVariableName.STUDY_ID) studyId: String, request: HttpServletRequest): String?
     {
         val path = documentTraverser.requestToUrlPath(request)
@@ -64,7 +64,7 @@ class DocumentController(private val documentService: IDocumentService, private 
     }
 
     @PostMapping(value = [COLLECTIONS], produces = [MediaType.APPLICATION_JSON_VALUE])
-    @PreAuthorize("@documentAuthorizationService.canViewDocument(#studyId)")
+    @PreAuthorize("#{false}")
     @ResponseStatus(HttpStatus.CREATED)
     fun createByDocumentPath(
             @PathVariable(PathVariableName.STUDY_ID) studyId: String,
@@ -77,7 +77,7 @@ class DocumentController(private val documentService: IDocumentService, private 
     }
 
     @GetMapping(value = [GET_DOCUMENT_BY_ID], produces = [MediaType.APPLICATION_JSON_VALUE])
-    @PreAuthorize("@documentAuthorizationService.canViewDocument(#studyId)")
+    @PreAuthorize("#{false}")
     @Operation(tags = ["document/getOne.json"])
     fun getOne(
             @PathVariable(PathVariableName.STUDY_ID) studyId: String,
@@ -88,7 +88,7 @@ class DocumentController(private val documentService: IDocumentService, private 
     }
 
     @PostMapping(value = [DOCUMENTS], produces = [MediaType.APPLICATION_JSON_VALUE])
-    @PreAuthorize("@documentAuthorizationService.canViewDocument(#studyId)")
+    @PreAuthorize("#{false}")
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(tags = ["document/create.json"])
     fun create(
@@ -100,7 +100,7 @@ class DocumentController(private val documentService: IDocumentService, private 
     }
 
     @DeleteMapping(value = [GET_DOCUMENT_BY_ID])
-    @PreAuthorize("@documentAuthorizationService.canViewDocument(#studyId)")
+    @PreAuthorize("#{false}")
     @Operation(tags = ["document/delete.json"])
     fun delete(
             @PathVariable(PathVariableName.STUDY_ID) studyId: String,
@@ -111,7 +111,7 @@ class DocumentController(private val documentService: IDocumentService, private 
     }
 
     @PutMapping(value = [GET_DOCUMENT_BY_ID])
-    @PreAuthorize("@documentAuthorizationService.canViewDocument(#studyId)")
+    @PreAuthorize("#{false}")
     @Operation(tags = ["document/update.json"])
     fun update(
             @PathVariable(PathVariableName.STUDY_ID) studyId: String,
@@ -124,7 +124,7 @@ class DocumentController(private val documentService: IDocumentService, private 
     }
 
     @PutMapping(value = [GET_DOCUMENT_BY_ID + APPEND])
-    @PreAuthorize("@documentAuthorizationService.canViewDocument(#studyId)")
+    @PreAuthorize("#{false}")
     @Operation(tags = ["document/append.json"])
     fun append(
             @PathVariable(PathVariableName.STUDY_ID) studyId: String,

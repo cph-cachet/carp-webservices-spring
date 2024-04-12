@@ -14,8 +14,8 @@ class EntityAuditorAware(
 {
     override fun getCurrentAuditor(): Optional<String> =
         try {
-            Optional.of(authenticationService.getCurrentPrincipal().id!!)
+            Optional.of( authenticationService.getAuthentication().id!! )
         } catch (e: Exception) {
-            Optional.of("SYSTEM")
+            Optional.of( "SYSTEM" )
         }
 }

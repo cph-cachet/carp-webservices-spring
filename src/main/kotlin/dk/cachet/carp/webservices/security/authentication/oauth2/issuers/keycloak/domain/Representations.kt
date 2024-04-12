@@ -14,21 +14,21 @@ data class UserRepresentation(
     var lastName: String? = null,
     var email: String? = null,
     var emailVerified: Boolean? = false,
-    var requiredActions: List<RequiredActions>? = emptyList(),
+    var requiredActions: List<RequiredAction>? = emptyList(),
     var enabled: Boolean? = true,
     var attributes: Map<String, Any>? = emptyMap()
 ) {
     companion object {
-        fun createFromAccount(account: Account, accountType: AccountType) =
+        fun createFromAccount(account: Account, requiredActions: List<RequiredAction> = emptyList()) =
             UserRepresentation(
                 id = account.id,
                 username = account.username,
                 firstName = account.firstName,
                 lastName = account.lastName,
                 email = account.email,
-                requiredActions = RequiredActions.getForAccountType(accountType),
-                emailVerified = accountType == AccountType.GENERATED,
-                attributes = account.carpClaims?.associate { it.toTokenClaimObject() }
+                requiredActions = requiredActions,
+                emailVerified = !requiredActions.contains( RequiredAction.VERIFY_EMAIL ),
+                attributes = account.carpClaims?.groupBy( { Claim.userAttributeName( it::class ) }, { it.value } )
             )
     }
 
@@ -40,7 +40,7 @@ data class UserRepresentation(
             lastName = lastName,
             email = email,
             role = roles.max(),
-            carpClaims = attributes?.mapNotNull { Claim.fromTokenClaimObject(it.key to it.value) }
+            carpClaims = attributes?.mapNotNull { Claim.fromTokenClaimObject(it.key to it.value) }?.flatten()?.toSet()
         )
 
 }
@@ -51,7 +51,7 @@ data class RoleRepresentation(
     var name: String? = null
 )
 
-enum class RequiredActions {
+enum class RequiredAction {
     VERIFY_EMAIL,
     UPDATE_PROFILE,
     UPDATE_PASSWORD,
@@ -59,7 +59,7 @@ enum class RequiredActions {
     TERMS_AND_CONDITIONS;
 
     companion object {
-        fun getForAccountType(accountType: AccountType): List<RequiredActions> {
+        fun getForAccountType(accountType: AccountType): List<RequiredAction> {
             return when (accountType) {
                 AccountType.NEW -> listOf(
                     VERIFY_EMAIL,

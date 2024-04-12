@@ -7,52 +7,45 @@ import kotlin.reflect.full.primaryConstructor
 
 sealed class Claim
 {
-    protected abstract val value: Set<String>
-
-    fun toTokenClaimObject(): Pair<String, Any> = getKey( this::class ) to value
+    abstract val value: Any
 
     companion object
     {
-        fun getKey( klass: KClass<*> ) = klass.simpleName!!.toSnakeCase()
+        fun userAttributeName( klass: KClass<*> ) = klass.simpleName!!.replaceFirstChar { it.lowercase() }
+        fun tokenClaimName( klass: KClass<*> ) = klass.simpleName!!.toSnakeCase()
 
-        fun fromTokenClaimObject( pair: Pair<String, Any> ): Claim?
+        fun fromTokenClaimObject( pair: Pair<String, Any> ): List<Claim>?
         {
-            val claimKlass = Claim::class.sealedSubclasses.first { getKey( it ) == pair.first }
+            val claimKlass =
+                Claim::class.sealedSubclasses.firstOrNull { tokenClaimName( it ) == pair.first }
+                ?: return null
 
-            val uuids = (pair.second as? Set<*>)
+            return (pair.second as? List<*>)
                 ?.mapNotNull {
-                    runCatching { UUID(it.toString()) }.getOrNull()
-                } ?: emptyList()
-
-            return claimKlass.primaryConstructor?.call(uuids)
+                    claimKlass.primaryConstructor?.call(
+                        runCatching { UUID(it.toString()) }.getOrNull()
+                    )
+                }
         }
     }
 
-    data class ManageDeployment( val deploymentIds: Set<UUID> ) : Claim()
+    data class ManageDeployment( val deploymentId: UUID ) : Claim()
     {
-        constructor( deploymentId: UUID ) : this( setOf( deploymentId ) )
-
-        override val value = deploymentIds.map { it.toString() }.toSet()
+        override val value = deploymentId.toString()
     }
 
-    data class ManageStudy( val studyIds: Set<UUID> ) : Claim()
+    data class ManageStudy( val studyId: UUID ) : Claim()
     {
-        constructor( studyId: UUID ) : this( setOf( studyId ) )
-
-        override val value = studyIds.map { it.toString() }.toSet()
+        override val value = studyId.toString()
     }
 
-    data class ProtocolOwner( val ownerIds: Set<UUID> ) : Claim()
+    data class ProtocolOwner( val ownerId: UUID ) : Claim()
     {
-        constructor( ownerId: UUID ) : this( setOf( ownerId ) )
-
-        override val value = ownerIds.map { it.toString() }.toSet()
+        override val value = ownerId.toString()
     }
 
-    data class InDeployment( val deploymentIds: Set<UUID> ) : Claim()
+    data class InDeployment( val deploymentId: UUID ) : Claim()
     {
-        constructor( deploymentId: UUID ) : this( setOf( deploymentId ) )
-
-        override val value = deploymentIds.map { it.toString() }.toSet()
+        override val value = deploymentId.toString()
     }
 }

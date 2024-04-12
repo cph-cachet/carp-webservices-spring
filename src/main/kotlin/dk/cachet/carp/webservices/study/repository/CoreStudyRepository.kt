@@ -13,7 +13,6 @@ import dk.cachet.carp.webservices.collection.repository.CollectionRepository
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.consent.repository.ConsentDocumentRepository
 import dk.cachet.carp.webservices.dataPoint.repository.DataPointRepository
-import dk.cachet.carp.webservices.deployment.repository.CoreDeploymentRepository
 import dk.cachet.carp.webservices.document.repository.DocumentRepository
 import dk.cachet.carp.webservices.file.repository.FileRepository
 import dk.cachet.carp.webservices.security.authentication.domain.Account
@@ -31,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional
 class CoreStudyRepository
 (
     private val studyRepository: dk.cachet.carp.webservices.study.repository.StudyRepository,
-    private val deploymentRepository: CoreDeploymentRepository,
+    private val participantRepository: CoreParticipantRepository,
     private val dataPointRepository: DataPointRepository,
     private val collectionRepository: CollectionRepository,
     private val consentDocumentRepository: ConsentDocumentRepository,
@@ -103,21 +102,24 @@ class CoreStudyRepository
         }.distinctBy { it.studyId }.toList()
     }
 
+    /**
+     * TODO: This should only remove the study from the study repository.
+     * TODO: All associated data should be deleted by subscribing to `StudyService.Event.StudyRemoved` in the respective services.
+     */
     @Transactional( rollbackFor = [Exception::class])
     override suspend fun remove(studyId: UUID): Boolean = runBlocking {
-        getById(studyId) ?: return@runBlocking false
-        val deploymentSnapshots =  deploymentRepository.getDeploymentSnapshotsByStudyId(studyId.stringRepresentation)
-        val deploymentIds = deploymentSnapshots.map { d -> d.id}.toSet()
-        val deploymentIdsString = deploymentIds.map { it.stringRepresentation }.toSet()
-        val collectionIds = collectionRepository.getCollectionIdsByStudyId(studyId.stringRepresentation)
+        val idsToRemove = getDeploymentIdsOrThrow( studyId )
+        val collectionIds = collectionRepository.getCollectionIdsByStudyId( studyId.stringRepresentation )
 
-        summaryRepository.deleteByStudyId(studyId.stringRepresentation)
-        consentDocumentRepository.deleteAllByDeploymentIds(deploymentIdsString)
-        documentRepository.deleteAllByCollectionIds(collectionIds)
-        collectionRepository.deleteAllByDeploymentIds(deploymentIdsString)
-        studyRepository.deleteByStudyId(studyId.stringRepresentation)
-        filesRepository.deleteByStudyId(studyId.stringRepresentation)
-        dataPointRepository.deleteAllByDeploymentIds(deploymentIdsString)
+        documentRepository.deleteAllByCollectionIds( collectionIds )
+
+        collectionRepository.deleteAllByDeploymentIds( idsToRemove )
+        consentDocumentRepository.deleteAllByDeploymentIds( idsToRemove )
+        dataPointRepository.deleteAllByDeploymentIds( idsToRemove )
+
+        filesRepository.deleteByStudyId( studyId.stringRepresentation )
+        summaryRepository.deleteByStudyId( studyId.stringRepresentation )
+        studyRepository.deleteByStudyId( studyId.stringRepresentation )
 
         LOGGER.info("Study with id ${studyId.stringRepresentation} and all associated data deleted.")
         return@runBlocking true
@@ -173,8 +175,13 @@ class CoreStudyRepository
         return optionalStudy.get()
     }
 
-    suspend fun getStudySnapshotById(id: String): StudySnapshot = runBlocking {
-        val study = getWSStudyById(UUID(id))
+    suspend fun getDeploymentIdsOrThrow(studyId: UUID): List<String> = runBlocking {
+        val recruitment = participantRepository.getRecruitment(studyId)
+        return@runBlocking recruitment?.participantGroups?.keys?.map { it.stringRepresentation } ?: emptyList()
+    }
+
+    suspend fun getStudySnapshotById(id: UUID): StudySnapshot = runBlocking {
+        val study = getWSStudyById(id)
         return@runBlocking objectMapper.treeToValue(study.snapshot, StudySnapshot::class.java)
     }
 

@@ -37,7 +37,7 @@ class DataPointController(private val dataPointService: DataPointService)
     }
 
     @GetMapping
-    @PreAuthorize("@dataPointAuthorizationService.canCreateDataPoint(#deploymentId)")
+    @PreAuthorize("#{false}")
     @Operation(tags = ["dataPoint/getAll.json"])
     fun getAll(
             @RequestParam(RequestParamName.PAGE, required = false) page: Int?,
@@ -51,7 +51,7 @@ class DataPointController(private val dataPointService: DataPointService)
     }
 
     @GetMapping(value = [GET_DATAPOINT_BY_ID])
-    @PreAuthorize("@dataPointAuthorizationService.canViewDataPoint(#deploymentId, #dataPointId)")
+    @PreAuthorize("#{false}")
     @Operation(tags = ["dataPoint/getOne.json"])
     fun getOne(
             @PathVariable(PathVariableName.DEPLOYMENT_ID) deploymentId: String,
@@ -62,7 +62,7 @@ class DataPointController(private val dataPointService: DataPointService)
     }
 
     @PostMapping
-    @PreAuthorize("@dataPointAuthorizationService.canCreateDataPoint(#deploymentId)")
+    @PreAuthorize("#{false}")
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(tags = ["dataPoint/create.json"])
     fun create(
@@ -75,7 +75,7 @@ class DataPointController(private val dataPointService: DataPointService)
     }
 
     @PostMapping(value = [BATCH])
-    @PreAuthorize("@dataPointAuthorizationService.canCreateDataPoint(#deploymentId)")
+    @PreAuthorize("#{false}")
     @Operation(tags = ["dataPoint/createMany.json"])
     fun createMany(
             @PathVariable(PathVariableName.DEPLOYMENT_ID) deploymentId: String,
@@ -86,7 +86,7 @@ class DataPointController(private val dataPointService: DataPointService)
     }
 
     @DeleteMapping(value = [GET_DATAPOINT_BY_ID])
-    @PreAuthorize("@dataPointAuthorizationService.canViewDataPoint(#deploymentId, #dataPointId)")
+    @PreAuthorize("#{false}")
     @Operation(tags = ["dataPoint/delete.json"])
     fun delete(
             @PathVariable(PathVariableName.DEPLOYMENT_ID) deploymentId: String,
@@ -97,7 +97,7 @@ class DataPointController(private val dataPointService: DataPointService)
     }
 
     @GetMapping(value = [COUNT])
-    @PreAuthorize("@dataPointAuthorizationService.canCreateDataPoint(#deploymentId)")
+    @PreAuthorize("#{false}")
     @Operation(tags = ["dataPoint/count.json"])
     fun count(
             @RequestParam(RequestParamName.QUERY, required = false) query: String?,

@@ -9,10 +9,10 @@ import dk.cachet.carp.protocols.infrastructure.ProtocolServiceRequest
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.constants.PathVariableName
 import dk.cachet.carp.webservices.common.exception.responses.BadRequestException
-import dk.cachet.carp.webservices.protocol.authorization.ProtocolAuthorizationService
 import dk.cachet.carp.webservices.protocol.dto.GetLatestProtocolResponseDto
 import dk.cachet.carp.webservices.protocol.repository.CoreProtocolRepository
 import dk.cachet.carp.webservices.security.authorization.*
+import dk.cachet.carp.webservices.security.authorization.service.AuthorizationService
 import io.swagger.v3.oas.annotations.Operation
 import kotlinx.coroutines.runBlocking
 import org.apache.logging.log4j.LogManager
@@ -26,8 +26,8 @@ import org.springframework.web.bind.annotation.*
 class ProtocolController
 (
     private val coreProtocolRepository: CoreProtocolRepository,
-    private val protocolAuthorizationService: ProtocolAuthorizationService,
-    private val validationMessages: MessageBase
+    private val validationMessages: MessageBase,
+    private val authorizationService: AuthorizationService
 )
 {
     companion object
@@ -51,18 +51,18 @@ class ProtocolController
         {
             is ProtocolServiceRequest.Add ->
             {
-                requireRole( Role.RESEARCHER )
-                requireAuthenticated( request.protocol.ownerId )
+                authorizationService.require( Role.RESEARCHER )
+                authorizationService.requireOwner( request.protocol.ownerId )
 
                 LOGGER.info("Start POST: $PROTOCOL_SERVICE -> Add")
                 protocolService.add(request.protocol, request.versionTag)
-                ResponseEntity.status(HttpStatus.CREATED).build()
 
-                // Grant protocol owner
+                authorizationService.grantCurrentAuthentication( Claim.ProtocolOwner( request.protocol.ownerId ) )
+                ResponseEntity.status(HttpStatus.CREATED).build()
             }
             is ProtocolServiceRequest.AddVersion ->
             {
-                requireAuthenticated( request.protocol.ownerId )
+                authorizationService.requireOwner( request.protocol.ownerId )
 
                 LOGGER.info("Start POST: $PROTOCOL_SERVICE -> AddVersion")
                 protocolService.addVersion(request.protocol, request.versionTag)
@@ -70,15 +70,17 @@ class ProtocolController
             }
             is ProtocolServiceRequest.UpdateParticipantDataConfiguration ->
             {
-                requireClaims( Claim.ProtocolOwner( request.protocolId ) )
+                authorizationService.require( Claim.ProtocolOwner( request.protocolId ) )
 
                 LOGGER.info("Start POST: $PROTOCOL_SERVICE -> UpdateParticipantDataConfiguration")
-                val results = protocolService.updateParticipantDataConfiguration(request.protocolId, request.versionTag, request.expectedParticipantData)
+                val results = protocolService.updateParticipantDataConfiguration(
+                    request.protocolId, request.versionTag, request.expectedParticipantData
+                )
                 ResponseEntity.ok(results)
             }
             is ProtocolServiceRequest.GetBy ->
             {
-                requireClaims( Claim.ProtocolOwner( request.protocolId ) )
+                authorizationService.require( Claim.ProtocolOwner( request.protocolId ) )
 
                 LOGGER.info("Start POST: $PROTOCOL_SERVICE -> GetBy")
                 val result = protocolService.getBy(request.protocolId, request.versionTag)
@@ -86,7 +88,7 @@ class ProtocolController
             }
             is ProtocolServiceRequest.GetAllForOwner ->
             {
-                requireAuthenticated( request.ownerId )
+                authorizationService.requireOwner( request.ownerId )
 
                 LOGGER.info("Start POST: $PROTOCOL_SERVICE -> GetAllFor")
                 val results = protocolService.getAllForOwner(request.ownerId)
@@ -94,7 +96,7 @@ class ProtocolController
             }
             is ProtocolServiceRequest.GetVersionHistoryFor ->
             {
-                requireClaims( Claim.ProtocolOwner( request.protocolId ) )
+                authorizationService.require( Claim.ProtocolOwner( request.protocolId ) )
 
                 LOGGER.info("Start POST: $PROTOCOL_SERVICE -> GetVersionHistoryFor")
                 val results = protocolService.getVersionHistoryFor(request.protocolId)
@@ -114,7 +116,7 @@ class ProtocolController
         {
             is ProtocolFactoryServiceRequest.CreateCustomProtocol ->
             {
-                requireRole( Role.RESEARCHER )
+                authorizationService.require( Role.RESEARCHER )
 
                 LOGGER.info("Start POST: $PROTOCOL_FACTORY_SERVICE -> CreateCustomProtocol")
                 val result = protocolFactoryService.createCustomProtocol(
@@ -133,7 +135,7 @@ class ProtocolController
 
 
     @GetMapping(value = [GET_LATEST_PROTOCOL])
-    @PreAuthorize("@protocolAuthorizationService.canViewProtocol()")
+    @PreAuthorize("#{false}")
     @Operation(tags = ["protocol/getLatestProtocolById.json"])
     fun getLatestProtocolById (
         @PathVariable(PathVariableName.PROTOCOL_ID) protocolId: String

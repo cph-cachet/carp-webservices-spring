@@ -14,7 +14,6 @@ import dk.cachet.carp.webservices.common.eventbus.CoreEventBus
 import dk.cachet.carp.webservices.data.service.IDataStreamService
 import dk.cachet.carp.webservices.deployment.service.CoreDeploymentService
 import dk.cachet.carp.webservices.security.authentication.domain.Account
-import dk.cachet.carp.webservices.security.authentication.domain.AccountFactory
 import dk.cachet.carp.webservices.study.domain.AnonymousParticipant
 import dk.cachet.carp.webservices.study.domain.ParticipantAccount
 import dk.cachet.carp.webservices.study.domain.ParticipantGroupInfo
@@ -35,7 +34,6 @@ class CoreRecruitmentService(
     private val coreStudyService: CoreStudyService,
     private val dataStreamService: IDataStreamService,
     private val accountService: AccountService,
-    private val accountFactory: AccountFactory,
 ) {
     final val instance: RecruitmentService = RecruitmentServiceHost(
         participantRepository,
@@ -56,7 +54,7 @@ class CoreRecruitmentService(
             if (account != null) {
                 accounts.add(account)
             } else {
-                accounts.add(accountFactory.fromAccountIdentity(participant.accountIdentity))
+                accounts.add(Account.fromAccountIdentity(participant.accountIdentity))
             }
         }
         return accounts
