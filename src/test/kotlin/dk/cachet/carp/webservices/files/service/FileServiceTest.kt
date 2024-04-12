@@ -4,7 +4,6 @@ import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.DeleteObjectRequest
 import com.amazonaws.services.s3.model.PutObjectRequest
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
-import dk.cachet.carp.webservices.file.authorization.FileAuthorizationService
 import dk.cachet.carp.webservices.file.repository.FileRepository
 import dk.cachet.carp.webservices.file.service.FileStorage
 import dk.cachet.carp.webservices.file.service.impl.FileServiceImpl
@@ -23,9 +22,8 @@ class FileServiceTest {
     private val fileRepository: FileRepository = mockk()
     private val fileStorage: FileStorage = mockk()
     private val messageBase: MessageBase = mockk()
-    private val fileAuthorizationService: FileAuthorizationService = mockk()
-    private val authenticationService: AuthenticationService = mockk()
     private val s3Client: AmazonS3 = mockk()
+    private val authenticationService: AuthenticationService = mockk()
 
     private val s3SpaceBucket = "s3://bucket"
     private val s3SpaceEndpoint = "https://why-is-aamir-written-with-two-As.com"
@@ -43,7 +41,6 @@ class FileServiceTest {
                 fileStorage,
                 messageBase,
                 s3Client,
-                fileAuthorizationService,
                 authenticationService,
                 s3SpaceBucket,
                 s3SpaceEndpoint
@@ -68,7 +65,6 @@ class FileServiceTest {
                 fileStorage,
                 messageBase,
                 s3Client,
-                fileAuthorizationService,
                 authenticationService,
                 s3SpaceBucket,
                 s3SpaceEndpoint
@@ -99,7 +95,6 @@ class FileServiceTest {
                 fileStorage,
                 messageBase,
                 s3Client,
-                fileAuthorizationService,
                 authenticationService,
                 s3SpaceBucket,
                 s3SpaceEndpoint
@@ -122,7 +117,6 @@ class FileServiceTest {
                 fileStorage,
                 messageBase,
                 s3Client,
-                fileAuthorizationService,
                 authenticationService,
                 s3SpaceBucket,
                 s3SpaceEndpoint

@@ -9,11 +9,14 @@ import dk.cachet.carp.studies.application.RecruitmentService
 import dk.cachet.carp.studies.application.RecruitmentServiceHost
 import dk.cachet.carp.studies.application.users.AssignedParticipantRoles
 import dk.cachet.carp.studies.application.users.ParticipantGroupStatus
+import dk.cachet.carp.studies.infrastructure.RecruitmentServiceDecorator
 import dk.cachet.carp.webservices.account.service.AccountService
+import dk.cachet.carp.webservices.common.authorization.ApplicationServiceRequestAuthorizer
 import dk.cachet.carp.webservices.common.eventbus.CoreEventBus
 import dk.cachet.carp.webservices.data.service.IDataStreamService
 import dk.cachet.carp.webservices.deployment.service.CoreDeploymentService
 import dk.cachet.carp.webservices.security.authentication.domain.Account
+import dk.cachet.carp.webservices.study.authorization.RecruitmentServiceAuthorizer
 import dk.cachet.carp.webservices.study.domain.AnonymousParticipant
 import dk.cachet.carp.webservices.study.domain.ParticipantAccount
 import dk.cachet.carp.webservices.study.domain.ParticipantGroupInfo
@@ -29,17 +32,30 @@ import kotlin.time.toDuration
 @Component
 class CoreRecruitmentService(
     participantRepository: CoreParticipantRepository,
+    recruitmentServiceAuthorizer: RecruitmentServiceAuthorizer,
     coreEventBus: CoreEventBus,
     private val coreDeploymentService: CoreDeploymentService,
     private val coreStudyService: CoreStudyService,
     private val dataStreamService: IDataStreamService,
     private val accountService: AccountService,
 ) {
-    final val instance: RecruitmentService = RecruitmentServiceHost(
-        participantRepository,
-        coreDeploymentService.instance,
-        coreEventBus.createApplicationServiceAdapter(RecruitmentService::class)
-    )
+    final val instance: RecruitmentServiceDecorator
+
+    init
+    {
+        val service = RecruitmentServiceHost(
+            participantRepository,
+            coreDeploymentService.instance,
+            coreEventBus.createApplicationServiceAdapter( RecruitmentService::class )
+        )
+
+        val authorizedService = RecruitmentServiceDecorator( service )
+        {
+            command -> ApplicationServiceRequestAuthorizer( recruitmentServiceAuthorizer, command )
+        }
+
+        instance = authorizedService
+    }
 
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()

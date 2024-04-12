@@ -3,6 +3,7 @@ package dk.cachet.carp.webservices.study.controller
 import dk.cachet.carp.common.application.EmailAddress
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.studies.infrastructure.RecruitmentServiceRequest
+import dk.cachet.carp.studies.infrastructure.StudyServiceDecorator
 import dk.cachet.carp.studies.infrastructure.StudyServiceRequest
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.constants.PathVariableName
@@ -37,9 +38,7 @@ class StudyController
     (
     private val coreParticipantRepository: CoreParticipantRepository,
     private val coreStudyRepository: CoreStudyRepository,
-    private val validationMessages: MessageBase,
     private val authenticationService: AuthenticationService,
-    private val authorizationService: AuthorizationService,
     coreStudyService: CoreStudyService,
     /**
      * This is a hack to resolve the circular dependencies. I hate to do this, but the webservices
@@ -140,164 +139,12 @@ class StudyController
     @PostMapping(value = [STUDY_SERVICE])
     @Operation(tags = ["study/studies.json"])
     suspend fun studies(@RequestBody request: StudyServiceRequest<*>): ResponseEntity<*> =
-        when (request)
-        {
-            is StudyServiceRequest.CreateStudy -> {
-                authorizationService.require( Role.RESEARCHER )
-                authorizationService.requireOwner( request.ownerId )
-
-                LOGGER.info("Start POST: $STUDY_SERVICE -> CreateStudy")
-                val status =
-                    studyService.createStudy(request.ownerId, request.name, request.description, request.invitation)
-
-                authorizationService.grantCurrentAuthentication(
-                    Claim.ManageStudy( status.studyId )
-                )
-                ResponseEntity.status(HttpStatus.CREATED).body(status)
-            }
-
-            is StudyServiceRequest.SetInternalDescription -> {
-                authorizationService.require( Claim.ManageStudy( request.studyId ) )
-
-                LOGGER.info("Start POST: $STUDY_SERVICE -> SetInternalDescription")
-                val result = studyService.setInternalDescription(request.studyId, request.name, request.description)
-                ResponseEntity.ok(result)
-            }
-
-            is StudyServiceRequest.GetStudyDetails -> {
-                authorizationService.require( Claim.ManageStudy( request.studyId ) )
-
-                LOGGER.info("Start POST: $STUDY_SERVICE -> GetStudyDetails")
-                val result = studyService.getStudyDetails(request.studyId)
-                ResponseEntity.ok(result)
-            }
-
-            is StudyServiceRequest.GetStudyStatus -> {
-                authorizationService.require( Claim.ManageStudy( request.studyId ) )
-
-                LOGGER.info("Start POST: $STUDY_SERVICE -> GetStudyStatus")
-                val status = studyService.getStudyStatus(request.studyId)
-                ResponseEntity.ok(status)
-            }
-
-            is StudyServiceRequest.GetStudiesOverview -> {
-                authorizationService.requireOwner( request.ownerId )
-
-                LOGGER.info("Start POST: $STUDY_SERVICE -> GetStudiesOverview")
-                val result = studyService.getStudiesOverview(request.ownerId)
-                ResponseEntity.ok(result)
-            }
-
-            is StudyServiceRequest.SetInvitation -> {
-                authorizationService.require( Claim.ManageStudy( request.studyId ) )
-                LOGGER.info("Start POST: $STUDY_SERVICE -> SetInvitation")
-                val result = studyService.setInvitation(request.studyId, request.invitation)
-                ResponseEntity.ok(result)
-            }
-
-            is StudyServiceRequest.SetProtocol -> {
-                authorizationService.require( Claim.ManageStudy( request.studyId ) )
-
-                LOGGER.info("Start POST: $STUDY_SERVICE -> SetProtocol")
-                val result = studyService.setProtocol(request.studyId, request.protocol)
-                ResponseEntity.ok(result)
-            }
-
-            is StudyServiceRequest.RemoveProtocol -> {
-                authorizationService.require( Claim.ManageStudy( request.studyId ) )
-
-                LOGGER.info("Start POST: $STUDY_SERVICE -> SetProtocol")
-                val result = studyService.removeProtocol( request.studyId )
-                ResponseEntity.ok(result)
-            }
-
-            is StudyServiceRequest.GoLive -> {
-                authorizationService.require( Claim.ManageStudy( request.studyId ) )
-
-                LOGGER.info("Start POST: $STUDY_SERVICE -> GoLive")
-                val result = studyService.goLive(request.studyId)
-                ResponseEntity.ok(result)
-            }
-
-            is StudyServiceRequest.Remove -> {
-                authorizationService.require( Claim.ManageStudy( request.studyId ) )
-
-                LOGGER.info("Start POST: $STUDY_SERVICE -> Remove")
-                val result = studyService.remove(request.studyId)
-                ResponseEntity.ok(result)
-            }
-
-            else -> throw BadRequestException(validationMessages.get("study.service.invalid_request", request))
-        }
-
+        studyService.invoke( request ).let { ResponseEntity.ok( it ) }
 
     @PostMapping(value = [RECRUITMENT_SERVICE])
     @Operation(tags = ["study/recruitments.json"])
     suspend fun recruitments(@RequestBody request: RecruitmentServiceRequest<*>): ResponseEntity<*> =
-        when (request) {
-            is RecruitmentServiceRequest.AddParticipantByEmailAddress -> {
-                authorizationService.require( Claim.ManageStudy( request.studyId ) )
-
-                LOGGER.info("Start POST: $RECRUITMENT_SERVICE -> AddParticipant")
-                val result = recruitmentService.addParticipant(request.studyId, request.email)
-                ResponseEntity.ok(result)
-            }
-
-            is RecruitmentServiceRequest.AddParticipantByUsername -> {
-                authorizationService.require( Claim.ManageStudy( request.studyId ) )
-
-                LOGGER.info("Start POST: $RECRUITMENT_SERVICE -> AddParticipant")
-                val result = recruitmentService.addParticipant(request.studyId, request.username)
-                ResponseEntity.ok(result)
-            }
-
-            is RecruitmentServiceRequest.GetParticipant -> {
-                authorizationService.require( Claim.ManageStudy( request.studyId ) )
-
-                LOGGER.info("Start POST: $RECRUITMENT_SERVICE -> GetParticipant")
-                val result = recruitmentService.getParticipant(request.studyId, request.participantId)
-                ResponseEntity.ok(result)
-            }
-
-            is RecruitmentServiceRequest.GetParticipants -> {
-                authorizationService.require( Claim.ManageStudy( request.studyId ) )
-
-                LOGGER.info("Start POST: $RECRUITMENT_SERVICE -> GetParticipants")
-                val result = recruitmentService.getParticipants(request.studyId)
-                ResponseEntity.ok(result)
-            }
-
-            is RecruitmentServiceRequest.InviteNewParticipantGroup -> {
-                authorizationService.require( Claim.ManageStudy( request.studyId ) )
-
-                LOGGER.info("Start POST: $RECRUITMENT_SERVICE -> DeployParticipantGroup")
-                val result = recruitmentService.inviteNewParticipantGroup(request.studyId, request.group)
-                ResponseEntity.ok(result)
-            }
-
-            is RecruitmentServiceRequest.GetParticipantGroupStatusList -> {
-                authorizationService.require( Claim.ManageStudy( request.studyId ) )
-
-                LOGGER.info("Start POST: $RECRUITMENT_SERVICE -> GetParticipantGroupStatusList")
-                val result = recruitmentService.getParticipantGroupStatusList(request.studyId)
-                ResponseEntity.ok(result)
-            }
-
-            is RecruitmentServiceRequest.StopParticipantGroup -> {
-                authorizationService.require( Claim.ManageStudy( request.studyId ) )
-
-                LOGGER.info("Start POST: $RECRUITMENT_SERVICE -> StopParticipantGroup")
-                val result = recruitmentService.stopParticipantGroup(request.studyId, request.groupId)
-                ResponseEntity.ok(result)
-            }
-
-            else -> throw BadRequestException(
-                validationMessages.get(
-                    "study.service.participant.invalid_request",
-                    request
-                )
-            )
-        }
+        recruitmentService.invoke( request ).let { ResponseEntity.ok( it ) }
 
     @PostMapping(value = [ADD_PARTICIPANTS])
     // TODO

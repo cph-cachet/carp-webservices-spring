@@ -7,8 +7,10 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.stereotype.Service
 
 @Service
-class AuthenticationServiceImpl : AuthenticationService {
-    override fun getAuthentication(): Account {
+class AuthenticationServiceImpl : AuthenticationService
+{
+    override fun getAuthentication() : Account
+    {
         val authentication = SecurityContextHolder.getContext().authentication
 
         require( authentication is JwtAuthenticationToken )

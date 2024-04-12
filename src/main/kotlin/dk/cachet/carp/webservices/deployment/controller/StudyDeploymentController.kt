@@ -27,9 +27,8 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 class StudyDeploymentController
 (
-    private val validationMessages: MessageBase,
+    // should be removed when statistics endpoint gets removed
     private val dataPointService: DataPointService,
-    private val authorizationService: AuthorizationService,
     coreParticipationService: CoreParticipationService,
     coreDeploymentService: CoreDeploymentService
 )
@@ -52,139 +51,12 @@ class StudyDeploymentController
     @PostMapping(value = [DEPLOYMENT_SERVICE])
     @Operation(tags = ["studyDeployment/deployments.json"])
     suspend fun deployments(@RequestBody request: DeploymentServiceRequest<*>): ResponseEntity<Any> =
-        when (request)
-        {
-            is DeploymentServiceRequest.CreateStudyDeployment ->
-            {
-                LOGGER.info("Start POST: $DEPLOYMENT_SERVICE -> CreateStudyDeployment")
-                val result = deploymentService.createStudyDeployment(
-                        request.id,
-                        request.protocol,
-                        request.invitations,
-                        request.connectedDevicePreregistrations
-                )
-
-                authorizationService.grantCurrentAuthentication(
-                    setOf(
-                        Claim.ManageDeployment(result.studyDeploymentId),
-                        Claim.InDeployment( result.studyDeploymentId )
-                    )
-                )
-
-                ResponseEntity.status(HttpStatus.CREATED).body(result)
-            }
-            is DeploymentServiceRequest.RemoveStudyDeployments ->
-            {
-                authorizationService.require( request.studyDeploymentIds.map { Claim.ManageDeployment(it) }.toSet() )
-
-                LOGGER.info("Start POST: $DEPLOYMENT_SERVICE -> RemoveStudyDeployments")
-                val result = deploymentService.removeStudyDeployments(request.studyDeploymentIds)
-                ResponseEntity.ok(result)
-            }
-            is DeploymentServiceRequest.GetStudyDeploymentStatus ->
-            {
-                authorizationService.require( Claim.InDeployment( request.studyDeploymentId ) )
-
-                LOGGER.info("Start POST: $DEPLOYMENT_SERVICE -> GetStudyDeploymentStatus")
-                val result = deploymentService.getStudyDeploymentStatus(request.studyDeploymentId)
-                ResponseEntity.ok(result)
-            }
-            is DeploymentServiceRequest.GetStudyDeploymentStatusList ->
-            {
-                authorizationService.require( request.studyDeploymentIds.map { Claim.InDeployment(it) }.toSet() )
-
-                LOGGER.info("Start POST: $DEPLOYMENT_SERVICE -> GetStudyDeploymentStatusList")
-                val result = deploymentService.getStudyDeploymentStatusList(request.studyDeploymentIds)
-                ResponseEntity.ok(result)
-            }
-            is DeploymentServiceRequest.RegisterDevice ->
-            {
-                authorizationService.require( Claim.InDeployment( request.studyDeploymentId ) )
-
-                LOGGER.info("Start POST: $DEPLOYMENT_SERVICE -> RegisterDevice")
-                val result = deploymentService.registerDevice(request.studyDeploymentId, request.deviceRoleName, request.registration)
-                ResponseEntity.ok(result)
-            }
-            is DeploymentServiceRequest.UnregisterDevice ->
-            {
-                authorizationService.require( Claim.InDeployment( request.studyDeploymentId ) )
-
-                LOGGER.info("Start POST: $DEPLOYMENT_SERVICE -> UnregisterDevice")
-                val result = deploymentService.unregisterDevice(request.studyDeploymentId, request.deviceRoleName)
-                ResponseEntity.ok(result)
-            }
-            is DeploymentServiceRequest.GetDeviceDeploymentFor ->
-            {
-                authorizationService.require( Claim.InDeployment( request.studyDeploymentId ) )
-
-                LOGGER.info("Start POST: $DEPLOYMENT_SERVICE -> GetDeviceDeploymentFor")
-                val result = deploymentService.getDeviceDeploymentFor(request.studyDeploymentId, request.primaryDeviceRoleName)
-                ResponseEntity.ok(result)
-            }
-            is DeploymentServiceRequest.DeviceDeployed ->
-            {
-                authorizationService.require( Claim.InDeployment( request.studyDeploymentId ) )
-
-                LOGGER.info("Start POST: $DEPLOYMENT_SERVICE -> DeploymentSuccessful")
-                val result = deploymentService.deviceDeployed(request.studyDeploymentId, request.primaryDeviceRoleName, request.deviceDeploymentLastUpdatedOn)
-                ResponseEntity.ok(result)
-            }
-            is DeploymentServiceRequest.Stop ->
-            {
-                authorizationService.require( Claim.InDeployment( request.studyDeploymentId ) )
-
-                LOGGER.info("Start POST: $DEPLOYMENT_SERVICE -> Stop")
-                val result = deploymentService.stop(request.studyDeploymentId)
-                ResponseEntity.ok(result)
-            }
-            else ->
-            {
-                throw BadRequestException(validationMessages.get("deployment.handle_all.invalid.request", request))
-            }
-        }
+        deploymentService.invoke( request ).let { ResponseEntity.ok( it ) }
 
     @PostMapping(value = [PARTICIPATION_SERVICE])
     @Operation(tags = ["studyDeployment/invitations.json"])
-    suspend fun invitations(@RequestBody request: ParticipationServiceRequest<*>): ResponseEntity<Any> =
-        when (request)
-        {
-            is ParticipationServiceRequest.GetActiveParticipationInvitations ->
-            {
-                authorizationService.requireOwner( request.accountId )
-
-                LOGGER.info("Start POST: $PARTICIPATION_SERVICE -> GetActiveParticipationInvitations")
-                val result = participationService.getActiveParticipationInvitations(request.accountId)
-                ResponseEntity.ok(result)
-            }
-            is ParticipationServiceRequest.GetParticipantData ->
-            {
-                authorizationService.require( Claim.InDeployment( request.studyDeploymentId ) )
-
-                LOGGER.info("Start POST: $PARTICIPATION_SERVICE -> GetParticipantData")
-                val result = participationService.getParticipantData(request.studyDeploymentId)
-                ResponseEntity.ok(result)
-            }
-            is ParticipationServiceRequest.GetParticipantDataList ->
-            {
-                authorizationService.require( request.studyDeploymentIds.map { Claim.InDeployment(it) }.toSet() )
-
-                LOGGER.info("Start POST: $PARTICIPATION_SERVICE -> GetParticipantDataList")
-                val result = participationService.getParticipantDataList(request.studyDeploymentIds)
-                ResponseEntity.ok(result)
-            }
-            is ParticipationServiceRequest.SetParticipantData ->
-            {
-                authorizationService.require( Claim.InDeployment( request.studyDeploymentId ) )
-
-                LOGGER.info("Start POST: $PARTICIPATION_SERVICE -> SetParticipantData")
-                val result = participationService.setParticipantData(request.studyDeploymentId, request.data, request.inputByParticipantRole)
-                ResponseEntity.ok(result)
-            }
-            else ->
-            {
-                throw BadRequestException(validationMessages.get("deployment.handle_all.invalid.request", request))
-            }
-        }
+    suspend fun participation(@RequestBody request: ParticipationServiceRequest<*>): ResponseEntity<Any> =
+        participationService.invoke( request ).let { ResponseEntity.ok( it ) }
 
     /**
      * Statistics endpoint is disabled, due to a refactor of the authorization

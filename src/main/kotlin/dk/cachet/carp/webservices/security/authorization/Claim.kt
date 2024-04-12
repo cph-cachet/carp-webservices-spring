@@ -12,6 +12,7 @@ sealed class Claim
     companion object
     {
         fun userAttributeName( klass: KClass<*> ) = klass.simpleName!!.replaceFirstChar { it.lowercase() }
+
         fun tokenClaimName( klass: KClass<*> ) = klass.simpleName!!.toSnakeCase()
 
         fun fromTokenClaimObject( pair: Pair<String, Any> ): List<Claim>?

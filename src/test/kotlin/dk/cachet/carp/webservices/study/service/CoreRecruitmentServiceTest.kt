@@ -50,6 +50,7 @@ class CoreRecruitmentServiceTest {
             val sut = CoreRecruitmentService(
                 mockk(),
                 mockk(),
+                mockk(),
                 coreDeploymentService,
                 coreStudyService,
                 mockk(),
@@ -74,6 +75,7 @@ class CoreRecruitmentServiceTest {
             coEvery { studyService.getStudyDetails(any()) } returns studyDetails
 
             val sut = CoreRecruitmentService(
+                mockk(),
                 mockk(),
                 mockk(),
                 coreDeploymentService,
