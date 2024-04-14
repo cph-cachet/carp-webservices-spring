@@ -5,6 +5,9 @@ import dk.cachet.carp.deployments.infrastructure.ParticipationServiceRequest
 import dk.cachet.carp.webservices.account.service.AccountService
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.exception.responses.BadRequestException
+import dk.cachet.carp.webservices.data.controller.DataStreamController
+import dk.cachet.carp.webservices.data.controller.DataStreamController.Companion
+import dk.cachet.carp.webservices.data.controller.DataStreamController.Companion.DATA_STREAM_SERVICE
 import dk.cachet.carp.webservices.dataPoint.service.DataPointService
 import dk.cachet.carp.webservices.deployment.dto.DeploymentStatisticsRequestDto
 import dk.cachet.carp.webservices.deployment.dto.DeploymentStatisticsResponseDto
@@ -50,13 +53,19 @@ class StudyDeploymentController
 
     @PostMapping(value = [DEPLOYMENT_SERVICE])
     @Operation(tags = ["studyDeployment/deployments.json"])
-    suspend fun deployments(@RequestBody request: DeploymentServiceRequest<*>): ResponseEntity<Any> =
-        deploymentService.invoke( request ).let { ResponseEntity.ok( it ) }
+    suspend fun deployments(@RequestBody request: DeploymentServiceRequest<*>): ResponseEntity<Any>
+    {
+        LOGGER.info("Start POST: $DEPLOYMENT_SERVICE -> ${ request::class.simpleName }")
+        return deploymentService.invoke( request ).let { ResponseEntity.ok( it ) }
+    }
 
     @PostMapping(value = [PARTICIPATION_SERVICE])
     @Operation(tags = ["studyDeployment/invitations.json"])
-    suspend fun participation(@RequestBody request: ParticipationServiceRequest<*>): ResponseEntity<Any> =
-        participationService.invoke( request ).let { ResponseEntity.ok( it ) }
+    suspend fun participation(@RequestBody request: ParticipationServiceRequest<*>): ResponseEntity<Any>
+    {
+        LOGGER.info("Start POST: $PARTICIPATION_SERVICE -> ${ request::class.simpleName }")
+        return participationService.invoke( request ).let { ResponseEntity.ok( it ) }
+    }
 
     /**
      * Statistics endpoint is disabled, due to a refactor of the authorization

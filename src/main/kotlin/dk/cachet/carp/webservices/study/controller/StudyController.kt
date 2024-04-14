@@ -3,16 +3,11 @@ package dk.cachet.carp.webservices.study.controller
 import dk.cachet.carp.common.application.EmailAddress
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.studies.infrastructure.RecruitmentServiceRequest
-import dk.cachet.carp.studies.infrastructure.StudyServiceDecorator
 import dk.cachet.carp.studies.infrastructure.StudyServiceRequest
-import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.constants.PathVariableName
 import dk.cachet.carp.webservices.common.constants.RequestParamName
-import dk.cachet.carp.webservices.common.exception.responses.BadRequestException
 import dk.cachet.carp.webservices.security.authentication.domain.Account
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
-import dk.cachet.carp.webservices.security.authorization.*
-import dk.cachet.carp.webservices.security.authorization.service.AuthorizationService
 import dk.cachet.carp.webservices.study.domain.AnonymousLinkRequest
 import dk.cachet.carp.webservices.study.domain.ParticipantGroupsStatus
 import dk.cachet.carp.webservices.study.domain.StudyOverview
@@ -138,13 +133,18 @@ class StudyController
 
     @PostMapping(value = [STUDY_SERVICE])
     @Operation(tags = ["study/studies.json"])
-    suspend fun studies(@RequestBody request: StudyServiceRequest<*>): ResponseEntity<*> =
-        studyService.invoke( request ).let { ResponseEntity.ok( it ) }
+    suspend fun studies(@RequestBody request: StudyServiceRequest<*>): ResponseEntity<*> {
+        LOGGER.info("Start POST: $STUDY_SERVICE -> ${ request::class.simpleName }")
+        return studyService.invoke( request ).let { ResponseEntity.ok( it ) }
+    }
 
     @PostMapping(value = [RECRUITMENT_SERVICE])
     @Operation(tags = ["study/recruitments.json"])
-    suspend fun recruitments(@RequestBody request: RecruitmentServiceRequest<*>): ResponseEntity<*> =
-        recruitmentService.invoke( request ).let { ResponseEntity.ok( it ) }
+    suspend fun recruitments(@RequestBody request: RecruitmentServiceRequest<*>): ResponseEntity<*>
+    {
+        LOGGER.info("Start POST: $RECRUITMENT_SERVICE -> ${ request::class.simpleName}")
+        return recruitmentService.invoke( request ).let { ResponseEntity.ok( it ) }
+    }
 
     @PostMapping(value = [ADD_PARTICIPANTS])
     // TODO
