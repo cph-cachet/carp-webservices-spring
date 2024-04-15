@@ -57,6 +57,13 @@ class AccountServiceImpl(
             null
         }
 
+    override suspend fun findAllByClaim( claim: Claim ): List<Account> =
+        try {
+            issuerFacade.getAllByClaim( claim )
+        } catch (e: Exception) {
+            emptyList()
+        }
+
     override suspend fun hasRoleByEmail(email: EmailAddress, role: Role): Boolean {
         val account = findByAccountIdentity(AccountIdentity.fromEmailAddress(email.address))
 
@@ -81,6 +88,16 @@ class AccountServiceImpl(
 
         LOGGER.info("Granting claim: $claims for user: $identity")
         account.carpClaims = account.carpClaims?.plus(claims) ?: claims
+        return issuerFacade.updateAccount(account)
+    }
+
+    override suspend fun revoke(identity: AccountIdentity, claims: Set<Claim>): Account {
+        val account = findByAccountIdentity(identity)
+
+        requireNotNull(account)
+
+        LOGGER.info("Revoking claim: $claims for user: $identity")
+        account.carpClaims = account.carpClaims?.minus(claims) ?: emptySet()
         return issuerFacade.updateAccount(account)
     }
 

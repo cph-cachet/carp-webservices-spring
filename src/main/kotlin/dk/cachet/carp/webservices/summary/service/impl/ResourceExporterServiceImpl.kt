@@ -11,14 +11,13 @@ import dk.cachet.carp.webservices.consent.service.IConsentDocumentService
 import dk.cachet.carp.webservices.data.repository.DataStreamSequenceRepository
 import dk.cachet.carp.webservices.dataPoint.service.DataPointService
 import dk.cachet.carp.webservices.deployment.repository.StudyDeploymentRepository
-import dk.cachet.carp.webservices.deployment.service.CoreParticipationService
+import dk.cachet.carp.webservices.deployment.service.core.CoreParticipationService
 import dk.cachet.carp.webservices.document.domain.Document
 import dk.cachet.carp.webservices.document.service.IDocumentService
 import dk.cachet.carp.webservices.file.domain.File
 import dk.cachet.carp.webservices.file.service.FileService
 import dk.cachet.carp.webservices.file.service.FileStorage
 import dk.cachet.carp.webservices.file.util.FileUtil
-import dk.cachet.carp.webservices.study.repository.CoreParticipantRepository
 import dk.cachet.carp.webservices.study.repository.CoreStudyRepository
 import dk.cachet.carp.webservices.summary.domain.SummaryLog
 import dk.cachet.carp.webservices.summary.service.ResourceExporterService

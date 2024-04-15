@@ -8,7 +8,10 @@ import dk.cachet.carp.protocols.application.StudyProtocolSnapshot
 import dk.cachet.carp.studies.application.RecruitmentService
 import dk.cachet.carp.studies.application.StudyDetails
 import dk.cachet.carp.studies.application.StudyService
-import dk.cachet.carp.webservices.deployment.service.CoreDeploymentService
+import dk.cachet.carp.webservices.deployment.service.core.CoreDeploymentService
+import dk.cachet.carp.webservices.study.service.core.CoreRecruitmentService
+import dk.cachet.carp.webservices.study.service.core.CoreStudyService
+import dk.cachet.carp.webservices.study.service.impl.RecruitmentServiceImpl
 import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -19,23 +22,12 @@ import kotlin.test.assertFailsWith
 
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class CoreRecruitmentServiceTest {
-    private val coreStudyService: CoreStudyService = mockk()
+class RecruitmentServiceTest {
     private val studyService: StudyService = mockk()
-    private val coreDeploymentService: CoreDeploymentService = mockk()
-    private val deploymentService: DeploymentService = mockk()
 
     @BeforeTest
     fun setup() {
-        // setup event bus
-        val eventBus = mockk<ApplicationServiceEventBus<RecruitmentService, RecruitmentService.Event>>()
-        every { eventBus.subscribe(any<EventSubscriptionBuilder.() -> Unit>()) } returns mockk()
-        mockkStatic(EventBus::createApplicationServiceAdapter)
-        every { any<EventBus>().createApplicationServiceAdapter(eq(RecruitmentService::class)) } returns eventBus
 
-        // setup singletons
-        every { coreStudyService getProperty "instance" } answers { studyService }
-        every { coreDeploymentService getProperty "instance" } answers { deploymentService }
     }
 
     @Nested
@@ -47,18 +39,16 @@ class CoreRecruitmentServiceTest {
             every { studyDetails getProperty "protocolSnapshot" } returns null
             coEvery { studyService.getStudyDetails(any()) } returns studyDetails
 
-            val sut = CoreRecruitmentService(
+            val sut = RecruitmentServiceImpl(
                 mockk(),
                 mockk(),
                 mockk(),
-                coreDeploymentService,
-                coreStudyService,
                 mockk(),
-                mockk(),
+                mockk()
             )
 
             assertFailsWith<IllegalArgumentException> {
-                sut.createAnonymousParticipants(UUID.randomUUID(), 1, 1, "roleName", "redirect")
+                sut.addAnonymousParticipants(UUID.randomUUID(), 1, 1, "roleName", "redirect")
             }
 
             coVerify(exactly = 1) { studyService.getStudyDetails(any()) }
@@ -74,18 +64,16 @@ class CoreRecruitmentServiceTest {
             every { studyDetails getProperty "protocolSnapshot" } returns protocolSnapshot
             coEvery { studyService.getStudyDetails(any()) } returns studyDetails
 
-            val sut = CoreRecruitmentService(
+            val sut = RecruitmentServiceImpl(
                 mockk(),
                 mockk(),
                 mockk(),
-                coreDeploymentService,
-                coreStudyService,
                 mockk(),
-                mockk(),
+                mockk()
             )
 
             assertFailsWith<IllegalArgumentException> {
-                sut.createAnonymousParticipants(UUID.randomUUID(), 1, 1, "notInProtocol", "redirect")
+                sut.addAnonymousParticipants(UUID.randomUUID(), 1, 1, "notInProtocol", "redirect")
             }
 
             coVerify(exactly = 1) { studyService.getStudyDetails(any()) }

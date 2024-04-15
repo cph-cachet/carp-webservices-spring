@@ -4,18 +4,18 @@ import dk.cachet.carp.common.application.EmailAddress
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.studies.infrastructure.RecruitmentServiceRequest
 import dk.cachet.carp.studies.infrastructure.StudyServiceRequest
+import dk.cachet.carp.webservices.account.service.AccountService
 import dk.cachet.carp.webservices.common.constants.PathVariableName
 import dk.cachet.carp.webservices.common.constants.RequestParamName
 import dk.cachet.carp.webservices.security.authentication.domain.Account
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
+import dk.cachet.carp.webservices.security.authorization.Claim
 import dk.cachet.carp.webservices.study.domain.AnonymousLinkRequest
 import dk.cachet.carp.webservices.study.domain.ParticipantGroupsStatus
 import dk.cachet.carp.webservices.study.domain.StudyOverview
 import dk.cachet.carp.webservices.study.dto.AddParticipantsRequestDto
-import dk.cachet.carp.webservices.study.repository.CoreParticipantRepository
-import dk.cachet.carp.webservices.study.repository.CoreStudyRepository
-import dk.cachet.carp.webservices.study.service.CoreRecruitmentService
-import dk.cachet.carp.webservices.study.service.CoreStudyService
+import dk.cachet.carp.webservices.study.service.RecruitmentService
+import dk.cachet.carp.webservices.study.service.StudyService
 import io.swagger.v3.oas.annotations.Operation
 import jakarta.validation.Valid
 import kotlinx.coroutines.runBlocking
@@ -31,16 +31,10 @@ import org.springframework.web.bind.annotation.*
 @RestController
 class StudyController
     (
-    private val coreParticipantRepository: CoreParticipantRepository,
-    private val coreStudyRepository: CoreStudyRepository,
     private val authenticationService: AuthenticationService,
-    coreStudyService: CoreStudyService,
-    /**
-     * This is a hack to resolve the circular dependencies. I hate to do this, but the webservices
-     * is in a very sorry state and I cannot emphasize enough how much I want to refactor it.
-     * I just want to have the surrounding infrastructure ready.
-     */
-    private val coreRecruitmentService: CoreRecruitmentService
+    private val accountService: AccountService,
+    private val studyService: StudyService,
+    private val recruitmentService: RecruitmentService,
 ) {
     companion object {
         val LOGGER: Logger = LogManager.getLogger()
@@ -58,84 +52,89 @@ class StudyController
         const val GENERATE_ANONYMOUS_PARTICIPANTS = "/api/studies/{${PathVariableName.STUDY_ID}}/generate"
     }
 
-    private val studyService = coreStudyService.instance
-    private val recruitmentService = coreRecruitmentService.instance
-
     @PostMapping(value = [ADD_RESEARCHER])
     // TODO
     @PreAuthorize("#{false}")
     @Operation(tags = ["study/addResearcher.json"])
-    fun addResearcher(
-        @PathVariable(PathVariableName.STUDY_ID) studyId: String,
+    suspend fun addResearcher(
+        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @RequestParam(RequestParamName.EMAIL) email: String
     ) {
         LOGGER.info("Start POST: /api/studies/$studyId/researchers")
-        return coreStudyRepository.inviteResearcherToStudy(studyId, email)
+        return recruitmentService.inviteResearcher( studyId, email )
     }
 
     @GetMapping(value = [GET_PARTICIPANTS_ACCOUNTS])
     // TODO
     @PreAuthorize("#{false}")
     @Operation(tags = ["study/getParticipantsAccounts.json"])
-    fun getParticipantAccounts(
-        @PathVariable(PathVariableName.STUDY_ID) studyId: String
-    ): List<Account> {
+    suspend fun getParticipantAccounts(
+        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID
+    ): List<Account>
+    {
         LOGGER.info("Start GET: /api/studies/$studyId/participants/accounts")
-        return runBlocking { coreRecruitmentService.getParticipantAccounts(UUID(studyId)) }
+        return recruitmentService.getParticipants( studyId )
     }
 
     @GetMapping(value = [RESEARCHERS])
     // TODO
     @PreAuthorize("#{false}")
     @Operation(tags = ["study/getResearchers.json"])
-    fun getResearchers(@PathVariable(PathVariableName.STUDY_ID) studyId: String): List<Account> {
+    suspend fun getResearchers(@PathVariable(PathVariableName.STUDY_ID) studyId: UUID): List<Account>
+    {
         LOGGER.info("Start GET: /api/studies/$studyId/researchers")
-        return runBlocking { coreStudyRepository.getResearcherAccountsForStudy(studyId) }
+        return accountService.findAllByClaim( Claim.ManageStudy( studyId ) )
     }
 
     @GetMapping(value = [GET_PARTICIPANT_GROUP_STATUS])
     // TODO
     @PreAuthorize("#{false}")
     @Operation(tags = ["study/getParticipantGroupStatus.json"])
-    fun getParticipantGroupStatus(@PathVariable(PathVariableName.STUDY_ID) studyId: String): ParticipantGroupsStatus {
+    fun getParticipantGroupStatus(
+        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID
+    ): ParticipantGroupsStatus
+    {
         LOGGER.info("Start GET: /api/studies/$studyId/participantGroup/status")
-        return runBlocking { coreRecruitmentService.getParticipantGroupStatus(UUID(studyId)) }
+        return runBlocking { recruitmentService.getParticipantGroupsStatus( studyId ) }
     }
 
     @DeleteMapping(value = [RESEARCHERS])
     // TODO
     @PreAuthorize("#{false}")
     @Operation(tags = ["study/removeResearchers.json"])
-    fun removeResearcher(
-        @PathVariable(PathVariableName.STUDY_ID) studyId: String,
+    suspend fun removeResearcher(
+        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @RequestParam(RequestParamName.EMAIL) email: String
-    ): Boolean {
-        return coreStudyRepository.removeResearcherFromStudy(studyId, email)
-    }
+    ): Boolean =
+        recruitmentService.removeResearcher( studyId, email )
 
+    // TODO: duplicated endpoint, mark for removal
     @GetMapping(value = [GET_PARTICIPANT_INFO])
     // TODO
     @PreAuthorize("#{false}")
     @Operation(tags = ["study/getParticipantAccountInfo.json"])
-    fun getParticipantAccountInfo(@PathVariable(PathVariableName.STUDY_ID) studyId: String): List<Account> {
+    suspend fun getParticipantAccountInfo(
+        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID
+    ) : List<Account>
+    {
         LOGGER.info("Start POST: /api/studies/$studyId/participants")
-        return runBlocking { coreParticipantRepository.getParticipantAccountDetailsForStudy(studyId) }
+        return recruitmentService.getParticipants( studyId )
     }
 
     @GetMapping(value = [GET_STUDIES_OVERVIEW])
     // TODO
     @PreAuthorize("#{false}")
-    fun getStudiesOverview(): List<StudyOverview> {
+    suspend fun getStudiesOverview(): List<StudyOverview> {
         LOGGER.info("Start POST: /api/studies/studies-overview")
         val account = authenticationService.getAuthentication()
-        return runBlocking { coreStudyRepository.getStudiesOverview(account.id!!) }
+        return studyService.getStudiesOverview( UUID( account.id!! ) )
     }
 
     @PostMapping(value = [STUDY_SERVICE])
     @Operation(tags = ["study/studies.json"])
     suspend fun studies(@RequestBody request: StudyServiceRequest<*>): ResponseEntity<*> {
         LOGGER.info("Start POST: $STUDY_SERVICE -> ${ request::class.simpleName }")
-        return studyService.invoke( request ).let { ResponseEntity.ok( it ) }
+        return studyService.core.invoke( request ).let { ResponseEntity.ok( it ) }
     }
 
     @PostMapping(value = [RECRUITMENT_SERVICE])
@@ -143,20 +142,18 @@ class StudyController
     suspend fun recruitments(@RequestBody request: RecruitmentServiceRequest<*>): ResponseEntity<*>
     {
         LOGGER.info("Start POST: $RECRUITMENT_SERVICE -> ${ request::class.simpleName}")
-        return recruitmentService.invoke( request ).let { ResponseEntity.ok( it ) }
+        return recruitmentService.core.invoke( request ).let { ResponseEntity.ok( it ) }
     }
 
     @PostMapping(value = [ADD_PARTICIPANTS])
     // TODO
     @PreAuthorize("#{false}")
     suspend fun addParticipants(
-        @PathVariable(PathVariableName.STUDY_ID) studyId: String,
+        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @Valid @RequestBody request: AddParticipantsRequestDto
     ) {
-        runBlocking {
-            LOGGER.info("Start POST: /api/studies/$studyId/participants/add")
-            request.emails.forEach { e -> recruitmentService.addParticipant(UUID(studyId), EmailAddress(e)) }
-        }
+        LOGGER.info("Start POST: /api/studies/$studyId/participants/add")
+        request.emails.forEach { e -> recruitmentService.core.addParticipant( studyId, EmailAddress(e) ) }
     }
 
     @PostMapping(GENERATE_ANONYMOUS_PARTICIPANTS)
@@ -168,7 +165,7 @@ class StudyController
     ): ResponseEntity<ByteArray> {
         LOGGER.info("Start POST: /api/studies/$studyId/generate")
 
-        val anonymousParticipants = coreRecruitmentService.createAnonymousParticipants(
+        val anonymousParticipants = recruitmentService.addAnonymousParticipants(
             studyId,
             request.amountOfAccounts,
             request.expirationSeconds,

@@ -1,4 +1,4 @@
-package dk.cachet.carp.webservices.data.service
+package dk.cachet.carp.webservices.data.service.core
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -12,11 +12,12 @@ import dk.cachet.carp.webservices.data.domain.DataStreamSnapshot
 import dk.cachet.carp.webservices.data.repository.DataStreamConfigurationRepository
 import dk.cachet.carp.webservices.data.repository.DataStreamIdRepository
 import dk.cachet.carp.webservices.data.repository.DataStreamSequenceRepository
+import dk.cachet.carp.webservices.data.service.MutableDataStreamBatch
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 
-@Service
+@Component
 class CoreDataStreamService(
     private val configRepository: DataStreamConfigurationRepository,
     private val dataStreamIdRepository: DataStreamIdRepository,

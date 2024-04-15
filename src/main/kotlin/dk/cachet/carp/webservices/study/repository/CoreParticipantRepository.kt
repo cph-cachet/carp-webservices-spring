@@ -23,42 +23,11 @@ class CoreParticipantRepository
 (
     private val objectMapper: ObjectMapper,
     private val recruitmentRepository: RecruitmentRepository,
-    private val accountService: AccountService,
-): ParticipantRepository
+) : ParticipantRepository
 {
     companion object
     {
         private val LOGGER: Logger = LogManager.getLogger()
-    }
-
-    suspend fun getParticipantAccountDetailsForStudy(studyId: String): List<Account> = runBlocking {
-        val recruitment = recruitmentRepository.findRecruitmentByStudyId(studyId)
-            ?: throw IllegalArgumentException("Recruitment for study with id $studyId not found")
-        val recruitmentSnapshot =  objectMapper.treeToValue(recruitment.snapshot, RecruitmentSnapshot::class.java)
-        val participantEmails = mutableSetOf<String>()
-        val participantUsernames = mutableSetOf<String>()
-        recruitmentSnapshot.participants.forEach { p ->
-            run {
-                when (p.accountIdentity) {
-                    is EmailAccountIdentity -> participantEmails.add((p.accountIdentity as EmailAccountIdentity).emailAddress.address)
-                    is UsernameAccountIdentity -> participantUsernames.add((p.accountIdentity as UsernameAccountIdentity).username.name)
-                }
-            }
-        }
-        val accounts = arrayListOf<Account>()
-        participantUsernames.forEach{
-            val account = accountService.findByAccountIdentity(UsernameAccountIdentity(it))
-            if (account != null) {
-                accounts.add(account)
-            }
-        }
-        participantEmails.forEach{
-            val account = accountService.findByAccountIdentity(EmailAccountIdentity(it))
-            if (account != null) {
-                accounts.add(account)
-            }
-        }
-        return@runBlocking accounts
     }
 
     override suspend fun addRecruitment(recruitment: Recruitment) = runBlocking {

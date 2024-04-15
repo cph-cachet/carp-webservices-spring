@@ -1,4 +1,4 @@
-package dk.cachet.carp.webservices.study.service
+package dk.cachet.carp.webservices.study.service.core
 
 import dk.cachet.carp.common.application.services.createApplicationServiceAdapter
 import dk.cachet.carp.studies.application.StudyService
@@ -19,9 +19,9 @@ import org.springframework.stereotype.Component
 @Component
 class CoreStudyService
 (
-        studyRepository: CoreStudyRepository,
-        coreEventBus: CoreEventBus,
-        studyServiceAuthorizer: StudyServiceAuthorizer
+    studyRepository: CoreStudyRepository,
+    coreEventBus: CoreEventBus,
+    studyServiceAuthorizer: StudyServiceAuthorizer
 )
 {
     final val instance: StudyServiceDecorator

@@ -2,24 +2,15 @@ package dk.cachet.carp.webservices.deployment.controller
 
 import dk.cachet.carp.deployments.infrastructure.DeploymentServiceRequest
 import dk.cachet.carp.deployments.infrastructure.ParticipationServiceRequest
-import dk.cachet.carp.webservices.account.service.AccountService
-import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
-import dk.cachet.carp.webservices.common.exception.responses.BadRequestException
-import dk.cachet.carp.webservices.data.controller.DataStreamController
-import dk.cachet.carp.webservices.data.controller.DataStreamController.Companion
-import dk.cachet.carp.webservices.data.controller.DataStreamController.Companion.DATA_STREAM_SERVICE
 import dk.cachet.carp.webservices.dataPoint.service.DataPointService
 import dk.cachet.carp.webservices.deployment.dto.DeploymentStatisticsRequestDto
 import dk.cachet.carp.webservices.deployment.dto.DeploymentStatisticsResponseDto
-import dk.cachet.carp.webservices.deployment.service.CoreDeploymentService
-import dk.cachet.carp.webservices.deployment.service.CoreParticipationService
-import dk.cachet.carp.webservices.security.authorization.*
-import dk.cachet.carp.webservices.security.authorization.service.AuthorizationService
+import dk.cachet.carp.webservices.deployment.service.DeploymentService
+import dk.cachet.carp.webservices.deployment.service.ParticipationService
 import io.swagger.v3.oas.annotations.Operation
 import jakarta.validation.Valid
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.PostMapping
@@ -30,10 +21,10 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 class StudyDeploymentController
 (
+    private val deploymentService: DeploymentService,
+    private val participationService: ParticipationService,
     // should be removed when statistics endpoint gets removed
-    private val dataPointService: DataPointService,
-    coreParticipationService: CoreParticipationService,
-    coreDeploymentService: CoreDeploymentService
+    private val dataPointService: DataPointService
 )
 {
     companion object
@@ -47,16 +38,12 @@ class StudyDeploymentController
         const val DEPLOYMENT_STATISTICS = "/api/deployment-service/statistics"
     }
 
-    private val participationService = coreParticipationService.instance
-
-    private val deploymentService = coreDeploymentService.instance
-
     @PostMapping(value = [DEPLOYMENT_SERVICE])
     @Operation(tags = ["studyDeployment/deployments.json"])
     suspend fun deployments(@RequestBody request: DeploymentServiceRequest<*>): ResponseEntity<Any>
     {
         LOGGER.info("Start POST: $DEPLOYMENT_SERVICE -> ${ request::class.simpleName }")
-        return deploymentService.invoke( request ).let { ResponseEntity.ok( it ) }
+        return deploymentService.core.invoke( request ).let { ResponseEntity.ok( it ) }
     }
 
     @PostMapping(value = [PARTICIPATION_SERVICE])
@@ -64,7 +51,7 @@ class StudyDeploymentController
     suspend fun participation(@RequestBody request: ParticipationServiceRequest<*>): ResponseEntity<Any>
     {
         LOGGER.info("Start POST: $PARTICIPATION_SERVICE -> ${ request::class.simpleName }")
-        return participationService.invoke( request ).let { ResponseEntity.ok( it ) }
+        return participationService.core.invoke( request ).let { ResponseEntity.ok( it ) }
     }
 
     /**

@@ -23,8 +23,4 @@ data class Study
         @Column(columnDefinition = "jsonb")
         @Type(JsonBinaryType::class)
         var snapshot: JsonNode? = null,
-
-        @ElementCollection(fetch = FetchType.EAGER)
-        @CollectionTable(name = "studies_researcher_account_ids", joinColumns = [JoinColumn(name = "studies_id")])
-        var researcherAccountIds: MutableSet<String> = mutableSetOf()
 ): Auditable()

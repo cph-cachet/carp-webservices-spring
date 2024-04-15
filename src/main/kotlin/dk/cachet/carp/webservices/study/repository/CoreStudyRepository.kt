@@ -3,21 +3,16 @@ package dk.cachet.carp.webservices.study.repository
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import dk.cachet.carp.common.application.UUID
-import dk.cachet.carp.common.application.users.AccountIdentity
 import dk.cachet.carp.deployments.application.users.StudyInvitation
 import dk.cachet.carp.studies.domain.Study
 import dk.cachet.carp.studies.domain.StudyRepository
 import dk.cachet.carp.studies.domain.StudySnapshot
-import dk.cachet.carp.webservices.account.service.AccountService
 import dk.cachet.carp.webservices.collection.repository.CollectionRepository
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.consent.repository.ConsentDocumentRepository
 import dk.cachet.carp.webservices.dataPoint.repository.DataPointRepository
 import dk.cachet.carp.webservices.document.repository.DocumentRepository
 import dk.cachet.carp.webservices.file.repository.FileRepository
-import dk.cachet.carp.webservices.security.authentication.domain.Account
-import dk.cachet.carp.webservices.security.authorization.Role
-import dk.cachet.carp.webservices.study.domain.StudyOverview
 import dk.cachet.carp.webservices.summary.repository.SummaryRepository
 import kotlinx.coroutines.runBlocking
 import org.apache.logging.log4j.LogManager
@@ -39,7 +34,6 @@ class CoreStudyRepository
     private val filesRepository: FileRepository,
     private val objectMapper: ObjectMapper,
     private val validationMessages: MessageBase,
-    private val accountService: AccountService,
 ): StudyRepository
 {
     companion object
@@ -48,7 +42,7 @@ class CoreStudyRepository
     }
 
     override suspend fun add(study: Study) = runBlocking {
-        if (studyRepository.getByStudyId(study.id.stringRepresentation).isPresent)
+        if ( studyRepository.getByStudyId(study.id.stringRepresentation) != null )
         {
             LOGGER.warn("Study already exists, id: ${study.id.stringRepresentation}")
             throw IllegalArgumentException(validationMessages.get("study.core.add.exists", study.id.stringRepresentation))
@@ -67,15 +61,15 @@ class CoreStudyRepository
     }
 
     override suspend fun getById(studyId: UUID): Study? = runBlocking {
-        val optionalStudy = studyRepository.getByStudyId(studyId.stringRepresentation)
-        if (!optionalStudy.isPresent)
+        val study = studyRepository.getByStudyId(studyId.stringRepresentation)
+
+        if ( study == null )
         {
             LOGGER.info("Study is not found, id: ${studyId.stringRepresentation}")
             return@runBlocking null
         }
 
-        val foundStudy = optionalStudy.get()
-        return@runBlocking convertStudySnapshotNodeToStudy(foundStudy.snapshot!!)
+        return@runBlocking convertStudySnapshotNodeToStudy( study.snapshot!! )
     }
 
     override suspend fun getForOwner(ownerId: UUID): List<Study> = runBlocking {
@@ -83,24 +77,6 @@ class CoreStudyRepository
         return@runBlocking studies.map { convertStudySnapshotNodeToStudy(it.snapshot!!) }.toList()
     }
 
-    suspend fun getStudiesOverview(accountId: String): List<StudyOverview> = runBlocking {
-        val studiesAsOwner = studyRepository.findAllByOwnerId(accountId)
-        val studiesAsGuestResearcher = studyRepository.getForGuestResearcher(accountId)
-        val studies = studiesAsOwner + studiesAsGuestResearcher
-        return@runBlocking studies.map {
-            val study = convertStudySnapshotNodeToStudy(it.snapshot!!)
-            val studyStatus = study.getStatus()
-            StudyOverview(
-                    studyStatus.studyId,
-                    studyStatus.name,
-                    studyStatus.createdOn,
-                    studyStatus.studyProtocolId,
-                    studyStatus.canSetInvitation,
-                    studyStatus.canSetStudyProtocol,
-                    studyStatus.canDeployToParticipants,
-                    study.description)
-        }.distinctBy { it.studyId }.toList()
-    }
 
     /**
      * TODO: This should only remove the study from the study repository.
@@ -126,53 +102,29 @@ class CoreStudyRepository
     }
 
     override suspend fun update(study: Study) = runBlocking {
-        val optionalStudy = studyRepository.getByStudyId(study.id.stringRepresentation)
-        if (!optionalStudy.isPresent)
+        val existingStudy = studyRepository.getByStudyId(study.id.stringRepresentation)
+
+        if (existingStudy == null)
         {
             LOGGER.warn("Study is not found, id: ${study.id.stringRepresentation}")
             throw IllegalArgumentException(validationMessages.get("study.core.update.study.not_found", study.id.stringRepresentation))
         }
 
-        val storedStudy = optionalStudy.get()
-        storedStudy.snapshot = objectMapper.valueToTree(study.getSnapshot())
+        existingStudy.snapshot = objectMapper.valueToTree(study.getSnapshot())
         LOGGER.info("Study updated, id: ${study.id.stringRepresentation}")
     }
 
-    fun inviteResearcherToStudy(studyId: String, email: String) = runBlocking {
-        val study = getWSStudyById(UUID(studyId))
-        val accountIdentity = AccountIdentity.fromEmailAddress(email)
-        var account = accountService.findByAccountIdentity(accountIdentity)
 
-        if (account == null)
-        {
-            LOGGER.info("Account with email $email is not found.")
-            account = accountService.invite(accountIdentity, Role.RESEARCHER)
-        }
-
-        if (account.role!! < Role.RESEARCHER) {
-            accountService.addRole(accountIdentity, Role.RESEARCHER)
-            LOGGER.info("Account with email $email is granted the role RESEARCHER.")
-        }
-
-        if (study.researcherAccountIds.contains(account.id))
-        {
-            LOGGER.info("Study with id $studyId already contains the account with id ${account.id}")
-            throw IllegalArgumentException(validationMessages.get("study.core.invite.researcher.exists", account.id!!, studyId))
-        }
-
-        study.researcherAccountIds.add(account.id!!)
-        LOGGER.info("Account with email $email is added as a researcher to study with id $studyId.")
-    }
-
-    fun getWSStudyById(id: UUID): dk.cachet.carp.webservices.study.domain.Study
+    fun getWSStudyById( id: UUID ): dk.cachet.carp.webservices.study.domain.Study
     {
-        val optionalStudy = studyRepository.getByStudyId(id.stringRepresentation)
-        if (!optionalStudy.isPresent)
+        val study = studyRepository.getByStudyId( id.stringRepresentation )
+        if ( study == null )
         {
-            LOGGER.warn("Study is not found, id: ${id.stringRepresentation}")
-            throw IllegalArgumentException(validationMessages.get("study.core.study.not_found", id.stringRepresentation))
+            LOGGER.warn( "Study is not found, id: ${id.stringRepresentation}" )
+            throw IllegalArgumentException( validationMessages.get("study.core.study.not_found", id.stringRepresentation ) )
         }
-        return optionalStudy.get()
+
+        return study
     }
 
     suspend fun getDeploymentIdsOrThrow(studyId: UUID): List<String> = runBlocking {
@@ -189,22 +141,5 @@ class CoreStudyRepository
     {
         val snapshot = objectMapper.treeToValue(node, StudySnapshot::class.java)
         return Study.fromSnapshot(snapshot)
-    }
-
-    suspend fun getResearcherAccountsForStudy(studyId: String): List<Account> = runBlocking {
-        val ownerId = convertStudySnapshotNodeToStudy(getWSStudyById(UUID(studyId)).snapshot!!).ownerId.stringRepresentation
-        val accountIds = getWSStudyById(UUID(studyId)).researcherAccountIds.toMutableList()
-        accountIds.add(ownerId)
-        return@runBlocking accountIds.mapNotNull { accountService.findByUUID(UUID(it)) }
-    }
-
-    fun removeResearcherFromStudy(studyId: String, email: String): Boolean
-    {
-        val study = getWSStudyById(UUID(studyId))
-        val account = runBlocking { accountService.findByAccountIdentity(AccountIdentity.fromEmailAddress(email))
-            ?: throw IllegalArgumentException("Account with email $email is not found.") }
-        val isDeleted = study.researcherAccountIds.remove(account.id)
-        if (isDeleted) LOGGER.info("Researcher with id ${account.id} is removed from the study with id $studyId.")
-        return isDeleted
     }
 }

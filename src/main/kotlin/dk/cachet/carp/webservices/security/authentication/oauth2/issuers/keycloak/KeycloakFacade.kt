@@ -10,6 +10,7 @@ import dk.cachet.carp.webservices.common.environment.EnvironmentUtil
 import dk.cachet.carp.webservices.security.authentication.domain.Account
 import dk.cachet.carp.webservices.security.authentication.oauth2.IssuerFacade
 import dk.cachet.carp.webservices.security.authentication.oauth2.issuers.keycloak.domain.*
+import dk.cachet.carp.webservices.security.authorization.Claim
 import dk.cachet.carp.webservices.security.authorization.Role
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -147,31 +148,23 @@ class KeycloakFacade(
     }
 
     override suspend fun getAccount(identity: AccountIdentity): Account? {
-        val auth = authenticate()
-        val token = auth.accessToken
         val queryString = when (identity) {
             is EmailAccountIdentity -> "email=${identity.emailAddress}"
             is UsernameAccountIdentity -> "username=${identity.username}"
             else -> throw IllegalArgumentException("Unsupported account identity type: ${identity::class.simpleName}.")
-        }
+        }.plus("&exact=true")
 
         LOGGER.debug("Getting account with identity: {}", identity)
 
-        val userRepresentation = adminClient.get().uri("/users?$queryString&exact=true")
-            .headers {
-                it.setBearerAuth(token!!)
-            }
-            .retrieve()
-            .awaitBody<List<UserRepresentation>>()
-            .firstOrNull()
+        return queryAll(queryString).firstOrNull()
+    }
 
-        if (userRepresentation == null) {
-            LOGGER.debug("No account found with identity: {}", identity)
-            return null
-        }
+    override suspend fun getAllByClaim( claim: Claim ): List<Account> {
+        val queryString = "q=${claim.userAttributeName()}:${claim.value}"
 
-        val roles = getRoles(UUID(userRepresentation.id!!))
-        return userRepresentation.toAccount(roles)
+        LOGGER.debug("Getting all accounts with claim: {}", claim)
+
+        return queryAll(queryString)
     }
 
     override suspend fun sendInvitation(account: Account, redirectUri: String?, accountType: AccountType) {
@@ -250,6 +243,24 @@ class KeycloakFacade(
             .awaitBody<MagicLinkResponse>()
 
         return magicLinkResponse.link
+    }
+
+    private suspend fun queryAll( query: String ): List<Account> {
+        val token = authenticate().accessToken
+
+        LOGGER.debug("Querying all accounts with query: {}", query)
+
+        val userRepresentations = adminClient.get().uri("/users?$query")
+            .headers {
+                it.setBearerAuth(token!!)
+            }
+            .retrieve()
+            .awaitBody<List<UserRepresentation>>()
+
+        return userRepresentations.map { userRepresentation ->
+            val roles = getRoles(UUID(userRepresentation.id!!))
+            userRepresentation.toAccount(roles)
+        }
     }
 
     suspend fun authenticate(): TokenResponse =

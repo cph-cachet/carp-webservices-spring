@@ -1,4 +1,4 @@
-package dk.cachet.carp.webservices.deployment.service
+package dk.cachet.carp.webservices.deployment.service.core
 
 import dk.cachet.carp.common.application.services.createApplicationServiceAdapter
 import dk.cachet.carp.deployments.application.DeploymentService
@@ -6,7 +6,7 @@ import dk.cachet.carp.deployments.application.DeploymentServiceHost
 import dk.cachet.carp.deployments.infrastructure.DeploymentServiceDecorator
 import dk.cachet.carp.webservices.common.authorization.ApplicationServiceRequestAuthorizer
 import dk.cachet.carp.webservices.common.eventbus.CoreEventBus
-import dk.cachet.carp.webservices.data.service.CoreDataStreamService
+import dk.cachet.carp.webservices.data.service.core.CoreDataStreamService
 import dk.cachet.carp.webservices.deployment.authorization.DeploymentServiceAuthorizer
 import dk.cachet.carp.webservices.deployment.repository.CoreDeploymentRepository
 import org.springframework.stereotype.Component

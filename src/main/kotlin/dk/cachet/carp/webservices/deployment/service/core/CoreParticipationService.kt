@@ -1,4 +1,4 @@
-package dk.cachet.carp.webservices.deployment.service
+package dk.cachet.carp.webservices.deployment.service.core
 
 import dk.cachet.carp.common.application.services.createApplicationServiceAdapter
 import dk.cachet.carp.deployments.application.ParticipationService

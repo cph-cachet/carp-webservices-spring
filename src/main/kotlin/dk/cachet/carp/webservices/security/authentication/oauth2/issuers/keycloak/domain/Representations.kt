@@ -28,7 +28,7 @@ data class UserRepresentation(
                 email = account.email,
                 requiredActions = requiredActions,
                 emailVerified = !requiredActions.contains( RequiredAction.VERIFY_EMAIL ),
-                attributes = account.carpClaims?.groupBy( { Claim.userAttributeName( it::class ) }, { it.value } )
+                attributes = account.carpClaims?.groupBy( { it.userAttributeName() }, { it.value } )
             )
     }
 
