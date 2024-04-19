@@ -16,6 +16,7 @@ data class Account(
     var lastName: String? = null,
     var email: String? = null,
     var role: Role? = null,
+    var isEmailVerified: Boolean? = null
 ) {
     fun getIdentity(): AccountIdentity = when {
         !email.isNullOrBlank() -> EmailAccountIdentity(email!!)

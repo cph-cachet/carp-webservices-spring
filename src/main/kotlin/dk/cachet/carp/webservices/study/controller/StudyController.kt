@@ -58,12 +58,16 @@ class StudyController
         const val RECRUITMENT_SERVICE = "/api/recruitment-service"
         const val RESEARCHERS = "/api/studies/{${PathVariableName.STUDY_ID}}/researchers"
         const val ADD_RESEARCHER = "/api/studies/{${PathVariableName.STUDY_ID}}/researchers/add"
-        const val GET_PARTICIPANT_INFO = "/api/studies/{${PathVariableName.STUDY_ID}}/participants"
+        const val GET_PARTICIPANTS_INFO = "/api/studies/{${PathVariableName.STUDY_ID}}/participants"
         const val GET_STUDIES_OVERVIEW = "/api/studies/studies-overview"
         const val GET_PARTICIPANTS_ACCOUNTS = "/api/studies/{${PathVariableName.STUDY_ID}}/participants/accounts"
+
         const val GET_PARTICIPANT_GROUP_STATUS = "/api/studies/{${PathVariableName.STUDY_ID}}/participantGroup/status"
+
         const val ADD_PARTICIPANTS = "/api/studies/{${PathVariableName.STUDY_ID}}/participants/add"
         const val GENERATE_ANONYMOUS_PARTICIPANTS = "/api/studies/{${PathVariableName.STUDY_ID}}/generate"
+
+        const val GET_PARTICIPANTS_GENERAL_INFO = "/api/studies/{${PathVariableName.STUDY_ID}}/participants/general-info"
     }
 
     private val studyService = coreStudyService.instance
@@ -116,13 +120,21 @@ class StudyController
         return coreStudyRepository.removeResearcherFromStudy(studyId, email)
     }
 
-    @GetMapping(value = [GET_PARTICIPANT_INFO])
+    @GetMapping(value = [GET_PARTICIPANTS_INFO])
     @PreAuthorize("@studyAuthorizationService.canAccessStudy(#studyId)")
     @Operation(tags = ["study/getParticipantAccountInfo.json"])
     fun getParticipantAccountInfo(@PathVariable(PathVariableName.STUDY_ID) studyId: String): List<Account> {
         LOGGER.info("Start POST: /api/studies/$studyId/participants")
         return runBlocking { coreParticipantRepository.getParticipantAccountDetailsForStudy(studyId) }
     }
+
+/*    @GetMapping(value = [GET_PARTICIPANTS_GENERAL_INFO])
+    @PreAuthorize("@studyAuthorizationService.canAccessStudy(#studyId)")
+    @Operation(tags = ["study/getParticipantAccountInfo.json"])
+    fun getParticipantAccountInfo(@PathVariable(PathVariableName.STUDY_ID) studyId: String): List<Account> {
+        LOGGER.info("Start POST: /api/studies/{${PathVariableName.STUDY_ID}}/participants/general-info\"")
+        return runBlocking { coreParticipantRepository.getParticipantAccountGeneralDetailsForStudy(studyId) }
+    }*/
 
     @GetMapping(value = [GET_STUDIES_OVERVIEW])
     @PreAuthorize("@studyAuthorizationService.canCreateStudy()")
