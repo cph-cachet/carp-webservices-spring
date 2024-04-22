@@ -12,6 +12,7 @@ interface RecruitmentService
     suspend fun inviteResearcher( studyId: UUID, email: String )
     suspend fun removeResearcher( studyId: UUID, email: String ): Boolean
     suspend fun getParticipants( studyId: UUID ) : List<Account>
+    fun isParticipant( studyId: UUID, accountId: UUID ): Boolean
     suspend fun getParticipantGroupsStatus( studyId: UUID ) : ParticipantGroupsStatus
     suspend fun addAnonymousParticipants(
         studyId: UUID,

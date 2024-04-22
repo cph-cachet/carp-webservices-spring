@@ -64,10 +64,11 @@ class AccountServiceImpl(
             emptyList()
         }
 
-    override suspend fun hasRoleByEmail(email: EmailAddress, role: Role): Boolean {
-        val account = findByAccountIdentity(AccountIdentity.fromEmailAddress(email.address))
+    override suspend fun hasRoleByEmail( email: EmailAddress, role: Role ): Boolean
+    {
+        val account = findByAccountIdentity( AccountIdentity.fromEmailAddress( email.address ) )
 
-        requireNotNull(account)
+        requireNotNull( account )
 
         return account.role!! >= role
     }

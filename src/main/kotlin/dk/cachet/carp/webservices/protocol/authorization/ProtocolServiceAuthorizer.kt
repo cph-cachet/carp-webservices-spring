@@ -32,7 +32,7 @@ class ProtocolServiceAuthorizer(
         when ( this )
         {
             is ProtocolServiceRequest.Add ->
-                auth.grantCurrentAuthentication( Claim.ProtocolOwner( protocol.ownerId ) )
+                auth.grantCurrentAuthentication( Claim.ProtocolOwner( protocol.id ) )
             is ProtocolServiceRequest.AddVersion,
             is ProtocolServiceRequest.UpdateParticipantDataConfiguration,
             is ProtocolServiceRequest.GetBy,

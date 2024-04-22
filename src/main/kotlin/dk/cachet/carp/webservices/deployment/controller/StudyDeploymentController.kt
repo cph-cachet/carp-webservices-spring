@@ -66,7 +66,7 @@ class StudyDeploymentController
      * statistics for a single participant group.
      */
     @PostMapping(value = [DEPLOYMENT_STATISTICS])
-    @PreAuthorize("#{false}")
+    @PreAuthorize("false")
     @Operation(tags = ["studyDeployment/statistics.json"])
     fun statistics(@Valid @RequestBody request: DeploymentStatisticsRequestDto): DeploymentStatisticsResponseDto
     {

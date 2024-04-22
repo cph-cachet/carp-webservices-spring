@@ -29,8 +29,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 
 @RestController
-class StudyController
-    (
+class StudyController(
     private val authenticationService: AuthenticationService,
     private val accountService: AccountService,
     private val studyService: StudyService,
@@ -53,8 +52,7 @@ class StudyController
     }
 
     @PostMapping(value = [ADD_RESEARCHER])
-    // TODO
-    @PreAuthorize("#{false}")
+    @PreAuthorize("canManageStudy(#studyId)")
     @Operation(tags = ["study/addResearcher.json"])
     suspend fun addResearcher(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
@@ -65,8 +63,7 @@ class StudyController
     }
 
     @GetMapping(value = [GET_PARTICIPANTS_ACCOUNTS])
-    // TODO
-    @PreAuthorize("#{false}")
+    @PreAuthorize("canManageStudy(#studyId)")
     @Operation(tags = ["study/getParticipantsAccounts.json"])
     suspend fun getParticipantAccounts(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID
@@ -77,8 +74,7 @@ class StudyController
     }
 
     @GetMapping(value = [RESEARCHERS])
-    // TODO
-    @PreAuthorize("#{false}")
+    @PreAuthorize("canManageStudy(#studyId)")
     @Operation(tags = ["study/getResearchers.json"])
     suspend fun getResearchers(@PathVariable(PathVariableName.STUDY_ID) studyId: UUID): List<Account>
     {
@@ -87,8 +83,7 @@ class StudyController
     }
 
     @GetMapping(value = [GET_PARTICIPANT_GROUP_STATUS])
-    // TODO
-    @PreAuthorize("#{false}")
+    @PreAuthorize("canManageStudy(#studyId)")
     @Operation(tags = ["study/getParticipantGroupStatus.json"])
     fun getParticipantGroupStatus(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID
@@ -99,8 +94,7 @@ class StudyController
     }
 
     @DeleteMapping(value = [RESEARCHERS])
-    // TODO
-    @PreAuthorize("#{false}")
+    @PreAuthorize("canManageStudy(#studyId)")
     @Operation(tags = ["study/removeResearchers.json"])
     suspend fun removeResearcher(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
@@ -110,8 +104,7 @@ class StudyController
 
     // TODO: duplicated endpoint, mark for removal
     @GetMapping(value = [GET_PARTICIPANT_INFO])
-    // TODO
-    @PreAuthorize("#{false}")
+    @PreAuthorize("canManageStudy(#studyId)")
     @Operation(tags = ["study/getParticipantAccountInfo.json"])
     suspend fun getParticipantAccountInfo(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID
@@ -122,17 +115,16 @@ class StudyController
     }
 
     @GetMapping(value = [GET_STUDIES_OVERVIEW])
-    // TODO
-    @PreAuthorize("#{false}")
-    suspend fun getStudiesOverview(): List<StudyOverview> {
+    suspend fun getStudiesOverview(): List<StudyOverview>
+    {
         LOGGER.info("Start POST: /api/studies/studies-overview")
-        val account = authenticationService.getAuthentication()
-        return studyService.getStudiesOverview( UUID( account.id!! ) )
+        return studyService.getStudiesOverview( authenticationService.getId() )
     }
 
     @PostMapping(value = [STUDY_SERVICE])
     @Operation(tags = ["study/studies.json"])
-    suspend fun studies(@RequestBody request: StudyServiceRequest<*>): ResponseEntity<*> {
+    suspend fun studies(@RequestBody request: StudyServiceRequest<*>): ResponseEntity<*>
+    {
         LOGGER.info("Start POST: $STUDY_SERVICE -> ${ request::class.simpleName }")
         return studyService.core.invoke( request ).let { ResponseEntity.ok( it ) }
     }
@@ -146,8 +138,7 @@ class StudyController
     }
 
     @PostMapping(value = [ADD_PARTICIPANTS])
-    // TODO
-    @PreAuthorize("#{false}")
+    @PreAuthorize("canManageStudy(#studyId)")
     suspend fun addParticipants(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @Valid @RequestBody request: AddParticipantsRequestDto
@@ -157,8 +148,7 @@ class StudyController
     }
 
     @PostMapping(GENERATE_ANONYMOUS_PARTICIPANTS)
-    // TODO
-    @PreAuthorize("#{false}")
+    @PreAuthorize("canManageStudy(#studyId)")
     suspend fun generateAnonymousParticipants(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @Valid @RequestBody request: AnonymousLinkRequest

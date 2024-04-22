@@ -27,35 +27,43 @@ class AuthorizationServiceImpl(
 
     override fun require( claim: Claim ) = require( claim ) { PERMISSION_DENIED_MSG }
 
-    private inline fun require( vararg claims: Claim, crossinline lazyMessage: () -> Any = {} )
-    {
-        val account = authenticationService.getAuthentication()
-        require( claims.all { account.carpClaims?.contains( it ) == true }, lazyMessage )
+    private inline fun require( vararg claims: Claim, crossinline lazyMessage: () -> Any = {} ) {
+        if ( isAdmin() ) return
+
+        require( authenticationService.getClaims().containsAll( claims.toList() ), lazyMessage )
     }
 
     override fun require( role: Role ) = require( role ) { PERMISSION_DENIED_MSG }
 
-    private inline fun require( role: Role, crossinline lazyMessage: () -> Any = {} )
-    {
-        val account = authenticationService.getAuthentication()
-        require( account.role?.let { role >= it } ?: false , lazyMessage )
+    private inline fun require( role: Role, crossinline lazyMessage: () -> Any = {} ) {
+        if ( isAdmin() ) return
+
+        require( authenticationService.getRole() >= role, lazyMessage )
     }
 
     override fun requireOwner( ownerId: UUID ) = requireOwner( ownerId ) { PERMISSION_DENIED_MSG }
 
-    private inline fun requireOwner( ownerId: UUID, crossinline lazyMessage: () -> Any = {} )
-    {
-        val account = authenticationService.getAuthentication()
-        require( account.id == ownerId.toString(), lazyMessage )
+    private inline fun requireOwner( ownerId: UUID, crossinline lazyMessage: () -> Any = {} ) {
+        if ( isAdmin() ) return
+
+        require( authenticationService.getId() == ownerId, lazyMessage )
     }
 
     override suspend fun grantCurrentAuthentication( claim: Claim ) = grantCurrentAuthentication( setOf( claim ) )
 
     override suspend fun grantCurrentAuthentication( claims: Set<Claim> )
     {
-        val account = authenticationService.getAuthentication()
-        accountService.grant( account.getIdentity(), claims )
+        accountService.grant( authenticationService.getCarpIdentity(), claims )
     }
+
+    override suspend fun grantEveryoneWithExistingClaim( existingClaim: Claim, newClaim: Claim )
+    {
+        accountService.findAllByClaim( existingClaim ).forEach {
+            accountService.grant( it.getIdentity(), setOf( newClaim ) )
+        }
+    }
+
+    private fun isAdmin() = authenticationService.getRole() == Role.SYSTEM_ADMIN
 
     @OptIn( ExperimentalContracts::class )
     private inline fun require( value: Boolean, lazyMessage: () -> Any )
@@ -70,3 +78,4 @@ class AuthorizationServiceImpl(
         }
     }
 }
+

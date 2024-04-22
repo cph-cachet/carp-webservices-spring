@@ -9,6 +9,7 @@ import com.amazonaws.services.s3.model.PutObjectRequest
 import com.fasterxml.jackson.databind.ObjectMapper
 import cz.jirutka.rsql.parser.RSQLParser
 import dk.cachet.carp.common.application.UUID
+import dk.cachet.carp.webservices.account.service.AccountService
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.exception.responses.ResourceNotFoundException
 import dk.cachet.carp.webservices.common.query.QueryVisitor
@@ -17,7 +18,9 @@ import dk.cachet.carp.webservices.file.repository.FileRepository
 import dk.cachet.carp.webservices.file.service.FileService
 import dk.cachet.carp.webservices.file.service.FileStorage
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
+import dk.cachet.carp.webservices.security.authorization.Claim
 import dk.cachet.carp.webservices.security.authorization.Role
+import kotlinx.coroutines.*
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.beans.factory.annotation.Value
@@ -36,10 +39,13 @@ class FileServiceImpl(
     private val validateMessages: MessageBase,
     private val s3Client: AmazonS3,
     private val authenticationService: AuthenticationService,
+    private val accountService: AccountService,
     @Value("\${s3.space.bucket}") private val s3SpaceBucket: String,
     @Value("\${s3.space.endpoint}") private val s3SpaceEndpoint: String
 ): FileService
 {
+    private val backgroundWorker = CoroutineScope(Dispatchers.IO)
+
     companion object
     {
         private val LOGGER: Logger = LogManager.getLogger()
@@ -47,9 +53,9 @@ class FileServiceImpl(
 
     override fun getAll(query: String?, studyId: String): List<File>
     {
-        val account = authenticationService.getAuthentication()
-        val isResearcher = account.role!! >= Role.RESEARCHER
-
+        val id = authenticationService.getId()
+        val role = authenticationService.getRole()
+        val isResearcher = role >= Role.RESEARCHER
 
         if (isResearcher && query == null)
         {
@@ -60,7 +66,7 @@ class FileServiceImpl(
             query?.let {
                 val queryForRole = if (!isResearcher)
                      // Return data relevant to this user only.
-                    "$query;created_by==${account.id!!};study_id==$studyId"
+                    "$query;created_by==${id};study_id==$studyId"
                 else
                 {
                     // Return data relevant to this study.
@@ -71,7 +77,7 @@ class FileServiceImpl(
                         .accept(QueryVisitor<File>())
                 return fileRepository.findAll(specification)
             }
-            return fileRepository.findByStudyIdAndCreatedBy(studyId, account.id!!)
+            return fileRepository.findByStudyIdAndCreatedBy(studyId, id.stringRepresentation)
         }
     }
 
@@ -102,20 +108,27 @@ class FileServiceImpl(
         )
 
         LOGGER.info("File saved, id = ${saved.id}")
+
+        backgroundWorker.launch {
+            val identity = authenticationService.getCarpIdentity()
+            accountService.grant(identity, setOf(Claim.FileOwner(saved.id)))
+        }
+
         return saved
     }
 
     override fun delete(id: Int)
     {
-        // Find the file by id.
         val file = getOne(id)
-
-        // Delete the file.
         fileStorage.deleteFile(file.storageName)
-
-        // Delete the file from file repository
         fileRepository.delete(file)
+
         LOGGER.info("File deleted, id = $id")
+
+        backgroundWorker.launch {
+            val identity = authenticationService.getCarpIdentity()
+            accountService.revoke(identity, setOf(Claim.FileOwner(file.id)))
+        }
     }
 
     /**

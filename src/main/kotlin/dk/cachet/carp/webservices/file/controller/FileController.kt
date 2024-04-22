@@ -1,5 +1,6 @@
 package dk.cachet.carp.webservices.file.controller
 
+import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.webservices.common.constants.PathVariableName
 import dk.cachet.carp.webservices.common.constants.RequestParamName
 import dk.cachet.carp.webservices.file.domain.File
@@ -38,42 +39,53 @@ class FileController(private val fileStorage: FileStorage, private val fileServi
 
     @GetMapping(FILE_BASE)
     @Operation(tags = ["file/getAll.json"])
-    @PreAuthorize("#{false}")
+    @PreAuthorize("canManageStudy(#studyId)")
     fun getAll(
-        @PathVariable(PathVariableName.STUDY_ID) studyId: String,
+        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @RequestParam(RequestParamName.QUERY) query: String?): List<File>
     {
         LOGGER.info("Start GET: /api/studies/$studyId/files")
-        return fileService.getAll(query, studyId)
+        return fileService.getAll(query, studyId.stringRepresentation)
     }
 
     @GetMapping(GET_BY_DEPLOYMENT_ID)
-    @PreAuthorize("#{false}")
+    @PreAuthorize("canManageStudy(#studyId)")
     fun getByStudyIdAndDeploymentId(
-        @PathVariable(PathVariableName.STUDY_ID) studyId: String,
-        @PathVariable(PathVariableName.DEPLOYMENT_ID) deploymentId: String): List<File>
+        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
+        @PathVariable(PathVariableName.DEPLOYMENT_ID) deploymentId: UUID
+    ): List<File>
     {
         LOGGER.info("Start GET: /api/studies/$studyId/deployments/$deploymentId/files")
-        return fileService.getAllByStudyIdAndDeploymentId(studyId, deploymentId)
+
+        return fileService.getAllByStudyIdAndDeploymentId(
+            studyId.stringRepresentation,
+            deploymentId.stringRepresentation
+        )
     }
 
     @GetMapping(FILE_ID)
     @Operation(tags = ["file/getOne.json"])
-    @PreAuthorize("#{false}")
+    @PreAuthorize("canManageStudy(#studyId) or isFileOwner(#fileId)")
     fun getOne(
-        @PathVariable(PathVariableName.STUDY_ID) studyId: String,
+        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @PathVariable(PathVariableName.FILE_ID) fileId: Int): File
     {
         LOGGER.info("Start GET: /api/studies/$studyId/files/$fileId")
         return fileService.getOne(fileId)
     }
 
-    @GetMapping(produces = [MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_OCTET_STREAM_VALUE], value = [DOWNLOAD])
+    @GetMapping(
+        produces = [
+            MediaType.MULTIPART_FORM_DATA_VALUE,
+            MediaType.APPLICATION_OCTET_STREAM_VALUE
+        ],
+        value = [DOWNLOAD]
+    )
     @ResponseBody
     @Operation(tags = ["file/download.json"])
-    @PreAuthorize("#{false}")
+    @PreAuthorize("canManageStudy(#studyId) or isFileOwner(#id)")
     fun download(
-        @PathVariable(PathVariableName.STUDY_ID) studyId: String,
+        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @PathVariable(PathVariableName.FILE_ID) id: Int): ResponseEntity<Resource>
     {
         LOGGER.info("Start GET: /api/studies/$studyId/files/$id/download")
@@ -83,28 +95,34 @@ class FileController(private val fileStorage: FileStorage, private val fileServi
                 "attachment; filename=\"" + file.originalName + "\"").body<Resource>(fileToDownload)
     }
 
-    @PostMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_OCTET_STREAM_VALUE],
-                 produces = [MediaType.APPLICATION_JSON_VALUE],
-                 value = [FILE_BASE])
+    @PostMapping(
+        consumes = [
+            MediaType.MULTIPART_FORM_DATA_VALUE,
+            MediaType.APPLICATION_OCTET_STREAM_VALUE
+        ],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+        value = [FILE_BASE]
+    )
     @Operation(tags = ["file/create.json"])
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("#{false}")
+    @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
     fun create(
-        @PathVariable(PathVariableName.STUDY_ID) studyId: String,
-        @RequestParam(RequestParamName.DEPLOYMENT_ID, required = false) deploymentId: String?,
+        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
+        @RequestParam(RequestParamName.DEPLOYMENT_ID, required = false) deploymentId: UUID?,
         @RequestParam(RequestParamName.METADATA, required = false) metadata: String?,
-        @RequestPart file: MultipartFile): File
+        @RequestPart file: MultipartFile
+    ): File
     {
         LOGGER.info("Start POST: /api/studies/$studyId/files")
-        return fileService.create(studyId, file, metadata)
+        return fileService.create(studyId.stringRepresentation, file, metadata)
     }
 
     @DeleteMapping(FILE_ID)
     @Operation(tags = ["file/delete.json"])
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("#{false}")
+    @PreAuthorize("canManageStudy(#studyId) or isFileOwner(#fileId)")
     fun delete(
-        @PathVariable(PathVariableName.STUDY_ID) studyId: String,
+        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @PathVariable(PathVariableName.FILE_ID) fileId: Int)
     {
         LOGGER.info("Start DELETE: /api/studies/$studyId/files/$fileId")
@@ -113,9 +131,9 @@ class FileController(private val fileStorage: FileStorage, private val fileServi
 
     @PostMapping(UPLOAD_IMAGE)
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("#{false}")
+    @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
     fun uploadS3(
-        @PathVariable(PathVariableName.STUDY_ID) studyId: String,
+        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @RequestParam(RequestParamName.IMAGE, required = true) image: MultipartFile): String
     {
         LOGGER.info("Start PUT: /api/studies/$studyId/images")

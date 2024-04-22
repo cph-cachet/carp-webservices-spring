@@ -3,6 +3,8 @@ package dk.cachet.carp.webservices.common.authorization
 import dk.cachet.carp.common.application.services.ApplicationService
 import dk.cachet.carp.common.infrastructure.services.ApplicationServiceRequest
 import dk.cachet.carp.common.infrastructure.services.Command
+import dk.cachet.carp.webservices.security.config.SecurityCoroutineContext
+import kotlinx.coroutines.withContext
 
 interface ApplicationServiceAuthorizer<
         TService: ApplicationService<TService, *>,
@@ -27,14 +29,15 @@ class ApplicationServiceRequestAuthorizer<
     private val decoratee: Command<TRequest>
 ): Command<TRequest>
 {
-    override suspend fun invoke( request: TRequest ): Any?
-    {
-        serviceAuthorizer.authorizeRequest( request )
+    override suspend fun invoke( request: TRequest ): Any? =
+        withContext( SecurityCoroutineContext() )
+        {
+            serviceAuthorizer.authorizeRequest( request )
 
-        val result = decoratee.invoke( request )
+            val result = decoratee.invoke( request )
 
-        serviceAuthorizer.grantClaimsOnSuccessfulRequest( request, result )
+            serviceAuthorizer.grantClaimsOnSuccessfulRequest( request, result )
 
-        return result
-    }
+            return@withContext result
+        }
 }

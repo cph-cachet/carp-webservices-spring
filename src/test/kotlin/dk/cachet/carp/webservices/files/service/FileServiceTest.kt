@@ -3,6 +3,7 @@ package dk.cachet.carp.webservices.files.service
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.DeleteObjectRequest
 import com.amazonaws.services.s3.model.PutObjectRequest
+import dk.cachet.carp.webservices.account.service.AccountService
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.file.repository.FileRepository
 import dk.cachet.carp.webservices.file.service.FileStorage
@@ -24,6 +25,7 @@ class FileServiceTest {
     private val messageBase: MessageBase = mockk()
     private val s3Client: AmazonS3 = mockk()
     private val authenticationService: AuthenticationService = mockk()
+    private val accountService: AccountService = mockk()
 
     private val s3SpaceBucket = "s3://bucket"
     private val s3SpaceEndpoint = "https://why-is-aamir-written-with-two-As.com"
@@ -42,6 +44,7 @@ class FileServiceTest {
                 messageBase,
                 s3Client,
                 authenticationService,
+                accountService,
                 s3SpaceBucket,
                 s3SpaceEndpoint
             )
@@ -66,6 +69,7 @@ class FileServiceTest {
                 messageBase,
                 s3Client,
                 authenticationService,
+                accountService,
                 s3SpaceBucket,
                 s3SpaceEndpoint
             )
@@ -96,6 +100,7 @@ class FileServiceTest {
                 messageBase,
                 s3Client,
                 authenticationService,
+                accountService,
                 s3SpaceBucket,
                 s3SpaceEndpoint
             )
@@ -118,6 +123,7 @@ class FileServiceTest {
                 messageBase,
                 s3Client,
                 authenticationService,
+                accountService,
                 s3SpaceBucket,
                 s3SpaceEndpoint
             )

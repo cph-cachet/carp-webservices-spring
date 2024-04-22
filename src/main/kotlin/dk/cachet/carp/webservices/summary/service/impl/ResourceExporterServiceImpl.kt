@@ -5,15 +5,15 @@ import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.deployments.application.ParticipationService
 import dk.cachet.carp.deployments.application.users.ParticipantData
 import dk.cachet.carp.deployments.domain.StudyDeploymentSnapshot
-import dk.cachet.carp.webservices.collection.service.ICollectionService
+import dk.cachet.carp.webservices.collection.service.CollectionService
 import dk.cachet.carp.webservices.common.exception.file.FileStorageException
-import dk.cachet.carp.webservices.consent.service.IConsentDocumentService
+import dk.cachet.carp.webservices.consent.service.ConsentDocumentService
 import dk.cachet.carp.webservices.data.repository.DataStreamSequenceRepository
 import dk.cachet.carp.webservices.dataPoint.service.DataPointService
 import dk.cachet.carp.webservices.deployment.repository.StudyDeploymentRepository
 import dk.cachet.carp.webservices.deployment.service.core.CoreParticipationService
 import dk.cachet.carp.webservices.document.domain.Document
-import dk.cachet.carp.webservices.document.service.IDocumentService
+import dk.cachet.carp.webservices.document.service.DocumentService
 import dk.cachet.carp.webservices.file.domain.File
 import dk.cachet.carp.webservices.file.service.FileService
 import dk.cachet.carp.webservices.file.service.FileStorage
@@ -38,12 +38,12 @@ class ResourceExporterServiceImpl
     private val studyDeploymentRepository: StudyDeploymentRepository,
     coreParticipationService: CoreParticipationService,
     private val dataPointService: DataPointService,
-    private val consentDocumentService: IConsentDocumentService,
+    private val consentDocumentService: ConsentDocumentService,
     private val fileService: FileService,
     private val fileStorage: FileStorage,
     private val fileUtil: FileUtil,
-    private val documentService: IDocumentService,
-    private val collectionService: ICollectionService,
+    private val documentService: DocumentService,
+    private val collectionService: CollectionService,
     private val dataStreamSequenceRepository: DataStreamSequenceRepository
 ): ResourceExporterService
 {

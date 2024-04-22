@@ -5,10 +5,10 @@ import dk.cachet.carp.webservices.collection.dto.CollectionCreateRequestDto
 import dk.cachet.carp.webservices.collection.dto.CollectionUpdateRequestDto
 
 /**
- * The Interface [ICollectionService].
- * The [ICollectionService] creates the interfaces for handling collections with the given parameters.
+ * The Interface [CollectionService].
+ * The [CollectionService] creates the interfaces for handling collections with the given parameters.
  */
-interface ICollectionService
+interface CollectionService
 {
     /** The [delete] interface for deleting a collection. */
     fun delete(studyId: String, id: Int)

@@ -8,7 +8,6 @@ import dk.cachet.carp.protocols.application.StudyProtocolSnapshot
 import dk.cachet.carp.protocols.domain.*
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.protocol.domain.Protocol
-import dk.cachet.carp.webservices.protocol.dto.GetLatestProtocolResponseDto
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Instant
 import org.apache.logging.log4j.LogManager
@@ -192,17 +191,4 @@ class CoreProtocolRepository(
 
         return wsProtocol
     }
-
-    fun getLatestProtocolById(protocolId: String): GetLatestProtocolResponseDto?
-    {
-        val latestVersion = protocolRepository.findLatestById(protocolId)
-        val firstVersion = protocolRepository.findFirstById(protocolId)
-        if (latestVersion.isPresent && firstVersion.isPresent)
-        {
-            val protocol = convertJsonNodeToStudyProtocol(latestVersion.get().snapshot!!)
-            return GetLatestProtocolResponseDto(latestVersion.get().versionTag, protocol.getSnapshot(), firstVersion.get().createdAt!!, latestVersion.get().createdAt!!)
-        }
-        return null
-    }
-
 }

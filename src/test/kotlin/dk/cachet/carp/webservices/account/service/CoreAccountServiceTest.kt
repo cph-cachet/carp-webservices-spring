@@ -10,7 +10,6 @@ import dk.cachet.carp.webservices.common.email.service.EmailInvitationService
 import dk.cachet.carp.webservices.deployment.repository.CoreDeploymentRepository
 import dk.cachet.carp.webservices.security.authentication.domain.Account
 import io.mockk.*
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Nested
 import kotlin.test.Test
@@ -18,7 +17,6 @@ import kotlin.test.assertFailsWith
 import kotlin.test.expect
 import dk.cachet.carp.common.domain.users.Account as CoreAccount
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class CoreAccountServiceTest
 {
     private val accountService: AccountService = mockk()
@@ -98,6 +96,7 @@ class CoreAccountServiceTest
                 every { getIdentity() } returns AccountIdentity.fromUsername("username")
             }
             val foundDeployment = mockk<StudyDeployment> {
+                every { id } returns UUID.randomUUID()
                 every { protocol } returns mockk<StudyProtocol> {
                     every { primaryDevices } returns setOf()
                     every { tasks } returns setOf()
@@ -106,6 +105,7 @@ class CoreAccountServiceTest
             coEvery { deploymentRepository.getStudyDeploymentBy(any()) } returns foundDeployment
             coEvery { accountService.findByUUID(any()) } returns foundAccount
             coEvery { accountService.invite(any(), any(), any()) } returns mockk()
+            coEvery { accountService.grant(any(), any()) } returns mockk()
             every { emailInvitationService.inviteToStudy(any(), any(), any(), any()) } returns mockk()
             val sut = CoreAccountService( accountService, deploymentRepository, emailInvitationService )
 
@@ -126,6 +126,7 @@ class CoreAccountServiceTest
                 every { getIdentity() } returns AccountIdentity.fromEmailAddress("email")
             }
             val foundDeployment = mockk<StudyDeployment> {
+                every { id } returns UUID.randomUUID()
                 every { protocol } returns mockk<StudyProtocol> {
                     every { primaryDevices } returns setOf()
                     every { tasks } returns setOf()
@@ -134,6 +135,7 @@ class CoreAccountServiceTest
             coEvery { deploymentRepository.getStudyDeploymentBy(any()) } returns foundDeployment
             coEvery { accountService.findByUUID(any()) } returns foundAccount
             coEvery { accountService.invite(any(), any(), any()) } returns mockk()
+            coEvery { accountService.grant(any(), any()) } returns mockk()
             every { emailInvitationService.inviteToStudy(any(), any(), any(), any()) } returns mockk()
             val sut = CoreAccountService( accountService, deploymentRepository, emailInvitationService )
 
@@ -143,6 +145,7 @@ class CoreAccountServiceTest
             coVerify(exactly = 1) { accountService.findByUUID(any()) }
             verify(exactly = 1) { emailInvitationService.inviteToStudy(any(), any(), any(), any())  }
             coVerify(exactly = 1) { accountService.invite(any(), any(), any()) }
+            coVerify(exactly = 1) { accountService.grant(any(), any()) }
         }
     }
 
@@ -174,6 +177,7 @@ class CoreAccountServiceTest
                 every { studyDeploymentId } returns UUID.randomUUID()
             }
             val foundDeployment = mockk<StudyDeployment> {
+                every { id } returns UUID.randomUUID()
                 every { protocol } returns mockk<StudyProtocol> {
                     every { primaryDevices } returns setOf()
                     every { tasks } returns setOf()
@@ -185,6 +189,7 @@ class CoreAccountServiceTest
             coEvery { deploymentRepository.getStudyDeploymentBy(any()) } returns foundDeployment
             every { emailInvitationService.inviteToStudy(any(), any(), any(), any()) } returns mockk()
             coEvery { accountService.invite(any(), any()) } returns invitedAccount
+            coEvery { accountService.grant(any(), any()) } returns mockk()
             val sut = CoreAccountService( accountService, deploymentRepository, emailInvitationService )
 
             sut.inviteNewAccount( accountIdentity, mockk(), mockParticipation, mockk() )
@@ -200,6 +205,7 @@ class CoreAccountServiceTest
                 every { studyDeploymentId } returns UUID.randomUUID()
             }
             val foundDeployment = mockk<StudyDeployment> {
+                every { id } returns UUID.randomUUID()
                 every { protocol } returns mockk<StudyProtocol> {
                     every { primaryDevices } returns setOf()
                     every { tasks } returns setOf()
@@ -210,6 +216,7 @@ class CoreAccountServiceTest
             }
             coEvery { deploymentRepository.getStudyDeploymentBy(any()) } returns foundDeployment
             coEvery { accountService.invite(any(), any()) } returns invitedAccount
+            coEvery { accountService.grant(any(), any()) } returns mockk()
             every { emailInvitationService.inviteToStudy(any(), any(), any(), any()) } returns mockk()
             val sut = CoreAccountService( accountService, deploymentRepository, emailInvitationService )
 
@@ -218,6 +225,7 @@ class CoreAccountServiceTest
             coVerify(exactly = 1) { deploymentRepository.getStudyDeploymentBy(any()) }
             verify(exactly = 1) { emailInvitationService.inviteToStudy(any(), any(), any(), any())  }
             coVerify(exactly = 1) { accountService.invite(any(), any()) }
+            coVerify(exactly = 1) { accountService.grant(any(), any()) }
             expect( CoreAccount( accountIdentity, UUID.parse(invitedAccount.id!!) ) ) { coreAccount }
         }
     }

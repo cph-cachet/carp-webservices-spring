@@ -8,12 +8,12 @@ import dk.cachet.carp.webservices.security.authorization.Claim
 import dk.cachet.carp.webservices.security.authorization.Role
 
 interface AccountService {
-    suspend fun invite(identity: AccountIdentity, role: Role, redirectUri: String? = null): Account
-    suspend fun findByUUID(uuid: UUID): Account?
-    suspend fun findByAccountIdentity(identity: AccountIdentity): Account?
-    suspend fun findAllByClaim(claim: Claim): List<Account>
-    suspend fun hasRoleByEmail(email: EmailAddress, role: Role): Boolean
-    suspend fun addRole(identity: AccountIdentity, role: Role)
+    suspend fun invite( identity: AccountIdentity, role: Role, redirectUri: String? = null ): Account
+    suspend fun findByUUID( uuid: UUID ): Account?
+    suspend fun findByAccountIdentity( identity: AccountIdentity ): Account?
+    suspend fun findAllByClaim( claim: Claim ): List<Account>
+    suspend fun hasRoleByEmail( email: EmailAddress, role: Role ): Boolean
+    suspend fun addRole( identity: AccountIdentity, role: Role )
     suspend fun grant( identity: AccountIdentity, claims: Set<Claim> ): Account
     suspend fun revoke( identity: AccountIdentity, claims: Set<Claim> ): Account
     suspend fun generateTemporaryAccount(

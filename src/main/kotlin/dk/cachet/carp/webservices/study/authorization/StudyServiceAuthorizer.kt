@@ -50,6 +50,5 @@ class StudyServiceAuthorizer(
             is StudyServiceRequest.RemoveProtocol,
             is StudyServiceRequest.GoLive,
             is StudyServiceRequest.Remove -> Unit
-
         }
 }

@@ -1,15 +1,15 @@
 package dk.cachet.carp.webservices.protocol.controller
 
+import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.protocols.infrastructure.ProtocolFactoryServiceRequest
 import dk.cachet.carp.protocols.infrastructure.ProtocolServiceRequest
 import dk.cachet.carp.webservices.common.constants.PathVariableName
-import dk.cachet.carp.webservices.deployment.controller.StudyDeploymentController
-import dk.cachet.carp.webservices.deployment.controller.StudyDeploymentController.Companion
-import dk.cachet.carp.webservices.deployment.controller.StudyDeploymentController.Companion.DEPLOYMENT_SERVICE
 import dk.cachet.carp.webservices.protocol.dto.GetLatestProtocolResponseDto
 import dk.cachet.carp.webservices.protocol.repository.CoreProtocolRepository
-import dk.cachet.carp.webservices.protocol.service.CoreProtocolFactoryService
-import dk.cachet.carp.webservices.protocol.service.CoreProtocolService
+import dk.cachet.carp.webservices.protocol.service.ProtocolFactoryService
+import dk.cachet.carp.webservices.protocol.service.ProtocolService
+import dk.cachet.carp.webservices.protocol.service.core.CoreProtocolFactoryService
+import dk.cachet.carp.webservices.protocol.service.core.CoreProtocolService
 import io.swagger.v3.oas.annotations.Operation
 import kotlinx.coroutines.runBlocking
 import org.apache.logging.log4j.LogManager
@@ -21,10 +21,8 @@ import org.springframework.web.bind.annotation.*
 @RestController
 class ProtocolController
 (
-    // TODO: repository acts as a service (it shouldn't) when this gets sorted out, remove the reference
-    private val coreProtocolRepository: CoreProtocolRepository,
-    protocolService: CoreProtocolService,
-    protocolFactoryService: CoreProtocolFactoryService
+    private val protocolService: ProtocolService,
+    private val protocolFactoryService: ProtocolFactoryService
 )
 {
     companion object
@@ -37,15 +35,12 @@ class ProtocolController
         const val GET_LATEST_PROTOCOL = "/api/protocols/{${PathVariableName.PROTOCOL_ID}}/latest"
     }
 
-    private val protocolService = protocolService.instance
-    private val protocolFactoryService = protocolFactoryService.instance
-
     @PostMapping(value = [PROTOCOL_SERVICE])
     @Operation(tags = ["protocol/protocols.json"])
     suspend fun protocols(@RequestBody request: ProtocolServiceRequest<*>): ResponseEntity<Any>
     {
         LOGGER.info("Start POST: $PROTOCOL_SERVICE -> ${ request::class.simpleName }")
-        return protocolService.invoke( request ).let { ResponseEntity.ok( it ) }
+        return protocolService.core.invoke( request ).let { ResponseEntity.ok( it ) }
     }
 
     @PostMapping(value = [PROTOCOL_FACTORY_SERVICE])
@@ -53,19 +48,19 @@ class ProtocolController
     suspend fun protocolFactory(@RequestBody request: ProtocolFactoryServiceRequest<*>): ResponseEntity<Any>
     {
         LOGGER.info("Start POST: $PROTOCOL_FACTORY_SERVICE -> ${ request::class.simpleName }")
-        return protocolFactoryService.invoke( request ).let { ResponseEntity.ok( it ) }
+        return protocolFactoryService.core.invoke( request ).let { ResponseEntity.ok( it ) }
     }
 
     @GetMapping(value = [GET_LATEST_PROTOCOL])
-    @PreAuthorize("#{false}")
+    @PreAuthorize("isProtocolOwner(#protocolId)")
     @Operation(tags = ["protocol/getLatestProtocolById.json"])
     fun getLatestProtocolById (
-        @PathVariable(PathVariableName.PROTOCOL_ID) protocolId: String
+        @PathVariable(PathVariableName.PROTOCOL_ID) protocolId: UUID
     ): GetLatestProtocolResponseDto?
     {
         return runBlocking {
             LOGGER.info("/api/protocols/$protocolId/latest")
-            return@runBlocking coreProtocolRepository.getLatestProtocolById(protocolId)
+            return@runBlocking protocolService.getLatestProtocolById(protocolId.stringRepresentation)
         }
     }
 }

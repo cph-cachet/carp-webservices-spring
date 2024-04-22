@@ -28,11 +28,11 @@ data class UserRepresentation(
                 email = account.email,
                 requiredActions = requiredActions,
                 emailVerified = !requiredActions.contains( RequiredAction.VERIFY_EMAIL ),
-                attributes = account.carpClaims?.groupBy( { it.userAttributeName() }, { it.value } )
+                attributes = account.carpClaims?.groupBy( { Claim.userAttributeName( it::class ) }, { it.value } )
             )
     }
 
-    fun toAccount(roles: Set<Role>) =
+    fun toAccount( roles: Set<Role> ) =
         Account(
             id = id,
             username = username,
@@ -40,7 +40,7 @@ data class UserRepresentation(
             lastName = lastName,
             email = email,
             role = roles.max(),
-            carpClaims = attributes?.mapNotNull { Claim.fromTokenClaimObject(it.key to it.value) }?.flatten()?.toSet()
+            carpClaims = attributes?.mapNotNull { Claim.fromUserAttribute(it.key to it.value) }?.flatten()?.toSet()
         )
 
 }

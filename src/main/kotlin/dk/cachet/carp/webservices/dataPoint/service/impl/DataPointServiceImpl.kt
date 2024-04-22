@@ -55,14 +55,15 @@ class DataPointServiceImpl(
 
     override suspend fun getAll(deploymentId: String, pageRequest: PageRequest, query: String?): List<DataPoint>
     {
-        val account = authenticationService.getAuthentication()
+        val role = authenticationService.getRole()
+        val id = authenticationService.getId()
 
         val validatedQuery = query?.let { validateQuery(it) }
 
         validatedQuery?.let {
-            val queryForRole = if (account.role!! < Role.RESEARCHER )
+            val queryForRole = if ( role < Role.RESEARCHER )
                 // Return data relevant to this user only.
-                "$validatedQuery;deployment_id==$deploymentId;created_by==${account.id!!}"
+                "$validatedQuery;deployment_id==$deploymentId;created_by==${id}"
             else
             {
                 // Return data relevant to this deployment.
@@ -76,12 +77,12 @@ class DataPointServiceImpl(
             return dataPointRepository.findAll(specification, pageRequest).content
         }
 
-        if(account.role!! < Role.RESEARCHER)
+        if( role < Role.RESEARCHER )
         {
             return dataPointRepository.findByDeploymentId(deploymentId, pageRequest).content
         }
 
-        return dataPointRepository.findByDeploymentIdAndCreatedBy(deploymentId, account.id!!, pageRequest).content
+        return dataPointRepository.findByDeploymentIdAndCreatedBy(deploymentId, id.stringRepresentation, pageRequest).content
     }
 
     override fun getAllForDownload(deploymentIds: List<String>): List<DataPoint> {
@@ -90,11 +91,13 @@ class DataPointServiceImpl(
 
     override fun getNumberOfDataPoints(deploymentId: String, query: String?): Long
     {
-        val account = authenticationService.getAuthentication()
+        val role = authenticationService.getRole()
+        val id = authenticationService.getId()
+
         val validatedQuery = query?.let { validateQuery(it) }
 
         validatedQuery?.let {
-            val queryForRole = if (account.role!! < Role.RESEARCHER)
+            val queryForRole = if ( role < Role.RESEARCHER )
             // Return data relevant to this user only.
                 "$validatedQuery;deployment_id==$deploymentId"
             else
@@ -110,12 +113,12 @@ class DataPointServiceImpl(
             return dataPointRepository.count(specification)
         }
 
-        if(account.role!! < Role.RESEARCHER)
+        if( role < Role.RESEARCHER)
         {
             return dataPointRepository.countByDeploymentId(deploymentId)
         }
 
-        return dataPointRepository.countByDeploymentIdAndCreatedBy(deploymentId, account.id!!)
+        return dataPointRepository.countByDeploymentIdAndCreatedBy(deploymentId, id.stringRepresentation)
     }
 
     /**
@@ -178,14 +181,14 @@ class DataPointServiceImpl(
 
     override fun create(deploymentId: String, file: MultipartFile?, request: CreateDataPointRequestDto): DataPoint
     {
-        val account = authenticationService.getAuthentication()
+        val id = authenticationService.getId()
         val dataPoint = DataPoint().apply {
             this.deploymentId = deploymentId
             carpHeader = request.carpHeader
             carpBody = request.carpBody
             storageName = request.storageName
-            createdBy = account.id!!
-            updatedBy = account.id!!
+            createdBy = id.stringRepresentation
+            updatedBy = id.stringRepresentation
         }
 
         val saved = dataPointRepository.save(dataPoint, file)
@@ -204,14 +207,14 @@ class DataPointServiceImpl(
 
     override fun createMany(file: MultipartFile, deploymentId: String)
     {
-        val account = authenticationService.getAuthentication()
+        val id = authenticationService.getId()
         val dataPoints: Array<DataPoint> = dataPointBatchProcessorJob.parseBatchFile(file)
             ?: throw BadRequestException(validateMessage.get("datapoint.file.batch.failed"))
         dataPoints.forEach { d ->
             run {
                 d.deploymentId = deploymentId
-                d.createdBy = account.id!!
-                d.updatedBy = account.id!!
+                d.createdBy = id.stringRepresentation
+                d.updatedBy = id.stringRepresentation
             }
         }
         dataPointBatchProcessorJob.process(dataPoints)

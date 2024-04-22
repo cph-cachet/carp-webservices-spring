@@ -20,8 +20,8 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping(SUMMARY_BASE)
 class SummaryController(
+    private val authenticationService: AuthenticationService,
     private val summaryService: SummaryService,
-    private val authenticationService: AuthenticationService
 ) {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
@@ -35,7 +35,7 @@ class SummaryController(
 
     @PostMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
-    @PreAuthorize("#{false}")
+    @PreAuthorize("canManageStudy(#request.studyId)")
     fun create(@RequestBody request: CreateSummaryRequest): Summary
     {
         LOGGER.info("Start POST: $SUMMARY_BASE")
@@ -44,14 +44,15 @@ class SummaryController(
 
     @DeleteMapping(DELETE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("#{false}")
+    // TODO: better access control (create a new claim such as `ManageSummary`)
+    @PreAuthorize("hasRole('RESEARCHER')")
     fun delete(@PathVariable(PathVariableName.SUMMARY_ID) summaryId: UUID) {
         LOGGER.info("Start DELETE: $DELETE")
         summaryService.deleteSummaryById(summaryId)
     }
 
     @GetMapping(DOWNLOAD)
-    @PreAuthorize("#{false}")
+    @PreAuthorize("hasRole('RESEARCHER')")
     fun download(@PathVariable(PathVariableName.SUMMARY_ID) summaryId: UUID): ResponseEntity<Resource> {
         LOGGER.info("Start GET: $DOWNLOAD")
         val file = summaryService.downloadSummary(summaryId)
@@ -63,10 +64,9 @@ class SummaryController(
 
     @GetMapping(LIST)
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("#{false}")
+    @PreAuthorize("canManageStudy(#studyId)")
     fun list(@RequestParam(RequestParamName.STUDY_ID) studyId: UUID?): List<Summary> {
         LOGGER.info("Start GET: $LIST")
-        val account = authenticationService.getAuthentication()
-        return summaryService.listSummaries(UUID(account.id!!), studyId)
+        return summaryService.listSummaries(authenticationService.getId(), studyId)
     }
 }

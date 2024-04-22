@@ -29,7 +29,8 @@ class SummaryServiceImpl
     private val summaryFactory: SummaryFactory,
     private val fileStorage: FileStorage,
     private val fileUtil: FileUtil,
-) : SummaryService {
+) : SummaryService
+{
 
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()

@@ -8,10 +8,10 @@ import jakarta.servlet.http.HttpServletRequest
 import org.springframework.data.domain.PageRequest
 
 /**
- * The Interface [IDocumentService].
- * [IDocumentService] creates an interface for handling document requests.
+ * The Interface [DocumentService].
+ * [DocumentService] creates an interface for handling document requests.
  */
-interface IDocumentService
+interface DocumentService
 {
     /** The [getAll] interface retrieves all documents with the given [studyId] and [query] parameters. */
     fun getAll(pageRequest: PageRequest, query: String?, studyId: String): List<Document>

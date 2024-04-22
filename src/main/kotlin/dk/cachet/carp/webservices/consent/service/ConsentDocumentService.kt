@@ -4,10 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode
 import dk.cachet.carp.webservices.consent.domain.ConsentDocument
 
 /**
- * The Interface [IConsentDocumentService].
- * The [IConsentDocumentService] creates an interface for handling consent document requests.
+ * The Interface [ConsentDocumentService].
+ * The [ConsentDocumentService] creates an interface for handling consent document requests.
  */
-interface IConsentDocumentService
+interface ConsentDocumentService
 {
     /** The [getAll] interface for retrieving consent documents by their [deploymentId]. */
     fun getAll(deploymentId: String): List<ConsentDocument>

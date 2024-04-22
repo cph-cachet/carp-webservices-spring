@@ -12,7 +12,7 @@ import dk.cachet.carp.webservices.document.dto.CreateDocumentRequestDto
 import dk.cachet.carp.webservices.document.dto.UpdateDocumentRequestDto
 import dk.cachet.carp.webservices.document.filter.DocumentSpecification
 import dk.cachet.carp.webservices.document.repository.DocumentRepository
-import dk.cachet.carp.webservices.document.service.IDocumentService
+import dk.cachet.carp.webservices.document.service.DocumentService
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
 import dk.cachet.carp.webservices.security.authorization.Role
 import jakarta.servlet.http.HttpServletRequest
@@ -29,7 +29,7 @@ class DocumentServiceImpl(
     private val documentTraverser: DocumentTraverser,
     private val validationMessages: MessageBase,
     private val authenticationService: AuthenticationService
-): IDocumentService
+): DocumentService
 {
     companion object
     {
@@ -39,17 +39,18 @@ class DocumentServiceImpl(
     override fun getAll(pageRequest: PageRequest, query: String?, studyId: String): List<Document>
     {
         try {
-            val account = authenticationService.getAuthentication()
-            val isAccountResearcher = account.role!! >= Role.RESEARCHER
+            val role = authenticationService.getRole()
+            val id = authenticationService.getId()
+            val isAccountResearcher = role >= Role.RESEARCHER
             val belongsToStudySpec = DocumentSpecification.belongsToStudyId(studyId)
-            val belongsToUserSpec = DocumentSpecification.belongsToUserAccountId(account.id!!)
+            val belongsToUserSpec = DocumentSpecification.belongsToUserAccountId(id.stringRepresentation)
 
             val validatedQuery = query?.let { QueryUtil.validateQuery(it) }
 
             validatedQuery?.let {
                 val queryForRole = if (!isAccountResearcher) {
                     // Return data relevant to this user only.
-                    "$validatedQuery;created_by==${account.id!!}"
+                    "$validatedQuery;created_by==${id}"
                 } else validatedQuery
 
                 val specification = RSQLParser()

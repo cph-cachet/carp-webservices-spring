@@ -144,7 +144,7 @@ class KeycloakFacade(
             .awaitBody<UserRepresentation>()
 
         val roles = getRoles(uuid)
-        return userRepresentation.toAccount(roles)
+        return userRepresentation.toAccount( roles )
     }
 
     override suspend fun getAccount(identity: AccountIdentity): Account? {
@@ -160,7 +160,7 @@ class KeycloakFacade(
     }
 
     override suspend fun getAllByClaim( claim: Claim ): List<Account> {
-        val queryString = "q=${claim.userAttributeName()}:${claim.value}"
+        val queryString = "q=${Claim.userAttributeName( claim::class )}:${claim.value}"
 
         LOGGER.debug("Getting all accounts with claim: {}", claim)
 

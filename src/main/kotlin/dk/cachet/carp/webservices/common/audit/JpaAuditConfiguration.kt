@@ -12,13 +12,11 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing
  */
 @Configuration
 @EnableJpaAuditing(auditorAwareRef = "auditorAware")
-class JpaAuditConfiguration(
-    private val authenticationService: AuthenticationService
-)
+class JpaAuditConfiguration( private val authenticationService: AuthenticationService )
 {
     /**
      * The function [auditorAware] returns the current auditor of the application.
      */
     @Bean("auditorAware")
-    fun auditorAware(): AuditorAware<String> = EntityAuditorAware(authenticationService)
+    fun auditorAware(): AuditorAware<String> = EntityAuditorAware( authenticationService )
 }

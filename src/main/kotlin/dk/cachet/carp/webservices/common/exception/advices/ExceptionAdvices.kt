@@ -258,22 +258,22 @@ internal class ExceptionAdvices(
     }
 
     //  413
-    @ResponseBody
-    @ResponseStatus(HttpStatus.PAYLOAD_TOO_LARGE)
-    @ExceptionHandler(MaxUploadSizeExceededException::class)
-    protected fun handleMaxUploadSizeExceededException(ex: MaxUploadSizeExceededException, request: WebRequest): ResponseEntity<CarpErrorResponse>
-    {
-        val message = "Attempt to upload file with the size exceeded max allowed value = $maxAllowedSize Megabyte(s)."
-        val errorResponse = CarpErrorResponse(
-                HttpStatus.CONFLICT.value(),
-                ex::class.qualifiedName.orEmpty(),
-                message,
-                getURIPathFromWebRequest(request)
-        )
-        LOGGER.error("Maximum upload size exceeded exception: {}", errorResponse)
-        notificationService.sendExceptionNotificationToSlack(errorResponse)
-        return ResponseEntity(errorResponse, HttpStatus.PAYLOAD_TOO_LARGE)
-    }
+//    @ResponseBody
+//    @ResponseStatus(HttpStatus.PAYLOAD_TOO_LARGE)
+//    @ExceptionHandler(MaxUploadSizeExceededException::class)
+//    protected fun handleMaxUploadSizeExceededException(ex: MaxUploadSizeExceededException, request: WebRequest): ResponseEntity<CarpErrorResponse>
+//    {
+//        val message = "Attempt to upload file with the size exceeded max allowed value = $maxAllowedSize Megabyte(s)."
+//        val errorResponse = CarpErrorResponse(
+//                HttpStatus.CONFLICT.value(),
+//                ex::class.qualifiedName.orEmpty(),
+//                message,
+//                getURIPathFromWebRequest(request)
+//        )
+//        LOGGER.error("Maximum upload size exceeded exception: {}", errorResponse)
+//        notificationService.sendExceptionNotificationToSlack(errorResponse)
+//        return ResponseEntity(errorResponse, HttpStatus.PAYLOAD_TOO_LARGE)
+//    }
 
     // 500 - DEFAULT
     @ResponseBody
