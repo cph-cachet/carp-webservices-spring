@@ -964,6 +964,55 @@
             "claim.name": "manage_study",
             "jsonType.label": "String"
           }
+        },
+        {
+          "id": "2e1eb95f-9a8f-4b8e-9e06-b47cae6ea37e",
+          "name": "Consent Owner",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "multivalued": "true",
+            "user.attribute": "consentOwner",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "consent_owner",
+            "jsonType.label": "int"
+          }
+        },
+        {
+          "id": "579a16d4-e7c3-4b63-9241-49ef03462064",
+          "name": "File Owner",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "multivalued": "true",
+            "user.attribute": "fileOwner",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "file_owner",
+            "jsonType.label": "int"
+          }
+        },
+        {
+          "id": "ca9653d1-926a-4652-b9b2-12597b356aab",
+          "name": "Protocol Owner",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "aggregate.attrs": "false",
+            "userinfo.token.claim": "true",
+            "multivalued": "true",
+            "user.attribute": "protocolOwner",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "protocol_owner",
+            "jsonType.label": "String"
+          }
         }
       ]
     },
