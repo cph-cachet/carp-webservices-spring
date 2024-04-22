@@ -100,10 +100,11 @@ dependencies {
 
     // SECURITY
     implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
     implementation("org.springframework.security:spring-security-config")
     implementation("org.springframework.security:spring-security-taglibs")
     implementation("org.springframework.security:spring-security-core")
-    implementation("com.c4-soft.springaddons:spring-addons-webmvc-jwt-resource-server:${property("springAddonsVersion")}")
+    implementation("com.c4-soft.springaddons:spring-addons-starter-oidc:${property("springAddonsVersion")}")
 
     // SPRING CLOUD
     implementation("org.springframework.cloud:spring-cloud-starter-config")
@@ -124,7 +125,7 @@ dependencies {
 
     // HIBERNATE
     implementation("org.hibernate:hibernate-core:${property("hibernateVersion")}")
-    implementation("com.vladmihalcea:hibernate-types-60:${property("hibernateTypesVersion")}")
+    implementation("io.hypersistence:hypersistence-utils-hibernate-63:${property("hibernateTypesVersion")}")
 
     // POSTGRESQL
     runtimeOnly("org.postgresql:postgresql")
@@ -160,7 +161,7 @@ dependencies {
     testImplementation(kotlin("test-annotations-common"))
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:${property("kotlinCoroutinesVersion")}")
 
-    testImplementation("com.c4-soft.springaddons:spring-addons-webmvc-jwt-test:${property("springAddonsVersion")}")
+    testImplementation("com.c4-soft.springaddons:spring-addons-starter-oidc-test:${property("springAddonsVersion")}")
     testImplementation("com.ninja-squad:springmockk:${property("springMockkVersion")}")
     testImplementation("com.squareup.okhttp3:mockwebserver:${property("okhttpVersion")}")
     testImplementation("org.springframework.security:spring-security-test")
