@@ -7,4 +7,5 @@ import kotlinx.datetime.Instant
 interface IDataStreamService {
     fun getDataStream(deploymentIds: List<String>) : List<DataStreamSequence>
     fun getLatestUpdatedAt(deploymentId: UUID): Instant?
+    fun fromZipToBatch(studyDeploymentId: UUID, zipFile: ByteArray): DataStreamSequence
 }

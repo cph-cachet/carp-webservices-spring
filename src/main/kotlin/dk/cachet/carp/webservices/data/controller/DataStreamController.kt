@@ -4,6 +4,7 @@ import dk.cachet.carp.data.application.DataStreamService
 import dk.cachet.carp.data.infrastructure.DataStreamServiceRequest
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.exception.responses.BadRequestException
+import dk.cachet.carp.webservices.data.domain.DataStreamRequest
 import io.swagger.v3.oas.annotations.Operation
 import kotlinx.coroutines.runBlocking
 import org.apache.logging.log4j.LogManager
@@ -12,6 +13,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 
@@ -29,6 +31,7 @@ class DataStreamController(
         /** Endpoint URI constants */
 
         const val DATA_STREAM_SERVICE = "/api/data-stream-service"
+        const val DATA_STREAM_SERVICE_OPEN = "/api/data-stream-service/zip"
     }
 
 
@@ -69,5 +72,16 @@ class DataStreamController(
                 throw BadRequestException(validationMessages.get("data.stream.service.request.error", request))
             }
         }
+    }
+
+    // New endpoint specifically for AppendToDataStreams with zip file
+    @PostMapping(value = [DATA_STREAM_SERVICE_OPEN])
+    @Operation(tags = ["dataStream/getDataStream.json"])
+    fun appendToDataStreamWithZip(
+        @RequestParam request: DataStreamRequest
+    ): ResponseEntity<Any> = runBlocking {
+        LOGGER.info("Start POST: $DATA_STREAM_SERVICE -> AppendToDataStreams with zip file")
+        val result = dataStreamService.appendToDataStreams(request.studyDeploymentId, request.zipFile)
+        ResponseEntity.ok(result)
     }
 }

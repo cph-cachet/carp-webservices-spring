@@ -7,6 +7,9 @@ import dk.cachet.carp.webservices.data.repository.DataStreamSequenceRepository
 import kotlinx.datetime.Instant
 import kotlinx.datetime.toKotlinInstant
 import org.springframework.stereotype.Service
+import java.io.*
+import java.util.zip.ZipEntry
+import java.util.zip.ZipInputStream
 
 @Service
 class IDataStreamServiceImpl(
@@ -27,4 +30,39 @@ class IDataStreamServiceImpl(
 
         return sortedDataPoint.updatedAt?.toKotlinInstant()
     }
+/*
+
+    override fun fromZipToBatch(studyDeploymentId: UUID, zipFile: File): DataStreamSequence<Sequence> {
+        val zip = extractJsonFromZip(zipFile)
+
+        return zip?.let {
+            val dataStreamSequence = DataStreamSequence(
+                dataStreamId = dataStreamIdRepository.findByDeploymentId(studyDeploymentId.toString())?.id,
+                snapshot = it
+            )
+            dataStreamSequenceRepository.save(dataStreamSequence)
+        }
+
+            ?: throw IOException("No JSON file found in the zip.")
+    }
+
+    @Throws(IOException::class)
+    fun extractJsonFromZip(zipFile: File): String? {
+        ZipInputStream(FileInputStream(zipFile)).use { zis ->
+            var entry: ZipEntry? = zis.nextEntry
+            while (entry != null) {
+                if (!entry.isDirectory && entry.name.endsWith(".json")) {
+                    // Found a JSON file, extract its content
+                    val jsonContent = ByteArrayOutputStream()
+                    zis.copyTo(jsonContent)
+                    return jsonContent.toString(Charsets.UTF_8)
+                }
+                entry = zis.nextEntry
+            }
+        }
+        // No JSON file found in the zip
+        return null
+    }
+*/
+
 }
