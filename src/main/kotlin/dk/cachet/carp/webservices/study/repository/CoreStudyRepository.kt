@@ -14,7 +14,9 @@ import dk.cachet.carp.webservices.dataPoint.repository.DataPointRepository
 import dk.cachet.carp.webservices.document.repository.DocumentRepository
 import dk.cachet.carp.webservices.file.repository.FileRepository
 import dk.cachet.carp.webservices.summary.repository.SummaryRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.stereotype.Service
@@ -41,40 +43,45 @@ class CoreStudyRepository
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
-    override suspend fun add(study: Study) = runBlocking {
-        if ( studyRepository.getByStudyId(study.id.stringRepresentation) != null )
+    override suspend fun add(study: Study) = withContext( Dispatchers.IO )
+    {
+        check( studyRepository.getByStudyId(study.id.stringRepresentation) == null )
         {
             LOGGER.warn("Study already exists, id: ${study.id.stringRepresentation}")
-            throw IllegalArgumentException(validationMessages.get("study.core.add.exists", study.id.stringRepresentation))
+            validationMessages.get("study.core.add.exists", study.id.stringRepresentation)
         }
 
         val studyToSave = dk.cachet.carp.webservices.study.domain.Study()
 
-        val extendedInvitation = StudyInvitation(study.invitation.name, study.invitation.description, study.id.stringRepresentation)
-        study.invitation = extendedInvitation
+        study.invitation = StudyInvitation(
+            study.invitation.name,
+            study.invitation.description,
+            study.id.stringRepresentation
+        )
 
-        val snapshot = study.getSnapshot()
-        studyToSave.snapshot = objectMapper.valueToTree(snapshot)
-
+        studyToSave.snapshot = objectMapper.valueToTree(study.getSnapshot())
         studyRepository.save(studyToSave)
+
         LOGGER.info("Study saved, id: ${study.id.stringRepresentation}")
     }
 
-    override suspend fun getById(studyId: UUID): Study? = runBlocking {
+    override suspend fun getById( studyId: UUID ): Study? = withContext( Dispatchers.IO )
+    {
         val study = studyRepository.getByStudyId(studyId.stringRepresentation)
 
         if ( study == null )
         {
             LOGGER.info("Study is not found, id: ${studyId.stringRepresentation}")
-            return@runBlocking null
+            return@withContext null
         }
 
-        return@runBlocking convertStudySnapshotNodeToStudy( study.snapshot!! )
+        convertStudySnapshotNodeToStudy( study.snapshot!! )
     }
 
-    override suspend fun getForOwner(ownerId: UUID): List<Study> = runBlocking {
+    override suspend fun getForOwner( ownerId: UUID ): List<Study> = withContext( Dispatchers.IO )
+    {
         val studies = studyRepository.findAllByOwnerId(ownerId.stringRepresentation)
-        return@runBlocking studies.map { convertStudySnapshotNodeToStudy(it.snapshot!!) }.toList()
+        studies.map { convertStudySnapshotNodeToStudy(it.snapshot!!) }.toList()
     }
 
 
@@ -83,7 +90,8 @@ class CoreStudyRepository
      * TODO: All associated data should be deleted by subscribing to `StudyService.Event.StudyRemoved` in the respective services.
      */
     @Transactional( rollbackFor = [Exception::class])
-    override suspend fun remove(studyId: UUID): Boolean = runBlocking {
+    override suspend fun remove(studyId: UUID): Boolean = withContext(Dispatchers.IO)
+    {
         val idsToRemove = getDeploymentIdsOrThrow( studyId )
         val collectionIds = collectionRepository.getCollectionIdsByStudyId( studyId.stringRepresentation )
 
@@ -98,43 +106,50 @@ class CoreStudyRepository
         studyRepository.deleteByStudyId( studyId.stringRepresentation )
 
         LOGGER.info("Study with id ${studyId.stringRepresentation} and all associated data deleted.")
-        return@runBlocking true
+
+        true
     }
 
-    override suspend fun update(study: Study) = runBlocking {
+    override suspend fun update(study: Study) = withContext(Dispatchers.IO)
+    {
         val existingStudy = studyRepository.getByStudyId(study.id.stringRepresentation)
 
-        if (existingStudy == null)
-        {
+        checkNotNull(existingStudy) {
             LOGGER.warn("Study is not found, id: ${study.id.stringRepresentation}")
-            throw IllegalArgumentException(validationMessages.get("study.core.update.study.not_found", study.id.stringRepresentation))
+            validationMessages.get("study.core.update.study.not_found", study.id.stringRepresentation)
         }
 
         existingStudy.snapshot = objectMapper.valueToTree(study.getSnapshot())
+        studyRepository.save(existingStudy)
+
         LOGGER.info("Study updated, id: ${study.id.stringRepresentation}")
     }
 
 
-    fun getWSStudyById( id: UUID ): dk.cachet.carp.webservices.study.domain.Study
-    {
-        val study = studyRepository.getByStudyId( id.stringRepresentation )
-        if ( study == null )
+    suspend fun getWSStudyById( id: UUID ): dk.cachet.carp.webservices.study.domain.Study =
+        withContext( Dispatchers.IO )
         {
-            LOGGER.warn( "Study is not found, id: ${id.stringRepresentation}" )
-            throw IllegalArgumentException( validationMessages.get("study.core.study.not_found", id.stringRepresentation ) )
+            val study = studyRepository.getByStudyId( id.stringRepresentation )
+
+            checkNotNull( study )
+            {
+                LOGGER.warn( "Study is not found, id: ${id.stringRepresentation}" )
+                validationMessages.get("study.core.study.not_found", id.stringRepresentation )
+            }
+
+            study
         }
 
-        return study
-    }
-
-    suspend fun getDeploymentIdsOrThrow(studyId: UUID): List<String> = runBlocking {
+    suspend fun getDeploymentIdsOrThrow(studyId: UUID): List<String>
+    {
         val recruitment = participantRepository.getRecruitment(studyId)
-        return@runBlocking recruitment?.participantGroups?.keys?.map { it.stringRepresentation } ?: emptyList()
+        return recruitment?.participantGroups?.keys?.map { it.stringRepresentation } ?: emptyList()
     }
 
-    suspend fun getStudySnapshotById(id: UUID): StudySnapshot = runBlocking {
+    suspend fun getStudySnapshotById(id: UUID): StudySnapshot
+    {
         val study = getWSStudyById(id)
-        return@runBlocking objectMapper.treeToValue(study.snapshot, StudySnapshot::class.java)
+        return objectMapper.treeToValue(study.snapshot, StudySnapshot::class.java)
     }
 
     suspend fun convertStudySnapshotNodeToStudy(node: JsonNode): Study

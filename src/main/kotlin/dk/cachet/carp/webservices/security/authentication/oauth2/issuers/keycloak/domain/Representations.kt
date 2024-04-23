@@ -22,7 +22,7 @@ data class UserRepresentation(
         fun createFromAccount(account: Account, requiredActions: List<RequiredAction> = emptyList()) =
             UserRepresentation(
                 id = account.id,
-                username = account.username,
+                username = account.username ?: account.email,
                 firstName = account.firstName,
                 lastName = account.lastName,
                 email = account.email,

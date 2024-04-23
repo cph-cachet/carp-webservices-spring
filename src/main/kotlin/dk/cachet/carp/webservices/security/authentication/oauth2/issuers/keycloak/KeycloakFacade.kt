@@ -86,7 +86,10 @@ class KeycloakFacade(
             .retrieve()
             .awaitBodilessEntity()
 
-        return account
+        val createdAccount = getAccount(account.getIdentity())
+        checkNotNull(createdAccount) { "Account not created." }
+
+        return createdAccount
     }
 
     override suspend fun addRole(account: Account, role: Role) {
@@ -144,7 +147,7 @@ class KeycloakFacade(
             .awaitBody<UserRepresentation>()
 
         val roles = getRoles(uuid)
-        return userRepresentation.toAccount( roles )
+        return userRepresentation.toAccount(roles)
     }
 
     override suspend fun getAccount(identity: AccountIdentity): Account? {
@@ -159,8 +162,8 @@ class KeycloakFacade(
         return queryAll(queryString).firstOrNull()
     }
 
-    override suspend fun getAllByClaim( claim: Claim ): List<Account> {
-        val queryString = "q=${Claim.userAttributeName( claim::class )}:${claim.value}"
+    override suspend fun getAllByClaim(claim: Claim): List<Account> {
+        val queryString = "q=${Claim.userAttributeName(claim::class)}:${claim.value}"
 
         LOGGER.debug("Getting all accounts with claim: {}", claim)
 
@@ -245,7 +248,7 @@ class KeycloakFacade(
         return magicLinkResponse.link
     }
 
-    private suspend fun queryAll( query: String ): List<Account> {
+    private suspend fun queryAll(query: String): List<Account> {
         val token = authenticate().accessToken
 
         LOGGER.debug("Querying all accounts with query: {}", query)
