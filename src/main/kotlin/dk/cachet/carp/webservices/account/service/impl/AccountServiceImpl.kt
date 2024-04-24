@@ -4,11 +4,10 @@ import dk.cachet.carp.common.application.EmailAddress
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.common.application.users.AccountIdentity
 import dk.cachet.carp.webservices.account.service.AccountService
-import dk.cachet.carp.webservices.common.environment.EnvironmentUtil
 import dk.cachet.carp.webservices.security.authentication.domain.Account
-import dk.cachet.carp.webservices.security.authentication.domain.AccountFactory
 import dk.cachet.carp.webservices.security.authentication.oauth2.IssuerFacade
 import dk.cachet.carp.webservices.security.authentication.oauth2.issuers.keycloak.domain.AccountType
+import dk.cachet.carp.webservices.security.authorization.Claim
 import dk.cachet.carp.webservices.security.authorization.Role
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -17,8 +16,6 @@ import org.springframework.stereotype.Service
 @Service
 class AccountServiceImpl(
     private val issuerFacade: IssuerFacade,
-    private val accountFactory: AccountFactory,
-    private val environmentUtil: EnvironmentUtil
 ) : AccountService {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
@@ -30,7 +27,7 @@ class AccountServiceImpl(
 
         if (account == null) {
             accountType = AccountType.NEW
-            account = issuerFacade.createAccount(accountFactory.fromAccountIdentity(identity))
+            account = issuerFacade.createAccount(Account.fromAccountIdentity(identity))
             LOGGER.info("User created for account identity: $identity")
         }
 
@@ -60,10 +57,18 @@ class AccountServiceImpl(
             null
         }
 
-    override suspend fun hasRoleByEmail(email: EmailAddress, role: Role): Boolean {
-        val account = findByAccountIdentity(AccountIdentity.fromEmailAddress(email.address))
+    override suspend fun findAllByClaim( claim: Claim ): List<Account> =
+        try {
+            issuerFacade.getAllByClaim( claim )
+        } catch (e: Exception) {
+            emptyList()
+        }
 
-        requireNotNull(account)
+    override suspend fun hasRoleByEmail( email: EmailAddress, role: Role ): Boolean
+    {
+        val account = findByAccountIdentity( AccountIdentity.fromEmailAddress( email.address ) )
+
+        requireNotNull( account )
 
         return account.role!! >= role
     }
@@ -77,12 +82,32 @@ class AccountServiceImpl(
         issuerFacade.addRole(account, role)
     }
 
+    override suspend fun grant(identity: AccountIdentity, claims: Set<Claim>): Account {
+        val account = findByAccountIdentity(identity)
+
+        requireNotNull(account)
+
+        LOGGER.info("Granting claim: $claims for user: $identity")
+        account.carpClaims = account.carpClaims?.plus(claims) ?: claims
+        return issuerFacade.updateAccount(account)
+    }
+
+    override suspend fun revoke(identity: AccountIdentity, claims: Set<Claim>): Account {
+        val account = findByAccountIdentity(identity)
+
+        requireNotNull(account)
+
+        LOGGER.info("Revoking claim: $claims for user: $identity")
+        account.carpClaims = account.carpClaims?.minus(claims) ?: emptySet()
+        return issuerFacade.updateAccount(account)
+    }
+
     override suspend fun generateTemporaryAccount(
         identity: AccountIdentity,
         expirationSeconds: Long?,
         redirectUri: String?
     ): String {
-        val account = issuerFacade.createAccount(accountFactory.fromAccountIdentity(identity), AccountType.GENERATED)
+        val account = issuerFacade.createAccount(Account.fromAccountIdentity(identity), AccountType.GENERATED)
 
         return issuerFacade.recoverAccount(
             account,

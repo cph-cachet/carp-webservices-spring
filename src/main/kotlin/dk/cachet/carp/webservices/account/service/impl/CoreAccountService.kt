@@ -15,6 +15,7 @@ import dk.cachet.carp.webservices.common.email.domain.EmailType
 import dk.cachet.carp.webservices.common.email.service.EmailInvitationService
 import dk.cachet.carp.webservices.deployment.repository.CoreDeploymentRepository
 import dk.cachet.carp.webservices.security.authentication.domain.Account
+import dk.cachet.carp.webservices.security.authorization.Claim
 import dk.cachet.carp.webservices.security.authorization.Role
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
@@ -86,6 +87,7 @@ class CoreAccountService(
         participation: Participation,
         deployment: StudyDeployment
     ): Account {
+        // only send out email invitations if the account's identity is an email address
         if (accountIdentity is EmailAccountIdentity) {
             emailInvitationService.inviteToStudy(
                 accountIdentity.emailAddress.address,
@@ -95,11 +97,22 @@ class CoreAccountService(
             )
         }
 
-        return accountService.invite(
+        val account = accountService.invite(
             accountIdentity,
             Role.PARTICIPANT,
             getRedirectUrl(deployment.protocol)
         )
+
+        // grant the account the necessary claims for the deployment
+        accountService.grant(
+            accountIdentity,
+            setOf(
+                Claim.ManageDeployment( deployment.id ),
+                Claim.InDeployment( deployment.id )
+            )
+        )
+
+        return account
     }
 
     /**

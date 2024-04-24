@@ -6,7 +6,6 @@ import dk.cachet.carp.webservices.common.exception.responses.BadRequestException
 import dk.cachet.carp.webservices.common.exception.responses.ResourceNotFoundException
 import dk.cachet.carp.webservices.common.query.QueryUtil.Companion.validateQuery
 import dk.cachet.carp.webservices.common.query.QueryVisitor
-import dk.cachet.carp.webservices.dataPoint.authorization.DataPointAuthorizationService
 import dk.cachet.carp.webservices.dataPoint.domain.DataPoint
 import dk.cachet.carp.webservices.dataPoint.dto.CreateDataPointRequestDto
 import dk.cachet.carp.webservices.dataPoint.listener.DataPointBatchProcessorJob
@@ -15,6 +14,7 @@ import dk.cachet.carp.webservices.dataPoint.service.DataPointService
 import dk.cachet.carp.webservices.deployment.dto.DeploymentStatisticsResponseDto
 import dk.cachet.carp.webservices.deployment.dto.StatisticsDto
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
+import dk.cachet.carp.webservices.security.authorization.Role
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.MeterRegistry
 import org.apache.logging.log4j.LogManager
@@ -30,9 +30,8 @@ import java.time.LocalDate
 class DataPointServiceImpl(
     private val dataPointRepository: DataPointRepository,
     private val dataPointBatchProcessorJob: DataPointBatchProcessorJob,
-    private val validateMessage: MessageBase,
     private val authenticationService: AuthenticationService,
-    private val authorizationService: DataPointAuthorizationService,
+    private val validateMessage: MessageBase,
     meterRegistry: MeterRegistry
 ): DataPointService
 {
@@ -56,15 +55,15 @@ class DataPointServiceImpl(
 
     override suspend fun getAll(deploymentId: String, pageRequest: PageRequest, query: String?): List<DataPoint>
     {
-        val accountId = authenticationService.getCurrentPrincipal().id
-        val isUserDeploymentResearcher = authorizationService.isAccountResearcher()
+        val role = authenticationService.getRole()
+        val id = authenticationService.getId()
 
         val validatedQuery = query?.let { validateQuery(it) }
 
         validatedQuery?.let {
-            val queryForRole = if (!isUserDeploymentResearcher)
+            val queryForRole = if ( role < Role.RESEARCHER )
                 // Return data relevant to this user only.
-                "$validatedQuery;deployment_id==$deploymentId;created_by==$accountId"
+                "$validatedQuery;deployment_id==$deploymentId;created_by==${id}"
             else
             {
                 // Return data relevant to this deployment.
@@ -78,12 +77,12 @@ class DataPointServiceImpl(
             return dataPointRepository.findAll(specification, pageRequest).content
         }
 
-        if(isUserDeploymentResearcher)
+        if( role < Role.RESEARCHER )
         {
             return dataPointRepository.findByDeploymentId(deploymentId, pageRequest).content
         }
 
-        return dataPointRepository.findByDeploymentIdAndCreatedBy(deploymentId, authenticationService.getCurrentPrincipal().id!!, pageRequest).content
+        return dataPointRepository.findByDeploymentIdAndCreatedBy(deploymentId, id.stringRepresentation, pageRequest).content
     }
 
     override fun getAllForDownload(deploymentIds: List<String>): List<DataPoint> {
@@ -92,12 +91,13 @@ class DataPointServiceImpl(
 
     override fun getNumberOfDataPoints(deploymentId: String, query: String?): Long
     {
-        val isUserDeploymentResearcher = authorizationService.isAccountResearcher()
+        val role = authenticationService.getRole()
+        val id = authenticationService.getId()
 
         val validatedQuery = query?.let { validateQuery(it) }
 
         validatedQuery?.let {
-            val queryForRole = if (!isUserDeploymentResearcher)
+            val queryForRole = if ( role < Role.RESEARCHER )
             // Return data relevant to this user only.
                 "$validatedQuery;deployment_id==$deploymentId"
             else
@@ -113,12 +113,12 @@ class DataPointServiceImpl(
             return dataPointRepository.count(specification)
         }
 
-        if(isUserDeploymentResearcher)
+        if( role < Role.RESEARCHER)
         {
             return dataPointRepository.countByDeploymentId(deploymentId)
         }
 
-        return dataPointRepository.countByDeploymentIdAndCreatedBy(deploymentId, authenticationService.getCurrentPrincipal().id!!)
+        return dataPointRepository.countByDeploymentIdAndCreatedBy(deploymentId, id.stringRepresentation)
     }
 
     /**
@@ -181,14 +181,14 @@ class DataPointServiceImpl(
 
     override fun create(deploymentId: String, file: MultipartFile?, request: CreateDataPointRequestDto): DataPoint
     {
-        val currentAccountId = authenticationService.getCurrentPrincipal().id
+        val id = authenticationService.getId()
         val dataPoint = DataPoint().apply {
             this.deploymentId = deploymentId
             carpHeader = request.carpHeader
             carpBody = request.carpBody
             storageName = request.storageName
-            createdBy = currentAccountId
-            updatedBy = currentAccountId
+            createdBy = id.stringRepresentation
+            updatedBy = id.stringRepresentation
         }
 
         val saved = dataPointRepository.save(dataPoint, file)
@@ -207,14 +207,14 @@ class DataPointServiceImpl(
 
     override fun createMany(file: MultipartFile, deploymentId: String)
     {
-        val currentAccountId = authenticationService.getCurrentPrincipal().id
+        val id = authenticationService.getId()
         val dataPoints: Array<DataPoint> = dataPointBatchProcessorJob.parseBatchFile(file)
             ?: throw BadRequestException(validateMessage.get("datapoint.file.batch.failed"))
         dataPoints.forEach { d ->
             run {
                 d.deploymentId = deploymentId
-                d.createdBy = currentAccountId
-                d.updatedBy = currentAccountId
+                d.createdBy = id.stringRepresentation
+                d.updatedBy = id.stringRepresentation
             }
         }
         dataPointBatchProcessorJob.process(dataPoints)

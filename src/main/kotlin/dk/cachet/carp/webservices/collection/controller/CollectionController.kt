@@ -1,10 +1,11 @@
 package dk.cachet.carp.webservices.collection.controller
 
+import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.webservices.collection.controller.CollectionController.Companion.COLLECTION_BASE
 import dk.cachet.carp.webservices.collection.domain.Collection
 import dk.cachet.carp.webservices.collection.dto.CollectionCreateRequestDto
 import dk.cachet.carp.webservices.collection.dto.CollectionUpdateRequestDto
-import dk.cachet.carp.webservices.collection.service.ICollectionService
+import dk.cachet.carp.webservices.collection.service.CollectionService
 import dk.cachet.carp.webservices.common.constants.PathVariableName
 import dk.cachet.carp.webservices.common.constants.RequestParamName
 import io.swagger.v3.oas.annotations.Operation
@@ -17,7 +18,9 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping(value= [COLLECTION_BASE])
-class CollectionController(private val collectionService: ICollectionService)
+class CollectionController(
+    private val collectionService: CollectionService
+)
 {
     companion object
     {
@@ -32,28 +35,28 @@ class CollectionController(private val collectionService: ICollectionService)
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("@collectionAuthorizationService.canViewCollection(#studyId)")
+    @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
     fun create(
-            @PathVariable(PathVariableName.STUDY_ID) studyId: String,
-            @Valid @RequestBody request: CollectionCreateRequestDto): Collection
+        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
+        @Valid @RequestBody request: CollectionCreateRequestDto): Collection
     {
         LOGGER.info("Start POST: /api/studies/$studyId/collections")
-        return collectionService.create(request, studyId, request.deploymentId)
+        return collectionService.create(request, studyId.stringRepresentation, request.deploymentId)
     }
 
     @GetMapping(value = [GET_COLLECTION_BY_ID])
-    @PreAuthorize("@collectionAuthorizationService.canViewCollection(#studyId)")
+    @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
     @Operation(tags = ["collection/getByStudyIdAndCollectionId.json"])
     fun getByStudyIdAndCollectionId(
-            @PathVariable(PathVariableName.STUDY_ID) studyId: String,
+            @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
             @PathVariable(PathVariableName.COLLECTION_ID) collectionId: Int): Collection
     {
         LOGGER.info("Start GET: /api/studies/$studyId/collections/id/$collectionId")
-        return collectionService.getCollectionByStudyIdAndId(studyId, collectionId)
+        return collectionService.getCollectionByStudyIdAndId(studyId.stringRepresentation, collectionId)
     }
 
     @GetMapping(value = [GET_COLLECTION_BY_NAME])
-    @PreAuthorize("@collectionAuthorizationService.canViewCollection(#studyId)")
+    @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
     @Operation(tags = ["collection/getByStudyIdAndCollectionName.json"])
     fun getByStudyIdAndCollectionName(
             @PathVariable(PathVariableName.STUDY_ID) studyId: String,
@@ -64,46 +67,49 @@ class CollectionController(private val collectionService: ICollectionService)
     }
 
     @GetMapping
-    @PreAuthorize("@collectionAuthorizationService.canViewCollection(#studyId)")
+    @PreAuthorize("canManageStudy(#studyId)")
     @Operation(tags = ["collection/getAll.json"])
     fun getAll(
-            @PathVariable(PathVariableName.STUDY_ID) studyId: String,
+            @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
             @RequestParam(RequestParamName.QUERY, required = true) query: String?): List<Collection>
     {
         LOGGER.info("Start GET: /api/studies/$studyId/collections?query=$query")
-        return collectionService.getAll(studyId, query)
+        return collectionService.getAll(studyId.stringRepresentation, query)
     }
 
     @GetMapping(value = [GET_COLLECTION_BY_DEPLOYMENT_ID])
-    @PreAuthorize("@collectionAuthorizationService.canViewCollection(#studyId)")
+    @PreAuthorize("canManageStudy(#studyId) or isInDeployment(#deploymentId)")
     fun getByStudyIdAndDeploymentId(
-            @PathVariable(PathVariableName.STUDY_ID) studyId: String,
-            @PathVariable(PathVariableName.DEPLOYMENT_ID) deploymentId: String): List<Collection>
+            @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
+            @PathVariable(PathVariableName.DEPLOYMENT_ID) deploymentId: UUID): List<Collection>
     {
         LOGGER.info("Start GET: /api/studies/$studyId/deployments/$deploymentId/collections")
-        return collectionService.getAllByStudyIdAndDeploymentId(studyId, deploymentId)
+        return collectionService.getAllByStudyIdAndDeploymentId(
+            studyId.stringRepresentation,
+            deploymentId.stringRepresentation
+        )
     }
 
     @DeleteMapping(value = [GET_COLLECTION_BY_ID])
-    @PreAuthorize("@collectionAuthorizationService.canModifyCollection(#studyId, #collectionId)")
+    @PreAuthorize("canManageStudy(#studyId) or isCollectionOwner(#collectionId)")
     @Operation(tags = ["collection/delete.json"])
     fun delete(
-            @PathVariable(PathVariableName.STUDY_ID) studyId: String,
+            @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
             @PathVariable(PathVariableName.COLLECTION_ID) collectionId: Int)
     {
         LOGGER.info("Start DELETE: /api/studies/$studyId/collections/id/$collectionId")
-        collectionService.delete(studyId, collectionId)
+        collectionService.delete(studyId.stringRepresentation, collectionId)
     }
 
     @PutMapping(value = [GET_COLLECTION_BY_ID])
-    @PreAuthorize("@collectionAuthorizationService.canModifyCollection(#studyId, #collectionId)")
+    @PreAuthorize("canManageStudy(#studyId) or isCollectionOwner(#collectionId)")
     @Operation(tags = ["collection/update.json"])
     fun update(
-            @PathVariable(PathVariableName.STUDY_ID) studyId: String,
+            @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
             @PathVariable(PathVariableName.COLLECTION_ID) collectionId: Int,
             @Valid @RequestBody request: CollectionUpdateRequestDto): Collection
     {
         LOGGER.info("Start PUT: /api/studies/$studyId/collections/id/$collectionId")
-        return collectionService.update(studyId, collectionId, request)
+        return collectionService.update(studyId.stringRepresentation, collectionId, request)
     }
 }

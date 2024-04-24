@@ -874,6 +874,149 @@
   ],
   "clientScopes": [
     {
+      "id": "e6e8d389-9c17-41d8-950f-aab87d7742c4",
+      "name": "carp",
+      "description": "OpenID Connect scope for adding CARP Authorization claims to the token.",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "false",
+        "gui.order": "",
+        "consent.screen.text": ""
+      },
+      "protocolMappers": [
+        {
+          "id": "ec074f85-abef-4e16-94a0-4a1a3c8909e8",
+          "name": "Manage Deployment",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "multivalued": "true",
+            "user.attribute": "manageDeployment",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "manage_deployment",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "id": "ca9653d1-926a-4652-b9b2-12597b356aab",
+          "name": "Protocol Owner",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "multivalued": "true",
+            "user.attribute": "protocolOwner",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "protocol_owner",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "id": "5a28ceca-4995-40cf-b4b2-961cf026d77b",
+          "name": "Study Owner",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "multivalued": "true",
+            "user.attribute": "studyOwner",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "study_owner",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "id": "ed5fd62a-8321-4e32-b4ad-9e4885dc4458",
+          "name": "In Deployment",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "multivalued": "true",
+            "user.attribute": "inDeployment",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "in_deployment",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "id": "7c404068-5243-464a-805b-298cc48c3c21",
+          "name": "Manage Study",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "multivalued": "true",
+            "user.attribute": "manageStudy",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "manage_study",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "id": "2e1eb95f-9a8f-4b8e-9e06-b47cae6ea37e",
+          "name": "Consent Owner",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "multivalued": "true",
+            "user.attribute": "consentOwner",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "consent_owner",
+            "jsonType.label": "int"
+          }
+        },
+        {
+          "id": "579a16d4-e7c3-4b63-9241-49ef03462064",
+          "name": "File Owner",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "multivalued": "true",
+            "user.attribute": "fileOwner",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "file_owner",
+            "jsonType.label": "int"
+          }
+        },
+        {
+          "id": "ca9653d1-926a-4652-b9b2-12597b356aab",
+          "name": "Protocol Owner",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "aggregate.attrs": "false",
+            "userinfo.token.claim": "true",
+            "multivalued": "true",
+            "user.attribute": "protocolOwner",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "protocol_owner",
+            "jsonType.label": "String"
+          }
+        }
+      ]
+    },
+    {
       "id": "ac2ceb26-3a1d-4dc3-9d82-a1aa8bc49ba2",
       "name": "email",
       "description": "OpenID Connect built-in scope: email",
@@ -1388,7 +1531,8 @@
     "roles",
     "role_list",
     "email",
-    "profile"
+    "profile",
+    "carp"
   ],
   "defaultOptionalClientScopes": [
     "offline_access",
@@ -2286,7 +2430,7 @@
     "cibaInterval": "5",
     "realmReusableOtpCode": "false"
   },
-  "keycloakVersion": "21.0.2",
+  "keycloakVersion": "22.0.1",
   "userManagedAccessAllowed": false,
   "clientProfiles": {
     "profiles": []

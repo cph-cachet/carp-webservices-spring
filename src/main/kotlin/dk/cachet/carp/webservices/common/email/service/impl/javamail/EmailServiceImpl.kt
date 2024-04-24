@@ -1,6 +1,5 @@
 package dk.cachet.carp.webservices.common.email.service.impl.javamail
 
-import com.sun.mail.smtp.SMTPSendFailedException
 import dk.cachet.carp.webservices.common.email.domain.EmailSendResult
 import dk.cachet.carp.webservices.common.email.util.EmailTemplateUtil
 import dk.cachet.carp.webservices.common.exception.email.EmailException
@@ -11,6 +10,7 @@ import jakarta.mail.internet.MimeMessage
 import org.apache.commons.io.IOUtils
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
+import org.eclipse.angus.mail.smtp.SMTPSendFailedException
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.core.env.Environment
 import org.springframework.core.io.ByteArrayResource

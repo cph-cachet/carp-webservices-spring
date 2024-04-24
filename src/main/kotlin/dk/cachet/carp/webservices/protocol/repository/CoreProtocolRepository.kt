@@ -8,8 +8,9 @@ import dk.cachet.carp.protocols.application.StudyProtocolSnapshot
 import dk.cachet.carp.protocols.domain.*
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.protocol.domain.Protocol
-import dk.cachet.carp.webservices.protocol.dto.GetLatestProtocolResponseDto
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -38,94 +39,121 @@ class CoreProtocolRepository(
      * @param version Identifies this first initial version of the [protocol].
      * @throws IllegalArgumentException when a [protocol] with the same owner and name already exists.
      */
-    override suspend fun add(protocol: StudyProtocol, version: ProtocolVersion) = runBlocking {
-        val protocolById = protocolRepository.findByIdParam(protocol.id.stringRepresentation)
-
-        if (protocolById.isNotEmpty())
+    override suspend fun add(protocol: StudyProtocol, version: ProtocolVersion) =
+        withContext( Dispatchers.IO )
         {
-            LOGGER.warn("Protocol already exists, ownerID: {}, name: {}, id: {}", protocol.ownerId.stringRepresentation, protocol.name, protocol.id)
-            throw IllegalArgumentException(validationMessages.get("protocol.id.already.exists", protocol.id))
+            val protocolById = protocolRepository.findByIdParam(protocol.id.stringRepresentation)
+
+            check( protocolById.isEmpty() )
+            {
+                LOGGER.warn(
+                    "Protocol already exists, ownerID: {}, name: {}, id: {}",
+                    protocol.ownerId.stringRepresentation, protocol.name, protocol.id
+                )
+                validationMessages.get("protocol.id.already.exists", protocol.id)
+            }
+
+            val protocolsStoredWithGivenParams = protocolRepository.findByParams(
+                protocol.id.stringRepresentation,
+                version.tag
+            )
+
+            check( protocolsStoredWithGivenParams.isEmpty() )
+            {
+                LOGGER.warn(
+                    "Protocol already exists, ownerID: {}, name: {}, version: {}",
+                    protocol.ownerId.stringRepresentation, protocol.name, version.tag
+                )
+                validationMessages.get(
+                    "protocol.already.exists",
+                    protocol.ownerId.stringRepresentation, protocol.name, version.tag
+                )
+            }
+
+            val protocolToSave = convertCoreProtocolToWSProtocol(protocol, version)
+
+            protocolRepository.save(protocolToSave)
+            LOGGER.info("Protocol saved, name: ${protocol.name}, version: ${version.tag}, id: ${protocol.id.stringRepresentation}")
         }
-
-        val protocolsStoredWithGivenParams = protocolRepository.findByParams(protocol.id.stringRepresentation, version.tag)
-
-        if (protocolsStoredWithGivenParams.isNotEmpty())
-        {
-            LOGGER.warn("Protocol already exists, ownerID: {}, name: {}, version: {}", protocol.ownerId.stringRepresentation, protocol.name, version.tag)
-            throw IllegalArgumentException(validationMessages.get("protocol.already.exists", protocol.ownerId.stringRepresentation, protocol.name, version.tag))
-        }
-
-        val protocolToSave = convertCoreProtocolToWSProtocol(protocol, version)
-
-        protocolRepository.save(protocolToSave)
-        LOGGER.info("Protocol saved, name: ${protocol.name}, version: ${version.tag}, id: ${protocol.id.stringRepresentation}")
-    }
 
     /**
      * Find all [StudyProtocol]'s owned by the owner with [ownerId], or an empty sequence if none are found.
      *
      * @return This returns the last version of each [StudyProtocol] owned by the requested owner.
      */
-    override suspend fun getAllForOwner(ownerId: UUID): Sequence<StudyProtocol> = runBlocking {
-        val result = protocolRepository.findAllByOwnerId(ownerId.stringRepresentation)
-        return@runBlocking result
+    override suspend fun getAllForOwner(ownerId: UUID): Sequence<StudyProtocol> =
+        withContext( Dispatchers.IO )
+        {
+            val result = protocolRepository.findAllByOwnerId(ownerId.stringRepresentation)
+
+            result
                 .map { p -> convertJsonNodeToStudyProtocol(p.snapshot!!) }
                 .asSequence()
-    }
+        }
 
     /**
      * Return the [StudyProtocol] with the specified protocol [id], or null when no such protocol is found.
      *
      * @param versionTag The tag of the specific version of the protocol to return. The latest version is returned when not specified.
      */
-    override suspend fun getBy(id: UUID, versionTag: String?): StudyProtocol? = runBlocking {
-        val result = protocolRepository.findByParams(
-                id.stringRepresentation,
-                versionTag
-        )
-
-        if (result.isEmpty())
+    override suspend fun getBy(id: UUID, versionTag: String?): StudyProtocol? =
+        withContext( Dispatchers.IO )
         {
-            return@runBlocking null
+            val result = protocolRepository.findByParams( id.stringRepresentation, versionTag )
+
+            if (result.isEmpty())
+            {
+                return@withContext null
+            }
+
+            convertJsonNodeToStudyProtocol(result[0].snapshot!!)
         }
-        return@runBlocking convertJsonNodeToStudyProtocol(result[0].snapshot!!)
-    }
 
     /**
      * Returns all stored versions for the [StudyProtocol] with the specified [protocol].
      *
      * @throws IllegalArgumentException when a protocol with the specified [protocol] does not exist.
      */
-    override suspend fun getVersionHistoryFor(id: UUID): List<ProtocolVersion> = runBlocking {
-        val protocols = protocolRepository.findByParams(id.stringRepresentation, null)
-        if (protocols.isEmpty())
+    override suspend fun getVersionHistoryFor(id: UUID): List<ProtocolVersion> =
+        withContext( Dispatchers.IO )
         {
-            LOGGER.warn("Protocol is not found with id: {}", id.stringRepresentation)
-            throw IllegalArgumentException(validationMessages.get("protocol.version_history.not_found", id.stringRepresentation))
+            val protocols = protocolRepository.findByParams(id.stringRepresentation, null)
+            check( protocols.isNotEmpty() )
+            {
+                LOGGER.warn("Protocol is not found with id: {}", id.stringRepresentation)
+                validationMessages.get("protocol.version_history.not_found", id.stringRepresentation)
+            }
+            protocols.map {
+                ProtocolVersion( it.versionTag, Instant.fromEpochMilliseconds( it.createdAt!!.toEpochMilli() ) )
+            }
         }
-        return@runBlocking protocols.map { ProtocolVersion(it.versionTag, Instant.fromEpochMilliseconds(it.createdAt!!.toEpochMilli())) }
-    }
 
     /**
      * Replace a [version] of a [protocol], of which a previous version with the same owner and name is already stored.
      *
      * @throws IllegalArgumentException when the [protocol] with [version] to replace is not found.
      */
-    override suspend fun replace(protocol: StudyProtocol, version: ProtocolVersion) = runBlocking {
-        val storedProtocols = protocolRepository.findByParams(protocol.id.stringRepresentation, version.tag)
-        if (storedProtocols.isEmpty())
+    override suspend fun replace(protocol: StudyProtocol, version: ProtocolVersion) =
+        withContext( Dispatchers.IO )
         {
-            LOGGER.warn("Protocol is not found with id: {} and name: {}.", protocol.id.stringRepresentation, protocol.name)
-            throw IllegalArgumentException(validationMessages.get("protocol.get.not_found", protocol.id.stringRepresentation, protocol.name))
+            val storedProtocols = protocolRepository.findByParams(protocol.id.stringRepresentation, version.tag)
+
+            check( storedProtocols.isNotEmpty() )
+            {
+                LOGGER.warn(
+                    "Protocol is not found with id: {} and name: {}.",
+                    protocol.id.stringRepresentation, protocol.name
+                )
+                validationMessages.get("protocol.get.not_found", protocol.id.stringRepresentation, protocol.name)
+            }
+
+            val oldVersion = storedProtocols[0]
+            protocolRepository.delete(oldVersion)
+
+            val newVersion = convertCoreProtocolToWSProtocol(protocol, version)
+            protocolRepository.save(newVersion)
+            LOGGER.info("Protocol(${protocol.ownerId.stringRepresentation}, ${protocol.name}) replace successful! Deleted version: ${oldVersion.versionTag}, new version: ${version.tag}")
         }
-
-        val oldVersion = storedProtocols[0]
-        protocolRepository.delete(oldVersion)
-
-        val newVersion = convertCoreProtocolToWSProtocol(protocol, version)
-        protocolRepository.save(newVersion)
-        LOGGER.info("Protocol(${protocol.ownerId.stringRepresentation}, ${protocol.name}) replace successful! Deleted version: ${oldVersion.versionTag}, new version: ${version.tag}")
-    }
 
     /**
      * Add a new [version] for the specified study [protocol] in the repository,
@@ -135,7 +163,7 @@ class CoreProtocolRepository(
      *   - the [protocol] is not yet stored in the repository
      *   - the tag specified in [version] is already in use
      */
-    override suspend fun addVersion(protocol: StudyProtocol, version: ProtocolVersion) = runBlocking {
+    override suspend fun addVersion(protocol: StudyProtocol, version: ProtocolVersion) = withContext( Dispatchers.IO ) {
         val protocolsStoredWithGivenParams = protocolRepository.findByIdParam(protocol.id.stringRepresentation)
 
         if (protocolsStoredWithGivenParams.isEmpty())
@@ -192,17 +220,4 @@ class CoreProtocolRepository(
 
         return wsProtocol
     }
-
-    fun getLatestProtocolById(protocolId: String): GetLatestProtocolResponseDto?
-    {
-        val latestVersion = protocolRepository.findLatestById(protocolId)
-        val firstVersion = protocolRepository.findFirstById(protocolId)
-        if (latestVersion.isPresent && firstVersion.isPresent)
-        {
-            val protocol = convertJsonNodeToStudyProtocol(latestVersion.get().snapshot!!)
-            return GetLatestProtocolResponseDto(latestVersion.get().versionTag, protocol.getSnapshot(), firstVersion.get().createdAt!!, latestVersion.get().createdAt!!)
-        }
-        return null
-    }
-
 }

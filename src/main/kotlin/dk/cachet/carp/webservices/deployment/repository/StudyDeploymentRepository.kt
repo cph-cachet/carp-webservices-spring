@@ -19,8 +19,6 @@ interface StudyDeploymentRepository: JpaRepository<StudyDeployment, String>
     @Query(value = "SELECT * FROM deployments WHERE snapshot->>'id' in ?1", nativeQuery = true)
     fun findAllByStudyDeploymentIds(deploymentIds: Set<String>): List<StudyDeployment>
 
-    fun findAllByDeployedFromStudyId(studyId: String): List<StudyDeployment>
-
     @Modifying
     @Transactional
     @Query(nativeQuery = true,
