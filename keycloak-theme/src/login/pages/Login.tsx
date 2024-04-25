@@ -8,11 +8,11 @@ import {
 } from '@mui/material';
 import * as yup from 'yup';
 import { useFormik } from "formik";
-import CarpInput from "src/components/CarpInput";
-import { AuthInfoText } from "src/components/Layout/PublicPageLayout/AuthPageLayout/styles";
-import StyledLink from "src/components/StyledLink";
-import LoginOauthOption from "src/components/Buttons/OauthOptions";
-import AuthActionButton from "src/components/Buttons/AuthActionButton";
+import CarpInput from "../../components/CarpInput";
+import { AuthInfoText } from "../../components/Layout/PublicPageLayout/AuthPageLayout/styles";
+import StyledLink from "../../components/StyledLink";
+import LoginOauthOption from "../../components/Buttons/OauthOptions";
+import AuthActionButton from "../../components/Buttons/AuthActionButton";
 import AppleLogo from '../../assets/images/logo-apple.png';
 import GoogleLogo from '../../assets/images/logo-google.png';
 import PasskeyLogo from '../../assets/images/logo-passkey.png';

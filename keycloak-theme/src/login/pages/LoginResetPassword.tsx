@@ -2,11 +2,11 @@ import { useFormik } from 'formik';
 import type { PageProps } from 'keycloakify/login/pages/PageProps';
 import { useState, type FormEventHandler } from "react";
 import { useConstCallback } from "keycloakify/tools/useConstCallback";
-import CarpInput from 'src/components/CarpInput';
-import { AuthInfoText } from 'src/components/Layout/PublicPageLayout/AuthPageLayout/styles';
+import CarpInput from '../../components/CarpInput';
+import { AuthInfoText } from '../../components/Layout/PublicPageLayout/AuthPageLayout/styles';
 import * as yup from 'yup';
-import AuthActionButton from 'src/components/Buttons/AuthActionButton';
-import BannerLogin from 'src/components/Layout/PublicPageLayout/BannerLogin';
+import AuthActionButton from '../../components/Buttons/AuthActionButton';
+import BannerLogin from '../../components/Layout/PublicPageLayout/BannerLogin';
 import type { KcContext } from '../kcContext';
 import type { I18n } from '../i18n';
 

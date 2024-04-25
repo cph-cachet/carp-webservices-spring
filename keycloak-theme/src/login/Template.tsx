@@ -1,10 +1,10 @@
-// Copy pasted from: https://github.com/InseeFrLab/keycloakify/blob/main/src/login/Template.tsx
+// Copy pasted from: https://github.com/InseeFrLab/keycloakify/blob/main/../../login/Template.tsx
 
 import { clsx } from "keycloakify/tools/clsx";
 import { usePrepareTemplate } from "keycloakify/lib/usePrepareTemplate";
 import { type TemplateProps } from "keycloakify/login/TemplateProps";
 import { useGetClassName } from "keycloakify/login/lib/useGetClassName";
-import AuthPageLayout from "src/components/Layout/PublicPageLayout/AuthPageLayout";
+import AuthPageLayout from "../components/Layout/PublicPageLayout/AuthPageLayout";
 import { Alert } from "@mui/material";
 import type { KcContext } from "./kcContext";
 import type { I18n } from "./i18n";
@@ -24,7 +24,7 @@ export const Template = (props: TemplateProps<KcContext, I18n>) => {
     i18n,
     doUseDefaultCss,
     classes,
-    children
+    children,
   } = props;
 
   const { getClassName } = useGetClassName({ doUseDefaultCss, classes });
@@ -34,11 +34,10 @@ export const Template = (props: TemplateProps<KcContext, I18n>) => {
   const { realm, auth, url, message, isAppInitiatedAction } = kcContext;
 
   const { isReady } = usePrepareTemplate({
-    "doFetchDefaultThemeResources": doUseDefaultCss,
-    "styles": [
-    ],
-    "htmlClassName": getClassName("kcHtmlClass"),
-    "bodyClassName": undefined
+    doFetchDefaultThemeResources: doUseDefaultCss,
+    styles: [],
+    htmlClassName: getClassName("kcHtmlClass"),
+    bodyClassName: undefined,
   });
 
   if (!isReady) {
@@ -106,44 +105,55 @@ export const Template = (props: TemplateProps<KcContext, I18n>) => {
           )}
         </header>
         */}
-        {displayMessage && message !== undefined && (message.type !== "warning" || !isAppInitiatedAction) && (
-          <Alert severity={message.type} sx={{mb: 2}}>
-            {message.summary}
-          </Alert>
-        )}
+        {displayMessage &&
+          message !== undefined &&
+          (message.type !== "warning" || !isAppInitiatedAction) && (
+            <Alert severity={message.type} sx={{ mb: 2 }}>
+              {message.summary}
+            </Alert>
+          )}
         {children}
-        {auth !== undefined && auth.showTryAnotherWayLink && showAnotherWayIfPresent && (
-          <form
-            id="kc-select-try-another-way-form"
-            action={url.loginAction}
-            method="post"
-            className={clsx(displayWide && getClassName("kcContentWrapperClass"))}
-          >
-            <div
+        {auth !== undefined &&
+          auth.showTryAnotherWayLink &&
+          showAnotherWayIfPresent && (
+            <form
+              id="kc-select-try-another-way-form"
+              action={url.loginAction}
+              method="post"
               className={clsx(
-                displayWide && [getClassName("kcFormSocialAccountContentClass"), getClassName("kcFormSocialAccountClass")]
+                displayWide && getClassName("kcContentWrapperClass"),
               )}
             >
-              <div className={getClassName("kcFormGroupClass")}>
-                <input type="hidden" name="tryAnotherWay" value="on" />
-                {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-                <a
-                  href="#"
-                  id="try-another-way"
-                  onClick={() => {
-                    document.forms["kc-select-try-another-way-form" as never].submit();
-                    return false;
-                  }}
-                >
-                  {msg("doTryAnotherWay")}
-                </a>
+              <div
+                className={clsx(
+                  displayWide && [
+                    getClassName("kcFormSocialAccountContentClass"),
+                    getClassName("kcFormSocialAccountClass"),
+                  ],
+                )}
+              >
+                <div className={getClassName("kcFormGroupClass")}>
+                  <input type="hidden" name="tryAnotherWay" value="on" />
+                  {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+                  <a
+                    href="#"
+                    id="try-another-way"
+                    onClick={() => {
+                      document.forms[
+                        "kc-select-try-another-way-form" as never
+                      ].submit();
+                      return false;
+                    }}
+                  >
+                    {msg("doTryAnotherWay")}
+                  </a>
+                </div>
               </div>
-            </div>
-          </form>
-        )}
+            </form>
+          )}
       </AuthPageLayout>
-    </PublicPageLayout >
+    </PublicPageLayout>
   );
-}
+};
 
 export default Template;
