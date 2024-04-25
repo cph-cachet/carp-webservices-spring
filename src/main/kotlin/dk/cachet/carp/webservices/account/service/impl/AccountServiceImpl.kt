@@ -3,6 +3,7 @@ package dk.cachet.carp.webservices.account.service.impl
 import dk.cachet.carp.common.application.EmailAddress
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.common.application.users.AccountIdentity
+import dk.cachet.carp.common.application.users.UsernameAccountIdentity
 import dk.cachet.carp.webservices.account.service.AccountService
 import dk.cachet.carp.webservices.security.authentication.domain.Account
 import dk.cachet.carp.webservices.security.authentication.oauth2.IssuerFacade
@@ -16,12 +17,15 @@ import org.springframework.stereotype.Service
 @Service
 class AccountServiceImpl(
     private val issuerFacade: IssuerFacade,
-) : AccountService {
-    companion object {
+) : AccountService
+{
+    companion object
+    {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
-    override suspend fun invite(identity: AccountIdentity, role: Role, redirectUri: String?): Account {
+    override suspend fun invite(identity: AccountIdentity, role: Role, redirectUri: String?): Account
+    {
         var accountType = AccountType.EXISTING
         var account = findByAccountIdentity(identity)
 
@@ -47,6 +51,7 @@ class AccountServiceImpl(
         try {
             issuerFacade.getAccount(uuid)
         } catch (e: Exception) {
+            LOGGER.warn("Account not found for UUID: $uuid")
             null
         }
 
@@ -54,6 +59,7 @@ class AccountServiceImpl(
         try {
             issuerFacade.getAccount(identity)
         } catch (e: Exception) {
+            LOGGER.warn("Account not found for identity: $identity")
             null
         }
 
@@ -61,6 +67,7 @@ class AccountServiceImpl(
         try {
             issuerFacade.getAllByClaim( claim )
         } catch (e: Exception) {
+            LOGGER.warn("No accounts found for claim: $claim")
             emptyList()
         }
 
@@ -73,7 +80,8 @@ class AccountServiceImpl(
         return account.role!! >= role
     }
 
-    override suspend fun addRole(identity: AccountIdentity, role: Role) {
+    override suspend fun addRole(identity: AccountIdentity, role: Role)
+    {
         val account = findByAccountIdentity(identity)
 
         requireNotNull(account)
@@ -82,7 +90,11 @@ class AccountServiceImpl(
         issuerFacade.addRole(account, role)
     }
 
-    override suspend fun grant(identity: AccountIdentity, claims: Set<Claim>): Account {
+    override suspend fun grant(identity: AccountIdentity, claims: Set<Claim>): Account
+    {
+        if ( claims.any { it is Claim.VirtualClaim } )
+            throw UnsupportedOperationException( "Virtual claims cannot be granted." )
+
         val account = findByAccountIdentity(identity)
 
         requireNotNull(account)
@@ -92,7 +104,11 @@ class AccountServiceImpl(
         return issuerFacade.updateAccount(account)
     }
 
-    override suspend fun revoke(identity: AccountIdentity, claims: Set<Claim>): Account {
+    override suspend fun revoke(identity: AccountIdentity, claims: Set<Claim>): Account
+    {
+        if ( claims.any { it is Claim.VirtualClaim } )
+            throw UnsupportedOperationException( "Virtual claims cannot be revoked." )
+
         val account = findByAccountIdentity(identity)
 
         requireNotNull(account)
@@ -103,16 +119,22 @@ class AccountServiceImpl(
     }
 
     override suspend fun generateTemporaryAccount(
-        identity: AccountIdentity,
         expirationSeconds: Long?,
         redirectUri: String?
-    ): String {
+    ): Pair<UsernameAccountIdentity, String>
+    {
+        val username = UUID.randomUUID()
+        val identity = UsernameAccountIdentity(username.toString())
+
         val account = issuerFacade.createAccount(Account.fromAccountIdentity(identity), AccountType.GENERATED)
 
-        return issuerFacade.recoverAccount(
-            account,
-            redirectUri,
-            expirationSeconds
+        return Pair(
+            identity,
+            issuerFacade.recoverAccount(
+                account,
+                redirectUri,
+                expirationSeconds
+            )
         )
     }
 }

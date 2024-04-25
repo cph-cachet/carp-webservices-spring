@@ -4,20 +4,20 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import dk.cachet.carp.protocols.application.StudyProtocolSnapshot
 import dk.cachet.carp.protocols.domain.StudyProtocol
+import dk.cachet.carp.webservices.common.services.CoreServiceContainer
 import dk.cachet.carp.webservices.protocol.dto.GetLatestProtocolResponseDto
 import dk.cachet.carp.webservices.protocol.repository.ProtocolRepository
 import dk.cachet.carp.webservices.protocol.service.ProtocolService
-import dk.cachet.carp.webservices.protocol.service.core.CoreProtocolService
 import org.springframework.stereotype.Service
 
 @Service
 class ProtocolServiceImpl(
     private val protocolRepository: ProtocolRepository,
     private val objectMapper: ObjectMapper,
-    coreProtocolService: CoreProtocolService
+    services: CoreServiceContainer
 ): ProtocolService
 {
-    final override val core = coreProtocolService.instance
+    final override val core = services.protocolService
 
     override fun getLatestProtocolById(protocolId: String): GetLatestProtocolResponseDto?
     {

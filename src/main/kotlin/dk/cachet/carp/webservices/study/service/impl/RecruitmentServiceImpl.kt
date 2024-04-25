@@ -3,18 +3,15 @@ package dk.cachet.carp.webservices.study.service.impl
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.common.application.users.AccountIdentity
 import dk.cachet.carp.common.application.users.AssignedTo
-import dk.cachet.carp.common.application.users.Username
 import dk.cachet.carp.common.application.users.UsernameAccountIdentity
 import dk.cachet.carp.studies.application.users.AssignedParticipantRoles
 import dk.cachet.carp.studies.application.users.ParticipantGroupStatus
 import dk.cachet.carp.webservices.account.service.AccountService
-import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
+import dk.cachet.carp.webservices.common.services.CoreServiceContainer
 import dk.cachet.carp.webservices.data.service.DataStreamService
 import dk.cachet.carp.webservices.security.authentication.domain.Account
-import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
 import dk.cachet.carp.webservices.security.authorization.Claim
 import dk.cachet.carp.webservices.security.authorization.Role
-import dk.cachet.carp.webservices.security.authorization.service.AuthorizationService
 import dk.cachet.carp.webservices.security.config.SecurityCoroutineContext
 import dk.cachet.carp.webservices.study.domain.AnonymousParticipant
 import dk.cachet.carp.webservices.study.domain.ParticipantAccount
@@ -22,15 +19,13 @@ import dk.cachet.carp.webservices.study.domain.ParticipantGroupInfo
 import dk.cachet.carp.webservices.study.domain.ParticipantGroupsStatus
 import dk.cachet.carp.webservices.study.service.RecruitmentService
 import dk.cachet.carp.webservices.study.service.StudyService
-import dk.cachet.carp.webservices.study.service.core.CoreRecruitmentService
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
+import kotlinx.coroutines.sync.Semaphore
 import kotlinx.datetime.Clock
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.stereotype.Service
+import java.util.*
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
@@ -38,15 +33,15 @@ import kotlin.time.toDuration
 class RecruitmentServiceImpl(
     private val accountService: AccountService,
     private val dataStreamService: DataStreamService,
-    private val studyService: StudyService,
-    coreRecruitmentService: CoreRecruitmentService
+    private val services: CoreServiceContainer
 ) : RecruitmentService
 {
-    final override val core = coreRecruitmentService.instance
+    final override val core = services.recruitmentService
 
     companion object
     {
         private val LOGGER: Logger = LogManager.getLogger()
+        private val SEMAPHORE = Semaphore( Runtime.getRuntime().availableProcessors() )
     }
 
     override suspend fun inviteResearcher( studyId: UUID, email: String ) =
@@ -66,21 +61,23 @@ class RecruitmentServiceImpl(
                 LOGGER.info("Account with email $email is granted the role RESEARCHER.")
             }
 
+            // grant it claims for the study and every deployment within it
             accountService.grant( accountIdentity, setOf( Claim.ManageStudy( studyId ) ) )
 
             LOGGER.info("Account with email $email is added as a researcher to study with id $studyId.")
     }
 
-    override suspend fun removeResearcher( studyId: UUID, email: String ): Boolean
-    {
-        val accountIdentity = AccountIdentity.fromEmailAddress( email )
+    override suspend fun removeResearcher( studyId: UUID, email: String ): Boolean =
+        withContext( Dispatchers.IO + SecurityCoroutineContext() )
+        {
+            val accountIdentity = AccountIdentity.fromEmailAddress( email )
 
-        val claims = setOf( Claim.ManageStudy( studyId ) )
+            val claims = setOf( Claim.ManageStudy( studyId ) )
 
-        val account = accountService.revoke( accountIdentity, claims )
+            val account = accountService.revoke( accountIdentity, claims )
 
-        return account.carpClaims?.intersect( claims )?.isEmpty() ?: false
-    }
+            account.carpClaims?.intersect( claims )?.isEmpty() ?: false
+        }
 
     override suspend fun getParticipants( studyId: UUID ) : List<Account> =
         withContext( Dispatchers.IO + SecurityCoroutineContext() )
@@ -149,7 +146,7 @@ class RecruitmentServiceImpl(
         {
             LOGGER.info("Generating $amount anonymous participants for study $studyId")
 
-            val protocol = studyService.core.getStudyDetails( studyId ).protocolSnapshot
+            val protocol = services.studyService.getStudyDetails( studyId ).protocolSnapshot
             requireNotNull( protocol ) { "No protocol found for study $studyId." }
 
             require( protocol.participantRoles.any { participantRole -> participantRole.role == participantRoleName } )
@@ -157,21 +154,33 @@ class RecruitmentServiceImpl(
                 "Participant role '$participantRoleName' not found in study protocol."
             }
 
-            val participants = arrayListOf<AnonymousParticipant>()
+            val links = Collections.synchronizedMap( mutableMapOf<UsernameAccountIdentity, String>() )
 
-            for (i in 0 until amount) {
-                val username = UUID.randomUUID()
-                val identity = UsernameAccountIdentity(username.toString())
+            (1..amount).map {
+                async {
+                    SEMAPHORE.acquire()
 
-                // generate account and get a link that authenticates it
-                val link = accountService.generateTemporaryAccount(
-                    identity,
-                    expirationSeconds,
-                    redirectUri
-                )
+                    try
+                    {
+                        // generate account and get a link that authenticates it
+                        val (identity, link) =
+                            accountService.generateTemporaryAccount(
+                                expirationSeconds,
+                                redirectUri
+                            )
 
-                // create the corresponding participant in core and deploy the participant group with a single participant
-                val participant = core.addParticipant( studyId, Username(username.toString() ) )
+                        links[identity] = link
+                    }
+                    finally
+                    {
+                        SEMAPHORE.release()
+                    }
+                }
+            }.awaitAll()
+
+            // map the generated links to anonymous participants
+            links.map {
+                val participant = core.addParticipant( studyId, it.key.username )
                 val groupStatus = core.inviteNewParticipantGroup(
                     studyId,
                     setOf(
@@ -184,16 +193,12 @@ class RecruitmentServiceImpl(
 
                 val deploymentId = groupStatus.studyDeploymentStatus.studyDeploymentId
 
-                participants.add(
-                    AnonymousParticipant(
-                        username,
-                        deploymentId,
-                        link,
-                        Clock.System.now() + expirationSeconds.toDuration(DurationUnit.SECONDS)
-                    )
+                AnonymousParticipant(
+                    UUID.parse( it.key.username.name ),
+                    deploymentId,
+                    it.value,
+                    Clock.System.now() + expirationSeconds.toDuration(DurationUnit.SECONDS)
                 )
             }
-
-            participants
     }
 }

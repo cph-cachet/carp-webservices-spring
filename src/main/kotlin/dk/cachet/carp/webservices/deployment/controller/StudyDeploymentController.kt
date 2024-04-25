@@ -2,11 +2,10 @@ package dk.cachet.carp.webservices.deployment.controller
 
 import dk.cachet.carp.deployments.infrastructure.DeploymentServiceRequest
 import dk.cachet.carp.deployments.infrastructure.ParticipationServiceRequest
+import dk.cachet.carp.webservices.common.services.CoreServiceContainer
 import dk.cachet.carp.webservices.dataPoint.service.DataPointService
 import dk.cachet.carp.webservices.deployment.dto.DeploymentStatisticsRequestDto
 import dk.cachet.carp.webservices.deployment.dto.DeploymentStatisticsResponseDto
-import dk.cachet.carp.webservices.deployment.service.DeploymentService
-import dk.cachet.carp.webservices.deployment.service.ParticipationService
 import io.swagger.v3.oas.annotations.Operation
 import jakarta.validation.Valid
 import org.apache.logging.log4j.LogManager
@@ -21,8 +20,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 class StudyDeploymentController
 (
-    private val deploymentService: DeploymentService,
-    private val participationService: ParticipationService,
+    private val services: CoreServiceContainer,
     // should be removed when statistics endpoint gets removed
     private val dataPointService: DataPointService
 )
@@ -43,7 +41,7 @@ class StudyDeploymentController
     suspend fun deployments(@RequestBody request: DeploymentServiceRequest<*>): ResponseEntity<Any>
     {
         LOGGER.info("Start POST: $DEPLOYMENT_SERVICE -> ${ request::class.simpleName }")
-        return deploymentService.core.invoke( request ).let { ResponseEntity.ok( it ) }
+        return services.deploymentService.invoke( request ).let { ResponseEntity.ok( it ) }
     }
 
     @PostMapping(value = [PARTICIPATION_SERVICE])
@@ -51,7 +49,7 @@ class StudyDeploymentController
     suspend fun participation(@RequestBody request: ParticipationServiceRequest<*>): ResponseEntity<Any>
     {
         LOGGER.info("Start POST: $PARTICIPATION_SERVICE -> ${ request::class.simpleName }")
-        return participationService.core.invoke( request ).let { ResponseEntity.ok( it ) }
+        return services.participationService.invoke( request ).let { ResponseEntity.ok( it ) }
     }
 
     /**

@@ -21,7 +21,14 @@ class ClaimTest {
 
         @Test
         fun `should return null if the attribute value is not a list`() {
-            val attribute = "manageDeployment" to "value"
+            val attribute = "manageStudy" to "value"
+            val claims = Claim.fromUserAttribute( attribute )
+            assertNull( claims )
+        }
+
+        @Test
+        fun `should not create virtual claims`() {
+            val attribute = "manageDeployment" to listOf( UUID.randomUUID() )
             val claims = Claim.fromUserAttribute( attribute )
             assertNull( claims )
         }
@@ -30,15 +37,15 @@ class ClaimTest {
         fun `should create claims`() {
             val uuid1 = UUID.randomUUID()
             val uuid2 = UUID.randomUUID()
-            val attribute = "manageDeployment" to listOf( uuid1.toString(), uuid2.toString() )
+            val attribute = "manageStudy" to listOf( uuid1.toString(), uuid2.toString() )
             val claims = Claim.fromUserAttribute( attribute )
 
-            assertEquals( claims, listOf( Claim.ManageDeployment( uuid1 ), Claim.ManageDeployment( uuid2 ) ) )
+            assertEquals( claims, listOf( Claim.ManageStudy( uuid1 ), Claim.ManageStudy( uuid2 ) ) )
         }
 
         @Test
         fun `should ignore unrecognized values`() {
-            val attribute = "manageDeployment" to listOf( UUID.randomUUID(), "randomValue" )
+            val attribute = "manageStudy" to listOf( UUID.randomUUID(), "randomValue" )
             val claims = Claim.fromUserAttribute( attribute )
             assertEquals( claims?.size, 1)
         }
@@ -57,10 +64,18 @@ class ClaimTest {
         @Test
         fun `should create claim`() {
             val uuid = UUID.randomUUID()
-            val authority = "manage_deployment_$uuid"
+            val authority = "manage_study_$uuid"
             val claim = Claim.fromGrantedAuthority( authority )
 
-            assertEquals( claim, Claim.ManageDeployment( uuid ) )
+            assertEquals( claim, Claim.ManageStudy( uuid ) )
+        }
+
+        @Test
+        fun `should not create virtual claims`() {
+            val uuid = UUID.randomUUID()
+            val authority = "manage_deployment_$uuid"
+            val claim = Claim.fromGrantedAuthority( authority )
+            assertNull( claim )
         }
     }
 }

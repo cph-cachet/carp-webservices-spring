@@ -5,7 +5,7 @@ import dk.cachet.carp.common.application.users.ParticipantRole
 import dk.cachet.carp.protocols.application.StudyProtocolSnapshot
 import dk.cachet.carp.studies.application.StudyDetails
 import dk.cachet.carp.studies.infrastructure.StudyServiceDecorator
-import dk.cachet.carp.webservices.study.service.core.CoreRecruitmentService
+import dk.cachet.carp.webservices.common.services.CoreServiceContainer
 import dk.cachet.carp.webservices.study.service.impl.RecruitmentServiceImpl
 import io.mockk.*
 import kotlinx.coroutines.test.runTest
@@ -17,15 +17,15 @@ import kotlin.test.assertFailsWith
 
 class RecruitmentServiceTest
 {
-    private val studyService: StudyService = mockk()
     private var coreStudyService: StudyServiceDecorator = mockk()
-    private val coreRecruitmentService: CoreRecruitmentService = mockk()
+    private val serviceContainer: CoreServiceContainer = mockk()
 
     @BeforeTest
     fun setup()
     {
         clearAllMocks()
-        every { studyService.core } returns coreStudyService
+        every { serviceContainer.studyService } returns coreStudyService
+        every { serviceContainer.recruitmentService } returns mockk()
     }
 
     @Nested
@@ -35,19 +35,22 @@ class RecruitmentServiceTest
             val studyDetails = mockk<StudyDetails>()
 
             every { studyDetails getProperty "protocolSnapshot" } returns null
-            every { coreRecruitmentService.instance } returns mockk()
             coEvery { coreStudyService.getStudyDetails(any()) } returns studyDetails
 
             val sut = RecruitmentServiceImpl(
                 mockk(),
                 mockk(),
-                mockk(),
-                studyService,
-                coreRecruitmentService
+                serviceContainer
             )
 
             assertFailsWith<IllegalArgumentException> {
-                sut.addAnonymousParticipants(UUID.randomUUID(), 1, 1, "roleName", "redirect")
+                sut.addAnonymousParticipants(
+                    UUID.randomUUID(),
+                    1,
+                    1,
+                    "roleName",
+                    "redirect"
+                )
             }
 
             coVerify(exactly = 1) { coreStudyService.getStudyDetails(any()) }
@@ -61,19 +64,21 @@ class RecruitmentServiceTest
 
             every { protocolSnapshot getProperty "participantRoles" } returns roles
             every { studyDetails getProperty "protocolSnapshot" } returns protocolSnapshot
-            every { coreRecruitmentService.instance } returns mockk()
             coEvery { coreStudyService.getStudyDetails(any()) } returns studyDetails
 
             val sut = RecruitmentServiceImpl(
                 mockk(),
                 mockk(),
-                mockk(),
-                studyService,
-                coreRecruitmentService
+                serviceContainer
             )
 
             assertFailsWith<IllegalArgumentException> {
-                sut.addAnonymousParticipants(UUID.randomUUID(), 1, 1, "notInProtocol", "redirect")
+                sut.addAnonymousParticipants(
+                    UUID.randomUUID(),
+                    1,
+                    1,
+                    "notInProtocol",
+                    "redirect")
             }
 
             coVerify(exactly = 1) { coreStudyService.getStudyDetails(any()) }
