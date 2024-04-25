@@ -11,7 +11,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "build-keycloak-theme": "yarn build && keycloakify",
+    "build-keycloak-theme": "DISABLE_ESLINT_PLUGIN=true npm run build && keycloakify",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },

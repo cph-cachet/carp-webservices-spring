@@ -1,19 +1,27 @@
 //This is to show that you can create stories for pages that you haven't overloaded.
 
-import { ComponentMeta, ComponentStory } from '@storybook/react';
-import { createPageStory } from '../createPageStory';
+import { Meta, StoryObj } from "@storybook/react";
+import { createPageStory } from "../createPageStory";
 
 const { PageStory } = createPageStory({
-  pageId: 'info.ftl',
+  pageId: "info.ftl",
 });
 
-export default {
-  title: 'login/Info',
+const meta = {
+  title: "login/Info",
   component: PageStory,
-} as ComponentMeta<typeof PageStory>;
+} satisfies Meta<typeof PageStory>;
 
-export const Default: ComponentStory<typeof PageStory> = () => (
-  <PageStory
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+export const Default: Story = {
+  render: () => <PageStory />,
+};
+
+export const WithEmailAsUsername: Story = {
+  render: () => (
+    <PageStory
     kcContext={{
       messageHeader: 'Account update required',
       message: {
@@ -22,5 +30,6 @@ export const Default: ComponentStory<typeof PageStory> = () => (
       },
       requiredActions: ['UPDATE_PASSWORD'],
     }}
-  />
-);
+    />
+  ),
+};
