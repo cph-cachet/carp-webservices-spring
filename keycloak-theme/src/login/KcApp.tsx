@@ -18,7 +18,6 @@ const Login = lazy(() => import("./pages/Login"));
 // If you can, favor register-user-profile.ftl over register.ftl, see: https://docs.keycloakify.dev/realtime-input-validation
 const Register = lazy(() => import("./pages/Register"));
 const RegisterUserProfile = lazy(() => import("./pages/RegisterUserProfile"));
-const Terms = lazy(() => import("./pages/Terms"));
 const MyExtraPage1 = lazy(() => import("./pages/MyExtraPage1"));
 const MyExtraPage2 = lazy(() => import("./pages/MyExtraPage2"));
 const Info = lazy(() => import("./pages/Info"));
@@ -62,7 +61,6 @@ export default function KcApp(props: { kcContext: KcContext; }) {
           case "login-update-profile.ftl": return <LoginUpdateProfile {...{ kcContext, i18n, Template, classes }} doUseDefaultCss />;
           case "login-update-password.ftl": return <LoginUpdatePassword {...{ kcContext, i18n, Template, classes }} doUseDefaultCss />;
           case "login-reset-password.ftl": return <LoginResetPassword {...{ kcContext, i18n, Template, classes }} doUseDefaultCss />;
-          case "terms.ftl": return <Terms {...{ kcContext, i18n, Template, classes }} doUseDefaultCss />;
           case "my-extra-page-1.ftl": return <MyExtraPage1 {...{ kcContext, i18n, Template, classes }} doUseDefaultCss />;
           case "my-extra-page-2.ftl": return <MyExtraPage2 {...{ kcContext, i18n, Template, classes }} doUseDefaultCss />;
           case "info.ftl": return <Info {...{ kcContext, i18n, classes, Template }} doUseDefaultCss />;

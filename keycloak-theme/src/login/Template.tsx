@@ -12,13 +12,10 @@ import PublicPageLayout from "../components/Layout/PublicPageLayout";
 
 export const Template = (props: TemplateProps<KcContext, I18n>) => {
   const {
-    displayInfo = false,
     displayMessage = true,
-    displayRequiredFields = false,
     displayWide = false,
     showAnotherWayIfPresent = true,
     headerNode,
-    showUsernameNode = null,
     infoNode = null,
     kcContext,
     i18n,
@@ -31,7 +28,7 @@ export const Template = (props: TemplateProps<KcContext, I18n>) => {
 
   const { msg } = i18n;
 
-  const { realm, auth, url, message, isAppInitiatedAction } = kcContext;
+  const { auth, url, message, isAppInitiatedAction } = kcContext;
 
   const { isReady } = usePrepareTemplate({
     doFetchDefaultThemeResources: doUseDefaultCss,
