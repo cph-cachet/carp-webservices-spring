@@ -48,26 +48,26 @@ class ProxiesMethodSecurityExpressionRoot(
     private val participantRepository: CoreParticipantRepository
 ): SpringAddonsMethodSecurityExpressionRoot()
 {
-    fun canManageStudy( studyId: UUID ) : Boolean =
-        getCarpClaims().contains( Claim.ManageStudy( studyId ) ) || isAdmin()
+    fun canManageStudy( studyId: UUID? ) : Boolean =
+        studyId != null && getCarpClaims().contains( Claim.ManageStudy( studyId ) ) || isAdmin()
 
-    fun isProtocolOwner( protocolId: UUID ) : Boolean =
-        getCarpClaims().contains( Claim.ProtocolOwner( protocolId ) ) || isAdmin()
+    fun isProtocolOwner( protocolId: UUID? ) : Boolean =
+        protocolId != null && getCarpClaims().contains( Claim.ProtocolOwner( protocolId ) ) || isAdmin()
 
-    fun isInDeployment( deploymentId: UUID ) : Boolean =
-        getCarpClaims().contains( Claim.InDeployment( deploymentId ) ) || isAdmin()
+    fun isInDeployment( deploymentId: UUID? ) : Boolean =
+        deploymentId != null && getCarpClaims().contains( Claim.InDeployment( deploymentId ) ) || isAdmin()
 
-    fun canManageDeployment( deploymentId: UUID ) : Boolean =
-        getCarpClaims().contains( Claim.ManageDeployment( deploymentId ) ) || isAdmin()
+    fun canManageDeployment( deploymentId: UUID? ) : Boolean =
+        deploymentId != null && getCarpClaims().contains( Claim.ManageDeployment( deploymentId ) ) || isAdmin()
 
-    fun isConsentOwner( consentId: Int ) : Boolean =
-        getCarpClaims().contains( Claim.ConsentOwner( consentId ) ) || isAdmin()
+    fun isConsentOwner( consentId: Int? ) : Boolean =
+        consentId != null && getCarpClaims().contains( Claim.ConsentOwner( consentId ) ) || isAdmin()
 
-    fun isCollectionOwner( collectionId: Int ) : Boolean =
-        getCarpClaims().contains( Claim.CollectionOwner( collectionId ) ) || isAdmin()
+    fun isCollectionOwner( collectionId: Int? ) : Boolean =
+        collectionId != null && getCarpClaims().contains( Claim.CollectionOwner( collectionId ) ) || isAdmin()
 
-    fun isFileOwner( fileId: Int ) : Boolean =
-        getCarpClaims().contains( Claim.FileOwner( fileId ) ) || isAdmin()
+    fun isFileOwner( fileId: Int? ) : Boolean =
+        fileId != null && getCarpClaims().contains( Claim.FileOwner( fileId ) ) || isAdmin()
 
     // HACK: it is not easy to assign a claim with a studyId when creating deployments,
     // so we inject `CoreParticipantRepository` here to check whether the user is in a deployment
