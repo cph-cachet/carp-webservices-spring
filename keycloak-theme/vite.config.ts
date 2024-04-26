@@ -13,7 +13,7 @@ export default defineConfig({
     commonjs(), 
     keycloakify({
       // See: https://docs.keycloakify.dev/build-options#themename
-      themeName: "keycloakify-starter",
+      themeName: "carp-custom-theme",
       // See: https://docs.keycloakify.dev/environnement-variables
       extraThemeProperties: [
         "MY_ENV_VARIABLE=${env.MY_ENV_VARIABLE:}"
