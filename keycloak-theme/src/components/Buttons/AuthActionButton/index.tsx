@@ -1,5 +1,5 @@
 import { CircularProgress } from '@mui/material';
-import StyledAuthActionButton from './styles';
+import CarpButton from './styles';
 
 type Props = {
   text: string;
@@ -8,14 +8,14 @@ type Props = {
 
 const AuthActionButton = ({ text, loading }: Props) => {
   return (
-    <StyledAuthActionButton
+    <CarpButton
       disableElevation
       variant="contained"
       disabled={loading}
       type="submit"
     >
       {loading ? <CircularProgress size={24} /> : text}
-    </StyledAuthActionButton>
+    </CarpButton>
   );
 };
 
