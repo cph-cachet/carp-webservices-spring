@@ -948,6 +948,21 @@
             "claim.name": "in_deployment",
             "jsonType.label": "String"
           }
+        },        {
+          "id": "aed9e007-0c5a-4cd6-9f62-d99626c1edbb",
+          "name": "Collection Owner",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "multivalued": "true",
+            "user.attribute": "collectionOwner",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "collection_owner",
+            "jsonType.label": "int"
+          }
         },
         {
           "id": "2e1eb95f-9a8f-4b8e-9e06-b47cae6ea37e",
