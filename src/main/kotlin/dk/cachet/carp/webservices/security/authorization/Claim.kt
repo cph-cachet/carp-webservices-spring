@@ -65,9 +65,9 @@ sealed class Claim( open val value: Any )
 
     data class InDeployment( val deploymentId: UUID ) : Claim( deploymentId.toString() )
 
-    data class ConsentOwner( val consentId: Int ) : Claim( consentId )
+    data class ConsentOwner( val consentId: Int ) : Claim( consentId.toString() )
 
-    data class CollectionOwner( val collectionId: Int ) : Claim( collectionId )
+    data class CollectionOwner( val collectionId: Int ) : Claim( collectionId.toString() )
 
-    data class FileOwner( val fileId: Int ) : Claim( fileId )
+    data class FileOwner( val fileId: Int ) : Claim( fileId.toString() )
 }
