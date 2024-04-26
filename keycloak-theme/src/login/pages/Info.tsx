@@ -55,16 +55,16 @@ export default function Info(
         <Box display="flex" justifyContent="center" mt={4}>
           {!skipLink && pageRedirectUri !== undefined ? (
             <Button href={pageRedirectUri} variant="contained">
-              {msgStr("backToApplication").replace("&raquo;", "").replace("&laquo;", "")}
+              {msgStr("backToApplication")}
             </Button>
           ) : actionUri !== undefined ? (
             <Button href={actionUri} variant="contained">
-              {msgStr("proceedWithAction").replace("&raquo;", "").replace("&laquo;", "")}
+              {msgStr("proceedWithAction")}
             </Button>
           ) : (
             client.baseUrl !== undefined && (
               <Button href={client.baseUrl} variant="contained">
-              {msgStr("backToApplication").replace("&raquo;", "").replace("&laquo;", "")}
+              {msgStr("backToApplication")}
               </Button>
             )
           )}
