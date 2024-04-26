@@ -1,210 +1,60 @@
-import { Evt } from 'evt';
-import jwt_decode from 'jwt-decode';
-import Keycloak_js from 'keycloak-js';
-import { createKeycloakAdapter } from 'keycloakify';
-import { addParamToUrl } from 'powerhooks/tools/urlSearchParams';
-import { createContext, useContext, useEffect, useState } from 'react';
-import { assert } from 'tsafe/assert';
-import { id } from 'tsafe/id';
-import type { Param0 } from 'tsafe/Param0';
-import type { ReturnType } from 'tsafe/ReturnType';
+// See documentation of oidc-spa for more details:
+// https://docs.oidc-spa.dev
 
-export declare type OidcClient = OidcClient.LoggedIn | OidcClient.NotLoggedIn;
+import { createReactOidc } from "oidc-spa/react";
+import { z } from "zod";
 
-export declare namespace OidcClient {
-  export type NotLoggedIn = {
-    isUserLoggedIn: false;
-    login: (params: {
-      //To prevent infinite loop if the user access a page that requires to
-      //be authenticated but cancel (clicks back).
-      doesCurrentHrefRequiresAuth: boolean;
-    }) => Promise<never>;
-  };
+//On older Keycloak version you need the /auth (e.g: http://localhost:8080/auth)
+//On newer version you must remove it (e.g: http://localhost:8080 )
+const keycloakUrl = "https://cloud-iam.keycloakify.dev/";
+const keycloakRealm = "keycloakify";
+const keycloakClientId= "starter";
 
-  export type LoggedIn = {
-    isUserLoggedIn: true;
-    getAccessToken: () => string;
-    logout: (params: { redirectTo: 'home' | 'current page' }) => Promise<never>;
-    //If we have sent a API request to change user's email for example
-    //and we want that jwt_decode(oidcClient.getAccessToken()).email be the new email
-    //in this case we would call this method...
-    updateTokenInfos: () => Promise<void>;
-  };
-}
-
-type Params = {
-  url: string;
-  realm: string;
-  clientId: string;
-  transformUrlBeforeRedirect?: (url: string) => string;
-  getUiLocales?: () => string;
-  log?: typeof console.log;
-};
-
-async function createKeycloakOidcClient(params: Params): Promise<OidcClient> {
-  const {
-    url,
-    realm,
-    clientId,
-    transformUrlBeforeRedirect,
-    getUiLocales,
-    log,
-  } = params;
-
-  const keycloakInstance = new Keycloak_js({ url, realm, clientId });
-
-  let redirectMethod: ReturnType<
-    Param0<typeof createKeycloakAdapter>['getRedirectMethod']
-  > = 'overwrite location.href';
-
-  const isAuthenticated = await keycloakInstance
-    .init({
-      onLoad: 'check-sso',
-      silentCheckSsoRedirectUri: `${window.location.origin}/silent-sso.html`,
-      responseMode: 'query',
-      checkLoginIframe: false,
-      adapter: createKeycloakAdapter({
-        transformUrlBeforeRedirect: (url) =>
-          [url].map(transformUrlBeforeRedirect ?? ((url) => url)).map(
-            getUiLocales === undefined
-              ? (url) => url
-              : (url) =>
-                  addParamToUrl({
-                    url,
-                    name: 'ui_locales',
-                    value: getUiLocales(),
-                  }).newUrl
-          )[0],
-        keycloakInstance,
-        getRedirectMethod: () => redirectMethod,
-      }),
+export const { OidcProvider, useOidc } = createReactOidc({
+    issuerUri: `${keycloakUrl}/realms/${keycloakRealm}`,
+    clientId: keycloakClientId,
+    // NOTE: You can also pass queries params when calling login()
+    extraQueryParams: () => ({
+        // This adding ui_locales to the url will ensure the consistency of the language between the app and the login pages
+        // If your app implements a i18n system (like i18nifty.dev for example) you should use this and replace "en" by the 
+        // current language of the app.
+        // On the other side you will find kcContext.locale.currentLanguageTag to be whatever you set here.  
+        "ui_locales": "en",
+        "my_custom_param": "value of foo transferred to login page"
+    }),
+    publicUrl: import.meta.env.BASE_URL,
+    decodedIdTokenSchema: z.object({
+        // Use https://jwt.io/ to tell what's in your idToken
+        // It will depend of your Keycloak configuration.
+        // Here I declare only two field on the type but actually there are
+        // Many more things available. 
+        sub: z.string(),
+        name: z.string(),
+        preferred_username: z.string(),
+        // This is a custom attribute set up in our Keycloak configuration
+        // it's not present by default. 
+        // See https://docs.keycloakify.dev/realtime-input-validation#getting-your-custom-user-attribute-to-be-included-in-the-jwt
+        favorite_pet: z.union([z.literal("cat"), z.literal("dog"), z.literal("bird")])
     })
-    .catch((error: Error) => error);
+});
 
-  //TODO: Make sure that result is always an object.
-  if (isAuthenticated instanceof Error) {
-    throw isAuthenticated;
-  }
 
-  const login: OidcClient.NotLoggedIn['login'] = async ({
-    doesCurrentHrefRequiresAuth,
-  }) => {
-    if (doesCurrentHrefRequiresAuth) {
-      redirectMethod = 'location.replace';
+export function getKeycloakAccountUrl(
+    params: {
+        locale: string;
     }
+){
+    const { locale } = params;
 
-    await keycloakInstance.login({ redirectUri: window.location.href });
+    const accountUrl = new URL(`${keycloakUrl}/realms/${keycloakRealm}/account`);
 
-    return new Promise<never>(() => {});
-  };
+    const searchParams = new URLSearchParams();
 
-  if (!isAuthenticated) {
-    return id<OidcClient.NotLoggedIn>({
-      isUserLoggedIn: false,
-      login,
-    });
-  }
+    searchParams.append("kc_locale", locale);
+    searchParams.append("referrer", keycloakClientId);
+    searchParams.append("referrer_uri", window.location.href);
 
-  let currentAccessToken = keycloakInstance.token!;
+    accountUrl.search = searchParams.toString();
 
-  const oidcClient = id<OidcClient.LoggedIn>({
-    isUserLoggedIn: true,
-    getAccessToken: () => currentAccessToken,
-    logout: async ({ redirectTo }) => {
-      await keycloakInstance.logout({
-        redirectUri: (() => {
-          switch (redirectTo) {
-            case 'current page':
-              return window.location.href;
-            case 'home':
-              return window.location.origin;
-          }
-        })(),
-      });
-
-      return new Promise<never>(() => {});
-    },
-    updateTokenInfos: async () => {
-      await keycloakInstance.updateToken(-1);
-
-      currentAccessToken = keycloakInstance.token!;
-    },
-  });
-
-  (function callee() {
-    const msBeforeExpiration =
-      jwt_decode<{ exp: number }>(currentAccessToken)['exp'] * 1000 -
-      Date.now();
-
-    setTimeout(
-      async () => {
-        log?.(
-          `OIDC access token will expire in ${minValiditySecond} seconds, waiting for user activity before renewing`
-        );
-
-        await Evt.merge([
-          Evt.from(document, 'mousemove'),
-          Evt.from(document, 'keydown'),
-        ]).waitFor();
-
-        log?.('User activity detected. Refreshing access token now');
-
-        const error = await keycloakInstance.updateToken(-1).then(
-          () => undefined,
-          (error: Error) => error
-        );
-
-        if (error) {
-          log?.("Can't refresh OIDC access token, getting a new one");
-          //NOTE: Never resolves
-          await login({ doesCurrentHrefRequiresAuth: true });
-        }
-
-        currentAccessToken = keycloakInstance.token!;
-
-        callee();
-      },
-      msBeforeExpiration - minValiditySecond * 1000
-    );
-  })();
-
-  return oidcClient;
-}
-
-const minValiditySecond = 25;
-
-const oidcClientContext = createContext<OidcClient | undefined>(undefined);
-
-export function createOidcClientProvider(params: Params) {
-  const prOidcClient = createKeycloakOidcClient(params);
-
-  function OidcClientProvider(props: { children: React.ReactNode }) {
-    const { children } = props;
-
-    const [oidcClient, setOidcClient] = useState<OidcClient | undefined>(
-      undefined
-    );
-
-    useEffect(() => {
-      prOidcClient.then(setOidcClient);
-    }, []);
-
-    if (oidcClient === undefined) {
-      return null;
-    }
-
-    return (
-      <oidcClientContext.Provider value={oidcClient}>
-        {children}
-      </oidcClientContext.Provider>
-    );
-  }
-
-  return { OidcClientProvider };
-}
-
-export function useOidcClient() {
-  const oidcClient = useContext(oidcClientContext);
-  assert(oidcClient !== undefined);
-  return { oidcClient };
+    return accountUrl.toString();
 }

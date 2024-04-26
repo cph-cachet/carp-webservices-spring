@@ -1,4 +1,4 @@
-import StyledLink from 'src/components/StyledLink';
+import StyledLink from '../../../../components/StyledLink';
 import { BannerActionText } from '../styles';
 
 type Props = { loginUrl: string };
