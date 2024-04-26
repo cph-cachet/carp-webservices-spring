@@ -57,10 +57,10 @@ export default function LoginUpdateProfile(
     validationSchema: user.editUsernameAllowed
       ? validationSchemaUsername
       : validationSchemaNoUsername,
-    onSubmit: () => {},
+    onSubmit: () => { },
   });
 
-  const onSubmit = useConstCallback<FormEventHandler<HTMLFormElement>>(e => {
+  const onSubmit = useConstCallback<FormEventHandler<HTMLFormElement>>((e) => {
     e.preventDefault();
     setIsLoading(true);
     const formElement = e.target as HTMLFormElement;
@@ -89,33 +89,6 @@ export default function LoginUpdateProfile(
             autoComplete="username"
             variant="outlined"
           />
-          // <div
-          //   className={clsx(
-          //     getClassName('kcFormGroupClass'),
-          //     messagesPerField.printIfExists(
-          //       'username',
-          //       getClassName('kcFormGroupErrorClass')
-          //     )
-          //   )}
-          // >
-          //   <div className={getClassName('kcLabelWrapperClass')}>
-          //     <label
-          //       htmlFor="username"
-          //       className={getClassName('kcLabelClass')}
-          //     >
-          //       {msg('username')}
-          //     </label>
-          //   </div>
-          //   <div className={getClassName('kcInputWrapperClass')}>
-          //     <input
-          //       type="text"
-          //       id="username"
-          //       name="username"
-          //       defaultValue={user.username ?? ''}
-          //       className={getClassName('kcInputClass')}
-          //     />
-          //   </div>
-          // </div>
         )}
 
         <CarpInput
@@ -182,13 +155,12 @@ export default function LoginUpdateProfile(
                 </button>
               </>
             ) : (
-
-          <div
-            id="kc-form-buttons"
-            className={getClassName('kcFormButtonsClass')}
-          >
-            <AuthActionButton text="Submit" loading={isLoading} />
-          </div>
+              <div
+                id="kc-form-buttons"
+                className={getClassName("kcFormButtonsClass")}
+              >
+                <AuthActionButton text="Submit" loading={isLoading} />
+              </div>
             )}
           </div>
         </div>
