@@ -109,8 +109,8 @@ class FileServiceImpl(
 
         LOGGER.info("File saved, id = ${saved.id}")
 
+        val identity = authenticationService.getCarpIdentity()
         backgroundWorker.launch {
-            val identity = authenticationService.getCarpIdentity()
             accountService.grant(identity, setOf(Claim.FileOwner(saved.id)))
         }
 
@@ -125,8 +125,8 @@ class FileServiceImpl(
 
         LOGGER.info("File deleted, id = $id")
 
+        val identity = authenticationService.getCarpIdentity()
         backgroundWorker.launch {
-            val identity = authenticationService.getCarpIdentity()
             accountService.revoke(identity, setOf(Claim.FileOwner(file.id)))
         }
     }

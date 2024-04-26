@@ -86,8 +86,8 @@ class ConsentDocumentServiceImpl(
         consentDocumentRepository.delete(consent)
         LOGGER.info("Consent document deleted, id: ${consent.id}")
 
+        val identity = authenticationService.getCarpIdentity()
         backgroundWorker.launch {
-            val identity = authenticationService.getCarpIdentity()
             accountService.revoke(identity, setOf( Claim.ConsentOwner( consent.id ) ) )
         }
     }
@@ -104,8 +104,8 @@ class ConsentDocumentServiceImpl(
         val saved = consentDocumentRepository.save(ConsentDocument(deploymentId = deploymentId, data = data))
         LOGGER.info("Consent document created, id: ${saved.id}")
 
+        val identity = authenticationService.getCarpIdentity()
         backgroundWorker.launch {
-            val identity = authenticationService.getCarpIdentity()
             accountService.grant( identity, setOf( Claim.ConsentOwner( saved.id ) ) )
         }
         return saved
