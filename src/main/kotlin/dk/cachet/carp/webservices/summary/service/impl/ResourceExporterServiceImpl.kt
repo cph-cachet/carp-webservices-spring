@@ -184,7 +184,7 @@ class ResourceExporterServiceImpl
      */
     override fun exportConsents(deploymentIds: List<String>, rootFolder: Path, summaryLog: SummaryLog)
     {
-        val consents = consentDocumentService.getAll(deploymentIds)
+        val consents = consentDocumentService.getAllByDeploymentIds( deploymentIds.map { UUID(it) }.toSet() )
         if (consents.isEmpty())
         {
             LOGGER.info("No consent document data was found.")

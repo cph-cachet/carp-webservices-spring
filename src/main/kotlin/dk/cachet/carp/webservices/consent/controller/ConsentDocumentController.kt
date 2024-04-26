@@ -3,7 +3,6 @@ package dk.cachet.carp.webservices.consent.controller
 import com.fasterxml.jackson.databind.JsonNode
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.webservices.common.constants.PathVariableName
-import dk.cachet.carp.webservices.consent.controller.ConsentDocumentController.Companion.CONSENT_DOCUMENT_BASE
 import dk.cachet.carp.webservices.consent.domain.ConsentDocument
 import dk.cachet.carp.webservices.consent.service.ConsentDocumentService
 import io.swagger.v3.oas.annotations.Operation
@@ -14,7 +13,6 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping(value = [CONSENT_DOCUMENT_BASE])
 class ConsentDocumentController(
     private val consentDocumentService: ConsentDocumentService
 )
@@ -24,21 +22,37 @@ class ConsentDocumentController(
         private val LOGGER: Logger = LogManager.getLogger()
 
         /** Endpoint URI constants */
-        const val CONSENT_DOCUMENT_BASE = "/api/deployments/{${PathVariableName.DEPLOYMENT_ID}}/consent-documents"
+        const val CONSENT_BY_STUDY_ID = "/api/studies/{${PathVariableName.STUDY_ID}}/consent-documents"
+        const val CONSENT_BY_DEPLOYMENT_ID = "/api/deployments/{${PathVariableName.DEPLOYMENT_ID}}/consent-documents"
         const val CONSENT_BY_ID = "/{${PathVariableName.CONSENT_ID}}"
     }
 
-    @GetMapping
-    @PreAuthorize("canManageDeployment(#deploymentId)")
-    @Operation(tags = ["consentDocument/getAll.json"])
-    fun getAll(@PathVariable(PathVariableName.DEPLOYMENT_ID) deploymentId: UUID): List<ConsentDocument>
+    @RequestMapping(
+        value = [ CONSENT_BY_STUDY_ID, CONSENT_BY_DEPLOYMENT_ID ],
+        method = [ RequestMethod.GET ]
+    )
+    @PreAuthorize("canManageDeployment(#deploymentId) or canManageStudy(#studyId)")
+    fun getAll(
+        @PathVariable( PathVariableName.DEPLOYMENT_ID, required = false ) deploymentId: UUID?,
+        @PathVariable( PathVariableName.STUDY_ID, required = false ) studyId: UUID?
+    ): List<ConsentDocument>
     {
-        LOGGER.info("Start GET: /api/deployments/$deploymentId/consent-documents")
-        return consentDocumentService.getAll(deploymentId.stringRepresentation)
+        if ( deploymentId != null )
+        {
+            LOGGER.info( "Start GET: /api/deployments/$deploymentId/consent-documents" )
+            return consentDocumentService.getAllByDeploymentIds( setOf( deploymentId ) )
+        }
+        else if ( studyId != null )
+        {
+            LOGGER.info( "Start GET: /api/studies/$studyId/consent-documents" )
+            return consentDocumentService.getAllByStudyId( studyId )
+        }
+
+        throw IllegalArgumentException( "Either a study ID or deployment ID should be provided." )
     }
 
-    @GetMapping(CONSENT_BY_ID)
-    @PreAuthorize("canManageDeployment(#deploymentId) or isConsentOwner(#consentId)")
+    @GetMapping(CONSENT_BY_DEPLOYMENT_ID + CONSENT_BY_ID)
+    @PreAuthorize("isConsentOwner(#consentId)")
     @Operation(tags = ["consentDocument/getOne.json"])
     fun getOne(
             @PathVariable(PathVariableName.DEPLOYMENT_ID) deploymentId: UUID,
@@ -48,20 +62,20 @@ class ConsentDocumentController(
         return consentDocumentService.getOne(consentId)
     }
 
-    @PostMapping
+    @PostMapping( CONSENT_BY_DEPLOYMENT_ID )
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("canManageDeployment(#deploymentId) or isInDeployment(#deploymentId)")
+    @PreAuthorize("isInDeployment(#deploymentId)")
     @Operation(tags = ["consentDocument/create.json"])
     fun create(
             @PathVariable(PathVariableName.DEPLOYMENT_ID) deploymentId: UUID,
             @RequestBody data: JsonNode?): ConsentDocument
     {
         LOGGER.info("Start POST: /api/deployments/$deploymentId/consent-documents")
-        return consentDocumentService.create(deploymentId.stringRepresentation, data)
+        return consentDocumentService.create(deploymentId, data)
     }
 
-    @DeleteMapping(CONSENT_BY_ID)
-    @PreAuthorize("canManageDeployment(#deploymentId) or isConsentOwner(#consentId)")
+    @DeleteMapping( CONSENT_BY_DEPLOYMENT_ID + CONSENT_BY_ID )
+    @PreAuthorize("isConsentOwner(#consentId)")
     @Operation(tags = ["consentDocument/delete.json"])
     fun delete(
             @PathVariable(PathVariableName.DEPLOYMENT_ID) deploymentId: UUID,
