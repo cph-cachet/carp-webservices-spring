@@ -16,16 +16,12 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  render: () => <PageStory />,
-};
-
-export const WithEmailAsUsername: Story = {
   render: () => (
     <PageStory
     kcContext={{
       messageHeader: 'Account update required',
       message: {
-        summary: 'Your administrator has requested you to.',
+        summary: 'Your administrator has requested you to',
         type: 'info',
       },
       requiredActions: ['UPDATE_PASSWORD'],

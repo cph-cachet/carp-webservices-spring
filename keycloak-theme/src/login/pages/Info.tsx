@@ -40,7 +40,7 @@ export default function Info(
     >
       <div id="kc-info-message">
         <Typography variant="body1" className="instruction">
-          {message.summary}
+          {message.summary}{" "}
 
           {requiredActions !== undefined && (
             <b>
@@ -55,16 +55,16 @@ export default function Info(
         <Box display="flex" justifyContent="center" mt={4}>
           {!skipLink && pageRedirectUri !== undefined ? (
             <Button href={pageRedirectUri} variant="contained">
-              {msgStr("backToApplication").replace("&raquo;", "")}
+              {msgStr("backToApplication").replace("&raquo;", "").replace("&laquo;", "")}
             </Button>
           ) : actionUri !== undefined ? (
             <Button href={actionUri} variant="contained">
-              {msgStr("proceedWithAction").replace("&raquo;", "")}
+              {msgStr("proceedWithAction").replace("&raquo;", "").replace("&laquo;", "")}
             </Button>
           ) : (
             client.baseUrl !== undefined && (
               <Button href={client.baseUrl} variant="contained">
-                {msgStr("backToApplication").replace("&raquo;", "")}
+              {msgStr("backToApplication").replace("&raquo;", "").replace("&laquo;", "")}
               </Button>
             )
           )}
