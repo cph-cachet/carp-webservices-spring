@@ -28,7 +28,7 @@ class ProtocolServiceAuthorizer(
             is ProtocolServiceRequest.GetVersionHistoryFor -> auth.require( Claim.ProtocolOwner( protocolId ) )
         }
 
-    override suspend fun ProtocolServiceRequest<*>.grantClaimsOnSuccess( result: Any? ) =
+    override suspend fun ProtocolServiceRequest<*>.changeClaimsOnSuccess(result: Any? ) =
         when ( this )
         {
             is ProtocolServiceRequest.Add ->

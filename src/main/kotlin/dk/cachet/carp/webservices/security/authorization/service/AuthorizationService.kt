@@ -43,4 +43,14 @@ interface AuthorizationService
      * Grant the current authentication all specified [claims].
      */
     suspend fun grantCurrentAuthentication( claims: Set<Claim> )
+
+    /**
+     * Revoke the specified [claim] from every account that has it.
+     */
+    suspend fun revokeClaimFromAllAccounts( claim: Claim )
+
+    /**
+     * Revoke the specified [claims] from every account that has them.
+     */
+    suspend fun revokeClaimsFromAllAccounts( claims: Set<Claim> )
 }

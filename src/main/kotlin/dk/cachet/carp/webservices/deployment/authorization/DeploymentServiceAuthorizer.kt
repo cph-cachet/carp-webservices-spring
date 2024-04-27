@@ -37,7 +37,7 @@ class DeploymentServiceAuthorizer(
                 auth.require( Claim.InDeployment( studyDeploymentId ) )
         }
 
-    override suspend fun DeploymentServiceRequest<*>.grantClaimsOnSuccess( result: Any? ) =
+    override suspend fun DeploymentServiceRequest<*>.changeClaimsOnSuccess(result: Any? ) =
         when ( this )
         {
             is DeploymentServiceRequest.CreateStudyDeployment -> {
@@ -50,7 +50,16 @@ class DeploymentServiceAuthorizer(
                     )
                 )
             }
-            is DeploymentServiceRequest.RemoveStudyDeployments,
+            is DeploymentServiceRequest.RemoveStudyDeployments -> {
+                studyDeploymentIds.forEach {
+                    auth.revokeClaimsFromAllAccounts(
+                        setOf(
+                            Claim.InDeployment( it ),
+                            Claim.ManageDeployment( it )
+                        )
+                    )
+                }
+            }
             is DeploymentServiceRequest.GetStudyDeploymentStatus,
             is DeploymentServiceRequest.GetStudyDeploymentStatusList,
             is DeploymentServiceRequest.RegisterDevice,

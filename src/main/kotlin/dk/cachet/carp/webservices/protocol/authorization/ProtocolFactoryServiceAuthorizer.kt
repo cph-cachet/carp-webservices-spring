@@ -13,7 +13,7 @@ class ProtocolFactoryServiceAuthorizer : ApplicationServiceAuthorizer<ProtocolFa
         when ( this ) { is ProtocolFactoryServiceRequest.CreateCustomProtocol -> Unit }
     }
 
-    override suspend fun ProtocolFactoryServiceRequest<*>.grantClaimsOnSuccess( result: Any? )
+    override suspend fun ProtocolFactoryServiceRequest<*>.changeClaimsOnSuccess(result: Any? )
     {
         when ( this ) { is ProtocolFactoryServiceRequest.CreateCustomProtocol -> Unit }
     }
