@@ -1,26 +1,21 @@
 package dk.cachet.carp.webservices.consent.service
 
 import com.fasterxml.jackson.databind.JsonNode
+import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.webservices.consent.domain.ConsentDocument
 
 /**
- * The Interface [ConsentDocumentService].
- * The [ConsentDocumentService] creates an interface for handling consent document requests.
+ * The Interface [ConsentDocumentService] for CRUD operations on consent documents.
  */
 interface ConsentDocumentService
 {
-    /** The [getAll] interface for retrieving consent documents by their [deploymentId]. */
-    fun getAll(deploymentId: String): List<ConsentDocument>
+    fun getAllByStudyId(studyId: UUID) : List<ConsentDocument>
 
-    /** The [getAll] interface for retrieving consent documents for several deployment id's. */
-    fun getAll(deploymentIds: List<String>): List<ConsentDocument>
+    fun getAllByDeploymentIds(deploymentIds: Set<UUID> ) : List<ConsentDocument>
 
-    /** The [getOne] interface for retrieving one specific consent document. */
-    fun getOne(id: Int): ConsentDocument
+    fun getOne( consentId: Int ) : ConsentDocument
 
-    /** The [delete] interface for deleting a consent document. */
-    fun delete(id: Int)
+    fun delete( consentId: Int )
 
-    /** The [create] interface to create a new consent document. */
-    fun create(deploymentId: String, data: JsonNode?): ConsentDocument
+    fun create(deploymentId: UUID, data: JsonNode? ) : ConsentDocument
 }

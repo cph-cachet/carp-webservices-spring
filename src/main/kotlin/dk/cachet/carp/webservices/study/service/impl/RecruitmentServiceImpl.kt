@@ -36,7 +36,6 @@ import kotlin.time.toDuration
 
 @Service
 class RecruitmentServiceImpl(
-    private val authorizationService: AuthorizationService,
     private val accountService: AccountService,
     private val dataStreamService: DataStreamService,
     private val studyService: StudyService,
@@ -45,7 +44,8 @@ class RecruitmentServiceImpl(
 {
     final override val core = coreRecruitmentService.instance
 
-    companion object {
+    companion object
+    {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
@@ -66,36 +66,21 @@ class RecruitmentServiceImpl(
                 LOGGER.info("Account with email $email is granted the role RESEARCHER.")
             }
 
-            // grant it claims for the study and every deployment within it
-            accountService.grant(
-                accountIdentity,
-                core.getParticipantGroupStatusList( studyId )
-                    .filterIsInstance<ParticipantGroupStatus.InDeployment>()
-                    .map { Claim.ManageDeployment( it.studyDeploymentStatus.studyDeploymentId ) }
-                    .toSet()
-                    .plus( Claim.ManageStudy( studyId ) )
-            )
+            accountService.grant( accountIdentity, setOf( Claim.ManageStudy( studyId ) ) )
 
             LOGGER.info("Account with email $email is added as a researcher to study with id $studyId.")
     }
 
-    override suspend fun removeResearcher( studyId: UUID, email: String ): Boolean =
-        withContext( Dispatchers.IO + SecurityCoroutineContext() )
-        {
-            val accountIdentity = AccountIdentity.fromEmailAddress( email )
+    override suspend fun removeResearcher( studyId: UUID, email: String ): Boolean
+    {
+        val accountIdentity = AccountIdentity.fromEmailAddress( email )
 
-            // get the claims for each deployment in the study and for the study itself
-            val claims = core.getParticipantGroupStatusList( studyId )
-                .filterIsInstance<ParticipantGroupStatus.InDeployment>()
-                .map { Claim.ManageDeployment( it.studyDeploymentStatus.studyDeploymentId ) }
-                .toSet()
-                .plus( Claim.ManageStudy( studyId ) )
+        val claims = setOf( Claim.ManageStudy( studyId ) )
 
-            // revoke them
-            val account = accountService.revoke( accountIdentity, claims )
+        val account = accountService.revoke( accountIdentity, claims )
 
-            account.carpClaims?.intersect( claims )?.isEmpty() ?: false
-        }
+        return account.carpClaims?.intersect( claims )?.isEmpty() ?: false
+    }
 
     override suspend fun getParticipants( studyId: UUID ) : List<Account> =
         withContext( Dispatchers.IO + SecurityCoroutineContext() )
@@ -198,12 +183,6 @@ class RecruitmentServiceImpl(
                 ) as ParticipantGroupStatus.InDeployment
 
                 val deploymentId = groupStatus.studyDeploymentStatus.studyDeploymentId
-
-                // grant the researchers the necessary claims to manage the deployment
-                authorizationService.grantEveryoneWithExistingClaim(
-                    Claim.ManageStudy( studyId ),
-                    Claim.ManageDeployment( deploymentId )
-                )
 
                 participants.add(
                     AnonymousParticipant(

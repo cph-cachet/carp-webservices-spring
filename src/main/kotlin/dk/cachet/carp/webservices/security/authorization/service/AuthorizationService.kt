@@ -4,7 +4,8 @@ import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.webservices.security.authorization.Claim
 import dk.cachet.carp.webservices.security.authorization.Role
 
-interface AuthorizationService {
+interface AuthorizationService
+{
     /**
      * Require the current authentication to have the specified [claim].
      *
@@ -42,9 +43,4 @@ interface AuthorizationService {
      * Grant the current authentication all specified [claims].
      */
     suspend fun grantCurrentAuthentication( claims: Set<Claim> )
-
-    /**
-     * Grant every identity with [existingClaim] the specified [newClaim].
-     */
-    suspend fun grantEveryoneWithExistingClaim( existingClaim: Claim, newClaim: Claim )
 }

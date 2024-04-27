@@ -56,13 +56,6 @@ class AuthorizationServiceImpl(
         accountService.grant( authenticationService.getCarpIdentity(), claims )
     }
 
-    override suspend fun grantEveryoneWithExistingClaim( existingClaim: Claim, newClaim: Claim )
-    {
-        accountService.findAllByClaim( existingClaim ).forEach {
-            accountService.grant( it.getIdentity(), setOf( newClaim ) )
-        }
-    }
-
     private fun isAdmin() = authenticationService.getRole() == Role.SYSTEM_ADMIN
 
     @OptIn( ExperimentalContracts::class )

@@ -961,7 +961,7 @@
             "id.token.claim": "true",
             "access.token.claim": "true",
             "claim.name": "collection_owner",
-            "jsonType.label": "int"
+            "jsonType.label": "String"
           }
         },
         {
@@ -977,7 +977,7 @@
             "id.token.claim": "true",
             "access.token.claim": "true",
             "claim.name": "consent_owner",
-            "jsonType.label": "int"
+            "jsonType.label": "String"
           }
         },
         {
@@ -993,7 +993,7 @@
             "id.token.claim": "true",
             "access.token.claim": "true",
             "claim.name": "file_owner",
-            "jsonType.label": "int"
+            "jsonType.label": "String"
           }
         }
       ]
