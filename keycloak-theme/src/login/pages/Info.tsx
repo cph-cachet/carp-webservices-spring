@@ -1,8 +1,9 @@
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import type { PageProps } from "keycloakify/login/pages/PageProps";
 import { assert } from "keycloakify/tools/assert";
 import type { I18n } from "../i18n";
 import type { KcContext } from "../kcContext";
+import CarpButton from "../../components/Buttons/AuthActionButton/styles";
 
 export default function Info(
   props: PageProps<Extract<KcContext, { pageId: "info.ftl" }>, I18n>,
@@ -41,7 +42,6 @@ export default function Info(
       <div id="kc-info-message">
         <Typography variant="body1" className="instruction">
           {message.summary}{" "}
-
           {requiredActions !== undefined && (
             <b>
               {requiredActions
@@ -54,18 +54,18 @@ export default function Info(
         </Typography>
         <Box display="flex" justifyContent="center" mt={4}>
           {!skipLink && pageRedirectUri !== undefined ? (
-            <Button href={pageRedirectUri} variant="contained">
+            <CarpButton href={pageRedirectUri} variant="contained">
               {msgStr("backToApplication")}
-            </Button>
+            </CarpButton>
           ) : actionUri !== undefined ? (
-            <Button href={actionUri} variant="contained">
+            <CarpButton href={actionUri} variant="contained">
               {msgStr("proceedWithAction")}
-            </Button>
+            </CarpButton>
           ) : (
             client.baseUrl !== undefined && (
-              <Button href={client.baseUrl} variant="contained">
-              {msgStr("backToApplication")}
-              </Button>
+              <CarpButton href={client.baseUrl} variant="contained">
+                {msgStr("backToApplication")}
+              </CarpButton>
             )
           )}
         </Box>
