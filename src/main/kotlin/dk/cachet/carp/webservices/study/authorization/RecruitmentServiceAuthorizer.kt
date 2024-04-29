@@ -24,7 +24,7 @@ class RecruitmentServiceAuthorizer(
             is RecruitmentServiceRequest.StopParticipantGroup -> auth.require( Claim.ManageStudy( studyId ) )
         }
 
-    override suspend fun RecruitmentServiceRequest<*>.grantClaimsOnSuccess( result: Any? ) =
+    override suspend fun RecruitmentServiceRequest<*>.changeClaimsOnSuccess(result: Any? ) =
         when ( this )
         {
             is RecruitmentServiceRequest.AddParticipantByEmailAddress,

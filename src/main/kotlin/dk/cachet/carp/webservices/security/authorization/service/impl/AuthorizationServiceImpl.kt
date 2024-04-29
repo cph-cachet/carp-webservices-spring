@@ -49,11 +49,23 @@ class AuthorizationServiceImpl(
         require( authenticationService.getId() == ownerId, lazyMessage )
     }
 
-    override suspend fun grantCurrentAuthentication( claim: Claim ) = grantCurrentAuthentication( setOf( claim ) )
+    override suspend fun grantCurrentAuthentication( claim: Claim ) =
+        grantCurrentAuthentication( setOf( claim ) )
 
     override suspend fun grantCurrentAuthentication( claims: Set<Claim> )
     {
         accountService.grant( authenticationService.getCarpIdentity(), claims )
+    }
+
+    override suspend fun revokeClaimFromAllAccounts( claim: Claim ) = revokeClaimsFromAllAccounts( setOf( claim ) )
+
+    override suspend fun revokeClaimsFromAllAccounts( claims: Set<Claim> )
+    {
+        claims.forEach { claim ->
+            accountService.findAllByClaim( claim ).forEach {
+                accountService.revoke( it.getIdentity(), claims )
+            }
+        }
     }
 
     private fun isAdmin() = authenticationService.getRole() == Role.SYSTEM_ADMIN

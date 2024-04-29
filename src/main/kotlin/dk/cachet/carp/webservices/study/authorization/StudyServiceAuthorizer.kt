@@ -34,7 +34,7 @@ class StudyServiceAuthorizer(
             is StudyServiceRequest.Remove -> auth.require( Claim.ManageStudy( studyId ) )
         }
 
-    override suspend fun StudyServiceRequest<*>.grantClaimsOnSuccess( result: Any? ) =
+    override suspend fun StudyServiceRequest<*>.changeClaimsOnSuccess(result: Any? ) =
         when ( this )
         {
             is StudyServiceRequest.CreateStudy -> {
@@ -48,7 +48,10 @@ class StudyServiceAuthorizer(
             is StudyServiceRequest.SetInvitation,
             is StudyServiceRequest.SetProtocol,
             is StudyServiceRequest.RemoveProtocol,
-            is StudyServiceRequest.GoLive,
-            is StudyServiceRequest.Remove -> Unit
+            is StudyServiceRequest.GoLive -> Unit
+            is StudyServiceRequest.Remove -> {
+                auth.revokeClaimFromAllAccounts( Claim.ManageStudy( studyId ) )
+            }
+
         }
 }

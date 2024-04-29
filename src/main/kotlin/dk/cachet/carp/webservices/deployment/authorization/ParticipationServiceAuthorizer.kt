@@ -25,7 +25,7 @@ class ParticipationServiceAuthorizer(
         }
     }
 
-    override suspend fun ParticipationServiceRequest<*>.grantClaimsOnSuccess(result: Any?) {
+    override suspend fun ParticipationServiceRequest<*>.changeClaimsOnSuccess(result: Any?) {
         when ( this )
         {
             is ParticipationServiceRequest.GetActiveParticipationInvitations,

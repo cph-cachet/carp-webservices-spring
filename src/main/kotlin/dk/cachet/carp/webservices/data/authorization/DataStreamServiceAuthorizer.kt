@@ -26,7 +26,7 @@ class DataStreamServiceAuthorizer(
                 auth.require( studyDeploymentIds.map { Claim.ManageDeployment( it ) }.toSet() )
         }
 
-    override suspend fun DataStreamServiceRequest<*>.grantClaimsOnSuccess( result: Any? ) =
+    override suspend fun DataStreamServiceRequest<*>.changeClaimsOnSuccess(result: Any? ) =
         when ( this ) {
             is DataStreamServiceRequest.OpenDataStreams,
             is DataStreamServiceRequest.AppendToDataStreams,
