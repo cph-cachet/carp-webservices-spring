@@ -6,6 +6,7 @@ import dk.cachet.carp.webservices.common.services.CoreServiceContainer
 import dk.cachet.carp.webservices.security.authorization.Claim
 import dk.cachet.carp.webservices.security.config.SecurityCoroutineContext
 import dk.cachet.carp.webservices.study.domain.StudyOverview
+import dk.cachet.carp.webservices.study.repository.CoreStudyRepository
 import dk.cachet.carp.webservices.study.service.StudyService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service
 @Service
 class StudyServiceImpl(
     private val accountService: AccountService,
+    private val repository: CoreStudyRepository,
     services: CoreServiceContainer
 ) : StudyService
 {
@@ -27,8 +29,9 @@ class StudyServiceImpl(
 
             val studyStatuses = account.carpClaims
                 ?.filterIsInstance<Claim.ManageStudy>()
-                ?.mapNotNull {
-                    runCatching { core.getStudyStatus( it.studyId ) }.getOrNull()
+                ?.map { it.studyId }
+                ?.let {
+                    repository.findAllByStudyIds( it ).map { study -> study.getStatus() }
                 } ?: emptyList()
 
             studyStatuses.map {

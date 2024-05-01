@@ -19,6 +19,10 @@ interface StudyRepository: JpaRepository<Study, Int>
             value = "SELECT * FROM studies WHERE snapshot->>'ownerId' = ?1")
     fun findAllByOwnerId(ownerId: String): List<Study>
 
+    @Query(nativeQuery = true,
+            value = "SELECT * FROM studies WHERE snapshot->>'id' IN ?1")
+    fun findAllByStudyIds( studyIds: List<String> ): List<Study>
+
     @Modifying
     @Transactional
     @Query(nativeQuery = true,
