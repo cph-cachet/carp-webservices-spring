@@ -9,7 +9,6 @@ import dk.cachet.carp.protocols.domain.*
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.protocol.domain.Protocol
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
 import org.apache.logging.log4j.LogManager
@@ -42,7 +41,7 @@ class CoreProtocolRepository(
     override suspend fun add(protocol: StudyProtocol, version: ProtocolVersion) =
         withContext( Dispatchers.IO )
         {
-            val protocolById = protocolRepository.findByIdParam(protocol.id.stringRepresentation)
+            val protocolById = protocolRepository.findAllById(protocol.id.stringRepresentation)
 
             check( protocolById.isEmpty() )
             {
@@ -164,7 +163,7 @@ class CoreProtocolRepository(
      *   - the tag specified in [version] is already in use
      */
     override suspend fun addVersion(protocol: StudyProtocol, version: ProtocolVersion) = withContext( Dispatchers.IO ) {
-        val protocolsStoredWithGivenParams = protocolRepository.findByIdParam(protocol.id.stringRepresentation)
+        val protocolsStoredWithGivenParams = protocolRepository.findAllById(protocol.id.stringRepresentation)
 
         if (protocolsStoredWithGivenParams.isEmpty())
         {
@@ -220,4 +219,5 @@ class CoreProtocolRepository(
 
         return wsProtocol
     }
+
 }
