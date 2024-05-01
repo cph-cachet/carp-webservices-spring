@@ -103,14 +103,7 @@ class CoreAccountService(
             getRedirectUrl(deployment.protocol)
         )
 
-        // grant the account the necessary claims for the deployment
-        accountService.grant(
-            accountIdentity,
-            setOf(
-                Claim.ManageDeployment( deployment.id ),
-                Claim.InDeployment( deployment.id )
-            )
-        )
+        accountService.grant( accountIdentity, setOf( Claim.InDeployment( deployment.id ) ) )
 
         return account
     }

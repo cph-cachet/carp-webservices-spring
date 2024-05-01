@@ -4,13 +4,16 @@ import dk.cachet.carp.deployments.application.DeploymentService
 import dk.cachet.carp.deployments.application.StudyDeploymentStatus
 import dk.cachet.carp.deployments.infrastructure.DeploymentServiceRequest
 import dk.cachet.carp.webservices.common.authorization.ApplicationServiceAuthorizer
+import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
 import dk.cachet.carp.webservices.security.authorization.Claim
+import dk.cachet.carp.webservices.security.authorization.Role
 import dk.cachet.carp.webservices.security.authorization.service.AuthorizationService
 import org.springframework.stereotype.Service
 
 @Service
 class DeploymentServiceAuthorizer(
-    private val auth: AuthorizationService
+    private val authorizationService: AuthorizationService,
+    private val authenticationService: AuthenticationService
 ) : ApplicationServiceAuthorizer<DeploymentService, DeploymentServiceRequest<*>>
 {
     override fun DeploymentServiceRequest<*>.authorize() =
@@ -20,43 +23,41 @@ class DeploymentServiceAuthorizer(
             // we shouldn't restrict study deployment creation to researchers only
             is DeploymentServiceRequest.CreateStudyDeployment -> Unit
             is DeploymentServiceRequest.RemoveStudyDeployments ->
-                auth.require( studyDeploymentIds.map { Claim.ManageDeployment( it ) }.toSet() )
+                authorizationService.require( studyDeploymentIds.map { Claim.ManageDeployment( it ) }.toSet() )
             is DeploymentServiceRequest.GetStudyDeploymentStatus ->
-                auth.require( Claim.InDeployment( studyDeploymentId ) )
+                authorizationService.require( Claim.InDeployment( studyDeploymentId ) )
             is DeploymentServiceRequest.GetStudyDeploymentStatusList ->
-                auth.require( studyDeploymentIds.map { Claim.InDeployment( it ) }.toSet() )
+                authorizationService.require( studyDeploymentIds.map { Claim.InDeployment( it ) }.toSet() )
             is DeploymentServiceRequest.RegisterDevice ->
-                auth.require( Claim.InDeployment( studyDeploymentId ) )
+                authorizationService.require( Claim.InDeployment( studyDeploymentId ) )
             is DeploymentServiceRequest.UnregisterDevice ->
-                auth.require( Claim.InDeployment( studyDeploymentId ) )
+                authorizationService.require( Claim.InDeployment( studyDeploymentId ) )
             is DeploymentServiceRequest.GetDeviceDeploymentFor ->
-                auth.require( Claim.InDeployment( studyDeploymentId ) )
+                authorizationService.require( Claim.InDeployment( studyDeploymentId ) )
             is DeploymentServiceRequest.DeviceDeployed ->
-                auth.require( Claim.InDeployment( studyDeploymentId ) )
+                authorizationService.require( Claim.InDeployment( studyDeploymentId ) )
             is DeploymentServiceRequest.Stop ->
-                auth.require( Claim.InDeployment( studyDeploymentId ) )
+                authorizationService.require( Claim.InDeployment( studyDeploymentId ) )
         }
 
-    override suspend fun DeploymentServiceRequest<*>.changeClaimsOnSuccess(result: Any? ) =
+    override suspend fun DeploymentServiceRequest<*>.changeClaimsOnSuccess( result: Any? ) =
         when ( this )
         {
             is DeploymentServiceRequest.CreateStudyDeployment -> {
                 require( result is StudyDeploymentStatus )
 
-                auth.grantCurrentAuthentication(
-                    setOf(
-                        Claim.ManageDeployment( result.studyDeploymentId ),
-                        Claim.InDeployment( result.studyDeploymentId )
+                if ( authenticationService.getRole() == Role.PARTICIPANT )
+                {
+                    authorizationService.grantCurrentAuthentication(
+                        setOf( Claim.InDeployment( result.studyDeploymentId ) )
                     )
-                )
+                }
+                else Unit
             }
             is DeploymentServiceRequest.RemoveStudyDeployments -> {
                 studyDeploymentIds.forEach {
-                    auth.revokeClaimsFromAllAccounts(
-                        setOf(
-                            Claim.InDeployment( it ),
-                            Claim.ManageDeployment( it )
-                        )
+                    authorizationService.revokeClaimsFromAllAccounts(
+                        setOf( Claim.InDeployment( it ) )
                     )
                 }
             }

@@ -14,9 +14,11 @@ import kotlin.reflect.full.primaryConstructor
  * - User Attribute: "someName"
  * - Token Claim: "some_name"
  */
-sealed class Claim( open val value: Any )
+sealed class Claim
 {
-    companion object
+    abstract val value: Any
+
+    companion object Factory
     {
         fun fromUserAttribute( pair: Pair<String, Any> ): List<Claim>?
         {
@@ -57,17 +59,45 @@ sealed class Claim( open val value: Any )
     }
 
 
-    data class ManageDeployment( val deploymentId: UUID ) : Claim( deploymentId.toString() )
+    data class ManageStudy( val studyId: UUID ) : Claim()
+    {
+        override val value = studyId.toString()
+    }
 
-    data class ManageStudy( val studyId: UUID ) : Claim( studyId.toString() )
+    data class ProtocolOwner( val protocolId: UUID ) : Claim()
+    {
+        override val value = protocolId.toString()
+    }
 
-    data class ProtocolOwner( val protocolId: UUID ) : Claim( protocolId.toString() )
+    data class InDeployment( val deploymentId: UUID ) : Claim()
+    {
+        override val value = deploymentId.toString()
+    }
 
-    data class InDeployment( val deploymentId: UUID ) : Claim( deploymentId.toString() )
+    data class ConsentOwner( val consentId: Int ) : Claim()
+    {
+        override val value = consentId.toString()
+    }
 
-    data class ConsentOwner( val consentId: Int ) : Claim( consentId.toString() )
+    data class CollectionOwner( val collectionId: Int ) : Claim()
+    {
+        override val value = collectionId.toString()
+    }
 
-    data class CollectionOwner( val collectionId: Int ) : Claim( collectionId.toString() )
+    data class FileOwner( val fileId: Int ) : Claim()
+    {
+        override val value = fileId.toString()
+    }
 
-    data class FileOwner( val fileId: Int ) : Claim( fileId.toString() )
+    /**
+     * A virtual claim is a claim which is not directly present as a user attribute,
+     * but can be derived from other claims.
+     */
+    sealed class VirtualClaim : Claim()
+    {
+        override val value get() =
+            throw UnsupportedOperationException( "The value of virtual claims cannot be requested." )
+    }
+
+    data class ManageDeployment( val deploymentId: UUID ) : VirtualClaim()
 }

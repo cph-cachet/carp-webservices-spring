@@ -4,12 +4,9 @@ import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.protocols.infrastructure.ProtocolFactoryServiceRequest
 import dk.cachet.carp.protocols.infrastructure.ProtocolServiceRequest
 import dk.cachet.carp.webservices.common.constants.PathVariableName
+import dk.cachet.carp.webservices.common.services.CoreServiceContainer
 import dk.cachet.carp.webservices.protocol.dto.GetLatestProtocolResponseDto
-import dk.cachet.carp.webservices.protocol.repository.CoreProtocolRepository
-import dk.cachet.carp.webservices.protocol.service.ProtocolFactoryService
 import dk.cachet.carp.webservices.protocol.service.ProtocolService
-import dk.cachet.carp.webservices.protocol.service.core.CoreProtocolFactoryService
-import dk.cachet.carp.webservices.protocol.service.core.CoreProtocolService
 import io.swagger.v3.oas.annotations.Operation
 import kotlinx.coroutines.runBlocking
 import org.apache.logging.log4j.LogManager
@@ -21,8 +18,8 @@ import org.springframework.web.bind.annotation.*
 @RestController
 class ProtocolController
 (
+    private val services: CoreServiceContainer,
     private val protocolService: ProtocolService,
-    private val protocolFactoryService: ProtocolFactoryService
 )
 {
     companion object
@@ -48,7 +45,7 @@ class ProtocolController
     suspend fun protocolFactory(@RequestBody request: ProtocolFactoryServiceRequest<*>): ResponseEntity<Any>
     {
         LOGGER.info("Start POST: $PROTOCOL_FACTORY_SERVICE -> ${ request::class.simpleName }")
-        return protocolFactoryService.core.invoke( request ).let { ResponseEntity.ok( it ) }
+        return services.protocolFactoryService.invoke( request ).let { ResponseEntity.ok( it ) }
     }
 
     @GetMapping(value = [GET_LATEST_PROTOCOL])

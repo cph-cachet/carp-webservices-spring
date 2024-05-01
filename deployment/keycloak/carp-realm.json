@@ -886,22 +886,6 @@
       },
       "protocolMappers": [
         {
-          "id": "ec074f85-abef-4e16-94a0-4a1a3c8909e8",
-          "name": "Manage Deployment",
-          "protocol": "openid-connect",
-          "protocolMapper": "oidc-usermodel-attribute-mapper",
-          "consentRequired": false,
-          "config": {
-            "userinfo.token.claim": "true",
-            "multivalued": "true",
-            "user.attribute": "manageDeployment",
-            "id.token.claim": "true",
-            "access.token.claim": "true",
-            "claim.name": "manage_deployment",
-            "jsonType.label": "String"
-          }
-        },
-        {
           "id": "ca9653d1-926a-4652-b9b2-12597b356aab",
           "name": "Protocol Owner",
           "protocol": "openid-connect",

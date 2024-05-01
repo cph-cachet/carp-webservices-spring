@@ -142,7 +142,8 @@ class StudyController(
     suspend fun addParticipants(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @Valid @RequestBody request: AddParticipantsRequestDto
-    ) {
+    )
+    {
         LOGGER.info("Start POST: /api/studies/$studyId/participants/add")
         request.emails.forEach { e -> recruitmentService.core.addParticipant( studyId, EmailAddress(e) ) }
     }
@@ -152,7 +153,8 @@ class StudyController(
     suspend fun generateAnonymousParticipants(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @Valid @RequestBody request: AnonymousLinkRequest
-    ): ResponseEntity<ByteArray> {
+    ): ResponseEntity<ByteArray>
+    {
         LOGGER.info("Start POST: /api/studies/$studyId/generate")
 
         val anonymousParticipants = recruitmentService.addAnonymousParticipants(
@@ -165,7 +167,10 @@ class StudyController(
 
         val responseHeaders = HttpHeaders()
         responseHeaders.set(HttpHeaders.CONTENT_TYPE, "text/csv")
-        responseHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=${Clock.System.now()}_${studyId}.csv")
+        responseHeaders.set(
+            HttpHeaders.CONTENT_DISPOSITION,
+            "attachment; filename=${Clock.System.now()}_generated_accounts.csv"
+        )
 
         val header = "account_id,study_deployment_id,access_link,expiry_date\n"
         val body = anonymousParticipants.joinToString("") { participant ->

@@ -7,11 +7,11 @@ import dk.cachet.carp.deployments.application.users.ParticipantData
 import dk.cachet.carp.deployments.domain.StudyDeploymentSnapshot
 import dk.cachet.carp.webservices.collection.service.CollectionService
 import dk.cachet.carp.webservices.common.exception.file.FileStorageException
+import dk.cachet.carp.webservices.common.services.CoreServiceContainer
 import dk.cachet.carp.webservices.consent.service.ConsentDocumentService
 import dk.cachet.carp.webservices.data.repository.DataStreamSequenceRepository
 import dk.cachet.carp.webservices.dataPoint.service.DataPointService
 import dk.cachet.carp.webservices.deployment.repository.StudyDeploymentRepository
-import dk.cachet.carp.webservices.deployment.service.core.CoreParticipationService
 import dk.cachet.carp.webservices.document.domain.Document
 import dk.cachet.carp.webservices.document.service.DocumentService
 import dk.cachet.carp.webservices.file.domain.File
@@ -33,10 +33,10 @@ import java.nio.file.Path
 @Service
 class ResourceExporterServiceImpl
 (
+    private val services: CoreServiceContainer,
     private val objectMapper: ObjectMapper,
     private val studyRepository: CoreStudyRepository,
     private val studyDeploymentRepository: StudyDeploymentRepository,
-    coreParticipationService: CoreParticipationService,
     private val dataPointService: DataPointService,
     private val consentDocumentService: ConsentDocumentService,
     private val fileService: FileService,
@@ -51,8 +51,6 @@ class ResourceExporterServiceImpl
     {
         private val LOGGER: Logger = LogManager.getLogger()
     }
-
-    private val deploymentParticipationService: ParticipationService = coreParticipationService.instance
 
     /**
      * Exports every application resource serialized into the specified [rootFolder].
@@ -122,7 +120,7 @@ class ResourceExporterServiceImpl
     override fun exportParticipantData(deploymentIds: List<String>, rootFolder: Path, summaryLog: SummaryLog) = runBlocking {
         val participantDataList = mutableListOf<ParticipantData>()
         deploymentIds.forEach {
-            val data = deploymentParticipationService.getParticipantData(UUID(it))
+            val data = services.participationService.getParticipantData(UUID(it))
             participantDataList.add(data)
         }
         if (participantDataList.isEmpty())

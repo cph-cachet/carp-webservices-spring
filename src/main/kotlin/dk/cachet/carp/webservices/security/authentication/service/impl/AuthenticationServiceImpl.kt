@@ -9,10 +9,14 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.stereotype.Service
 import dk.cachet.carp.webservices.security.config.SecurityCoroutineContext
+import dk.cachet.carp.webservices.study.repository.CoreParticipantRepository
+import kotlinx.coroutines.runBlocking
 
 
 @Service
-class AuthenticationServiceImpl : AuthenticationService
+class AuthenticationServiceImpl(
+    private val participantRepository: CoreParticipantRepository
+) : AuthenticationService
 {
     override fun getId(): UUID = UUID( getJwtAuthenticationToken().token.subject )
 
@@ -26,7 +30,24 @@ class AuthenticationServiceImpl : AuthenticationService
     }
 
     override fun getClaims(): Collection<Claim> =
-        getJwtAuthenticationToken().authorities.mapNotNull { Claim.fromGrantedAuthority( it.authority ) }
+        getJwtAuthenticationToken().authorities
+            .mapNotNull { Claim.fromGrantedAuthority(it.authority) }
+            .flatMap { claim ->
+                // if the study has `Claim.ManageStudy`,
+                // also add `Claim.ManageDeployment` for all deployments in the study
+                when ( claim ) {
+                    is Claim.ManageStudy -> {
+                        runBlocking {
+                            participantRepository.getRecruitment( claim.studyId )
+                                ?.participantGroups?.keys
+                                ?.map { deploymentId -> Claim.ManageDeployment( deploymentId ) }
+                                ?.plus( claim )
+                                ?: listOf( claim )
+                        }
+                    }
+                    else -> setOf( claim )
+                }
+            }
 
     override fun getCarpIdentity(): AccountIdentity
     {

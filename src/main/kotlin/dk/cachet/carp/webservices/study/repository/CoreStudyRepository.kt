@@ -125,6 +125,10 @@ class CoreStudyRepository
         LOGGER.info("Study updated, id: ${study.id.stringRepresentation}")
     }
 
+    fun findAllByStudyIds( studyIds: List<UUID> ): List<Study> =
+        studyRepository.findAllByStudyIds( studyIds.map { it.stringRepresentation } )
+            .map { convertStudySnapshotNodeToStudy(it.snapshot!!) }
+            .toList()
 
     suspend fun getWSStudyById( id: UUID ): dk.cachet.carp.webservices.study.domain.Study =
         withContext( Dispatchers.IO )
@@ -152,7 +156,7 @@ class CoreStudyRepository
         return objectMapper.treeToValue(study.snapshot, StudySnapshot::class.java)
     }
 
-    suspend fun convertStudySnapshotNodeToStudy(node: JsonNode): Study
+    fun convertStudySnapshotNodeToStudy(node: JsonNode): Study
     {
         val snapshot = objectMapper.treeToValue(node, StudySnapshot::class.java)
         return Study.fromSnapshot(snapshot)

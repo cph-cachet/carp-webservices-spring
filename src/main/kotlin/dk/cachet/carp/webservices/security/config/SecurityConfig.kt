@@ -3,6 +3,7 @@ package dk.cachet.carp.webservices.security.config
 import com.c4_soft.springaddons.security.oidc.spring.SpringAddonsMethodSecurityExpressionHandler
 import com.c4_soft.springaddons.security.oidc.spring.SpringAddonsMethodSecurityExpressionRoot
 import dk.cachet.carp.common.application.UUID
+import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
 import dk.cachet.carp.webservices.security.authorization.Claim
 import dk.cachet.carp.webservices.security.authorization.Role
 import dk.cachet.carp.webservices.study.repository.CoreParticipantRepository
@@ -28,10 +29,11 @@ class SecurityConfig
 {
     @Bean
     fun methodSecurityExpressionHandler(
-        participantRepository: CoreParticipantRepository
+        participantRepository: CoreParticipantRepository,
+        authenticationService: AuthenticationService
     ): MethodSecurityExpressionHandler =
         SpringAddonsMethodSecurityExpressionHandler {
-            ProxiesMethodSecurityExpressionRoot( participantRepository )
+            ProxiesMethodSecurityExpressionRoot( participantRepository, authenticationService )
         }
 
     @PostConstruct
@@ -45,29 +47,30 @@ class SecurityConfig
  * These methods can be used in SpeL-expressions (e.g., `@PreAuthorize`) in Spring Security annotations.
  */
 class ProxiesMethodSecurityExpressionRoot(
-    private val participantRepository: CoreParticipantRepository
+    private val participantRepository: CoreParticipantRepository,
+    private val auth: AuthenticationService
 ): SpringAddonsMethodSecurityExpressionRoot()
 {
     fun canManageStudy( studyId: UUID? ) : Boolean =
-        studyId != null && getCarpClaims().contains( Claim.ManageStudy( studyId ) ) || isAdmin()
+        studyId != null && auth.getClaims().contains( Claim.ManageStudy( studyId ) ) || isAdmin()
 
     fun isProtocolOwner( protocolId: UUID? ) : Boolean =
-        protocolId != null && getCarpClaims().contains( Claim.ProtocolOwner( protocolId ) ) || isAdmin()
+        protocolId != null && auth.getClaims().contains( Claim.ProtocolOwner( protocolId ) ) || isAdmin()
 
     fun isInDeployment( deploymentId: UUID? ) : Boolean =
-        deploymentId != null && getCarpClaims().contains( Claim.InDeployment( deploymentId ) ) || isAdmin()
+        deploymentId != null && auth.getClaims().contains( Claim.InDeployment( deploymentId ) ) || isAdmin()
 
     fun canManageDeployment( deploymentId: UUID? ) : Boolean =
-        deploymentId != null && getCarpClaims().contains( Claim.ManageDeployment( deploymentId ) ) || isAdmin()
+        deploymentId != null && auth.getClaims().contains( Claim.ManageDeployment( deploymentId ) ) || isAdmin()
 
     fun isConsentOwner( consentId: Int? ) : Boolean =
-        consentId != null && getCarpClaims().contains( Claim.ConsentOwner( consentId ) ) || isAdmin()
+        consentId != null && auth.getClaims().contains( Claim.ConsentOwner( consentId ) ) || isAdmin()
 
     fun isCollectionOwner( collectionId: Int? ) : Boolean =
-        collectionId != null && getCarpClaims().contains( Claim.CollectionOwner( collectionId ) ) || isAdmin()
+        collectionId != null && auth.getClaims().contains( Claim.CollectionOwner( collectionId ) ) || isAdmin()
 
     fun isFileOwner( fileId: Int? ) : Boolean =
-        fileId != null && getCarpClaims().contains( Claim.FileOwner( fileId ) ) || isAdmin()
+        fileId != null && auth.getClaims().contains( Claim.FileOwner( fileId ) ) || isAdmin()
 
     // HACK: it is not easy to assign a claim with a studyId when creating deployments,
     // so we inject `CoreParticipantRepository` here to check whether the user is in a deployment
@@ -82,17 +85,11 @@ class ProxiesMethodSecurityExpressionRoot(
             val id =
                 participantRepository.getRecruitment( studyId )?.participantGroups?.keys
                     ?.firstOrNull {
-                        getCarpClaims().contains(
-                            Claim.InDeployment( it )
-                        )
+                        auth.getClaims().contains( Claim.InDeployment( it ))
                     }
 
             id != null
         }
-
-    // TODO: There is probably a way to set up automatic conversion for JWTs in Spring Security
-    private fun getCarpClaims(): Collection<Claim> =
-        authentication.authorities.mapNotNull { Claim.fromGrantedAuthority( it.authority ) }
 
     private fun isAdmin() : Boolean = hasRole( Role.SYSTEM_ADMIN.toString() )
 }
