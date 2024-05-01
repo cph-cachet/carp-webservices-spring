@@ -72,8 +72,7 @@ class ProtocolServiceTest
                 every { ownerId } returns id
             }
             val account = mockk<Account> {
-                every { firstName } returns "John"
-                every { lastName } returns "Doe"
+                every { fullName } returns "John Doe"
             }
 
             every { protocolRepository.findAllByIdSortByCreatedAt( "id" ) } returns versions

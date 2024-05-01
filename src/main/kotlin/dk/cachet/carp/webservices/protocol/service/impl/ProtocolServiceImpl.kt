@@ -59,10 +59,9 @@ class ProtocolServiceImpl(
         val snapshot = objectMapper.treeToValue( versions.last().snapshot, StudyProtocolSnapshot::class.java )
 
         val owner = account ?: accountService.findByUUID( snapshot.ownerId )
-        val ownerName = owner?.let { "${it.firstName} ${it.lastName}" }
 
         return ProtocolOverview(
-            ownerName,
+            owner?.fullName,
             versions.first().createdAt,
             versions.last().createdAt,
             versions.last().versionTag,
