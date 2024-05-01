@@ -15,6 +15,8 @@ data class Account(
     var role: Role? = null,
     var carpClaims: Set<Claim>? = emptySet(),
 ) {
+    val fullName: String? get() = "$firstName $lastName".takeIf { it.isNotBlank() }
+
     companion object Factory {
         fun fromAccountIdentity(identity: AccountIdentity): Account = when (identity) {
             is EmailAccountIdentity -> {

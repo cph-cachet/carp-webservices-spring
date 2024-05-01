@@ -27,26 +27,27 @@ class StudyServiceImpl(
             val account = accountService.findByUUID( accountId ) ?:
                 throw IllegalArgumentException("Account with id $accountId is not found.")
 
-            val studyStatuses = account.carpClaims
+            account.carpClaims
                 ?.filterIsInstance<Claim.ManageStudy>()
                 ?.map { it.studyId }
-                ?.let {
-                    repository.findAllByStudyIds( it ).map { study -> study.getStatus() }
-                } ?: emptyList()
+                ?.let { repository.findAllByStudyIds( it ) }
+                ?.map {
+                    val status = it.getStatus()
+                    val details = core.getStudyDetails( it.getStatus().studyId )
+                    val owner = accountService.findByUUID( details.ownerId )
 
-            studyStatuses.map {
-                val details = core.getStudyDetails( it.studyId )
-
-                StudyOverview(
-                    it.studyId,
-                    it.name,
-                    it.createdOn,
-                    it.studyProtocolId,
-                    it.canSetInvitation,
-                    it.canSetStudyProtocol,
-                    it.canDeployToParticipants,
-                    details.description
-                )
-            }
+                    StudyOverview(
+                        status.studyId,
+                        it.name,
+                        it.createdOn,
+                        status.studyProtocolId,
+                        it.canSetInvitation,
+                        it.canSetStudyProtocol,
+                        it.canDeployToParticipants,
+                        details.description,
+                        owner?.fullName
+                    )
+                }
+                ?: emptyList()
         }
 }
