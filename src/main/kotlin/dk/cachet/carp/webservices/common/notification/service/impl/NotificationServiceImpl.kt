@@ -1,8 +1,5 @@
 package dk.cachet.carp.webservices.common.notification.service.impl
 
-import com.github.seratch.jslack.Slack
-import com.github.seratch.jslack.api.webhook.Payload
-import com.github.seratch.jslack.api.webhook.WebhookResponse
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.environment.EnvironmentProfile
 import dk.cachet.carp.webservices.common.environment.EnvironmentUtil
@@ -14,11 +11,15 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.BodyInserters
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import java.io.IOException
+import java.net.ConnectException
 
 /**
  * The Class [NotificationServiceImpl].
- * The [NotificationServiceImpl] enables exception notifications [CarpErrorResponse] in slack channel.
+ * The [NotificationServiceImpl] enables exception notifications [CarpErrorResponse] in Slack channel.
  */
 @Service
 class NotificationServiceImpl
@@ -28,23 +29,25 @@ class NotificationServiceImpl
     @Value("\${slack.channel.name}") private val slackChannel: String,
     @Value("\${slack.channel.server}") private val slackServerChannel: String,
     @Value("\${slack.channel.heartbeat}") private val slackHeartbeatChannel: String,
-    @Value("\${slack.webhook}") private val slackWebHook: String
+    @Value("\${slack.webhook}") private val slackWebHook: String,
+    @Value("\${teams.webhook}") private val teamsWebHook: String
 ): INotificationService
 {
     companion object
     {
         private val LOGGER: Logger = LogManager.getLogger()
-        private const val NEW_LINE = "\n"
+        private const val NEW_LINE = "\n\n"
     }
 
     /**
      * The [sendExceptionNotificationToSlack] function sends a notification message with the given message.
      * @param notification The [notification] containing the message to send.
-     * @param channelToSendTo The value of the slack channel the message needs to be sent to.
+     * @param channelToSendTo The value of the Slack channel the message needs to be sent to.
      */
     override fun sendRandomOrAlertNotificationToSlack(notification: String, channelToSendTo: SlackChannel)
     {
         val messageBuilder = StringBuilder()
+        messageBuilder.append(NEW_LINE)
         messageBuilder.append(notification)
         messageBuilder.append(NEW_LINE)
         messageBuilder.append(NEW_LINE)
@@ -66,6 +69,8 @@ class NotificationServiceImpl
         if(environment.profile == EnvironmentProfile.PRODUCTION)
         {
             val messageBuilder = StringBuilder()
+            messageBuilder.append("----- **Notification** ----- ")
+            messageBuilder.append(NEW_LINE)
             messageBuilder.append("Exception Code: ${errorResponse.statusCode}")
             messageBuilder.append(NEW_LINE)
             messageBuilder.append("Exception: ${errorResponse.exception}")
@@ -89,24 +94,42 @@ class NotificationServiceImpl
     }
 
     /**
-     * The [processException] function processes the exception and sends the message to the slack channel.
-     * @param message The message to send on slack channel.
+     * The [processException] function processes the exception and sends the message to the Slack channel.
+     * @param message The message to send on Slack channel.
      * @throws IOException when the webhook cannot be reached.
      */
     private fun processException(message: String, slackChannelToSend: String?)
     {
-        val payload: Payload = Payload.builder()
-                .channel(slackChannelToSend)
-                .username("CARP-Webservices")
-                .iconEmoji(":rocket:")
-                .text(message)
-                .build()
+        val payload = mapOf(
+            "text" to message,
+            "title" to "CARP-Webservices &#x1f381;",
+            "themeColor" to "0078D7")
+
         try
         {
-            val webhookResponse: WebhookResponse = Slack.getInstance().send(slackWebHook, payload)
-            LOGGER.info("Slack response code -> {}, body -> {}", webhookResponse.code, "body -> " + webhookResponse.body)
+            val webClient = WebClient.create()
+            webClient.post()
+                    .uri(teamsWebHook)
+                    .body(BodyInserters.fromValue(payload))
+                    .retrieve()
+                    .bodyToMono(String::class.java)
+                    .subscribe(
+                        { response -> LOGGER.info("Teams response -> {}", response) },
+                        { error -> LOGGER.error("Error sending message to Teams: ${error.message}") }
+                    )
+
         }
-        catch (ex: IOException)
+        catch (ex: WebClientResponseException)
+        {
+            LOGGER.error("Unexpected Error! WebHook: $ex")
+            throw BadRequestException(validationMessages.get("notification.slack.exception", ex.message.toString()))
+        }
+        catch (ex: ConnectException)
+        {
+            LOGGER.error("Connection Error! WebHook: $ex")
+            throw BadRequestException(validationMessages.get("notification.slack.exception", ex.message.toString()))
+        }
+        catch (ex: Exception)
         {
             LOGGER.error("Unexpected Error! WebHook: $ex")
             throw BadRequestException(validationMessages.get("notification.slack.exception", ex.message.toString()))

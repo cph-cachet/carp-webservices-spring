@@ -249,6 +249,9 @@ slack:
     heartbeat: '#carp-heartbeat'
   webhook: "${SLACK_WEBHOOK_URL}"
 
+teams:
+  webhook: "${TEAMS_WEBHOOK_URL}"
+
 storage:
   directory: /home/carp/storage/${spring.profiles.active}/
 

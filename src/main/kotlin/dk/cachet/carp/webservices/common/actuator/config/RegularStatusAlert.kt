@@ -28,7 +28,7 @@ class RegularStatusAlert(
     companion object
     {
         private val LOGGER: Logger = LogManager.getLogger()
-        private const val NEW_LINE = "\n"
+        private const val NEW_LINE = "\n\n"
     }
 
     @Scheduled(cron = "0 30 8,12,15,17 * * *", zone = "Europe/Copenhagen")
