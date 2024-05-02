@@ -12,7 +12,6 @@ import dk.cachet.carp.webservices.data.domain.DataStreamSnapshot
 import dk.cachet.carp.webservices.data.repository.DataStreamConfigurationRepository
 import dk.cachet.carp.webservices.data.repository.DataStreamIdRepository
 import dk.cachet.carp.webservices.data.repository.DataStreamSequenceRepository
-import dk.cachet.carp.webservices.data.service.MutableDataStreamBatch
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.stereotype.Component
@@ -25,8 +24,6 @@ class CoreDataStreamService(
     private val objectMapper: ObjectMapper,
 ) : DataStreamService
 {
-    private val dataStreams: MutableDataStreamBatch = MutableDataStreamBatch()
-
     companion object
     {
         private val LOGGER: Logger = LogManager.getLogger()
@@ -59,6 +56,8 @@ class CoreDataStreamService(
         // checks whether any of the streams wasn't configured for studyDeploymentId
         require( batch.sequences.all { it.dataStream in config.expectedDataStreamIds} )
             { "The batch contains a sequence with a data stream which wasn't configured for this study deployment." }
+
+        val dataStreams = MutableDataStreamBatch()
 
         //appending sequences to batch
        dataStreams.appendBatch(batch)
