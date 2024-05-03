@@ -242,15 +242,11 @@ logging:
     org.springframework.web: INFO
     org.springframework.security: INFO
 
-slack:
-  channel:
-    name: '#carp-notifications'
-    server: '#carp-server-errors'
-    heartbeat: '#carp-heartbeat'
-  webhook: "${SLACK_WEBHOOK_URL}"
-
 teams:
-  webhook: "${TEAMS_WEBHOOK_URL}"
+  webhook:
+    server: "${TEAMS_SERVER_WEBHOOK_URL}"
+    client: "${TEAMS_CLIENT_WEBHOOK_URL}"
+    heartbeat: "${TEAMS_HEARTBEAT_WEBHOOK_URL}"
 
 storage:
   directory: /home/carp/storage/${spring.profiles.active}/

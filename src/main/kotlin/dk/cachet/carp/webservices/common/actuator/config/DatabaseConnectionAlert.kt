@@ -2,7 +2,7 @@ package dk.cachet.carp.webservices.common.actuator.config
 
 import dk.cachet.carp.webservices.common.actuator.service.IDatabaseConnection
 import dk.cachet.carp.webservices.common.email.service.EmailInvitationService
-import dk.cachet.carp.webservices.common.notification.domain.SlackChannel
+import dk.cachet.carp.webservices.common.notification.domain.TeamsChannel
 import dk.cachet.carp.webservices.common.notification.service.INotificationService
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -43,9 +43,9 @@ class DatabaseConnectionAlert
                 "Database connection is ${database.statusHealth().code}!." +
                         " More details...: ${database.statusDetails()}"
 
-            notificationService.sendRandomOrAlertNotificationToSlack(
+            notificationService.sendAlertOrNotification(
                 databaseConnectionStatusNotification,
-                SlackChannel.HEARTBEAT
+                TeamsChannel.HEARTBEAT
             )
 
             emailNotificationService.sendNotificationEmail(

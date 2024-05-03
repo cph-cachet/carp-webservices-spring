@@ -3,7 +3,7 @@ package dk.cachet.carp.webservices.common.email.service.impl.javamail
 import dk.cachet.carp.webservices.common.email.domain.EmailSendResult
 import dk.cachet.carp.webservices.common.email.util.EmailTemplateUtil
 import dk.cachet.carp.webservices.common.exception.email.EmailException
-import dk.cachet.carp.webservices.common.notification.domain.SlackChannel
+import dk.cachet.carp.webservices.common.notification.domain.TeamsChannel
 import dk.cachet.carp.webservices.common.notification.service.INotificationService
 import jakarta.mail.MessagingException
 import jakarta.mail.internet.MimeMessage
@@ -85,32 +85,32 @@ class EmailServiceImpl(
         catch (ex: MailSendException)
         {
             LOGGER.warn("Email message not sent.", ex)
-            notificationService.sendRandomOrAlertNotificationToSlack("Email message not sent. Exception: $ex.", SlackChannel.SERVER_ERRORS)
+            notificationService.sendAlertOrNotification("Email message not sent. Exception: $ex.", TeamsChannel.SERVER_ERRORS)
             return EmailSendResult.FAILURE.status
         }
         catch (ex: SMTPSendFailedException)
         {
             LOGGER.warn("Email message not sent.", ex)
-            notificationService.sendRandomOrAlertNotificationToSlack("Email message not sent. Exception: $ex.", SlackChannel.SERVER_ERRORS)
+            notificationService.sendAlertOrNotification("Email message not sent. Exception: $ex.", TeamsChannel.SERVER_ERRORS)
             return EmailSendResult.FAILURE.status
         }
         catch (ex: MessagingException)
         {
             LOGGER.warn("Email message not sent.", ex)
-            notificationService.sendRandomOrAlertNotificationToSlack("Email message not sent. Exception: $ex.", SlackChannel.SERVER_ERRORS)
+            notificationService.sendAlertOrNotification("Email message not sent. Exception: $ex.", TeamsChannel.SERVER_ERRORS)
             return EmailSendResult.FAILURE.status
         }
         catch (ex: NullPointerException)
         {
             LOGGER.warn("No invitation email was found.", ex)
-            notificationService.sendRandomOrAlertNotificationToSlack("No invitation email was found. Exception: $ex.", SlackChannel.SERVER_ERRORS)
+            notificationService.sendAlertOrNotification("No invitation email was found. Exception: $ex.", TeamsChannel.SERVER_ERRORS)
             return EmailSendResult.FAILURE.status
         }
         catch (ex: Exception)
         {
             LOGGER.warn("Failed to send mail, mailAddress= $recipientEmailAddress", ex)
-            notificationService.sendRandomOrAlertNotificationToSlack(
-                    "Failed to send mail, mailAddress= $recipientEmailAddress. Exception: $ex.", SlackChannel.SERVER_ERRORS)
+            notificationService.sendAlertOrNotification(
+                    "Failed to send mail, mailAddress= $recipientEmailAddress. Exception: $ex.", TeamsChannel.SERVER_ERRORS)
             return EmailSendResult.FAILURE.status
         }
         return EmailSendResult.SUCCESS.status

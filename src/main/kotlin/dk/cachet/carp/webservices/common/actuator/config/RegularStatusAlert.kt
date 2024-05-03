@@ -1,7 +1,7 @@
 package dk.cachet.carp.webservices.common.actuator.config
 
 import dk.cachet.carp.webservices.common.actuator.service.*
-import dk.cachet.carp.webservices.common.notification.domain.SlackChannel
+import dk.cachet.carp.webservices.common.notification.domain.TeamsChannel
 import dk.cachet.carp.webservices.common.notification.service.INotificationService
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -58,6 +58,6 @@ class RegularStatusAlert(
         else { messageBuilder.append("Mail-Server-Status: ${mail.mailServerConnection()} :no_entry: ") }
 
         LOGGER.info("Regular status check: $messageBuilder")
-        notificationService.sendRandomOrAlertNotificationToSlack(messageBuilder.toString(), SlackChannel.HEARTBEAT)
+        notificationService.sendAlertOrNotification(messageBuilder.toString(), TeamsChannel.HEARTBEAT)
     }
 }
