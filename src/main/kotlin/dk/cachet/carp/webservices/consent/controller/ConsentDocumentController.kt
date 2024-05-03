@@ -31,7 +31,7 @@ class ConsentDocumentController(
         value = [ CONSENT_BY_STUDY_ID, CONSENT_BY_DEPLOYMENT_ID ],
         method = [ RequestMethod.GET ]
     )
-    @PreAuthorize("canManageDeployment(#deploymentId) or canManageStudy(#studyId)")
+    @PreAuthorize( "canManageDeployment( #deploymentId ) or canManageStudy( #studyId ) ")
     fun getAll(
         @PathVariable( PathVariableName.DEPLOYMENT_ID, required = false ) deploymentId: UUID?,
         @PathVariable( PathVariableName.STUDY_ID, required = false ) studyId: UUID?
@@ -52,36 +52,36 @@ class ConsentDocumentController(
     }
 
     @GetMapping(CONSENT_BY_DEPLOYMENT_ID + CONSENT_BY_ID)
-    @PreAuthorize("isConsentOwner(#consentId)")
-    @Operation(tags = ["consentDocument/getOne.json"])
+    @PreAuthorize( "isConsentOwner( #consentId )" )
+    @Operation( tags = ["consentDocument/getOne.json"] )
     fun getOne(
-            @PathVariable(PathVariableName.DEPLOYMENT_ID) deploymentId: UUID,
-            @PathVariable(PathVariableName.CONSENT_ID) consentId: Int): ConsentDocument
+            @PathVariable( PathVariableName.DEPLOYMENT_ID ) deploymentId: UUID,
+            @PathVariable( PathVariableName.CONSENT_ID ) consentId: Int): ConsentDocument
     {
-        LOGGER.info("Start GET: /api/deployments/$deploymentId/consent-documents/$consentId")
-        return consentDocumentService.getOne(consentId)
+        LOGGER.info( "Start GET: /api/deployments/$deploymentId/consent-documents/$consentId" )
+        return consentDocumentService.getOne( consentId )
     }
 
     @PostMapping( CONSENT_BY_DEPLOYMENT_ID )
-    @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("isInDeployment(#deploymentId)")
-    @Operation(tags = ["consentDocument/create.json"])
+    @ResponseStatus( HttpStatus.CREATED )
+    @PreAuthorize( "isInDeployment( #deploymentId )" )
+    @Operation( tags = ["consentDocument/create.json"] )
     fun create(
             @PathVariable(PathVariableName.DEPLOYMENT_ID) deploymentId: UUID,
             @RequestBody data: JsonNode?): ConsentDocument
     {
-        LOGGER.info("Start POST: /api/deployments/$deploymentId/consent-documents")
-        return consentDocumentService.create(deploymentId, data)
+        LOGGER.info( "Start POST: /api/deployments/$deploymentId/consent-documents" )
+        return consentDocumentService.create( deploymentId, data )
     }
 
     @DeleteMapping( CONSENT_BY_DEPLOYMENT_ID + CONSENT_BY_ID )
-    @PreAuthorize("isConsentOwner(#consentId)")
-    @Operation(tags = ["consentDocument/delete.json"])
+    @PreAuthorize( "isConsentOwner( #consentId )" )
+    @Operation( tags = ["consentDocument/delete.json"] )
     fun delete(
             @PathVariable(PathVariableName.DEPLOYMENT_ID) deploymentId: UUID,
             @PathVariable(PathVariableName.CONSENT_ID) consentId: Int)
     {
-        LOGGER.info("Start DELETE: /api/deployments/$deploymentId/consent-documents/$consentId")
-        consentDocumentService.delete(consentId)
+        LOGGER.info( "Start DELETE: /api/deployments/$deploymentId/consent-documents/$consentId" )
+        consentDocumentService.delete( consentId )
     }
 }

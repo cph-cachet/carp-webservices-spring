@@ -17,7 +17,7 @@ interface AccountService {
     suspend fun addRole( identity: AccountIdentity, role: Role )
     suspend fun grant( identity: AccountIdentity, claims: Set<Claim> ): Account
     suspend fun revoke( identity: AccountIdentity, claims: Set<Claim> ): Account
-    suspend fun generateTemporaryAccount(
+    suspend fun generateAnonymousAccount(
         expirationSeconds: Long?,
         redirectUri: String?
     ): Pair<UsernameAccountIdentity, String>

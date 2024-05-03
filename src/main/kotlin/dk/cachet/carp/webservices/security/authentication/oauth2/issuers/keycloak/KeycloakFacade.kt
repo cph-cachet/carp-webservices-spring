@@ -38,7 +38,8 @@ class KeycloakFacade(
     @Value("\${keycloak.admin.client-secret}") private val clientSecret: String,
     private val objectMapper: ObjectMapper,
     private val environmentUtil: EnvironmentUtil
-) : IssuerFacade {
+) : IssuerFacade
+{
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
         private const val INVITATION_LIFESPAN = 24 * 60 * 60 * 30 // 30 days

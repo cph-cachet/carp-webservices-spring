@@ -118,7 +118,7 @@ class AccountServiceImpl(
         return issuerFacade.updateAccount(account)
     }
 
-    override suspend fun generateTemporaryAccount(
+    override suspend fun generateAnonymousAccount(
         expirationSeconds: Long?,
         redirectUri: String?
     ): Pair<UsernameAccountIdentity, String>

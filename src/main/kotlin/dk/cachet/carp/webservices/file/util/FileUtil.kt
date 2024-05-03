@@ -1,6 +1,5 @@
 package dk.cachet.carp.webservices.file.util
 
-import dk.cachet.carp.webservices.common.environment.EnvironmentUtil
 import dk.cachet.carp.webservices.common.exception.file.FileStorageException
 import org.apache.commons.io.FileUtils
 import org.apache.logging.log4j.LogManager
@@ -14,6 +13,8 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
+import kotlin.io.path.ExperimentalPathApi
+import kotlin.io.path.walk
 
 /**
  * The Class [FileUtil].
@@ -26,7 +27,6 @@ import java.util.zip.ZipOutputStream
 @Component
 class FileUtil(
         private val filePermission: FilePermissionUtil,
-        private val environmentUtil: EnvironmentUtil,
         environment: Environment
 )
 {
@@ -163,30 +163,6 @@ class FileUtil(
     }
 
     /**
-     * Deletes a directory.
-     *
-     * @param [dirPath] [Path] of the directory.
-     */
-    fun deleteDirectory(dirPath: Path)
-    {
-        if (!dirPath.toFile().exists())
-        {
-            LOGGER.info("Request file system resource to delete does not exist! Directory delete operation aborted.")
-            return
-        }
-        if (!dirPath.toFile().isDirectory)
-        {
-            LOGGER.info("Request file system resource to delete is not a directory! Directory delete operation aborted.")
-            return
-        }
-
-        walk(dirPath)
-                .sorted(Comparator.reverseOrder())
-                .forEach(Files::delete)
-        LOGGER.info("Directory for ${dirPath.fileName} is deleted.")
-    }
-
-    /**
      * Deletes a file.
      *
      * @param [filePath] [Path] of the file.
@@ -208,37 +184,26 @@ class FileUtil(
         LOGGER.info("File with name ${filePath.fileName} is deleted.")
     }
 
-    /**
-     * Archives a directory.
-     * It only puts the files located directly in [directoryPath] into the archive,
-     * but not the folders and their nested content.
-     *
-     * @param [directoryPath] [Path] of the directory to be zipped.
-     * @param [zipFileName] Name of the zip file to create.
-     */
-    fun zipDirectory(directoryPath: Path, zipFileName: String)
+    @OptIn(ExperimentalPathApi::class)
+    fun zipDirectory( dirPath: Path, zipPath: Path )
     {
-        val zipPath = resolveFileStorage(zipFileName)
-        createFile(zipPath)
-        LOGGER.info("New zip archive created: ${zipPath.fileName}")
-
-        ZipOutputStream(newOutputStream(zipPath)).use { zipOutputStream ->
-            walk(directoryPath).use { paths ->
-                paths
-                        .filter { path -> !Files.isDirectory(path) }
-                        .forEach { path ->
-                            val zipEntry = ZipEntry(directoryPath.relativize(path).toString())
-                            try {
-                                zipOutputStream.putNextEntry(zipEntry)
-                                copy(path, zipOutputStream)
-                                zipOutputStream.closeEntry()
-                            } catch (e: IOException) {
-                                LOGGER.info("An error occurred while zipping the file ${path.fileName}: ${e.message}")
-                            }
-                        }
+        ZipOutputStream( newOutputStream( zipPath ) ).use { zipStream ->
+            dirPath.walk().forEach { path ->
+                val zipEntry = ZipEntry( dirPath.relativize( path ).toString() )
+                try
+                {
+                    zipStream.putNextEntry( zipEntry )
+                    copy( path, zipStream )
+                    zipStream.closeEntry()
+                }
+                catch ( e: IOException )
+                {
+                   LOGGER.error( "An error occurred while zipping the file ${path.fileName}: ${e.message}" )
+                }
             }
         }
-        LOGGER.info("Zipping procedure finished.")
+
+        LOGGER.info( "Directory ${dirPath.fileName} is zipped and is available as ${zipPath}." )
     }
 
     /**

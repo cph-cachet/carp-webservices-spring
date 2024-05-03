@@ -30,11 +30,6 @@ class FileController(private val fileStorage: FileStorage, private val fileServi
         const val UPLOAD_IMAGE = "/api/studies/{${PathVariableName.STUDY_ID}}/images"
         const val DOWNLOAD = "$FILE_BASE/{${PathVariableName.FILE_ID}}/download"
         const val FILE_ID = "$FILE_BASE/{${PathVariableName.FILE_ID}}"
-
-        /** NOTE: make sure to refactor this, it sounds like this
-         *        was supposed to be a query param to an existing endpoint */
-        const val GET_BY_DEPLOYMENT_ID =
-            "/api/studies/{${PathVariableName.STUDY_ID}}/deployments/{${PathVariableName.DEPLOYMENT_ID}}/files"
     }
 
     @GetMapping(FILE_BASE)
@@ -46,21 +41,6 @@ class FileController(private val fileStorage: FileStorage, private val fileServi
     {
         LOGGER.info("Start GET: /api/studies/$studyId/files")
         return fileService.getAll(query, studyId.stringRepresentation)
-    }
-
-    @GetMapping(GET_BY_DEPLOYMENT_ID)
-    @PreAuthorize("canManageStudy(#studyId)")
-    fun getByStudyIdAndDeploymentId(
-        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
-        @PathVariable(PathVariableName.DEPLOYMENT_ID) deploymentId: UUID
-    ): List<File>
-    {
-        LOGGER.info("Start GET: /api/studies/$studyId/deployments/$deploymentId/files")
-
-        return fileService.getAllByStudyIdAndDeploymentId(
-            studyId.stringRepresentation,
-            deploymentId.stringRepresentation
-        )
     }
 
     @GetMapping(FILE_ID)
@@ -108,7 +88,6 @@ class FileController(private val fileStorage: FileStorage, private val fileServi
     @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
     fun create(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
-        @RequestParam(RequestParamName.DEPLOYMENT_ID, required = false) deploymentId: UUID?,
         @RequestParam(RequestParamName.METADATA, required = false) metadata: String?,
         @RequestPart file: MultipartFile
     ): File

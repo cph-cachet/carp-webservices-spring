@@ -1,6 +1,7 @@
 package dk.cachet.carp.webservices.dataPoint.service.impl
 
 import cz.jirutka.rsql.parser.RSQLParser
+import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.exception.responses.BadRequestException
 import dk.cachet.carp.webservices.common.exception.responses.ResourceNotFoundException
@@ -13,16 +14,20 @@ import dk.cachet.carp.webservices.dataPoint.repository.DataPointRepository
 import dk.cachet.carp.webservices.dataPoint.service.DataPointService
 import dk.cachet.carp.webservices.deployment.dto.DeploymentStatisticsResponseDto
 import dk.cachet.carp.webservices.deployment.dto.StatisticsDto
+import dk.cachet.carp.webservices.export.service.ResourceExporter
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
 import dk.cachet.carp.webservices.security.authorization.Role
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.MeterRegistry
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
+import java.nio.file.Path
 import java.time.LocalDate
 
 @Service
@@ -33,7 +38,7 @@ class DataPointServiceImpl(
     private val authenticationService: AuthenticationService,
     private val validateMessage: MessageBase,
     meterRegistry: MeterRegistry
-): DataPointService
+): DataPointService, ResourceExporter<DataPoint>
 {
     companion object
     {
@@ -83,10 +88,6 @@ class DataPointServiceImpl(
         }
 
         return dataPointRepository.findByDeploymentIdAndCreatedBy(deploymentId, id.stringRepresentation, pageRequest).content
-    }
-
-    override fun getAllForDownload(deploymentIds: List<String>): List<DataPoint> {
-        return dataPointRepository.findAllByDeploymentIds(deploymentIds)
     }
 
     override fun getNumberOfDataPoints(deploymentId: String, query: String?): Long
@@ -226,4 +227,11 @@ class DataPointServiceImpl(
         dataPointRepository.delete(dataPoint)
         LOGGER.info("Datapoint deleted, id: $id")
     }
+
+    override val dataFileName = "data-points.json"
+    override suspend fun exportDataOrThrow( studyId: UUID, deploymentIds: Set<UUID>, target: Path ) =
+        withContext( Dispatchers.IO )
+        {
+            dataPointRepository.findAllByDeploymentIds( deploymentIds.map { it.stringRepresentation } )
+        }
 }

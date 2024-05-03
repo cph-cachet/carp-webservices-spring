@@ -9,18 +9,17 @@ import dk.cachet.carp.webservices.common.exception.responses.ResourceNotFoundExc
 import dk.cachet.carp.webservices.consent.domain.ConsentDocument
 import dk.cachet.carp.webservices.consent.repository.ConsentDocumentRepository
 import dk.cachet.carp.webservices.consent.service.ConsentDocumentService
+import dk.cachet.carp.webservices.export.service.ResourceExporter
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
 import dk.cachet.carp.webservices.security.authorization.Claim
 import dk.cachet.carp.webservices.security.config.SecurityCoroutineContext
 import dk.cachet.carp.webservices.study.service.RecruitmentService
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.nio.file.Path
 
 /**
  * The Class [ConsentDocumentServiceImpl].
@@ -34,7 +33,7 @@ class ConsentDocumentServiceImpl(
     private val authenticationService: AuthenticationService,
     private val validationMessages: MessageBase,
     private val recruitmentService: RecruitmentService
-): ConsentDocumentService
+): ConsentDocumentService, ResourceExporter<ConsentDocument>
 {
     private val backgroundWorker = CoroutineScope( Dispatchers.IO )
 
@@ -98,4 +97,12 @@ class ConsentDocumentServiceImpl(
         }
         return saved
     }
+
+    override val dataFileName = "consent-documents.json"
+
+    override suspend fun exportDataOrThrow( studyId: UUID, deploymentIds: Set<UUID>, target: Path ) =
+        withContext( Dispatchers.IO )
+        {
+            getAllByDeploymentIds( deploymentIds )
+        }
 }

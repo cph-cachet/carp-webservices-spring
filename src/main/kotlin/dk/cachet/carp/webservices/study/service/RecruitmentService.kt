@@ -14,11 +14,4 @@ interface RecruitmentService
     suspend fun getParticipants( studyId: UUID ) : List<Account>
     fun isParticipant( studyId: UUID, accountId: UUID ): Boolean
     suspend fun getParticipantGroupsStatus( studyId: UUID ) : ParticipantGroupsStatus
-    suspend fun addAnonymousParticipants(
-        studyId: UUID,
-        amount: Int,
-        expirationSeconds: Long,
-        participantRoleName: String,
-        redirectUri: String?
-    ): List<AnonymousParticipant>
 }
