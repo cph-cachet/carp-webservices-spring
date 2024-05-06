@@ -16,7 +16,7 @@ import org.springframework.web.reactive.function.BodyInserters
 import java.io.IOException
 /**
  * The Class [NotificationServiceImpl].
- * The [NotificationServiceImpl] enables exception notifications [CarpErrorResponse] in Slack channel.
+ * The [NotificationServiceImpl] enables exception notifications [CarpErrorResponse] in Teams channel.
  */
 @Service
 class NotificationServiceImpl
@@ -38,7 +38,7 @@ class NotificationServiceImpl
     /**
      * The [sendAlertOrGeneralNotification] function sends a notification message with the given message.
      * @param notification The [notification] containing the message to send.
-     * @param channelToSendTo The value of the Slack channel the message needs to be sent to.
+     * @param channelToSendTo The value of the Teams channel the message needs to be sent to.
      */
     override fun sendAlertOrGeneralNotification(notification: String, channelToSendTo: TeamsChannel)
     {
@@ -86,8 +86,8 @@ class NotificationServiceImpl
     }
 
     /**
-     * The [processException] function processes the exception and sends the message to the Slack channel.
-     * @param message The message to send on Slack channel.
+     * The [processException] function processes the exception and sends the message to the Teams channel.
+     * @param message The message to send on Teams channel.
      * @throws IOException when the webhook cannot be reached.
      */
     private fun processException(message: String, channelToSend: String) {
