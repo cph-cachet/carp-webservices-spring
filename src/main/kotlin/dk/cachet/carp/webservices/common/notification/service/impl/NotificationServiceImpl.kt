@@ -25,7 +25,8 @@ class NotificationServiceImpl
     private val validationMessages: MessageBase,
     @Value("\${teams.webhook.client}") private val teamsClientChannel: String,
     @Value("\${teams.webhook.server}") private val teamsServerChannel: String,
-    @Value("\${teams.webhook.heartbeat}") private val teamsHeartbeatChannel: String
+    @Value("\${teams.webhook.heartbeat}") private val teamsHeartbeatChannel: String,
+    @Value("\${teams.webhook.dev}") private val teamsDevChannel: String
 ): INotificationService
 {
     companion object
@@ -61,16 +62,15 @@ class NotificationServiceImpl
      */
     override fun sendExceptionNotification(errorResponse: CarpErrorResponse)
     {
+        val messageBuilder = StringBuilder()
+        messageBuilder.append("- Exception Code: ${errorResponse.statusCode}$NEW_LINE")
+        messageBuilder.append("- Exception: ${errorResponse.exception}$NEW_LINE")
+        messageBuilder.append("- Message: ${errorResponse.message}$NEW_LINE")
+        messageBuilder.append("- Path: ${errorResponse.path}$NEW_LINE")
+        messageBuilder.append("- Environment: ${environment.profile}$NEW_LINE")
 
         if(environment.profile == EnvironmentProfile.PRODUCTION)
         {
-            val messageBuilder = StringBuilder()
-            messageBuilder.append("- Exception Code: ${errorResponse.statusCode}$NEW_LINE")
-            messageBuilder.append("- Exception: ${errorResponse.exception}$NEW_LINE")
-            messageBuilder.append("- Message: ${errorResponse.message}$NEW_LINE")
-            messageBuilder.append("- Path: ${errorResponse.path}$NEW_LINE")
-            messageBuilder.append("- Environment: ${environment.profile}$NEW_LINE")
-
             if (errorResponse.statusCode in 400..499)
             {
                 processException(messageBuilder.toString(), teamsClientChannel)
@@ -79,15 +79,18 @@ class NotificationServiceImpl
             {
                 processException(messageBuilder.toString(), teamsServerChannel)
             }
+        } else if (environment.profile == EnvironmentProfile.DEVELOPMENT)
+        {
+            processException(messageBuilder.toString(), teamsDevChannel)
         }
     }
 
     /**
      * The [processException] function processes the exception and sends the message to the Slack channel.
      * @param message The message to send on Slack channel.
-     * @throws Exception when the webhook cannot be reached.
+     * @throws IOException when the webhook cannot be reached.
      */
-    private fun processException(message: String, channelToSend: String?) {
+    private fun processException(message: String, channelToSend: String) {
         val payload = mapOf(
             "text" to message,
             "title" to "\ud83c\udf81 CARP-Webservices",
@@ -95,19 +98,15 @@ class NotificationServiceImpl
 
         try {
             val webClient = WebClient.create()
-            if (channelToSend != null) {
-                webClient.post()
-                    .uri(channelToSend)
-                    .body(BodyInserters.fromValue(payload))
-                    .retrieve()
-                    .bodyToMono(String::class.java)
-                    .subscribe(
-                        { response -> LOGGER.info("Teams response -> {}", response) },
-                        { error -> LOGGER.error("Error sending message to Teams: ${error.message}") }
-                    )
-            } else {
-                LOGGER.error("Channel not found")
-            }
+            webClient.post()
+                .uri(channelToSend)
+                .body(BodyInserters.fromValue(payload))
+                .retrieve()
+                .bodyToMono(String::class.java)
+                .subscribe(
+                    { response -> LOGGER.info("Teams response -> {}", response) },
+                    { error -> LOGGER.error("Error sending message to Teams: ${error.message}") }
+                )
         } catch (ex: IOException) {
             LOGGER.error("Unexpected Error! WebHook: $ex")
             throw BadRequestException(validationMessages.get("notification.teams.exception", ex.message.toString()))

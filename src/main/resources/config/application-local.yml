@@ -247,6 +247,7 @@ teams:
     server: "${TEAMS_SERVER_WEBHOOK_URL}"
     client: "${TEAMS_CLIENT_WEBHOOK_URL}"
     heartbeat: "${TEAMS_HEARTBEAT_WEBHOOK_URL}"
+    dev: "${TEAMS_DEV_WEBHOOK_URL}"
 
 storage:
   directory: /home/carp/storage/${spring.profiles.active}/
