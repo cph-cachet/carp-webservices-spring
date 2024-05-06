@@ -136,9 +136,6 @@ dependencies {
     // S3
     implementation("com.amazonaws:aws-java-sdk-s3:${property("awsSDKVersion")}")
 
-    // SLACK
-    implementation("com.github.seratch:jslack:${property("jslackVersion")}")
-
     // MICROMETER
     runtimeOnly("io.micrometer:micrometer-registry-prometheus")
 

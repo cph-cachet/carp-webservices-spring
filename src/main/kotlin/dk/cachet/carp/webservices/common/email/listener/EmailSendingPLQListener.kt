@@ -2,15 +2,13 @@ package dk.cachet.carp.webservices.common.email.listener
 
 import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.webservices.common.email.domain.EmailRequest
-import dk.cachet.carp.webservices.common.notification.domain.SlackChannel
+import dk.cachet.carp.webservices.common.notification.domain.TeamsChannel
 import dk.cachet.carp.webservices.common.notification.service.INotificationService
-import kotlinx.serialization.decodeFromString
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.amqp.core.Message
 import org.springframework.amqp.rabbit.annotation.RabbitListener
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.messaging.support.GenericMessage
 import org.springframework.stereotype.Component
 
 /**
@@ -34,9 +32,9 @@ class EmailSendingPLQListener
     {
         val emailRequest: EmailRequest = JSON.decodeFromString(message.body.decodeToString())
         LOGGER.info("New Email message for ${emailRequest.destinationEmail} with id ${emailRequest.id} has arrived in the Email Parking Lot.")
-        notificationService.sendRandomOrAlertNotificationToSlack(
+        notificationService.sendAlertOrGeneralNotification(
                 "New Email message for ${emailRequest.destinationEmail} with id ${emailRequest.id} has arrived in the Parking Lot.",
-                SlackChannel.SERVER_ERRORS
+                TeamsChannel.SERVER_ERRORS
         )
     }
 }
