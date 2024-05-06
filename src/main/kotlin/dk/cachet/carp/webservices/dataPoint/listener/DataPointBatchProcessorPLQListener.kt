@@ -29,7 +29,7 @@ class DataPointBatchProcessorPLQListener
     fun receive(failedMessage: Message)
     {
         LOGGER.info("New Data Point message has arrived in the Parking Lot.")
-        notificationService.sendAlertOrNotification(
+        notificationService.sendAlertOrGeneralNotification(
                 "New Data Point message has arrived in the DataPoint Parking Lot.",
                 TeamsChannel.SERVER_ERRORS
         )

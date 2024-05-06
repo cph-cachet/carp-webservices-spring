@@ -85,31 +85,31 @@ class EmailServiceImpl(
         catch (ex: MailSendException)
         {
             LOGGER.warn("Email message not sent.", ex)
-            notificationService.sendAlertOrNotification("Email message not sent. Exception: $ex.", TeamsChannel.SERVER_ERRORS)
+            notificationService.sendAlertOrGeneralNotification("Email message not sent. Exception: $ex.", TeamsChannel.SERVER_ERRORS)
             return EmailSendResult.FAILURE.status
         }
         catch (ex: SMTPSendFailedException)
         {
             LOGGER.warn("Email message not sent.", ex)
-            notificationService.sendAlertOrNotification("Email message not sent. Exception: $ex.", TeamsChannel.SERVER_ERRORS)
+            notificationService.sendAlertOrGeneralNotification("Email message not sent. Exception: $ex.", TeamsChannel.SERVER_ERRORS)
             return EmailSendResult.FAILURE.status
         }
         catch (ex: MessagingException)
         {
             LOGGER.warn("Email message not sent.", ex)
-            notificationService.sendAlertOrNotification("Email message not sent. Exception: $ex.", TeamsChannel.SERVER_ERRORS)
+            notificationService.sendAlertOrGeneralNotification("Email message not sent. Exception: $ex.", TeamsChannel.SERVER_ERRORS)
             return EmailSendResult.FAILURE.status
         }
         catch (ex: NullPointerException)
         {
             LOGGER.warn("No invitation email was found.", ex)
-            notificationService.sendAlertOrNotification("No invitation email was found. Exception: $ex.", TeamsChannel.SERVER_ERRORS)
+            notificationService.sendAlertOrGeneralNotification("No invitation email was found. Exception: $ex.", TeamsChannel.SERVER_ERRORS)
             return EmailSendResult.FAILURE.status
         }
         catch (ex: Exception)
         {
             LOGGER.warn("Failed to send mail, mailAddress= $recipientEmailAddress", ex)
-            notificationService.sendAlertOrNotification(
+            notificationService.sendAlertOrGeneralNotification(
                     "Failed to send mail, mailAddress= $recipientEmailAddress. Exception: $ex.", TeamsChannel.SERVER_ERRORS)
             return EmailSendResult.FAILURE.status
         }

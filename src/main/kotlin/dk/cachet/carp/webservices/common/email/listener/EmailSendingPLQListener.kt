@@ -32,7 +32,7 @@ class EmailSendingPLQListener
     {
         val emailRequest: EmailRequest = JSON.decodeFromString(message.body.decodeToString())
         LOGGER.info("New Email message for ${emailRequest.destinationEmail} with id ${emailRequest.id} has arrived in the Email Parking Lot.")
-        notificationService.sendAlertOrNotification(
+        notificationService.sendAlertOrGeneralNotification(
                 "New Email message for ${emailRequest.destinationEmail} with id ${emailRequest.id} has arrived in the Parking Lot.",
                 TeamsChannel.SERVER_ERRORS
         )

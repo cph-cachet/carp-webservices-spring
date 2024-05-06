@@ -53,7 +53,7 @@ class DiskSpaceAlert
                 val spaceUsageNotification =
                     String.format("WARNING: HDD has reached %d%% disk space usage!", (usablePercentage * 100).toInt())
                 LOGGER.warn("WARNING: Disk space has reached {} of usage!", (usablePercentage * 100).toInt())
-                notificationService.sendAlertOrNotification(spaceUsageNotification, TeamsChannel.HEARTBEAT)
+                notificationService.sendAlertOrGeneralNotification(spaceUsageNotification, TeamsChannel.HEARTBEAT)
                 emailNotificationService.sendNotificationEmail(alertEmail, alertWarning, spaceUsageNotification)
             }
         }

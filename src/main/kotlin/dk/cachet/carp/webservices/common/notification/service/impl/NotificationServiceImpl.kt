@@ -36,11 +36,11 @@ class NotificationServiceImpl
     }
 
     /**
-     * The [sendAlertOrNotification] function sends a notification message with the given message.
+     * The [sendAlertOrGeneralNotification] function sends a notification message with the given message.
      * @param notification The [notification] containing the message to send.
      * @param channelToSendTo The value of the Slack channel the message needs to be sent to.
      */
-    override fun sendAlertOrNotification(notification: String, channelToSendTo: TeamsChannel)
+    override fun sendAlertOrGeneralNotification(notification: String, channelToSendTo: TeamsChannel)
     {
         val messageBuilder = StringBuilder()
 

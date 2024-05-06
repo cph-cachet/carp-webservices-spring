@@ -43,7 +43,7 @@ class DatabaseConnectionAlert
                 "Database connection is ${database.statusHealth().code}!." +
                         " More details...: ${database.statusDetails()}"
 
-            notificationService.sendAlertOrNotification(
+            notificationService.sendAlertOrGeneralNotification(
                 databaseConnectionStatusNotification,
                 TeamsChannel.HEARTBEAT
             )

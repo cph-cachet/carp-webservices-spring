@@ -29,7 +29,7 @@ class ThirdPartyProcessorPLQListener
     fun receive(failedMessage: Message)
     {
         LOGGER.info("New 3rd-party Data Point message has arrived in the Parking Lot.")
-        notificationService.sendAlertOrNotification(
+        notificationService.sendAlertOrGeneralNotification(
                 "New 3rd-party Data Point message has arrived in the 3rd-party DataPoint Parking Lot.",
                 TeamsChannel.SERVER_ERRORS
         )

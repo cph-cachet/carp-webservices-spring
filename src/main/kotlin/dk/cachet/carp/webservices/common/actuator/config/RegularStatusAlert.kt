@@ -58,6 +58,6 @@ class RegularStatusAlert(
         else { messageBuilder.append("Mail-Server-Status: ${mail.mailServerConnection()} :no_entry: ") }
 
         LOGGER.info("Regular status check: $messageBuilder")
-        notificationService.sendAlertOrNotification(messageBuilder.toString(), TeamsChannel.HEARTBEAT)
+        notificationService.sendAlertOrGeneralNotification(messageBuilder.toString(), TeamsChannel.HEARTBEAT)
     }
 }
