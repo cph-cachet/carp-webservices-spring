@@ -1,115 +1,115 @@
 package dk.cachet.carp.webservices.common.notification.service.impl
 
-import com.github.seratch.jslack.Slack
-import com.github.seratch.jslack.api.webhook.Payload
-import com.github.seratch.jslack.api.webhook.WebhookResponse
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.environment.EnvironmentProfile
 import dk.cachet.carp.webservices.common.environment.EnvironmentUtil
 import dk.cachet.carp.webservices.common.exception.advices.CarpErrorResponse
 import dk.cachet.carp.webservices.common.exception.responses.BadRequestException
-import dk.cachet.carp.webservices.common.notification.domain.SlackChannel
+import dk.cachet.carp.webservices.common.notification.domain.TeamsChannel
 import dk.cachet.carp.webservices.common.notification.service.INotificationService
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.BodyInserters
 import java.io.IOException
-
 /**
  * The Class [NotificationServiceImpl].
- * The [NotificationServiceImpl] enables exception notifications [CarpErrorResponse] in slack channel.
+ * The [NotificationServiceImpl] enables exception notifications [CarpErrorResponse] in Teams channel.
  */
 @Service
 class NotificationServiceImpl
 (
     private val environment: EnvironmentUtil,
     private val validationMessages: MessageBase,
-    @Value("\${slack.channel.name}") private val slackChannel: String,
-    @Value("\${slack.channel.server}") private val slackServerChannel: String,
-    @Value("\${slack.channel.heartbeat}") private val slackHeartbeatChannel: String,
-    @Value("\${slack.webhook}") private val slackWebHook: String
+    @Value("\${teams.webhook.client}") private val teamsClientChannel: String,
+    @Value("\${teams.webhook.server}") private val teamsServerChannel: String,
+    @Value("\${teams.webhook.heartbeat}") private val teamsHeartbeatChannel: String,
+    @Value("\${teams.webhook.dev}") private val teamsDevChannel: String
 ): INotificationService
 {
     companion object
     {
         private val LOGGER: Logger = LogManager.getLogger()
-        private const val NEW_LINE = "\n"
+        private const val NEW_LINE = "\n\n"
     }
 
     /**
-     * The [sendExceptionNotificationToSlack] function sends a notification message with the given message.
+     * The [sendAlertOrGeneralNotification] function sends a notification message with the given message.
      * @param notification The [notification] containing the message to send.
-     * @param channelToSendTo The value of the slack channel the message needs to be sent to.
+     * @param channelToSendTo The value of the Teams channel the message needs to be sent to.
      */
-    override fun sendRandomOrAlertNotificationToSlack(notification: String, channelToSendTo: SlackChannel)
+    override fun sendAlertOrGeneralNotification(notification: String, channelToSendTo: TeamsChannel)
     {
         val messageBuilder = StringBuilder()
+
         messageBuilder.append(notification)
         messageBuilder.append(NEW_LINE)
         messageBuilder.append(NEW_LINE)
         messageBuilder.append("Environment: ${environment.profile}")
         when (channelToSendTo)
         {
-            SlackChannel.CLIENT_ERRORS -> processException(messageBuilder.toString(), slackChannel)
-            SlackChannel.SERVER_ERRORS -> processException(messageBuilder.toString(), slackServerChannel)
-            SlackChannel.HEARTBEAT -> processException(messageBuilder.toString(), slackHeartbeatChannel)
+            TeamsChannel.CLIENT_ERRORS -> processException(messageBuilder.toString(), teamsClientChannel)
+            TeamsChannel.SERVER_ERRORS -> processException(messageBuilder.toString(), teamsServerChannel)
+            TeamsChannel.HEARTBEAT -> processException(messageBuilder.toString(), teamsHeartbeatChannel)
         }
     }
 
     /**
-     * The [sendExceptionNotificationToSlack] function sends a notification message with the given message.
+     * The [sendExceptionNotification] function sends a notification message with the given message.
      * @param errorResponse The errorResponse includes the error code, error message, and the error response.
      */
-    override fun sendExceptionNotificationToSlack(errorResponse: CarpErrorResponse)
+    override fun sendExceptionNotification(errorResponse: CarpErrorResponse)
     {
+        val messageBuilder = StringBuilder()
+        messageBuilder.append("- Exception Code: ${errorResponse.statusCode}$NEW_LINE")
+        messageBuilder.append("- Exception: ${errorResponse.exception}$NEW_LINE")
+        messageBuilder.append("- Message: ${errorResponse.message}$NEW_LINE")
+        messageBuilder.append("- Path: ${errorResponse.path}$NEW_LINE")
+        messageBuilder.append("- Environment: ${environment.profile}$NEW_LINE")
+
         if(environment.profile == EnvironmentProfile.PRODUCTION)
         {
-            val messageBuilder = StringBuilder()
-            messageBuilder.append("Exception Code: ${errorResponse.statusCode}")
-            messageBuilder.append(NEW_LINE)
-            messageBuilder.append("Exception: ${errorResponse.exception}")
-            messageBuilder.append(NEW_LINE)
-            messageBuilder.append("Message: ${errorResponse.message}")
-            messageBuilder.append(NEW_LINE)
-            messageBuilder.append("Path: ${errorResponse.path}")
-            messageBuilder.append(NEW_LINE)
-            messageBuilder.append("Environment: ${environment.profile}")
-            messageBuilder.append(NEW_LINE)
-
             if (errorResponse.statusCode in 400..499)
             {
-                processException(messageBuilder.toString(), slackChannel)
+                processException(messageBuilder.toString(), teamsClientChannel)
             }
             else if (errorResponse.statusCode in 500..599)
             {
-                processException(messageBuilder.toString(), slackServerChannel)
+                processException(messageBuilder.toString(), teamsServerChannel)
             }
+        } else if (environment.profile == EnvironmentProfile.DEVELOPMENT)
+        {
+            processException(messageBuilder.toString(), teamsDevChannel)
         }
     }
 
     /**
-     * The [processException] function processes the exception and sends the message to the slack channel.
-     * @param message The message to send on slack channel.
+     * The [processException] function processes the exception and sends the message to the Teams channel.
+     * @param message The message to send on Teams channel.
      * @throws IOException when the webhook cannot be reached.
      */
-    private fun processException(message: String, slackChannelToSend: String?)
-    {
-        val payload: Payload = Payload.builder()
-                .channel(slackChannelToSend)
-                .username("CARP-Webservices")
-                .iconEmoji(":rocket:")
-                .text(message)
-                .build()
-        try
-        {
-            val webhookResponse: WebhookResponse = Slack.getInstance().send(slackWebHook, payload)
-            LOGGER.info("Slack response code -> {}, body -> {}", webhookResponse.code, "body -> " + webhookResponse.body)
-        }
-        catch (ex: IOException)
-        {
+    private fun processException(message: String, channelToSend: String) {
+        val payload = mapOf(
+            "text" to message,
+            "title" to "\ud83c\udf81 CARP-Webservices",
+            "themeColor" to "8f4742")
+
+        try {
+            val webClient = WebClient.create()
+            webClient.post()
+                .uri(channelToSend)
+                .body(BodyInserters.fromValue(payload))
+                .retrieve()
+                .bodyToMono(String::class.java)
+                .subscribe(
+                    { response -> LOGGER.info("Teams response -> {}", response) },
+                    { error -> LOGGER.error("Error sending message to Teams: ${error.message}") }
+                )
+        } catch (ex: IOException) {
             LOGGER.error("Unexpected Error! WebHook: $ex")
-            throw BadRequestException(validationMessages.get("notification.slack.exception", ex.message.toString()))
+            throw BadRequestException(validationMessages.get("notification.teams.exception", ex.message.toString()))
         }
     }
 }

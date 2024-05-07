@@ -34,7 +34,6 @@ import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.context.request.ServletWebRequest
 import org.springframework.web.context.request.WebRequest
-import org.springframework.web.multipart.MaxUploadSizeExceededException
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 import java.lang.reflect.UndeclaredThrowableException
 import org.springframework.security.access.AccessDeniedException
@@ -78,7 +77,7 @@ internal class ExceptionAdvices(
                 getURIPathFromWebRequest(request)
         )
         LOGGER.error("Message not readable: {}", errorResponse)
-        notificationService.sendExceptionNotificationToSlack(errorResponse)
+        notificationService.sendExceptionNotification(errorResponse)
         return ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST)
     }
 
@@ -98,7 +97,7 @@ internal class ExceptionAdvices(
                 getURIPathFromWebRequest(request)
         )
         LOGGER.error("Missing request parameter: {}", request)
-        notificationService.sendExceptionNotificationToSlack(errorResponse)
+        notificationService.sendExceptionNotification(errorResponse)
         return ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST)
     }
 
@@ -118,7 +117,7 @@ internal class ExceptionAdvices(
                 getURIPathFromWebRequest(request)
         )
         LOGGER.error("Argument validation failed: {}", errorResponse)
-        notificationService.sendExceptionNotificationToSlack(errorResponse)
+        notificationService.sendExceptionNotification(errorResponse)
         return ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST)
     }
 
@@ -142,7 +141,7 @@ internal class ExceptionAdvices(
                 getURIPathFromWebRequest(request)
         )
         LOGGER.error("Bad Request Exception: {}", errorResponse)
-        notificationService.sendExceptionNotificationToSlack(errorResponse)
+        notificationService.sendExceptionNotification(errorResponse)
         return ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST)
     }
 
@@ -159,7 +158,7 @@ internal class ExceptionAdvices(
                 getURIPathFromWebRequest(request)
         )
         LOGGER.error("Unauthorized exception: {}", errorResponse)
-        notificationService.sendExceptionNotificationToSlack(errorResponse)
+        notificationService.sendExceptionNotification(errorResponse)
         return ResponseEntity(errorResponse, HttpStatus.UNAUTHORIZED)
     }
 
@@ -176,7 +175,7 @@ internal class ExceptionAdvices(
                 getURIPathFromWebRequest(request)
         )
         LOGGER.error("Authentication exception: {}", errorResponse)
-        notificationService.sendExceptionNotificationToSlack(errorResponse)
+        notificationService.sendExceptionNotification(errorResponse)
         return ResponseEntity(errorResponse, HttpStatus.FORBIDDEN)
     }
 
@@ -192,7 +191,7 @@ internal class ExceptionAdvices(
                 getURIPathFromWebRequest(request)
         )
         LOGGER.error("Access denied exception: {}", errorResponse)
-        notificationService.sendExceptionNotificationToSlack(errorResponse)
+        notificationService.sendExceptionNotification(errorResponse)
         return ResponseEntity(errorResponse, HttpStatus.FORBIDDEN)
     }
 
@@ -215,7 +214,7 @@ internal class ExceptionAdvices(
                 getURIPathFromWebRequest(request)
         )
         LOGGER.error("Resource not found: {}", errorResponse)
-        notificationService.sendExceptionNotificationToSlack(errorResponse)
+        notificationService.sendExceptionNotification(errorResponse)
         return ResponseEntity(errorResponse, HttpStatus.NOT_FOUND)
     }
 
@@ -236,7 +235,7 @@ internal class ExceptionAdvices(
                 getURIPathFromWebRequest(request)
         )
         LOGGER.error("Request method not supported: {}", errorResponse)
-        notificationService.sendExceptionNotificationToSlack(errorResponse)
+        notificationService.sendExceptionNotification(errorResponse)
         return ResponseEntity(errorResponse, HttpStatus.METHOD_NOT_ALLOWED)
     }
 
@@ -253,27 +252,27 @@ internal class ExceptionAdvices(
                 getURIPathFromWebRequest(request)
         )
         LOGGER.error("Conflict exception: {}", errorResponse)
-        notificationService.sendExceptionNotificationToSlack(errorResponse)
+        notificationService.sendExceptionNotification(errorResponse)
         return ResponseEntity(errorResponse, HttpStatus.CONFLICT)
     }
 
     //  413
-    @ResponseBody
-    @ResponseStatus(HttpStatus.PAYLOAD_TOO_LARGE)
-    @ExceptionHandler(MaxUploadSizeExceededException::class)
-    protected fun handleMaxUploadSizeExceededException(ex: MaxUploadSizeExceededException, request: WebRequest): ResponseEntity<CarpErrorResponse>
-    {
-        val message = "Attempt to upload file with the size exceeded max allowed value = $maxAllowedSize Megabyte(s)."
-        val errorResponse = CarpErrorResponse(
-                HttpStatus.CONFLICT.value(),
-                ex::class.qualifiedName.orEmpty(),
-                message,
-                getURIPathFromWebRequest(request)
-        )
-        LOGGER.error("Maximum upload size exceeded exception: {}", errorResponse)
-        notificationService.sendExceptionNotificationToSlack(errorResponse)
-        return ResponseEntity(errorResponse, HttpStatus.PAYLOAD_TOO_LARGE)
-    }
+//    @ResponseBody
+//    @ResponseStatus(HttpStatus.PAYLOAD_TOO_LARGE)
+//    @ExceptionHandler(MaxUploadSizeExceededException::class)
+//    protected fun handleMaxUploadSizeExceededException(ex: MaxUploadSizeExceededException, request: WebRequest): ResponseEntity<CarpErrorResponse>
+//    {
+//        val message = "Attempt to upload file with the size exceeded max allowed value = $maxAllowedSize Megabyte(s)."
+//        val errorResponse = CarpErrorResponse(
+//                HttpStatus.CONFLICT.value(),
+//                ex::class.qualifiedName.orEmpty(),
+//                message,
+//                getURIPathFromWebRequest(request)
+//        )
+//        LOGGER.error("Maximum upload size exceeded exception: {}", errorResponse)
+//        notificationService.sendExceptionNotificationToSlack(errorResponse)
+//        return ResponseEntity(errorResponse, HttpStatus.PAYLOAD_TOO_LARGE)
+//    }
 
     // 500 - DEFAULT
     @ResponseBody
@@ -287,7 +286,7 @@ internal class ExceptionAdvices(
                 getURIPathFromWebRequest(request)
         )
         LOGGER.error("Uncaught Exception: {}", errorResponse)
-        notificationService.sendExceptionNotificationToSlack(errorResponse)
+        notificationService.sendExceptionNotification(errorResponse)
         return ResponseEntity(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
@@ -302,7 +301,7 @@ internal class ExceptionAdvices(
             getURIPathFromWebRequest(request)
         )
         LOGGER.error("UndeclaredThrowableException: {}", errorResponse)
-        notificationService.sendExceptionNotificationToSlack(errorResponse)
+        notificationService.sendExceptionNotification(errorResponse)
         return ResponseEntity(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 

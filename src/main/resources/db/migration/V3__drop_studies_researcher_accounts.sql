@@ -1,0 +1,1 @@
+DROP TABLE studies_researcher_account_ids;

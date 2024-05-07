@@ -7,14 +7,14 @@ import dk.cachet.carp.webservices.common.exception.responses.AlreadyExistsExcept
 import dk.cachet.carp.webservices.common.exception.responses.ResourceNotFoundException
 import dk.cachet.carp.webservices.common.query.QueryUtil
 import dk.cachet.carp.webservices.common.query.QueryVisitor
-import dk.cachet.carp.webservices.document.authorizer.DocumentAuthorizationService
 import dk.cachet.carp.webservices.document.domain.Document
 import dk.cachet.carp.webservices.document.dto.CreateDocumentRequestDto
 import dk.cachet.carp.webservices.document.dto.UpdateDocumentRequestDto
 import dk.cachet.carp.webservices.document.filter.DocumentSpecification
 import dk.cachet.carp.webservices.document.repository.DocumentRepository
-import dk.cachet.carp.webservices.document.service.IDocumentService
-import dk.cachet.carp.webservices.security.authentication.service.impl.AuthenticationServiceImpl
+import dk.cachet.carp.webservices.document.service.DocumentService
+import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
+import dk.cachet.carp.webservices.security.authorization.Role
 import jakarta.servlet.http.HttpServletRequest
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -28,9 +28,8 @@ class DocumentServiceImpl(
     private val documentRepository: DocumentRepository,
     private val documentTraverser: DocumentTraverser,
     private val validationMessages: MessageBase,
-    private val authenticationService: AuthenticationServiceImpl,
-    private val authorizationService: DocumentAuthorizationService
-): IDocumentService
+    private val authenticationService: AuthenticationService
+): DocumentService
 {
     companion object
     {
@@ -40,17 +39,18 @@ class DocumentServiceImpl(
     override fun getAll(pageRequest: PageRequest, query: String?, studyId: String): List<Document>
     {
         try {
-            val isAccountResearcher = authorizationService.isAccountResearcher()
+            val role = authenticationService.getRole()
+            val id = authenticationService.getId()
+            val isAccountResearcher = role >= Role.RESEARCHER
             val belongsToStudySpec = DocumentSpecification.belongsToStudyId(studyId)
-            val accountId = authenticationService.getCurrentPrincipal().id!!
-            val belongsToUserSpec = DocumentSpecification.belongsToUserAccountId(accountId)
+            val belongsToUserSpec = DocumentSpecification.belongsToUserAccountId(id.stringRepresentation)
 
             val validatedQuery = query?.let { QueryUtil.validateQuery(it) }
 
             validatedQuery?.let {
                 val queryForRole = if (!isAccountResearcher) {
                     // Return data relevant to this user only.
-                    "$validatedQuery;created_by==${accountId}"
+                    "$validatedQuery;created_by==${id}"
                 } else validatedQuery
 
                 val specification = RSQLParser()

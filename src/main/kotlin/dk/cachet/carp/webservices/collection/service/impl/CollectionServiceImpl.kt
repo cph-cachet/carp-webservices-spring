@@ -2,16 +2,22 @@ package dk.cachet.carp.webservices.collection.service.impl
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import cz.jirutka.rsql.parser.RSQLParser
+import dk.cachet.carp.webservices.account.service.AccountService
 import dk.cachet.carp.webservices.collection.domain.Collection
 import dk.cachet.carp.webservices.collection.dto.CollectionCreateRequestDto
 import dk.cachet.carp.webservices.collection.dto.CollectionUpdateRequestDto
 import dk.cachet.carp.webservices.collection.repository.CollectionRepository
-import dk.cachet.carp.webservices.collection.service.ICollectionService
+import dk.cachet.carp.webservices.collection.service.CollectionService
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.exception.responses.AlreadyExistsException
 import dk.cachet.carp.webservices.common.exception.responses.ResourceNotFoundException
 import dk.cachet.carp.webservices.common.query.QueryUtil
 import dk.cachet.carp.webservices.common.query.QueryVisitor
+import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
+import dk.cachet.carp.webservices.security.authorization.Claim
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.stereotype.Service
@@ -20,18 +26,22 @@ import java.util.*
 
 /**
  * The Class [CollectionServiceImpl].
- * The [CollectionServiceImpl] provides implementation for [ICollectionService] to create, invite,
+ * The [CollectionServiceImpl] provides implementation for [CollectionService] to create, invite,
  * delete and find collection for the given parameter requests.
  */
 @Service
 @Transactional
 class CollectionServiceImpl
 (
-        private val collectionRepository: CollectionRepository,
-        private val validationMessages: MessageBase,
-        private val objectMapper: ObjectMapper
-): ICollectionService
+    private val collectionRepository: CollectionRepository,
+    private val accountService: AccountService,
+    private val authenticationService: AuthenticationService,
+    private val validationMessages: MessageBase,
+    private val objectMapper: ObjectMapper
+): CollectionService
 {
+    private val backgroundWorker = CoroutineScope(Dispatchers.IO)
+
     companion object
     {
         private val LOGGER: Logger = LogManager.getLogger()
@@ -48,6 +58,11 @@ class CollectionServiceImpl
         val collection = this.getCollectionByStudyIdAndId(studyId, id)
         collectionRepository.delete(collection)
         LOGGER.info("Collection deleted, id: $id")
+
+        val identity = authenticationService.getCarpIdentity()
+        backgroundWorker.launch {
+            accountService.revoke( identity, setOf( Claim.CollectionOwner( collection.id ) ) )
+        }
     }
 
     /**
@@ -84,6 +99,12 @@ class CollectionServiceImpl
         }
         val saved = collectionRepository.save(collection)
         LOGGER.info("Collection saved, id: ${saved.id}")
+
+        val identity = authenticationService.getCarpIdentity()
+        backgroundWorker.launch {
+            accountService.grant( identity, setOf( Claim.CollectionOwner( saved.id ) ) )
+        }
+
         return saved
     }
 

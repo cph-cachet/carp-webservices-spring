@@ -1,14 +1,18 @@
 package dk.cachet.carp.webservices.account.controller
 
 import dk.cachet.carp.common.application.EmailAddress
+import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.common.application.users.AccountIdentity
 import dk.cachet.carp.webservices.account.controller.AccountController.Companion.ACCOUNT_BASE
 import dk.cachet.carp.webservices.account.domain.AccountRequest
 import dk.cachet.carp.webservices.account.service.AccountService
+import dk.cachet.carp.webservices.common.constants.PathVariableName
+import dk.cachet.carp.webservices.security.authentication.domain.Account
 import jakarta.validation.Valid
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 
@@ -23,11 +27,12 @@ class AccountController(private val accountService: AccountService)
         const val ACCOUNT_BASE = "/api/accounts"
         const val INVITE = "/invite"
         const val ROLE = "/role"
+        const val ACCOUNT = "/{${PathVariableName.ACCOUNT_ID}}"
     }
 
     @PostMapping(INVITE)
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("@accountAuthorizationService.canInvite(#request)")
+    @PreAuthorize("hasRole('RESEARCHER') and hasRole(#request.role)")
     suspend fun invite(@Valid @RequestBody request: AccountRequest)
     {
         LOGGER.info("Start POST: $ACCOUNT_BASE$INVITE")
@@ -36,10 +41,25 @@ class AccountController(private val accountService: AccountService)
 
     @PostMapping(ROLE)
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("@accountAuthorizationService.canQueryRole(#request)")
-    suspend fun role(@Valid @RequestBody request: AccountRequest)
+    @PreAuthorize("hasRole('RESEARCHER') and hasRole(#request.role)")
+    suspend fun role(@Valid @RequestBody request: AccountRequest): ResponseEntity<Any>
     {
         LOGGER.info("Start POST: $ACCOUNT_BASE$ROLE")
-        accountService.hasRoleByEmail(EmailAddress(request.emailAddress), request.role)
+
+        if ( !accountService.hasRoleByEmail( EmailAddress( request.emailAddress ), request.role ) )
+        {
+            return ResponseEntity(HttpStatus.NOT_FOUND)
+        }
+
+        return ResponseEntity(HttpStatus.OK)
+    }
+
+    @GetMapping(ACCOUNT)
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('RESEARCHER')")
+    suspend fun info(@PathVariable(PathVariableName.ACCOUNT_ID) accountId: UUID): Account?
+    {
+        LOGGER.info("Start GET: $ACCOUNT_BASE$ACCOUNT")
+        return accountService.findByUUID(accountId)
     }
 }

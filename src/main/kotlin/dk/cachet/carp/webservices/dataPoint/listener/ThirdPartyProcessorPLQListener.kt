@@ -1,6 +1,6 @@
 package dk.cachet.carp.webservices.dataPoint.listener
 
-import dk.cachet.carp.webservices.common.notification.domain.SlackChannel
+import dk.cachet.carp.webservices.common.notification.domain.TeamsChannel
 import dk.cachet.carp.webservices.common.notification.service.INotificationService
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -29,9 +29,9 @@ class ThirdPartyProcessorPLQListener
     fun receive(failedMessage: Message)
     {
         LOGGER.info("New 3rd-party Data Point message has arrived in the Parking Lot.")
-        notificationService.sendRandomOrAlertNotificationToSlack(
+        notificationService.sendAlertOrGeneralNotification(
                 "New 3rd-party Data Point message has arrived in the 3rd-party DataPoint Parking Lot.",
-                SlackChannel.SERVER_ERRORS
+                TeamsChannel.SERVER_ERRORS
         )
     }
 }

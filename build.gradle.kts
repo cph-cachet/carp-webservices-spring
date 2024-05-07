@@ -51,7 +51,7 @@ configurations {
 
 allprojects {
     group = "dk.cachet"
-    version = "v1.0.0-alpha.28.infra.1"
+    version = "1.2.0"
 }
 
 java {
@@ -100,10 +100,11 @@ dependencies {
 
     // SECURITY
     implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
     implementation("org.springframework.security:spring-security-config")
     implementation("org.springframework.security:spring-security-taglibs")
     implementation("org.springframework.security:spring-security-core")
-    implementation("com.c4-soft.springaddons:spring-addons-webmvc-jwt-resource-server:${property("springAddonsVersion")}")
+    implementation("com.c4-soft.springaddons:spring-addons-starter-oidc:${property("springAddonsVersion")}")
 
     // SPRING CLOUD
     implementation("org.springframework.cloud:spring-cloud-starter-config")
@@ -124,7 +125,7 @@ dependencies {
 
     // HIBERNATE
     implementation("org.hibernate:hibernate-core:${property("hibernateVersion")}")
-    implementation("com.vladmihalcea:hibernate-types-60:${property("hibernateTypesVersion")}")
+    implementation("io.hypersistence:hypersistence-utils-hibernate-63:${property("hibernateTypesVersion")}")
 
     // POSTGRESQL
     runtimeOnly("org.postgresql:postgresql")
@@ -134,9 +135,6 @@ dependencies {
 
     // S3
     implementation("com.amazonaws:aws-java-sdk-s3:${property("awsSDKVersion")}")
-
-    // SLACK
-    implementation("com.github.seratch:jslack:${property("jslackVersion")}")
 
     // MICROMETER
     runtimeOnly("io.micrometer:micrometer-registry-prometheus")
@@ -150,9 +148,8 @@ dependencies {
     // Webflux
     implementation("org.springframework.boot:spring-boot-starter-webflux")
 
-    // Caching
-    implementation("org.springframework.boot:spring-boot-starter-cache")
-    implementation("com.github.ben-manes.caffeine:caffeine:${property("caffeineVersion")}")
+    // GSON Library
+    implementation("com.google.code.gson:gson:2.10.1")
 
     // Unit Test
     testImplementation(kotlin("test"))
@@ -161,7 +158,7 @@ dependencies {
     testImplementation(kotlin("test-annotations-common"))
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:${property("kotlinCoroutinesVersion")}")
 
-    testImplementation("com.c4-soft.springaddons:spring-addons-webmvc-jwt-test:${property("springAddonsVersion")}")
+    testImplementation("com.c4-soft.springaddons:spring-addons-starter-oidc-test:${property("springAddonsVersion")}")
     testImplementation("com.ninja-squad:springmockk:${property("springMockkVersion")}")
     testImplementation("com.squareup.okhttp3:mockwebserver:${property("okhttpVersion")}")
     testImplementation("org.springframework.security:spring-security-test")

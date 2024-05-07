@@ -11,37 +11,40 @@ import dk.cachet.carp.webservices.summary.domain.SummaryLog
 import dk.cachet.carp.webservices.summary.domain.SummaryStatus
 import dk.cachet.carp.webservices.summary.factory.impl.SummaryFactory
 import dk.cachet.carp.webservices.summary.repository.SummaryRepository
-import dk.cachet.carp.webservices.summary.service.IResourceExporterService
-import dk.cachet.carp.webservices.summary.service.ISummaryService
-import jakarta.annotation.PreDestroy
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
+import dk.cachet.carp.webservices.summary.service.ResourceExporterService
+import dk.cachet.carp.webservices.summary.service.SummaryService
+import kotlinx.coroutines.*
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.core.io.Resource
 import org.springframework.stereotype.Service
 import java.nio.file.Path
+import java.util.concurrent.Executors
 
 @Service
 class SummaryServiceImpl
     (
-    private val resourceExporter: IResourceExporterService,
+    private val resourceExporter: ResourceExporterService,
     private val summaryRepository: SummaryRepository,
     private val summaryFactory: SummaryFactory,
     private val fileStorage: FileStorage,
     private val fileUtil: FileUtil,
-) : ISummaryService {
+) : SummaryService
+{
 
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
-        private val exportScope = CoroutineScope(Dispatchers.IO)
+        private val threadPoolExecutor = Executors.newCachedThreadPool()
     }
 
-    override fun createSummaryForStudy(studyId: String, deploymentIds: List<String>?): Summary {
-        var summary = summaryFactory.create(UUID(studyId), deploymentIds)
-        val existingSummary = getSummary(summary.id)
+    /**
+     * NOTE: TODO this should depend on kotlin coroutines. Zip creation should be handled by the Dispatchers.IO context
+     * Currently, the persistence layer that we use, doesn't provide native support for kotlin coroutines so we
+     * should switch to something that does, like R2DBC. (The issue manifests in the fact the updates dont work in a reactive context)
+     * */
+    override fun createSummaryForStudy(studyId: UUID, deploymentIds: List<String>?): Summary {
+        var summary = summaryFactory.create(studyId, deploymentIds)
+        val existingSummary = getSummary(UUID( summary.id ))
 
         if (existingSummary != null) {
             return existingSummary
@@ -49,7 +52,7 @@ class SummaryServiceImpl
 
         summary = summaryRepository.save(summary)
 
-        exportScope.launch {
+        threadPoolExecutor.execute {
             LOGGER.info("Creating summary...")
             val summaryLog = SummaryLog(studyId, summary.createdAt)
 
@@ -73,7 +76,7 @@ class SummaryServiceImpl
         return summary
     }
 
-    override fun downloadSummary(id: String): Resource {
+    override fun downloadSummary(id: UUID): Resource {
         val summary = getSummaryById(id)
         val file = fileStorage.getFile(summary.fileName)
 
@@ -83,15 +86,15 @@ class SummaryServiceImpl
         return file
     }
 
-    override fun listSummaries(accountId: String, studyId: String?): List<Summary> {
-        if (studyId.isNullOrEmpty()) {
-            return summaryRepository.findAllByCreatedBy(accountId)
+    override fun listSummaries(accountId: UUID, studyId: UUID?): List<Summary> {
+        if ( studyId == null ) {
+            return summaryRepository.findAllByCreatedBy(accountId.stringRepresentation)
         }
 
-        return summaryRepository.findAllByCreatedByAndStudyId(accountId, studyId)
+        return summaryRepository.findAllByCreatedByAndStudyId(accountId.stringRepresentation, studyId.stringRepresentation)
     }
 
-    override fun deleteSummaryById(id: String): String {
+    override fun deleteSummaryById(id: UUID): UUID {
         val summary = getSummaryById(id)
         if (summary.status == SummaryStatus.IN_PROGRESS) {
             throw ConflictException("The summary creation is still in progress.")
@@ -103,8 +106,8 @@ class SummaryServiceImpl
         return id
     }
 
-    override fun getSummaryById(id: String): Summary {
-        val summaryOptional = summaryRepository.findById(id)
+    override fun getSummaryById(id: UUID): Summary {
+        val summaryOptional = summaryRepository.findById(id.stringRepresentation)
         if (!summaryOptional.isPresent) {
             LOGGER.info("Summary with id $id is not found.")
             throw ResourceNotFoundException("Summary with id $id is not found.")
@@ -122,16 +125,16 @@ class SummaryServiceImpl
         }
     }
 
-    private suspend fun exportStudyOrThrow(studyId: String, deploymentIds: List<String>?, path: Path, log: SummaryLog) {
+    private fun exportStudyOrThrow(studyId: UUID, deploymentIds: List<String>?, path: Path, log: SummaryLog) {
         try {
-            resourceExporter.exportAllForStudy(studyId, deploymentIds, path, log)
+            runBlocking { resourceExporter.exportAllForStudy(studyId, deploymentIds, path, log) }
         } catch (ex: Exception) {
             LOGGER.info("Data collection failed due to an error: ${ex.message}")
             throw FileStorageException(ex.message)
         }
     }
 
-    private fun getSummary(id: String): Summary? {
+    private fun getSummary(id: UUID): Summary? {
         try {
             val summary = getSummaryById(id)
 
@@ -145,10 +148,5 @@ class SummaryServiceImpl
         }
 
         return null
-    }
-
-    @PreDestroy
-    fun onDestroy() {
-        exportScope.cancel()
     }
 }

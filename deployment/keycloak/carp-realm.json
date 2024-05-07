@@ -5,12 +5,12 @@
   "defaultSignatureAlgorithm": "RS256",
   "revokeRefreshToken": false,
   "refreshTokenMaxReuse": 0,
-  "accessTokenLifespan": 300,
-  "accessTokenLifespanForImplicitFlow": 900,
+  "accessTokenLifespan": 900,
+  "accessTokenLifespanForImplicitFlow": 1800,
   "ssoSessionIdleTimeout": 1800,
-  "ssoSessionMaxLifespan": 36000,
-  "ssoSessionIdleTimeoutRememberMe": 0,
-  "ssoSessionMaxLifespanRememberMe": 0,
+  "ssoSessionMaxLifespan": 86400,
+  "ssoSessionIdleTimeoutRememberMe": 604800,
+  "ssoSessionMaxLifespanRememberMe": 2592000,
   "offlineSessionIdleTimeout": 2592000,
   "offlineSessionMaxLifespanEnabled": false,
   "offlineSessionMaxLifespan": 5184000,
@@ -21,15 +21,15 @@
   "accessCodeLifespan": 60,
   "accessCodeLifespanUserAction": 300,
   "accessCodeLifespanLogin": 1800,
-  "actionTokenGeneratedByAdminLifespan": 43200,
-  "actionTokenGeneratedByUserLifespan": 300,
+  "actionTokenGeneratedByAdminLifespan": 604800,
+  "actionTokenGeneratedByUserLifespan": 3600,
   "oauth2DeviceCodeLifespan": 600,
   "oauth2DevicePollingInterval": 5,
   "enabled": true,
   "sslRequired": "external",
   "registrationAllowed": true,
   "registrationEmailAsUsername": false,
-  "rememberMe": false,
+  "rememberMe": true,
   "verifyEmail": true,
   "loginWithEmailAllowed": true,
   "duplicateEmailsAllowed": false,
@@ -71,7 +71,8 @@
         "composites": {
           "realm": [
             "offline_access",
-            "uma_authorization"
+            "uma_authorization",
+            "participant"
           ],
           "client": {
             "account": [
@@ -641,7 +642,6 @@
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
-      "secret": "**********",
       "redirectUris": [],
       "webOrigins": [],
       "notBefore": 0,
@@ -873,6 +873,115 @@
     }
   ],
   "clientScopes": [
+    {
+      "id": "e6e8d389-9c17-41d8-950f-aab87d7742c4",
+      "name": "carp",
+      "description": "OpenID Connect scope for adding CARP Authorization claims to the token.",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "false",
+        "gui.order": "",
+        "consent.screen.text": ""
+      },
+      "protocolMappers": [
+        {
+          "id": "ca9653d1-926a-4652-b9b2-12597b356aab",
+          "name": "Protocol Owner",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "multivalued": "true",
+            "user.attribute": "protocolOwner",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "protocol_owner",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "id": "5a28ceca-4995-40cf-b4b2-961cf026d77b",
+          "name": "Study Owner",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "multivalued": "true",
+            "user.attribute": "studyOwner",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "study_owner",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "id": "ed5fd62a-8321-4e32-b4ad-9e4885dc4458",
+          "name": "In Deployment",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "multivalued": "true",
+            "user.attribute": "inDeployment",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "in_deployment",
+            "jsonType.label": "String"
+          }
+        },        {
+          "id": "aed9e007-0c5a-4cd6-9f62-d99626c1edbb",
+          "name": "Collection Owner",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "multivalued": "true",
+            "user.attribute": "collectionOwner",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "collection_owner",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "id": "2e1eb95f-9a8f-4b8e-9e06-b47cae6ea37e",
+          "name": "Consent Owner",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "multivalued": "true",
+            "user.attribute": "consentOwner",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "consent_owner",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "id": "579a16d4-e7c3-4b63-9241-49ef03462064",
+          "name": "File Owner",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "multivalued": "true",
+            "user.attribute": "fileOwner",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "file_owner",
+            "jsonType.label": "String"
+          }
+        }
+      ]
+    },
     {
       "id": "ac2ceb26-3a1d-4dc3-9d82-a1aa8bc49ba2",
       "name": "email",
@@ -1388,7 +1497,8 @@
     "roles",
     "role_list",
     "email",
-    "profile"
+    "profile",
+    "carp"
   ],
   "defaultOptionalClientScopes": [
     "offline_access",
@@ -2286,7 +2396,7 @@
     "cibaInterval": "5",
     "realmReusableOtpCode": "false"
   },
-  "keycloakVersion": "21.0.2",
+  "keycloakVersion": "22.0.1",
   "userManagedAccessAllowed": false,
   "clientProfiles": {
     "profiles": []

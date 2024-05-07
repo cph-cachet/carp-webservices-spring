@@ -23,14 +23,12 @@ x-keycloak-prod-commands: &keycloak-prod-commands
     - "--db-url=jdbc:postgresql://carp-postgres-${PROFILE}:5432/keycloak"
     - "--db-username=${ADMIN_USER}"
     - "--db-password=${ADMIN_PASSWORD}"
-    - "--hostname-url=${KEYCLOAK_HOSTNAME_URL}"
-    - "--hostname-admin-url=${KEYCLOAK_HOSTNAME_ADMIN_URL}"
     - "--import-realm"
 
 # Apply the following configuration if hosting behind a reverse proxy
-#    - "--hostname-url=${KEYCLOAK_HOSTNAME_URL}"
-#    - "--hostname-admin-url=${KEYCLOAK_HOSTNAME_ADMIN_URL}"
-#    - "--proxy ${KEYCLOAK_PROXY_MODE}"
+#    - "--hostname-url=${KC_URL}"
+#    - "--hostname-admin-url=${KC_URL}"
+#    - "--proxy edge
 
 services:
   carp-ws:
@@ -38,25 +36,21 @@ services:
     build:
       dockerfile: Dockerfile
     container_name: "carp-ws-${PROFILE}"
-    depends_on:
-      - postgres
-      - rabbitmq
-      - keycloak
     environment:
       - "SPRING_PROFILES_ACTIVE=${PROFILE}"
       - "JAVA_OPTS=-Xmx1g -Xms1g -XX:MaxPermSize=512m"
-      - "ADMIN_USER=${ADMIN_USER}"
-      - "ADMIN_PASSWORD=${ADMIN_PASSWORD}"
+    env_file:
+      - .env
     image: "carp-ws:${PROFILE}"
     ports:
-      - "${CARP_WS_PORT}:8080"
+      - "${CAWS_PORT}:${CAWS_PORT}"
     profiles:
       - production
       - staging
       - testing
       - development
     volumes:
-      - "/data/carp/storage/${PROFILE}:/root/home/carp/storage/${PROFILE}"
+      - "/data/carp/storage/${PROFILE}:/home/carp/storage/${PROFILE}"
 
   rabbitmq: &rabbitmq
     <<: *carp-base-config
@@ -91,7 +85,7 @@ services:
     environment:
       - "POSTGRES_USER=${ADMIN_USER}"
       - "POSTGRES_PASSWORD=${ADMIN_PASSWORD}"
-      - PGDATA=/data/postgres
+      - PGDATA=/var/lib/postgresql/data
     hostname: "carp-postgres-${PROFILE}"
     image: postgres:latest
     profiles:
@@ -113,18 +107,18 @@ services:
   keycloak: &keycloak
     <<: [*carp-base-config]
     container_name: "carp-keycloak-${PROFILE}"
-    depends_on:
-      - postgres
     environment:
       - "KEYCLOAK_ADMIN=${ADMIN_USER}"
       - "KEYCLOAK_ADMIN_PASSWORD=${ADMIN_PASSWORD}"
     image: quay.io/keycloak/keycloak:22.0.1
     ports:
-      - "${KEYCLOAK_PORT}:8080"
+      - "${KC_PORT}:8080"
     profiles:
       - base
     volumes:
       - ./deployment/keycloak/carp-realm.json:/opt/keycloak/data/import/carp-realm.json
+      - ./deployment/keycloak/carp-theme.jar:/opt/keycloak/providers/carp-theme.jar
+      - ./deployment/keycloak/magic-links.jar:/opt/keycloak/providers/magic-links.jar
       - keycloak:/opt/keycloak/data
 
   keycloak-dev:
@@ -140,6 +134,56 @@ services:
     profiles:
       - production
 
+  prometheus:
+    <<: *carp-base-config
+    container_name: "carp-prometheus"
+    image: prom/prometheus:latest
+    ports:
+      - "${PROMETHEUS_PORT}:9090"
+    profiles:
+      - production
+    volumes:
+      - ./deployment/monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+
+  grafana:
+    <<: *carp-base-config
+    container_name: "carp-grafana"
+    environment:
+      - "GF_SECURITY_ADMIN_USER=${ADMIN_USER}"
+      - "GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD}"
+    image: grafana/grafana:latest
+    ports:
+      - "${GRAFANA_PORT}:3000"
+    profiles:
+      - production
+    volumes:
+      - ./deployment/monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - ./deployment/monitoring/grafana/dashboards:/var/lib/grafana/dashboards
+      - ./deployment/monitoring/grafana/grafana.ini:/etc/grafana/grafana.ini
+
+  node-exporter:
+    <<: *carp-base-config
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    container_name: "carp-node-exporter"
+    image: prom/node-exporter:latest
+    profiles:
+      - production
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+
 networks:
   carp:
     external: true
@@ -149,8 +193,13 @@ networks:
 volumes:
   rabbitmq:
     name: "rabbitmq-${PROFILE}"
+    external: true
   postgres:
     name: "postgres-${PROFILE}"
+    external: true
   keycloak:
     name: "keycloak-${PROFILE}"
-
+    external: true
+  prometheus:
+    name: "prometheus-${PROFILE}"
+    external: True
