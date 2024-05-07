@@ -11,6 +11,7 @@ import dk.cachet.carp.webservices.common.services.CoreServiceContainer
 import dk.cachet.carp.webservices.consent.service.ConsentDocumentService
 import dk.cachet.carp.webservices.data.repository.DataStreamSequenceRepository
 import dk.cachet.carp.webservices.dataPoint.service.DataPointService
+import dk.cachet.carp.webservices.deployment.repository.CoreParticipationRepository
 import dk.cachet.carp.webservices.deployment.repository.StudyDeploymentRepository
 import dk.cachet.carp.webservices.document.domain.Document
 import dk.cachet.carp.webservices.document.service.DocumentService
@@ -33,9 +34,9 @@ import java.nio.file.Path
 @Service
 class ResourceExporterServiceImpl
 (
-    private val services: CoreServiceContainer,
     private val objectMapper: ObjectMapper,
     private val studyRepository: CoreStudyRepository,
+    private val participationRepository: CoreParticipationRepository,
     private val studyDeploymentRepository: StudyDeploymentRepository,
     private val dataPointService: DataPointService,
     private val consentDocumentService: ConsentDocumentService,
@@ -120,8 +121,14 @@ class ResourceExporterServiceImpl
     override fun exportParticipantData(deploymentIds: List<String>, rootFolder: Path, summaryLog: SummaryLog) = runBlocking {
         val participantDataList = mutableListOf<ParticipantData>()
         deploymentIds.forEach {
-            val data = services.participationService.getParticipantData(UUID(it))
-            participantDataList.add(data)
+            val group = participationRepository.getParticipantGroupOrThrowBy(UUID(it))
+            participantDataList.add(
+                ParticipantData(
+                    group.studyDeploymentId,
+                    group.commonData.toMap(),
+                    group.roleData.toList()
+                )
+            )
         }
         if (participantDataList.isEmpty())
         {
