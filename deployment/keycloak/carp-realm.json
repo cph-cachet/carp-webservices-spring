@@ -903,17 +903,17 @@
         },
         {
           "id": "5a28ceca-4995-40cf-b4b2-961cf026d77b",
-          "name": "Study Owner",
+          "name": "Manage Study",
           "protocol": "openid-connect",
           "protocolMapper": "oidc-usermodel-attribute-mapper",
           "consentRequired": false,
           "config": {
             "userinfo.token.claim": "true",
             "multivalued": "true",
-            "user.attribute": "studyOwner",
+            "user.attribute": "manageStudy",
             "id.token.claim": "true",
             "access.token.claim": "true",
-            "claim.name": "study_owner",
+            "claim.name": "manage_study",
             "jsonType.label": "String"
           }
         },
