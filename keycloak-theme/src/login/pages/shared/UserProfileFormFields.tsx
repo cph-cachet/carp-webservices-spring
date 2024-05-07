@@ -2,7 +2,7 @@ import type { ClassKey } from 'keycloakify/login/TemplateProps';
 import type { Attribute } from 'keycloakify/login/kcContext/KcContext';
 import { useFormValidation } from 'keycloakify/login/lib/useFormValidation';
 import { Fragment, useEffect } from 'react';
-import CarpInputNoFormik from 'src/components/CarpInputNoFormik';
+import CarpInputNoFormik from '../../../components/CarpInputNoFormik';
 import type { I18n } from '../../i18n';
 
 export type UserProfileFormFieldsProps = {

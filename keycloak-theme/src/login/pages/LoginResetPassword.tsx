@@ -1,32 +1,32 @@
-import { useFormik } from 'formik';
-import type { PageProps } from 'keycloakify/login/pages/PageProps';
+import { useFormik } from "formik";
+import type { PageProps } from "keycloakify/login/pages/PageProps";
 import { useState, type FormEventHandler } from "react";
 import { useConstCallback } from "keycloakify/tools/useConstCallback";
-import CarpInput from 'src/components/CarpInput';
-import { AuthInfoText } from 'src/components/Layout/PublicPageLayout/AuthPageLayout/styles';
-import * as yup from 'yup';
-import AuthActionButton from 'src/components/Buttons/AuthActionButton';
-import BannerLogin from 'src/components/Layout/PublicPageLayout/BannerLogin';
-import type { KcContext } from '../kcContext';
-import type { I18n } from '../i18n';
+import CarpInput from "../../components/CarpInput";
+import { AuthInfoText } from "../../components/Layout/PublicPageLayout/AuthPageLayout/styles";
+import * as yup from "yup";
+import AuthActionButton from "../../components/Buttons/AuthActionButton";
+import BannerLogin from "../../components/Layout/PublicPageLayout/BannerLogin";
+import type { KcContext } from "../kcContext";
+import type { I18n } from "../i18n";
 
 const validationSchema = yup.object({
   username: yup
     .string()
-    .email('Enter a valid email')
-    .required('Email is required'),
+    .email("Enter a valid email")
+    .required("Email is required"),
 });
 
 const LoginResetPassword = (
   props: PageProps<
-    Extract<KcContext, { pageId: 'login-reset-password.ftl' }>,
+    Extract<KcContext, { pageId: "login-reset-password.ftl" }>,
     I18n
-  >
+  >,
 ) => {
   const { kcContext, i18n, doUseDefaultCss, Template, classes } = props;
 
   const [isLoading, setIsLoading] = useState(false);
-  const onSubmit = useConstCallback<FormEventHandler<HTMLFormElement>>(e => {
+  const onSubmit = useConstCallback<FormEventHandler<HTMLFormElement>>((e) => {
     e.preventDefault();
 
     setIsLoading(true);
@@ -35,20 +35,22 @@ const LoginResetPassword = (
 
     // NOTE: Even if we login with email Keycloak expect username and password in
     // the POST request.
-    formElement.querySelector("input[name='email']")?.setAttribute("name", "username");
+    formElement
+      .querySelector("input[name='email']")
+      ?.setAttribute("name", "username");
 
     formElement.submit();
   });
 
   const formik = useFormik({
     initialValues: {
-      username: '',
+      username: "",
     },
     validationSchema,
-    onSubmit: () => { },
+    onSubmit: () => {},
   });
 
-  const { url, realm, auth } = kcContext;
+  const { url } = kcContext;
 
   const { msg } = i18n;
 
@@ -57,9 +59,7 @@ const LoginResetPassword = (
       {...{ kcContext, i18n, doUseDefaultCss, classes }}
       displayMessage={false}
       headerNode={msg("emailForgotTitle")}
-      infoNode={
-        <BannerLogin loginUrl={url.loginUrl} />
-      }
+      infoNode={<BannerLogin loginUrl={url.loginUrl} />}
     >
       <AuthInfoText variant="h4_web">
         Enter your email address. If an account is found, a password reset link
@@ -81,7 +81,7 @@ const LoginResetPassword = (
         />
         <AuthActionButton loading={isLoading} text="Submit" />
       </form>
-    </Template >
+    </Template>
   );
 };
 

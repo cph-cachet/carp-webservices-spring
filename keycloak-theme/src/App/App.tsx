@@ -1,104 +1,87 @@
-import jwt_decode from 'jwt-decode';
-import { addParamToUrl } from 'powerhooks/tools/urlSearchParams';
-import {
-  addBarToQueryParams,
-  addFooToQueryParams,
-} from '../login/valuesTransferredOverUrl';
-import './App.css';
-import logo from './logo.svg';
-import { createOidcClientProvider, useOidcClient } from './oidc';
-
-// On older Keycloak version you need the /auth (e.g: http://localhost:8080/auth)
-// On newer version you must remove it (e.g: http://localhost:8080 )
-const keycloakUrl = 'https://auth.code.gouv.fr/auth';
-const keycloakRealm = 'keycloakify';
-const keycloakClient = 'starter';
-
-const { OidcClientProvider } = createOidcClientProvider({
-  url: keycloakUrl,
-  realm: keycloakRealm,
-  clientId: keycloakClient,
-  // This function will be called just before redirecting,
-  // it should return the current langue.
-  // kcContext.locale.currentLanguageTag will be what this function returned just before redirecting.
-  getUiLocales: () => 'en',
-  transformUrlBeforeRedirect: (url) =>
-    [url]
-      // Instead of foo and bar you could have isDark for example or any other state that you wish to
-      // transfer from the main app to the login pages.
-      .map((url) => addFooToQueryParams({ url, value: { foo: 42 } }))
-      .map((url) =>
-        addBarToQueryParams({
-          url,
-          value: 'value of bar transferred to login page',
-        })
-      )[0],
-  log: console.log,
-});
+import "./App.css";
+import reactSvgUrl from "./assets/react.svg";
+import viteSvgUrl from "./assets/vite.svg";
+import { OidcProvider, useOidc, getKeycloakAccountUrl } from "./oidc";
 
 export default function App() {
-  return (
-    <OidcClientProvider>
-      <ContextualizedApp />
-    </OidcClientProvider>
-  );
+    return (
+        // To integrate Keycloak to your React App you have many options such as:  
+        // - https://www.npmjs.com/package/keycloak-js  
+        // - https://github.com/authts/oidc-client-ts
+        // - https://github.com/authts/react-oidc-context  
+        // In this starter we use oidc-spa instead
+        // It's a new library made by us, the Keycloakify team.  
+        // Check it out: https://github.com/keycloakify/oidc-spa
+        <OidcProvider>
+            <ContextualizedApp />
+        </OidcProvider>
+    );
 }
 
-const ContextualizedApp = () => {
-  const { oidcClient } = useOidcClient();
+function ContextualizedApp() {
 
-  let accountUrl = `${keycloakUrl}/realms/${keycloakRealm}/account`;
+    const { isUserLoggedIn, login, logout, oidcTokens } = useOidc();
 
-  // Set the language the user will get on the account page
-  accountUrl = addParamToUrl({
-    url: accountUrl,
-    name: 'kc_locale',
-    value: 'en',
-  }).newUrl;
+    return (
+        <div className="App">
+            <div>
+            <div className="App-payload">
+            {isUserLoggedIn ?
+                (
+                    <>
 
-  // Enable to redirect to the app from the account page we'll get the referrer_uri under kcContext.referrer.url
-  // It's useful to avoid hard coding the app url in the keycloak config
-  accountUrl = addParamToUrl({
-    url: accountUrl,
-    name: 'referrer',
-    value: keycloakClient,
-  }).newUrl;
+                        <h1>Hello {oidcTokens.decodedIdToken.name} !</h1>
+                        <a
+                            href={getKeycloakAccountUrl({ locale: "en" })}
+                        >
+                            Link to your Keycloak account
+                        </a>
+                        &nbsp;&nbsp;&nbsp;
+                        <button
+                            onClick={() => logout({ redirectTo: "home" })}
+                        >
+                            Logout
+                        </button>
+                        <Jwt />
+                    </>
+                )
+                :
+                (
+                    <button
+                        onClick={() => login({
+                            doesCurrentHrefRequiresAuth: false,
+                            //extraQueryParams: { kc_idp_hint: "google" }
+                        })}
+                    >
+                        Login
+                    </button>
+                )
+            }
+            </div>
+            <div className="App-logo-wrapper">
+            <img src={reactSvgUrl} className="App-logo rotate" alt="logo" />
+            &nbsp;&nbsp;&nbsp;
+            <img src={viteSvgUrl} className="App-logo" alt="logo" />
+            </div>
+            </div>
+        </div>
+    );
 
-  accountUrl = addParamToUrl({
-    url: accountUrl,
-    name: 'referrer_uri',
-    value: window.location.href,
-  }).newUrl;
+}
 
-  return (
-    <div className="App">
-      <header className="App-header">
-        {oidcClient.isUserLoggedIn ? (
-          <>
-            <h1>You are authenticated !</h1>
-            {/* On older Keycloak version its /auth/realms instead of /realms */}
-            <a href={accountUrl}>Link to your Keycloak account</a>
-            <pre style={{ textAlign: 'left' }}>
-              {JSON.stringify(jwt_decode(oidcClient.getAccessToken()), null, 2)}
-            </pre>
-            <button onClick={() => oidcClient.logout({ redirectTo: 'home' })}>
-              Logout
-            </button>
-          </>
-        ) : (
-          <button>Login</button>
-        )}
-        <img src={logo} className="App-logo" alt="logo" />
-        <p style={{ fontFamily: '"Work Sans"' }}>Hello world</p>
-        <p>
-          Check out all keycloak pages in the{' '}
-          <a href="https://storybook.keycloakify.dev/storybook">Storybook</a>!
-        </p>
-        <p>
-          Once you've identified the ones you want to customize run{' '}
-          <code>npx eject-keycloak-page</code>
-        </p>
-      </header>
-    </div>
-  );
-};
+function Jwt() {
+
+    const { oidcTokens } = useOidc({
+        assertUserLoggedIn: true
+    });
+
+    // NOTE: Use `Bearer ${oidcTokens.accessToken}` as the Authorization header to call your backend
+    // Here we just display the decoded id token
+
+    return (
+        <pre style={{ textAlign: "left" }}>
+            {JSON.stringify(oidcTokens.decodedIdToken, null, 2)}
+        </pre>
+    );
+
+}

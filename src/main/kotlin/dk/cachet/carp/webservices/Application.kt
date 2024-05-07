@@ -14,9 +14,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement
 @EnableAsync
 class Application
 
-fun main(args: Array<String>)
+fun main( args: Array<String> )
 {
-    runApplication<Application>(*args)
+    runApplication<Application>( *args )
 }
 
 

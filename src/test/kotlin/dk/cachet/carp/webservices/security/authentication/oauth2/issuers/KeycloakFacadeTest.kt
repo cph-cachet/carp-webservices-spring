@@ -13,22 +13,14 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.assertThrows
 import kotlin.test.Test
 
-// KeycloakFacade is most likely to change when the official keycloak wrappers are released.
-@OptIn(ExperimentalCoroutinesApi::class)
-class KeycloakFacadeTest {
-
+// KeycloakFacade is more than likely to change when the official keycloak wrappers are released.
+class KeycloakFacadeTest
+{
     private val realm = "test"
     private val clientId = "test"
     private val clientSecret = "test"
     private val objectMapper = mockk<ObjectMapper>()
     private val environmentUtil = mockk<EnvironmentUtil>()
-
-    @Test
-    fun `updateAccount is not supported`() = runTest {
-        assertThrows<UnsupportedOperationException> {
-            KeycloakFacade("", realm, clientId, clientSecret, objectMapper, environmentUtil).updateAccount(mockk())
-        }
-    }
 
     @Test
     fun `deleteAccount is not supported`() = runTest {

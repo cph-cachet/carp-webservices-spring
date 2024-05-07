@@ -2,6 +2,7 @@ package dk.cachet.carp.webservices.security.authentication.oauth2.issuers.keyclo
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import dk.cachet.carp.webservices.security.authentication.domain.Account
+import dk.cachet.carp.webservices.security.authorization.Claim
 import dk.cachet.carp.webservices.security.authorization.Role
 
 
@@ -12,42 +13,36 @@ data class UserRepresentation(
     var firstName: String? = null,
     var lastName: String? = null,
     var email: String? = null,
-    var emailVerified: Boolean? = null,
-    var requiredActions: List<RequiredActions>? = null,
-    var enabled: Boolean? = null
+    var emailVerified: Boolean? = false,
+    var requiredActions: List<RequiredAction>? = emptyList(),
+    var enabled: Boolean? = true,
+    var attributes: Map<String, Any>? = emptyMap()
 ) {
     companion object {
-        fun createFromAccount(account: Account): UserRepresentation {
-            val userRepresentation = UserRepresentation()
-            userRepresentation.id = account.id
-            userRepresentation.username = account.username
-            userRepresentation.firstName = account.firstName
-            userRepresentation.lastName = account.lastName
-            userRepresentation.email = account.email
-
-            return userRepresentation
-        }
+        fun createFromAccount(account: Account, requiredActions: List<RequiredAction> = emptyList()) =
+            UserRepresentation(
+                id = account.id,
+                username = account.username ?: account.email,
+                firstName = account.firstName,
+                lastName = account.lastName,
+                email = account.email,
+                requiredActions = requiredActions,
+                emailVerified = !requiredActions.contains( RequiredAction.VERIFY_EMAIL ),
+                attributes = account.carpClaims?.groupBy( { Claim.userAttributeName( it::class ) }, { it.value } )
+            )
     }
 
-    fun setDefaultActions(): UserRepresentation {
-        requiredActions = RequiredActions.getActionsForNewAccount()
-        emailVerified = false
-        enabled = true
+    fun toAccount( roles: Set<Role> ) =
+        Account(
+            id = id,
+            username = username,
+            firstName = firstName,
+            lastName = lastName,
+            email = email,
+            role = roles.max(),
+            carpClaims = attributes?.mapNotNull { Claim.fromUserAttribute(it.key to it.value) }?.flatten()?.toSet()
+        )
 
-        return this
-    }
-
-    fun toAccount(roles: Set<Role>): Account {
-        val account = Account()
-        account.id = id
-        account.username = username
-        account.firstName = firstName
-        account.lastName = lastName
-        account.email = email
-        account.role = roles.max()
-
-        return account
-    }
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -56,7 +51,7 @@ data class RoleRepresentation(
     var name: String? = null
 )
 
-enum class RequiredActions {
+enum class RequiredAction {
     VERIFY_EMAIL,
     UPDATE_PROFILE,
     UPDATE_PASSWORD,
@@ -64,18 +59,27 @@ enum class RequiredActions {
     TERMS_AND_CONDITIONS;
 
     companion object {
-        fun getActionsForNewAccount(): List<RequiredActions> =
-            listOf(
-                VERIFY_EMAIL,
-                UPDATE_PASSWORD,
-                UPDATE_PROFILE
-            )
+        fun getForAccountType(accountType: AccountType): List<RequiredAction> {
+            return when (accountType) {
+                AccountType.NEW -> listOf(
+                    VERIFY_EMAIL,
+                    UPDATE_PASSWORD,
+                    UPDATE_PROFILE
+                )
 
-        fun getActionsForExistingAccount(): List<RequiredActions> =
-            listOf(
-                UPDATE_PASSWORD,
-                UPDATE_PROFILE
-           )
+                AccountType.EXISTING -> listOf(
+                    UPDATE_PASSWORD,
+                    UPDATE_PROFILE
+                )
+
+                AccountType.GENERATED -> emptyList()
+            }
+        }
     }
 }
 
+enum class AccountType {
+    NEW,
+    EXISTING,
+    GENERATED
+}

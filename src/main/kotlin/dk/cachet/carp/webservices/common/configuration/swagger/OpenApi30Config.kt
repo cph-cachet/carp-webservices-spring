@@ -46,7 +46,7 @@ class OpenApi30Config(
         val apiTitle = String.format("%s API", StringUtils.capitalize(moduleName))
 
         return OpenAPI()
-            .addServersItem(Server().url(environmentUtil.serverUrl.toString()))
+            .addServersItem(Server().url(environmentUtil.url))
             .addSecurityItem(SecurityRequirement().addList(SCHEME))
             .components(
                 Components()

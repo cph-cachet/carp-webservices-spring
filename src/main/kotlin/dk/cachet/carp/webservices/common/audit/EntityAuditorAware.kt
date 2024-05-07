@@ -6,7 +6,8 @@ import java.util.*
 
 /**
  * An [AuditorAware] which retrieves the account ID of the currently authenticated user.
- * JPA entities annotated with [EntityListeners] will automatically have their `createdBy` and `lastModifiedBy` fields set.
+ * JPA entities annotated with [EntityListeners] will automatically have their `createdBy` and
+ * `lastModifiedBy` fields set.
  */
 class EntityAuditorAware(
     private val authenticationService: AuthenticationService
@@ -14,8 +15,8 @@ class EntityAuditorAware(
 {
     override fun getCurrentAuditor(): Optional<String> =
         try {
-            Optional.of(authenticationService.getCurrentPrincipal().id!!)
+            Optional.of( authenticationService.getId().stringRepresentation )
         } catch (e: Exception) {
-            Optional.of("SYSTEM")
+            Optional.of( "SYSTEM" )
         }
 }

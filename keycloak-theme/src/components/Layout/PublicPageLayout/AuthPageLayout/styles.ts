@@ -12,7 +12,7 @@ export const AuthContainer = styled("div")(({ theme }) => ({
   marginTop: 82,
   [theme.breakpoints.down("sm")]: {
     width: "100%",
-    padding: "0 50px",
+    padding: "0 8px",
     marginTop: 150,
   },
   [theme.breakpoints.down("xs")]: {

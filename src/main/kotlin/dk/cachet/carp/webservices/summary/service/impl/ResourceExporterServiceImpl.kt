@@ -2,28 +2,25 @@ package dk.cachet.carp.webservices.summary.service.impl
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import dk.cachet.carp.common.application.UUID
-import dk.cachet.carp.data.application.DataStreamService
 import dk.cachet.carp.deployments.application.ParticipationService
 import dk.cachet.carp.deployments.application.users.ParticipantData
 import dk.cachet.carp.deployments.domain.StudyDeploymentSnapshot
-import dk.cachet.carp.webservices.collection.service.ICollectionService
+import dk.cachet.carp.webservices.collection.service.CollectionService
 import dk.cachet.carp.webservices.common.exception.file.FileStorageException
-import dk.cachet.carp.webservices.consent.service.IConsentDocumentService
+import dk.cachet.carp.webservices.common.services.CoreServiceContainer
+import dk.cachet.carp.webservices.consent.service.ConsentDocumentService
 import dk.cachet.carp.webservices.data.repository.DataStreamSequenceRepository
 import dk.cachet.carp.webservices.dataPoint.service.DataPointService
-import dk.cachet.carp.webservices.deployment.repository.CoreDeploymentRepository
 import dk.cachet.carp.webservices.deployment.repository.StudyDeploymentRepository
-import dk.cachet.carp.webservices.deployment.service.CoreParticipationService
 import dk.cachet.carp.webservices.document.domain.Document
-import dk.cachet.carp.webservices.document.service.IDocumentService
+import dk.cachet.carp.webservices.document.service.DocumentService
 import dk.cachet.carp.webservices.file.domain.File
 import dk.cachet.carp.webservices.file.service.FileService
 import dk.cachet.carp.webservices.file.service.FileStorage
 import dk.cachet.carp.webservices.file.util.FileUtil
-import dk.cachet.carp.webservices.study.repository.CoreParticipantRepository
 import dk.cachet.carp.webservices.study.repository.CoreStudyRepository
 import dk.cachet.carp.webservices.summary.domain.SummaryLog
-import dk.cachet.carp.webservices.summary.service.IResourceExporterService
+import dk.cachet.carp.webservices.summary.service.ResourceExporterService
 import kotlinx.coroutines.runBlocking
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -36,29 +33,24 @@ import java.nio.file.Path
 @Service
 class ResourceExporterServiceImpl
 (
+    private val services: CoreServiceContainer,
     private val objectMapper: ObjectMapper,
     private val studyRepository: CoreStudyRepository,
-    private val studyParticipantRepository: CoreParticipantRepository,
-    private val deploymentRepository: CoreDeploymentRepository,
     private val studyDeploymentRepository: StudyDeploymentRepository,
-    coreParticipationService: CoreParticipationService,
-    private val coreDataStreamService: DataStreamService,
     private val dataPointService: DataPointService,
-    private val consentDocumentService: IConsentDocumentService,
+    private val consentDocumentService: ConsentDocumentService,
     private val fileService: FileService,
     private val fileStorage: FileStorage,
     private val fileUtil: FileUtil,
-    private val documentService: IDocumentService,
-    private val collectionService: ICollectionService,
+    private val documentService: DocumentService,
+    private val collectionService: CollectionService,
     private val dataStreamSequenceRepository: DataStreamSequenceRepository
-): IResourceExporterService
+): ResourceExporterService
 {
     companion object
     {
         private val LOGGER: Logger = LogManager.getLogger()
     }
-
-    private val deploymentParticipationService: ParticipationService = coreParticipationService.instance
 
     /**
      * Exports every application resource serialized into the specified [rootFolder].
@@ -67,9 +59,9 @@ class ResourceExporterServiceImpl
      * @param rootFolder [Path] of the destination directory.
      * @param summaryLog A [SummaryLog] instance to audit meta data.
      */
-    override suspend fun exportAllForStudy(studyId: String, deploymentIds: List<String>?, rootFolder: Path, summaryLog: SummaryLog)
+    override suspend fun exportAllForStudy(studyId: UUID, deploymentIds: List<String>?, rootFolder: Path, summaryLog: SummaryLog)
     {
-        val studyDeploymentIds = deploymentIds ?: getDeploymentIdsForStudy(studyId)
+        val studyDeploymentIds = deploymentIds ?: studyRepository.getDeploymentIdsOrThrow(studyId)
 
         exportStudy(studyId, rootFolder, summaryLog)
         exportDeployments(studyDeploymentIds, rootFolder, summaryLog)
@@ -89,7 +81,7 @@ class ResourceExporterServiceImpl
      * @param rootFolder [Path] of the destination directory.
      * @param summaryLog A [SummaryLog] instance to audit meta data.
      */
-    override suspend fun exportStudy(studyId: String, rootFolder: Path, summaryLog: SummaryLog)
+    override suspend fun exportStudy(studyId: UUID, rootFolder: Path, summaryLog: SummaryLog)
     {
         val study = studyRepository.getStudySnapshotById(studyId)
         val studyPath = resolveFullPathForFilename("${rootFolder.fileName}/study.json")
@@ -128,7 +120,7 @@ class ResourceExporterServiceImpl
     override fun exportParticipantData(deploymentIds: List<String>, rootFolder: Path, summaryLog: SummaryLog) = runBlocking {
         val participantDataList = mutableListOf<ParticipantData>()
         deploymentIds.forEach {
-            val data = deploymentParticipationService.getParticipantData(UUID(it))
+            val data = services.participationService.getParticipantData(UUID(it))
             participantDataList.add(data)
         }
         if (participantDataList.isEmpty())
@@ -190,7 +182,7 @@ class ResourceExporterServiceImpl
      */
     override fun exportConsents(deploymentIds: List<String>, rootFolder: Path, summaryLog: SummaryLog)
     {
-        val consents = consentDocumentService.getAll(deploymentIds)
+        val consents = consentDocumentService.getAllByDeploymentIds( deploymentIds.map { UUID(it) }.toSet() )
         if (consents.isEmpty())
         {
             LOGGER.info("No consent document data was found.")
@@ -208,11 +200,11 @@ class ResourceExporterServiceImpl
      * @param rootFolder [Path] of the destination directory.
      * @param summaryLog A [SummaryLog] instance to audit meta data.
      */
-    override fun exportFiles(studyId: String, deploymentIds: List<String>, rootFolder: Path, summaryLog: SummaryLog)
+    override fun exportFiles(studyId: UUID, deploymentIds: List<String>, rootFolder: Path, summaryLog: SummaryLog)
     {
         val files = mutableListOf<File>()
         deploymentIds.forEach {
-            val data = fileService.getAllByStudyIdAndDeploymentId(studyId, it)
+            val data = fileService.getAllByStudyIdAndDeploymentId(studyId.stringRepresentation, it)
             files.addAll(data)
         }
 
@@ -246,11 +238,11 @@ class ResourceExporterServiceImpl
      * @param rootFolder [Path] of the destination directory.
      * @param summaryLog A [SummaryLog] instance to audit meta data.
      */
-    override fun exportDocuments(studyId: String, deploymentIds: List<String>, rootFolder: Path, summaryLog: SummaryLog)
+    override fun exportDocuments(studyId: UUID, deploymentIds: List<String>, rootFolder: Path, summaryLog: SummaryLog)
     {
         val documentsList = ArrayList<Document>()
         deploymentIds.forEach {
-            val collections = collectionService.getAllByStudyIdAndDeploymentId(studyId, it)
+            val collections = collectionService.getAllByStudyIdAndDeploymentId(studyId.stringRepresentation, it)
 
             val documents = documentService.getAll(collections.map {  collection ->  collection.id })
             if (documents.isEmpty())
@@ -298,12 +290,6 @@ class ResourceExporterServiceImpl
     {
         val summaryLogPath = resolveFullPathForFilename("${rootFolder.fileName}/summary-logs.txt")
         createSummaryLogFileOnPath(summaryLogPath, summaryLog)
-    }
-
-    private suspend fun getDeploymentIdsForStudy(studyId: String): List<String>
-    {
-        val deployments = deploymentRepository.getDeploymentSnapshotsByStudyId(studyId)
-        return deployments.map { it.id.stringRepresentation}
     }
 
     private fun resolveFullPathForFilename(fileName: String): Path

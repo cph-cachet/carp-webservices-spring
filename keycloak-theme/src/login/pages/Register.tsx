@@ -4,11 +4,11 @@ import { useConstCallback } from "keycloakify/tools/useConstCallback";
 import { useFormik } from 'formik';
 import { useGetClassName } from 'keycloakify/login/lib/useGetClassName';
 import type { PageProps } from 'keycloakify/login/pages/PageProps';
-import AuthActionButton from 'src/components/Buttons/AuthActionButton';
-import CarpInput from 'src/components/CarpInput';
-import { AuthInfoText } from 'src/components/Layout/PublicPageLayout/AuthPageLayout/styles';
-import BannerLogin from 'src/components/Layout/PublicPageLayout/BannerLogin';
-import StyledLink from 'src/components/StyledLink';
+import AuthActionButton from '../../components/Buttons/AuthActionButton';
+import CarpInput from '../../components/CarpInput';
+import { AuthInfoText } from '../../components/Layout/PublicPageLayout/AuthPageLayout/styles';
+import BannerLogin from '../../components/Layout/PublicPageLayout/BannerLogin';
+import StyledLink from '../../components/StyledLink';
 import * as yup from 'yup';
 import type { I18n } from '../i18n';
 import type { KcContext } from '../kcContext';
@@ -135,8 +135,8 @@ const Register = (
         <AuthActionButton text="Sign up" loading={isLoading} />
         <AuthInfoText variant="h4_web" hideOnMobile>
           By registering, you agree to the{' '}
-          <StyledLink to="/forgot-password">
-            Cachet Privacy Statement
+          <StyledLink to="https://carp.cachet.dk/privacy-policy-service/">
+            CARP Privacy Policy
           </StyledLink>{' '}
           and <StyledLink to="/forgot-password">Terms of Service</StyledLink>.
         </AuthInfoText>
