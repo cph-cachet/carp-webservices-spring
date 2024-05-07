@@ -51,7 +51,7 @@ configurations {
 
 allprojects {
     group = "dk.cachet"
-    version = "v1.0.0-alpha.28.infra.1"
+    version = "1.2.0"
 }
 
 java {
