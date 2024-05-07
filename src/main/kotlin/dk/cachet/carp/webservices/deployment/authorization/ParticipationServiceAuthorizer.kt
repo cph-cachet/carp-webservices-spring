@@ -15,7 +15,8 @@ class ParticipationServiceAuthorizer(
     override fun ParticipationServiceRequest<*>.authorize() {
         when ( this )
         {
-            is ParticipationServiceRequest.GetActiveParticipationInvitations -> Unit
+            is ParticipationServiceRequest.GetActiveParticipationInvitations ->
+                auth.requireOwner( accountId )
             is ParticipationServiceRequest.GetParticipantData ->
                 auth.require( Claim.InDeployment( studyDeploymentId ))
             is ParticipationServiceRequest.GetParticipantDataList ->
