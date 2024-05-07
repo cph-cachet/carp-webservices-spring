@@ -21,7 +21,6 @@ The above-mentioned features, namely studies, protocols, and deployments are imp
 - [Developer Guide](#developer-guide)
   * [Local Development](#local-development)
   * [Database migrations](#database-migrations)
-- [Current Users](#current-users)
 
 # Architecture
 
@@ -123,11 +122,3 @@ Follow these steps to deploy CAWS:
 
 - Migrations will automatically be executed on the first time
 - Any new migrations will also be automatically executed when deployed through Jenkins onto the development or production environments.
-
-# Current Users
-
-Below is a short list of projects currently consuming the carp.webservices API.
-
-| Project                                                                    | Description                                                                                                                         |
-|----------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------|
-| [carp.sensing-flutter](https://github.com/cph-cachet/carp.sensing-flutter) | The CARP mobile sensing framework which has the option to use carp.webservices at the back-end receiver of data for various probes. |
