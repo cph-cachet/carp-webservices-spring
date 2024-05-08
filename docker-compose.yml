@@ -137,6 +137,8 @@ services:
   prometheus:
     <<: *carp-base-config
     container_name: "carp-prometheus"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     image: prom/prometheus:latest
     ports:
       - "${PROMETHEUS_PORT}:9090"
