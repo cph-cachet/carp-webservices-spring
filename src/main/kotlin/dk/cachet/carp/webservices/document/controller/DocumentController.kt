@@ -2,8 +2,10 @@ package dk.cachet.carp.webservices.document.controller
 
 import com.fasterxml.jackson.databind.JsonNode
 import dk.cachet.carp.common.application.UUID
+import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.constants.PathVariableName
 import dk.cachet.carp.webservices.common.constants.RequestParamName
+import dk.cachet.carp.webservices.common.exception.responses.ResourceNotFoundException
 import dk.cachet.carp.webservices.common.query.QueryUtil
 import dk.cachet.carp.webservices.document.controller.DocumentController.Companion.DOCUMENT_BASE
 import dk.cachet.carp.webservices.document.domain.Document
@@ -21,12 +23,14 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
+import kotlin.reflect.jvm.internal.impl.descriptors.Visibilities.Private
 
 @RestController
 @RequestMapping(value = [DOCUMENT_BASE])
 class DocumentController(
     private val documentService: DocumentService,
-    private val documentTraverser: DocumentTraverser
+    private val documentTraverser: DocumentTraverser,
+    private val validationMessages: MessageBase
 )
 {
     companion object
@@ -66,9 +70,14 @@ class DocumentController(
         request: HttpServletRequest
     ): String?
     {
-        val path = documentTraverser.requestToUrlPath(request)
-        LOGGER.info("Start GET: $path")
-        return documentService.getByDocumentPath(studyId.stringRepresentation, request)
+        try {
+            val path = documentTraverser.requestToUrlPath(request)
+            LOGGER.info("Start GET: $path")
+            return documentService.getByDocumentPath(studyId.stringRepresentation, request)
+        } catch (e: NullPointerException) {
+            LOGGER.error("Document not found, studyId: $studyId, path: ${request.requestURI}")
+            throw ResourceNotFoundException(validationMessages.get("document.path.not_found", studyId.stringRepresentation, request.requestURI))
+        }
     }
 
     @PostMapping(value = [COLLECTIONS], produces = [MediaType.APPLICATION_JSON_VALUE])
