@@ -19,10 +19,10 @@ export const { getKcContext } = createGetKcContext<KcContextExtension>({
   mockData: [
     {
       pageId: 'login.ftl',
-      locale: {
-        //When we test the login page we do it in french
-        currentLanguageTag: 'fr',
-      },
+      // locale: {
+      //   //When we test the login page we do it in french
+      //   currentLanguageTag: 'da',
+      // },
       //Uncomment the following line for hiding the Alert message
       //"message": undefined
       //Uncomment the following line for showing an Error message
