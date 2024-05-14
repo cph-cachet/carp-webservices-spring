@@ -14,11 +14,20 @@ export const { useI18n } = createUseI18n({
     agreeToPrivacyPolicy: "By logging in, you agree to the",
     carpPrivacyPolicy: "CARP Privacy Policy",
     newToCarp: "New to CARP?",
+    doRegister: "Sign up",
+    byRegisteringYouAgree: "By registering, you agree to the",
+    and: "and",
+    termsOfService: "Terms of Service",
+    loginBannerText: "Already have an account?"
   },
   da: {
     agreeToPrivacyPolicy: "Når du logger ind, accepterer du",
     carpPrivacyPolicy: "CARP's privatlivspolitik",
     newToCarp: "Ny på CARP?",
+    byRegisteringYouAgree: "Ved at registrere dig accepterer du ",
+    and: "og",
+    termsOfService: "servicevilkår",
+    loginBannerText: "Har du allerede en konto?"
   },
 });
 

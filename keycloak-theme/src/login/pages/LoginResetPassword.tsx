@@ -52,14 +52,14 @@ const LoginResetPassword = (
 
   const { url } = kcContext;
 
-  const { msg } = i18n;
+  const { msg, msgStr } = i18n;
 
   return (
     <Template
       {...{ kcContext, i18n, doUseDefaultCss, classes }}
       displayMessage={false}
       headerNode={msg("emailForgotTitle")}
-      infoNode={<BannerLogin loginUrl={url.loginUrl} />}
+      infoNode={<BannerLogin loginUrl={url.loginUrl} msgStr={msgStr} />}
     >
       <AuthInfoText variant="h4_web">
         Enter your email address. If an account is found, a password reset link

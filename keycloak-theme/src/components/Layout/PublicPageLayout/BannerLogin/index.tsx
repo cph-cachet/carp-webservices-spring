@@ -1,14 +1,14 @@
 import StyledLink from '../../../../components/StyledLink';
 import { BannerActionText } from '../styles';
 
-type Props = { loginUrl: string };
+type Props = { loginUrl: string, msgStr: (key: string) => string};
 
-const BannerLogin = ({ loginUrl }: Props) => {
+const BannerLogin = ({ loginUrl, msgStr }: Props) => {
   return (
     <BannerActionText>
-      Already have an account?
+      {msgStr("loginBannerText")}
       <StyledLink to={loginUrl} isBold>
-        Login
+        {msgStr("doLogIn")}
       </StyledLink>
     </BannerActionText>
   );

@@ -60,7 +60,7 @@ const LoginUpdatePassword = (
     <Template
       {...{ kcContext, i18n, doUseDefaultCss, classes }}
       headerNode={msg("updatePasswordTitle")}
-      infoNode={<BannerLogin loginUrl={url.loginUrl} />}
+      infoNode={<BannerLogin loginUrl={url.loginUrl} msgStr={msgStr} />}
     >
       <form
         id="kc-passwd-update-form"

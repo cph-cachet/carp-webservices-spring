@@ -1,15 +1,7 @@
 import { useState, type FormEventHandler } from "react";
 import { useConstCallback } from "keycloakify/tools/useConstCallback";
 import type { PageProps } from "keycloakify/login/pages/PageProps";
-import {
-  Checkbox,
-  FormControl,
-  FormControlLabel,
-  FormGroup,
-  MenuItem,
-  Select,
-  SelectChangeEvent,
-} from "@mui/material";
+import { Checkbox, FormControlLabel, FormGroup } from "@mui/material";
 import * as yup from "yup";
 import { useFormik } from "formik";
 import CarpInput from "../../components/CarpInput";
@@ -29,7 +21,6 @@ import {
   LoginSeparator,
   LoginSeparatorText,
 } from "./styles";
-import { BootstrapInput } from "../../components/BootstrapInput";
 
 const validationSchema = yup.object({
   username: yup
@@ -44,32 +35,12 @@ const Login = (
 ) => {
   const { kcContext, i18n, doUseDefaultCss, Template, classes } = props;
 
-  const {
-    social,
-    realm,
-    url,
-    usernameHidden,
-    login,
-    registrationDisabled,
-    locale,
-  } = kcContext;
+  const { social, realm, url, usernameHidden, login, registrationDisabled } =
+    kcContext;
 
-  const { msg, msgStr, changeLocale, labelBySupportedLanguageTag } = i18n;
+  const { msg, msgStr } = i18n;
 
   const [isLoading, setIsLoading] = useState(false);
-
-  const getLanguageLabel = (languageTag: string) => {
-    switch (languageTag) {
-      case "en":
-        return "🇬🇧 English";
-
-      case "da":
-        return "🇩🇰 Dansk";
-
-      default:
-        return labelBySupportedLanguageTag[languageTag];
-    }
-  };
 
   const onSubmit = useConstCallback<FormEventHandler<HTMLFormElement>>((e) => {
     e.preventDefault();
@@ -106,24 +77,6 @@ const Login = (
         <>
           {realm.registrationAllowed && !registrationDisabled && (
             <BannerRegister registerUrl={url.registrationUrl} msgStr={msgStr} />
-          )}
-          {realm.internationalizationEnabled && locale.supported.length > 1 && (
-            <FormControl variant="standard">
-              <Select
-                value={locale.currentLanguageTag}
-                input={<BootstrapInput />}
-              >
-                {locale.supported.map(({ languageTag }) => (
-                  <MenuItem
-                    key={languageTag}
-                    value={languageTag}
-                    onClick={() => changeLocale(languageTag)}
-                  >
-                    {getLanguageLabel(languageTag)}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
           )}
         </>
       }
