@@ -11,7 +11,9 @@ const PublicPageLayout = ({ children, infoNode }: Props) => {
     <>
       <PublicPageBanner>
         <StyledLogo type="flat-colored" />
+        <div style={{display: 'flex', gap: 8 }}>
         {infoNode}
+        </div>
       </PublicPageBanner>
       {children}
     </>
