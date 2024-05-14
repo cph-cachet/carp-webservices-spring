@@ -26,6 +26,17 @@ export const Default: Story = {
   ),
 };
 
+export const DefaultDanish: Story = {
+  render: () => (
+    <PageStory
+      kcContext={{
+        realm: { loginWithEmailAllowed: false },
+        locale: { currentLanguageTag: "da" },
+      }}
+    />
+  ),
+};
+
 export const WithoutRegistration: Story = {
   render: () => (
     <PageStory

@@ -38,8 +38,7 @@ const Login = (
   const { social, realm, url, usernameHidden, login, registrationDisabled } =
     kcContext;
 
-
-  const { msg, msgStr } = i18n;
+  const { msg, msgStr, advancedMsg } = i18n;
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -58,8 +57,8 @@ const Login = (
 
   const formik = useFormik({
     initialValues: {
-      username: login.username ?? '',
-      password: login.password ?? '',
+      username: login.username ?? "",
+      password: login.password ?? "",
     },
     validationSchema,
     onSubmit: () => {},
@@ -77,7 +76,7 @@ const Login = (
       infoNode={
         realm.registrationAllowed &&
         !registrationDisabled && (
-          <BannerRegister registerUrl={url.registrationUrl} />
+          <BannerRegister registerUrl={url.registrationUrl} msgStr={msgStr}/>
         )
       }
     >
@@ -148,11 +147,11 @@ const Login = (
               </AuthInfoText>
             )}
           </LoginAdditionalActions>
-          <AuthActionButton loading={isLoading} text="Log in" />
+          <AuthActionButton loading={isLoading} text={msgStr("doLogIn")} />
           <AuthInfoText variant="h4_web" hideOnMobile>
-            By logging in, you agree to the{" "}
+            {msgStr("agreeToPrivacyPolicy")}{" "}
             <StyledLink to="https://carp.cachet.dk/privacy-policy-service/">
-              CARP Privacy Policy
+              {msgStr("carpPrivacyPolicy")}
             </StyledLink>
             .
           </AuthInfoText>
