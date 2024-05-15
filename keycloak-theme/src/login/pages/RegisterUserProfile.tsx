@@ -3,11 +3,9 @@ import { useConstCallback } from "keycloakify/tools/useConstCallback";
 import { useState, type FormEventHandler } from "react";
 import { useGetClassName } from "keycloakify/login/lib/useGetClassName";
 import type { PageProps } from "keycloakify/login/pages/PageProps";
-import { clsx } from "keycloakify/tools/clsx";
 import type { I18n } from "../i18n";
 import type { KcContext } from "../kcContext";
 import { UserProfileFormFields } from "./shared/UserProfileFormFields";
-import CarpButton from "../../components/Buttons/AuthActionButton/styles";
 import AuthActionButton from "../../components/Buttons/AuthActionButton";
 
 export default function RegisterUserProfile(
@@ -29,7 +27,7 @@ export default function RegisterUserProfile(
 
   const { msg, msgStr } = i18n;
 
-  const [isFormSubmittable, setIsFormSubmittable] = useState(false);
+  const [, setIsFormSubmittable] = useState(false);
 
   const onSubmit = useConstCallback<FormEventHandler<HTMLFormElement>>((e) => {
     e.preventDefault();
