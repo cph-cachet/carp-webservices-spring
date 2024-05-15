@@ -7,6 +7,7 @@ import { CssBaseline, StyledEngineProvider, ThemeProvider } from "@mui/material"
 import LoginUpdatePassword from "./pages/LoginUpdatePassword";
 import LoginUpdateProfile from "./pages/LoginUpdateProfile";
 import { themeInstance } from "../utils/theme";
+import RegisterUserProfile from "./pages/RegisterUserProfile";
 
 const Template = lazy(() => import("./Template"));
 
@@ -57,6 +58,7 @@ export default function KcApp(props: { kcContext: KcContext; }) {
           case "login-update-profile.ftl": return <LoginUpdateProfile {...{ kcContext, i18n, Template, classes }} doUseDefaultCss />;
           case "login-update-password.ftl": return <LoginUpdatePassword {...{ kcContext, i18n, Template, classes }} doUseDefaultCss />;
           case "login-reset-password.ftl": return <LoginResetPassword {...{ kcContext, i18n, Template, classes }} doUseDefaultCss />;
+          case "register-user-profile.ftl": return <RegisterUserProfile {...{ kcContext, i18n, Template, classes }} doUseDefaultCss />;
           case "info.ftl": return <Info {...{ kcContext, i18n, classes, Template }} doUseDefaultCss />;
           default: return <Fallback {...{ kcContext, i18n, classes }} Template={Template} doUseDefaultCss />;
         }

@@ -18,7 +18,11 @@ export const { useI18n } = createUseI18n({
     byRegisteringYouAgree: "By registering, you agree to the",
     and: "and",
     termsOfService: "Terms of Service",
-    loginBannerText: "Already have an account?"
+    loginBannerText: "Already have an account?",
+    usernameRequired: "Username is required",
+    emailRequired: "Email is required",
+    firstNameRequired: "First name is required",
+    lastNameRequired: "Last name is required",
   },
   da: {
     agreeToPrivacyPolicy: "Når du logger ind, accepterer du",
@@ -28,14 +32,18 @@ export const { useI18n } = createUseI18n({
     and: "og",
     termsOfService: "servicevilkår",
     loginBannerText: "Har du allerede en konto?",
-    alphanumericalCharsOnly: "",
+    alphanumericalCharsOnly: "Kun alfanumeriske tegn",
     gender: "Køn",
     doForgotPassword: "Glemt din adgangskode?",
     invalidUserMessage: "Ugyldigt brugernavn eller adgangskode",
     backToApplication: "Tilbage til ansøgning",
     proceedWithAction: "Klik her for at fortsætte",
     doLogIn: "Log ind",
-    doRegister: "Tilmeld dig"
+    doRegister: "Tilmeld dig",
+    usernameRequired: "Brugernavn er påkrævet",
+    emailRequired: "Email er påkrævet",
+    firstNameRequired: "Fornavn er påkrævet",
+    lastNameRequired: "Efternavn er påkrævet",
   },
 });
 
