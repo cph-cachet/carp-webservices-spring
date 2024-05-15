@@ -19,7 +19,21 @@ export const Default: Story = {
   render: () => (
     <PageStory
       kcContext={{
-        realm: { loginWithEmailAllowed: false },
+        realm: { loginWithEmailAllowed: true },
+        locale: { currentLanguageTag: "en" },
+      }}
+    />
+  ),
+};
+
+export const DefaultEmailOnly: Story = {
+  render: () => (
+    <PageStory
+      kcContext={{
+        realm: {
+          loginWithEmailAllowed: true,
+          registrationEmailAsUsername: true,
+        },
         locale: { currentLanguageTag: "en" },
       }}
     />
@@ -30,7 +44,21 @@ export const DefaultDanish: Story = {
   render: () => (
     <PageStory
       kcContext={{
-        realm: { loginWithEmailAllowed: false },
+        realm: { loginWithEmailAllowed: true },
+        locale: { currentLanguageTag: "da" },
+      }}
+    />
+  ),
+};
+
+export const DefaultDanishEmailOnly: Story = {
+  render: () => (
+    <PageStory
+      kcContext={{
+        realm: {
+          loginWithEmailAllowed: true,
+          registrationEmailAsUsername: true,
+        },
         locale: { currentLanguageTag: "da" },
       }}
     />
@@ -41,7 +69,7 @@ export const WithoutRegistration: Story = {
   render: () => (
     <PageStory
       kcContext={{
-        realm: { registrationAllowed: false, loginWithEmailAllowed: false },
+        realm: { registrationAllowed: false, loginWithEmailAllowed: true },
       }}
     />
   ),
@@ -51,7 +79,7 @@ export const WithoutRememberMe: Story = {
   render: () => (
     <PageStory
       kcContext={{
-        realm: { rememberMe: false, loginWithEmailAllowed: false },
+        realm: { rememberMe: false, loginWithEmailAllowed: true },
       }}
     />
   ),
@@ -61,7 +89,7 @@ export const WithoutPasswordReset: Story = {
   render: () => (
     <PageStory
       kcContext={{
-        realm: { resetPasswordAllowed: false, loginWithEmailAllowed: false },
+        realm: { resetPasswordAllowed: false, loginWithEmailAllowed: true },
       }}
     />
   ),
@@ -74,7 +102,7 @@ export const WithPresetUsername: Story = {
         login: {
           username: "max.mustermann@mail.com",
         },
-        realm: { loginWithEmailAllowed: false },
+        realm: { loginWithEmailAllowed: true },
       }}
     />
   ),

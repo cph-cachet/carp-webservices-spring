@@ -13,24 +13,6 @@ import * as yup from "yup";
 import type { I18n } from "../i18n";
 import type { KcContext } from "../kcContext";
 
-const validationSchema = yup.object({
-  firstName: yup.string().required("First name is required"),
-  lastName: yup.string().required("Last name is required"),
-  email: yup
-    .string()
-    .email("Enter a valid email")
-    .required("Email is required"),
-  password: yup
-    .string()
-    .min(8, "Password has to be at least 8 characters long")
-    .required("Password is required"),
-  "password-confirm": yup
-    .string()
-    .min(8, "Password has to be at least 8 characters long")
-    .required("Password is required")
-    .oneOf([yup.ref("password"), null], "Passwords must match"),
-});
-
 const Register = (
   props: PageProps<Extract<KcContext, { pageId: "register.ftl" }>, I18n>,
 ) => {
@@ -56,21 +38,62 @@ const Register = (
     passwordRequired,
     recaptchaRequired,
     recaptchaSiteKey,
+    realm,
   } = kcContext;
+
+  const { msg, msgStr } = i18n;
+
+  const validationSchemaNoUsername = yup.object({
+    firstName: yup.string().required(msgStr("firstNameRequired")),
+    lastName: yup.string().required(msgStr("lastNameRequired")),
+    email: yup
+      .string()
+      .email(msgStr("invalidEmailMessage"))
+      .required(msgStr("emailRequired")),
+    password: yup
+      .string()
+      .min(8, msgStr("passwordMinLength"))
+      .required(msgStr("passwordRequired")),
+    "password-confirm": yup
+      .string()
+      .min(8, msgStr("passwordMinLength"))
+      .required(msgStr("passwordRequired"))
+      .oneOf([yup.ref("password"), null], msgStr("passwordsDontMatch")),
+  });
+
+  const validationSchemaWithUsername = yup.object({
+    username: yup.string().required(msgStr("usernameRequired")),
+    firstName: yup.string().required(msgStr("firstNameRequired")),
+    lastName: yup.string().required(msgStr("lastNameRequired")),
+    email: yup
+      .string()
+      .email(msgStr("invalidEmailMessage"))
+      .required(msgStr("emailRequired")),
+    password: yup
+      .string()
+      .min(8, msgStr("passwordMinLength"))
+      .required(msgStr("passwordRequired")),
+    "password-confirm": yup
+      .string()
+      .min(8, msgStr("passwordMinLength"))
+      .required(msgStr("passwordRequired"))
+      .oneOf([yup.ref("password"), null], msgStr("passwordsDontMatch")),
+  });
 
   const formik = useFormik({
     initialValues: {
+      username: register.formData.username ?? "",
       firstName: register.formData.firstName ?? "",
       lastName: register.formData.lastName ?? "",
       email: register.formData.email ?? "",
       password: "",
       "password-confirm": "",
     },
-    validationSchema,
+    validationSchema: realm.registrationEmailAsUsername
+      ? validationSchemaNoUsername
+      : validationSchemaWithUsername,
     onSubmit: () => {},
   });
-
-  const { msg, msgStr } = i18n;
 
   return (
     <Template
@@ -84,6 +107,16 @@ const Register = (
         method="post"
         onSubmit={onSubmit}
       >
+        {!realm.registrationEmailAsUsername && (
+          <CarpInput
+            name="username"
+            label={msgStr("username")}
+            type="text"
+            formikConfig={formik}
+            autoComplete="username"
+            variant="outlined"
+          />
+        )}
         <CarpInput
           name="firstName"
           label={msgStr("firstName")}

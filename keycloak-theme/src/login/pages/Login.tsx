@@ -47,12 +47,23 @@ const Login = (
     formElement.submit();
   });
 
-  const validationSchema = yup.object({
+  const validationSchemaWithEmail = yup.object({
     username: yup
       .string()
-      .email(msgStr('invalidEmailMessage'))
-      .required(msgStr('emailRequired')),
-    password: yup.string().required(msgStr('passwordRequired')),
+      .email(msgStr("invalidEmailMessage"))
+      .required(msgStr("emailRequired")),
+    password: yup.string().required(msgStr("passwordRequired")),
+  });
+
+  const validationSchemaWithString = yup.object({
+    username: yup
+      .string()
+      .required(
+        realm.loginWithEmailAllowed
+          ? msgStr("emailOrUsernameRequired")
+          : msgStr("usernameRequired"),
+      ),
+    password: yup.string().required(msgStr("passwordRequired")),
   });
 
   const formik = useFormik({
@@ -60,7 +71,9 @@ const Login = (
       username: login.username ?? "",
       password: login.password ?? "",
     },
-    validationSchema,
+    validationSchema: realm.registrationEmailAsUsername
+      ? validationSchemaWithEmail
+      : validationSchemaWithString,
     onSubmit: () => {},
   });
 
