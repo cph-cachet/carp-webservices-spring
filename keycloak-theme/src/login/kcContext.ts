@@ -35,9 +35,6 @@ export const { getKcContext } = createGetKcContext<KcContextExtension>({
     {
       //NOTE: You will either use register.ftl (legacy) or register-user-profile.ftl, not both
       pageId: 'register-user-profile.ftl',
-      locale: {
-        currentLanguageTag: 'fr',
-      },
       profile: {
         attributes: [
           {

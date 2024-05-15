@@ -5,11 +5,12 @@ import { usePrepareTemplate } from "keycloakify/lib/usePrepareTemplate";
 import { type TemplateProps } from "keycloakify/login/TemplateProps";
 import { useGetClassName } from "keycloakify/login/lib/useGetClassName";
 import AuthPageLayout from "../components/Layout/PublicPageLayout/AuthPageLayout";
-import { Alert, FormControl, MenuItem, Select } from "@mui/material";
+import { Alert, FormControl, MenuItem, Select, Typography } from "@mui/material";
 import type { KcContext } from "./kcContext";
 import type { I18n } from "./i18n";
 import PublicPageLayout from "../components/Layout/PublicPageLayout";
 import { BootstrapInput } from "../components/BootstrapInput";
+import LanguageIcon from "@mui/icons-material/Language";
 
 export const Template = (props: TemplateProps<KcContext, I18n>) => {
   const {
@@ -43,18 +44,8 @@ export const Template = (props: TemplateProps<KcContext, I18n>) => {
   }
 
   const getLanguageLabel = (languageTag: string) => {
-    switch (languageTag) {
-      case "en":
-        return "🇬🇧 English";
-
-      case "da":
-        return "🇩🇰 Dansk";
-
-      default:
-        return labelBySupportedLanguageTag[languageTag];
-    }
+    return labelBySupportedLanguageTag[languageTag];
   };
-
 
   return (
     <PublicPageLayout
@@ -65,6 +56,14 @@ export const Template = (props: TemplateProps<KcContext, I18n>) => {
               <Select
                 value={locale.currentLanguageTag}
                 input={<BootstrapInput />}
+                renderValue={(selected) => {
+                  return (
+                    <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 8}}>
+                      <LanguageIcon sx={{strokeWidth: 0.8, stroke: "#fff"}}/>
+                      <Typography >{getLanguageLabel(selected as string)}</Typography>
+                    </div>
+                  );
+                }}
               >
                 {locale.supported.map(({ languageTag }) => (
                   <MenuItem
