@@ -29,13 +29,13 @@ export const { useI18n } = createUseI18n({
     termsOfService: "servicevilkår",
     loginBannerText: "Har du allerede en konto?",
     alphanumericalCharsOnly: "",
-    gender: "",
-    doForgotPassword: "",
-    invalidUserMessage: "",
-    backToApplication: "",
-    proceedWithAction: "",
-    doLogIn: "",
-    doRegister: ""
+    gender: "Køn",
+    doForgotPassword: "Glemt din adgangskode?",
+    invalidUserMessage: "Ugyldigt brugernavn eller adgangskode",
+    backToApplication: "Tilbage til ansøgning",
+    proceedWithAction: "Klik her for at fortsætte",
+    doLogIn: "Log ind",
+    doRegister: "Tilmeld dig"
   },
 });
 
