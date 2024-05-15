@@ -1,17 +1,15 @@
-import type { PageProps } from 'keycloakify/account';
-import { lazy, Suspense } from 'react';
-import { useI18n } from './i18n';
-import type { KcContext } from './kcContext';
+import type { PageProps } from "keycloakify/account";
+import { lazy, Suspense } from "react";
+import { useI18n } from "./i18n";
+import type { KcContext } from "./kcContext";
 
-const Template = lazy(() => import('./Template'));
+const Template = lazy(() => import("./Template"));
 
-const Password = lazy(() => import('./pages/Password'));
-const MyExtraPage1 = lazy(() => import('./pages/MyExtraPage1'));
-const MyExtraPage2 = lazy(() => import('./pages/MyExtraPage2'));
-const Fallback = lazy(() => import('keycloakify/account'));
+const Password = lazy(() => import("./pages/Password"));
+const Fallback = lazy(() => import("keycloakify/account"));
 
-const classes: PageProps<any, any>['classes'] = {
-  kcBodyClass: 'my-root-account-class',
+const classes: PageProps<any, any>["classes"] = {
+  kcBodyClass: "my-root-account-class",
 };
 
 export default function KcApp(props: { kcContext: KcContext }) {
@@ -27,23 +25,9 @@ export default function KcApp(props: { kcContext: KcContext }) {
     <Suspense>
       {(() => {
         switch (kcContext.pageId) {
-          case 'password.ftl':
+          case "password.ftl":
             return (
               <Password
-                {...{ kcContext, i18n, Template, classes }}
-                doUseDefaultCss
-              />
-            );
-          case 'my-extra-page-1.ftl':
-            return (
-              <MyExtraPage1
-                {...{ kcContext, i18n, Template, classes }}
-                doUseDefaultCss
-              />
-            );
-          case 'my-extra-page-2.ftl':
-            return (
-              <MyExtraPage2
                 {...{ kcContext, i18n, Template, classes }}
                 doUseDefaultCss
               />

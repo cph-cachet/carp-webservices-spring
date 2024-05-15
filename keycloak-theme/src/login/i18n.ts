@@ -27,7 +27,15 @@ export const { useI18n } = createUseI18n({
     byRegisteringYouAgree: "Ved at registrere dig accepterer du ",
     and: "og",
     termsOfService: "servicevilkår",
-    loginBannerText: "Har du allerede en konto?"
+    loginBannerText: "Har du allerede en konto?",
+    alphanumericalCharsOnly: "",
+    gender: "",
+    doForgotPassword: "",
+    invalidUserMessage: "",
+    backToApplication: "",
+    proceedWithAction: "",
+    doLogIn: "",
+    doRegister: ""
   },
 });
 
