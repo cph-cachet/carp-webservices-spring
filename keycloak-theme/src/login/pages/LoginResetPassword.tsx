@@ -62,8 +62,7 @@ const LoginResetPassword = (
       infoNode={<BannerLogin loginUrl={url.loginUrl} msgStr={msgStr} />}
     >
       <AuthInfoText variant="h4_web">
-        Enter your email address. If an account is found, a password reset link
-        will be sent to your email.
+        {msgStr("forgotPasswordInfo")}
       </AuthInfoText>
       <form
         id="kc-reset-password-form"
@@ -74,12 +73,12 @@ const LoginResetPassword = (
         <CarpInput
           name="username"
           type="email"
-          label="Email"
+          label={msgStr("email")}
           formikConfig={formik}
           autoComplete="email"
           variant="outlined"
         />
-        <AuthActionButton loading={isLoading} text="Submit" />
+        <AuthActionButton loading={isLoading} text={msgStr("doSubmit")} />
       </form>
     </Template>
   );

@@ -10,18 +10,6 @@ import type { I18n } from "../i18n";
 import type { KcContext } from "../kcContext";
 import CarpInput from "../../components/CarpInput";
 
-const validationSchema = yup.object({
-  "password-new": yup
-    .string()
-    .min(8, "Password has to be at least 8 characters long")
-    .required("Password is required"),
-  "password-confirm": yup
-    .string()
-    .min(8, "Password has to be at least 8 characters long")
-    .required("Password is required")
-    .oneOf([yup.ref("password"), null], "Passwords must match"),
-});
-
 const LoginUpdatePassword = (
   props: PageProps<
     Extract<KcContext, { pageId: "login-update-password.ftl" }>,
@@ -38,6 +26,18 @@ const LoginUpdatePassword = (
   const { msg, msgStr } = i18n;
 
   const { url, isAppInitiatedAction, username } = kcContext;
+
+  const validationSchema = yup.object({
+    "password-new": yup
+      .string()
+      .min(8, msgStr("passwordMinLength"))
+      .required(msgStr('passwordRequired')),
+    "password-confirm": yup
+      .string()
+      .min(8, msgStr('passwordMinLength'))
+      .required(msgStr('passwordRequired'))
+      .oneOf([yup.ref("password-new"), null], msgStr("passwordsDontMatch")),
+  });
 
   const formik = useFormik({
     initialValues: {
@@ -87,7 +87,7 @@ const LoginUpdatePassword = (
 
         <CarpInput
           name="password-new"
-          label="New password"
+          label={msgStr("passwordNew")}
           type="password"
           formikConfig={formik}
           autoComplete="new-password"
@@ -95,7 +95,7 @@ const LoginUpdatePassword = (
         />
         <CarpInput
           name="password-confirm"
-          label="Confirm Password"
+          label={msgStr("passwordConfirm")}
           type="password"
           formikConfig={formik}
           autoComplete="new-password"
@@ -129,7 +129,7 @@ const LoginUpdatePassword = (
             id="kc-form-buttons"
             className={getClassName("kcFormButtonsClass")}
           >
-            <AuthActionButton text="Submit" loading={isLoading} />
+            <AuthActionButton text={msgStr("doSubmit")} loading={isLoading} />
           </div>
         </div>
       </form>

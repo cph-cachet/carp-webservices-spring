@@ -23,6 +23,10 @@ export const { useI18n } = createUseI18n({
     emailRequired: "Email is required",
     firstNameRequired: "First name is required",
     lastNameRequired: "Last name is required",
+    forgotPasswordInfo: "Enter your email address. If an account is found, a password reset link will be sent to your email.",
+    passwordMinLength: "Password must be at least 8 characters long",
+    passwordRequired: "Password is required",
+    passwordsDontMatch: "Passwords don't match",
   },
   da: {
     agreeToPrivacyPolicy: "Når du logger ind, accepterer du",
@@ -44,6 +48,10 @@ export const { useI18n } = createUseI18n({
     emailRequired: "Email er påkrævet",
     firstNameRequired: "Fornavn er påkrævet",
     lastNameRequired: "Efternavn er påkrævet",
+    forgotPasswordInfo: "Indtast din e-mailadresse. Hvis en konto findes, sendes et link til nulstilling af adgangskode til din e-mail.",
+    passwordMinLength: "Adgangskoden skal være mindst 8 tegn lang",
+    passwordRequired: "Adgangskode er påkrævet",
+    passwordsDontMatch: "Adgangskoderne matcher ikke",
   },
 });
 

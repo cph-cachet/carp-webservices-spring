@@ -22,14 +22,6 @@ import {
   LoginSeparatorText,
 } from "./styles";
 
-const validationSchema = yup.object({
-  username: yup
-    .string()
-    .email("Enter a valid email")
-    .required("Email is required"),
-  password: yup.string().required("Password is required"),
-});
-
 const Login = (
   props: PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18n>,
 ) => {
@@ -53,6 +45,14 @@ const Login = (
       .querySelector("input[name='email']")
       ?.setAttribute("name", "username");
     formElement.submit();
+  });
+
+  const validationSchema = yup.object({
+    username: yup
+      .string()
+      .email(msgStr('invalidEmailMessage'))
+      .required(msgStr('emailRequired')),
+    password: yup.string().required(msgStr('passwordRequired')),
   });
 
   const formik = useFormik({

@@ -24,8 +24,9 @@ export const Default: Story = {
         summary: 'Your administrator has requested you to',
         type: 'info',
       },
-      requiredActions: ['UPDATE_PASSWORD'],
+      requiredActions: ['UPDATE_PASSWORD', 'VERIFY_EMAIL'],
     }}
     />
   ),
 };
+
