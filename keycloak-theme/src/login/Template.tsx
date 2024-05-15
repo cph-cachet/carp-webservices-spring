@@ -5,10 +5,12 @@ import { usePrepareTemplate } from "keycloakify/lib/usePrepareTemplate";
 import { type TemplateProps } from "keycloakify/login/TemplateProps";
 import { useGetClassName } from "keycloakify/login/lib/useGetClassName";
 import AuthPageLayout from "../components/Layout/PublicPageLayout/AuthPageLayout";
-import { Alert } from "@mui/material";
+import { Alert, FormControl, MenuItem, Select, Typography } from "@mui/material";
 import type { KcContext } from "./kcContext";
 import type { I18n } from "./i18n";
 import PublicPageLayout from "../components/Layout/PublicPageLayout";
+import { BootstrapInput } from "../components/BootstrapInput";
+import LanguageIcon from "@mui/icons-material/Language";
 
 export const Template = (props: TemplateProps<KcContext, I18n>) => {
   const {
@@ -26,9 +28,9 @@ export const Template = (props: TemplateProps<KcContext, I18n>) => {
 
   const { getClassName } = useGetClassName({ doUseDefaultCss, classes });
 
-  const { msg } = i18n;
+  const { msg, changeLocale, labelBySupportedLanguageTag } = i18n;
 
-  const { auth, url, message, isAppInitiatedAction } = kcContext;
+  const { auth, url, message, isAppInitiatedAction, realm, locale } = kcContext;
 
   const { isReady } = usePrepareTemplate({
     doFetchDefaultThemeResources: doUseDefaultCss,
@@ -41,8 +43,44 @@ export const Template = (props: TemplateProps<KcContext, I18n>) => {
     return null;
   }
 
+  const getLanguageLabel = (languageTag: string) => {
+    return labelBySupportedLanguageTag[languageTag];
+  };
+
   return (
-    <PublicPageLayout infoNode={infoNode}>
+    <PublicPageLayout
+      infoNode={
+        <>
+          {realm.internationalizationEnabled && locale.supported.length > 1 && (
+            <FormControl variant="standard">
+              <Select
+                value={locale.currentLanguageTag}
+                input={<BootstrapInput />}
+                renderValue={(selected) => {
+                  return (
+                    <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 8}}>
+                      <LanguageIcon sx={{strokeWidth: 0.8, stroke: "#fff"}}/>
+                      <Typography >{getLanguageLabel(selected as string)}</Typography>
+                    </div>
+                  );
+                }}
+              >
+                {locale.supported.map(({ languageTag }) => (
+                  <MenuItem
+                    key={languageTag}
+                    value={languageTag}
+                    onClick={() => changeLocale(languageTag)}
+                  >
+                    {getLanguageLabel(languageTag)}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+          {infoNode}
+        </>
+      }
+    >
       <AuthPageLayout title={headerNode}>
         {/* 
         <header className={getClassName("kcFormHeaderClass")}>

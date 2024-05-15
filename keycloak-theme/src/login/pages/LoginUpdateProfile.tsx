@@ -10,25 +10,6 @@ import { useFormik } from "formik";
 import CarpInput from "../../components/CarpInput";
 import AuthActionButton from "../../components/Buttons/AuthActionButton";
 
-const validationSchemaUsername = yup.object({
-  username: yup.string().required("Username is required"),
-  email: yup
-    .string()
-    .email("Enter a valid email")
-    .required("Email is required"),
-  firstName: yup.string().required("First name is required"),
-  lastName: yup.string().required("Last name is required"),
-});
-
-const validationSchemaNoUsername = yup.object({
-  email: yup
-    .string()
-    .email("Enter a valid email")
-    .required("Email is required"),
-  firstName: yup.string().required("First name is required"),
-  lastName: yup.string().required("Last name is required"),
-});
-
 export default function LoginUpdateProfile(
   props: PageProps<
     Extract<KcContext, { pageId: "login-update-profile.ftl" }>,
@@ -47,6 +28,25 @@ export default function LoginUpdateProfile(
 
   const { url, user, isAppInitiatedAction } = kcContext;
 
+  const validationSchemaUsername = yup.object({
+    username: yup.string().required(msgStr("usernameRequired")),
+    email: yup
+      .string()
+      .email(msgStr("invalidEmailMessage"))
+      .required(msgStr("emailRequired")),
+    firstName: yup.string().required(msgStr("firstNameRequired")),
+    lastName: yup.string().required(msgStr("lastNameRequired")),
+  });
+
+  const validationSchemaNoUsername = yup.object({
+    email: yup
+      .string()
+      .email(msgStr("invalidEmailMessage"))
+      .required(msgStr("emailRequired")),
+    firstName: yup.string().required(msgStr("firstNameRequired")),
+    lastName: yup.string().required(msgStr("lastNameRequired")),
+  });
+
   const formik = useFormik({
     initialValues: {
       username: user.username ?? "",
@@ -57,7 +57,7 @@ export default function LoginUpdateProfile(
     validationSchema: user.editUsernameAllowed
       ? validationSchemaUsername
       : validationSchemaNoUsername,
-    onSubmit: () => { },
+    onSubmit: () => {},
   });
 
   const onSubmit = useConstCallback<FormEventHandler<HTMLFormElement>>((e) => {
@@ -83,7 +83,7 @@ export default function LoginUpdateProfile(
         {user.editUsernameAllowed && (
           <CarpInput
             name="username"
-            label="Username"
+            label={msgStr("username")}
             type="text"
             formikConfig={formik}
             autoComplete="username"
@@ -93,7 +93,7 @@ export default function LoginUpdateProfile(
 
         <CarpInput
           name="email"
-          label="Email"
+          label={msgStr("email")}
           type="email"
           formikConfig={formik}
           autoComplete="email"
@@ -102,7 +102,7 @@ export default function LoginUpdateProfile(
 
         <CarpInput
           name="firstName"
-          label="First name"
+          label={msgStr("firstName")}
           type="text"
           formikConfig={formik}
           autoComplete="given-name"
@@ -111,7 +111,7 @@ export default function LoginUpdateProfile(
 
         <CarpInput
           name="lastName"
-          label="Last name"
+          label={msgStr("lastName")}
           type="text"
           formikConfig={formik}
           autoComplete="family-name"
@@ -159,7 +159,10 @@ export default function LoginUpdateProfile(
                 id="kc-form-buttons"
                 className={getClassName("kcFormButtonsClass")}
               >
-                <AuthActionButton text="Submit" loading={isLoading} />
+                <AuthActionButton
+                  text={msgStr("doSubmit")}
+                  loading={isLoading}
+                />
               </div>
             )}
           </div>

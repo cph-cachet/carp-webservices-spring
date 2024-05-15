@@ -48,7 +48,7 @@ export default function Info(
                 .map((requiredAction) =>
                   msgStr(`requiredAction.${requiredAction}` as const),
                 )
-                .join(",")}
+                .join(", ")}
             </b>
           )}
         </Typography>

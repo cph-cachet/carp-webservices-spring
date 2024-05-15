@@ -1,5 +1,5 @@
-import { ReactNode } from 'react';
-import { PublicPageBanner, StyledLogo } from './styles';
+import { ReactNode } from "react";
+import { PublicPageBanner, StyledLogo } from "./styles";
 
 type Props = {
   infoNode: ReactNode;
@@ -11,7 +11,7 @@ const PublicPageLayout = ({ children, infoNode }: Props) => {
     <>
       <PublicPageBanner>
         <StyledLogo type="flat-colored" />
-        {infoNode}
+        <div style={{ display: "flex", gap: 16 }}>{infoNode}</div>
       </PublicPageBanner>
       {children}
     </>
