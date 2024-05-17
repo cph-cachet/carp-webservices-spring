@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
+import java.time.Instant
 
 @Repository
 interface ExportRepository: JpaRepository<Export, String>
@@ -22,6 +23,9 @@ interface ExportRepository: JpaRepository<Export, String>
 
     @Modifying
     @Transactional
-    @Query( "UPDATE exports SET status = :status WHERE id = :summaryId" )
-    fun updateExportStatus( status: ExportStatus, summaryId: String )
+    @Query( "UPDATE exports SET status = :status WHERE id = :exportId" )
+    fun updateExportStatus( status: ExportStatus, exportId: String )
+
+    @Query( nativeQuery = true, value = "SELECT * FROM exports WHERE created_at < :timestamp" )
+    fun findAllCreatedBefore( timestamp: Instant ): List<Export>
 }
