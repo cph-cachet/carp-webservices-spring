@@ -1,5 +1,5 @@
-import org.springframework.boot.gradle.tasks.bundling.BootJar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
     idea
@@ -68,6 +68,10 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${property("kotlinCoroutinesVersion")}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:${property("kotlinCoroutinesVersion")}")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:${property("kotlinDatetimeVersion")}")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-cbor:${property("kotlinxCborVersion")}")
+
+    // APACHE
+    implementation("org.apache.commons:commons-compress:${property("commonsCompressVersion")}")
 
     // JACKSON
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:${property("jacksonVersion")}")
