@@ -104,6 +104,8 @@ spring:
 
   main:
     banner-mode: off
+    allow-bean-definition-overriding: true
+    web-application-type: reactive
 
   flyway:
     enabled: true
@@ -111,12 +113,24 @@ spring:
   jackson:
     default-property-inclusion: NON_NULL
 
+  security:
+    oauth2:
+      client:
+        registration:
+          carp-webservices:
+            provider: keycloak
+            client-name: CARP WebServices
+            client-id: "${KC_CLIENT_ID}"
+            client-secret: "${KC_CLIENT_SECRET}"
+            authorization-grant-type: client_credentials
+        provider:
+          keycloak:
+            issuer-uri: ${keycloak.issuer-url}
+
 keycloak:
-  auth-server-url: "${KC_URL}"
-  realm: Carp
-  admin:
-    client-id: "${KC_CLIENT_ID}"
-    client-secret: "${KC_CLIENT_SECRET}"
+  issuer-url: "${KC_URL}/realms/Carp"
+  admin-url: "${KC_URL}/admin/realms/Carp"
+  client-id: "${KC_CLIENT_ID}"
 
 com:
   c4-soft:
@@ -131,7 +145,7 @@ com:
           - path: /**
             allowed-origins: "*"
         ops:
-          - iss: ${keycloak.auth-server-url}/realms/${keycloak.realm}
+          - iss: ${keycloak.issuer-url}
             username-claim: preferred_username
             authorities:
             - path: $.realm_access.roles
