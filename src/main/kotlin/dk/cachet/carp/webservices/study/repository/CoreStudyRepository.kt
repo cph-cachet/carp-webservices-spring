@@ -14,6 +14,7 @@ import dk.cachet.carp.webservices.dataPoint.repository.DataPointRepository
 import dk.cachet.carp.webservices.document.repository.DocumentRepository
 import dk.cachet.carp.webservices.file.repository.FileRepository
 import dk.cachet.carp.webservices.summary.repository.SummaryRepository
+import dk.cachet.carp.webservices.security.authentication.oauth2.IssuerFacade
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -36,6 +37,7 @@ class CoreStudyRepository
     private val filesRepository: FileRepository,
     private val objectMapper: ObjectMapper,
     private val validationMessages: MessageBase,
+    private val issuerFacade:IssuerFacade,
 ): StudyRepository
 {
     companion object
@@ -61,6 +63,13 @@ class CoreStudyRepository
 
         studyToSave.snapshot = objectMapper.valueToTree(study.getSnapshot())
         studyRepository.save(studyToSave)
+
+        val groupID = issuerFacade.createGroup(study.id.stringRepresentation)
+        check( groupID != study.id.stringRepresentation )
+        {
+            LOGGER.error("Failed to create group for study with id: ${study.id.stringRepresentation}")
+            validationMessages.get("study.core.add.group_failed", study.id.stringRepresentation)
+        }
 
         LOGGER.info("Study saved, id: ${study.id.stringRepresentation}")
     }

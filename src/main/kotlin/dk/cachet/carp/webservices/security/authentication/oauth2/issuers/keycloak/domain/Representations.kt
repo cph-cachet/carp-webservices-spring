@@ -83,3 +83,17 @@ enum class AccountType {
     EXISTING,
     GENERATED
 }
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class GroupRepresentation(
+
+    var name: String? = null,
+    var id: String? = null,
+) {
+    companion object {
+        fun createFromStudyId(studyId: String) =
+            GroupRepresentation(
+                name = studyId,
+            )
+    }
+}

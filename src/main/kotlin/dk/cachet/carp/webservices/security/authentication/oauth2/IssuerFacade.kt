@@ -27,4 +27,7 @@ interface IssuerFacade {
         redirectUri: String?,
         expirationSeconds: Long?
     ): String
+    suspend fun createGroup(groupName: String): String
+    suspend fun deleteGroup(groupName: String)
+    suspend fun addUserToGroup(userId: String, groupName: String)
 }

@@ -280,4 +280,105 @@ class KeycloakFacade(
             it.accept = listOf(MediaType.APPLICATION_JSON)
         }
         .build()
+
+
+    // Keycloak Group
+    override suspend fun createGroup(groupName: String): String {
+        val token = authenticate().accessToken
+        LOGGER.debug("Creating group: {}", groupName)
+
+        val groupRepresentation = GroupRepresentation
+            .createFromStudyId(groupName)
+
+        adminClient.post().uri("/groups")
+            .headers {
+                it.setBearerAuth(token!!)
+            }
+            .bodyValue(groupRepresentation)
+            .retrieve()
+            .awaitBodilessEntity()
+
+//        val createdGroup = getGroup(groupName)
+
+        return "group created successfully"
+    }
+
+    suspend fun getGroup(groupName: String): GroupRepresentation {
+        val token = authenticate().accessToken
+
+        LOGGER.debug("Getting group with name: {}", groupName)
+
+        val groupRepresentation = adminClient.get().uri("/groups/${groupName}")
+            .headers {
+                it.setBearerAuth(token!!)
+            }
+            .retrieve()
+            .awaitBody<GroupRepresentation>()
+
+        return groupRepresentation
+    }
+
+
+    suspend fun getGroupMembers(groupName: String): List<UserRepresentation> {
+        val token = authenticate().accessToken
+
+        LOGGER.debug("Getting group members of group with name: {}", groupName)
+        val groupId = getGroupIdByGroupName(groupName) ?: throw IllegalArgumentException("Group with name: $groupName not found")
+
+        val userRepresentations = adminClient.get().uri("/groups/${groupId}/members")
+            .headers {
+                it.setBearerAuth(token!!)
+            }
+            .retrieve()
+            .awaitBody<List<UserRepresentation>>()
+
+        return userRepresentations
+    }
+
+    override suspend fun addUserToGroup(userId: String, groupName: String) {
+        val token = authenticate().accessToken
+
+        val groupId = getGroupIdByGroupName(groupName) ?: throw IllegalArgumentException("Group with name: $groupName not found")
+
+        LOGGER.debug("Adding user with id: {} to group with name: {}", userId, groupName)
+
+        adminClient.put().uri("/users/${userId}/groups/${groupId}")
+            .headers {
+                it.setBearerAuth(token!!)
+            }
+            .retrieve()
+            .awaitBodilessEntity()
+    }
+
+    override suspend fun deleteGroup(groupName: String) {
+        val token = authenticate().accessToken
+
+        val groupId = getGroupIdByGroupName(groupName) ?: throw IllegalArgumentException("Group with name: $groupName not found")
+
+        LOGGER.debug("Deleting group with name: {}", groupName)
+
+        adminClient.delete().uri("/groups/${groupId}")
+            .headers {
+                it.setBearerAuth(token!!)
+            }
+            .retrieve()
+            .awaitBodilessEntity()
+    }
+
+    suspend fun getGroupIdByGroupName(groupName: String): String? {
+        val token = authenticate().accessToken
+
+        LOGGER.debug("Getting group id of group with name: {}", groupName)
+
+        val groupRepresentations = adminClient.get().uri("/groups?name=${groupName}")
+            .headers {
+                it.setBearerAuth(token!!)
+            }
+            .retrieve()
+            .awaitBody<List<GroupRepresentation>>()
+
+        return groupRepresentations.firstOrNull()?.id
+    }
+
+
 }

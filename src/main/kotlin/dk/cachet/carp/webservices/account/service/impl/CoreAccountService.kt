@@ -25,12 +25,14 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.stereotype.Service
 import dk.cachet.carp.common.domain.users.Account as CoreAccount
+import dk.cachet.carp.webservices.security.authentication.oauth2.IssuerFacade
 
 @Service
 class CoreAccountService(
     private val accountService: dk.cachet.carp.webservices.account.service.AccountService,
     private val deploymentRepository: CoreDeploymentRepository,
     private val emailInvitationService: EmailInvitationService,
+    private val issuerFacade: IssuerFacade,
 ) : AccountService {
 
     companion object {
@@ -102,6 +104,8 @@ class CoreAccountService(
             Role.PARTICIPANT,
             getRedirectUrl(deployment.protocol)
         )
+
+        invitation.applicationData?.let { account.id?.let { it1 -> issuerFacade.addUserToGroup(it, it1) } }
 
         accountService.grant( accountIdentity, setOf( Claim.InDeployment( deployment.id ) ) )
 
