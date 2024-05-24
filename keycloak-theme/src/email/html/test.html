@@ -1,4 +1,3 @@
-<#macro emailLayout>
 <html>
 
 <head>
@@ -58,7 +57,6 @@
         letter-spacing: 0.25px;
         padding: 10px 24px;
         text-decoration-line: none;
-        white-space: nowrap;
       }
     }
 
@@ -154,9 +152,25 @@
 <body>
   <header><img src="../assets/images/logo-carp-flat-colored.png" alt="CarpLogo" /></header>
   <main>
-    <h1>${kcSanitize(msg("welcomeTitle"))?no_esc}</h1>
+    <h1>Welcome to Copenhagen Research Platform</h1>
     <br>
-        <#nested>
+
+
+    <!-- TEMPLATE PART -->
+    <p>
+      Your administrator has just requested that you update your {2} account by
+      performing the following action(s): {3}. Click on the link below to start
+      this process.
+    </p>
+    <p><a href="{0}" style="white-space: nowrap;">Link to account update</a></p>
+    <p>This link will expire within {4}.</p>
+    <p>
+      If you are unaware that your administrator has requested this, just ignore
+      this message and nothing will be changed.
+    </p>
+    <!---->
+
+
     <br>
     <p>Sincerely, <br> Carp Team</p>
   </main>
@@ -166,17 +180,23 @@
       <a href="https://carp.cachet.dk/"
         style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
         <img src="../assets/images/logo-carp-flat.png" alt="FooterCarpLoo" />
+        <!-- <i>Copenhagen Research Platform (CARP)</i> -->
       </a>
       <a href="https://www.dtu.dk/"
         style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
         <img src="../assets/images/footer_DTU.png" alt="DTULogo" />
+        <!-- <i>Danmarks Tekniske Universitet</i> -->
       </a>
     </div>
+    <!-- Change this -->
     <p>
-        ${kcSanitize(msg("footerDescription"))?no_esc}
+      The Copenhagen Research Platform (CARP) is an open-source suite for digital phenotyping and mHealth app
+      development.
     </p>
-    ${kcSanitize(msg("footerFooterHtml"))?no_esc}
+    <p>View our <a href="https://carp.cachet.dk/privacy-policy/"
+        style="padding: 0px; text-decoration: underline;">privacy policy</a> or <a
+        href="https://carp.cachet.dk/#contact" style="padding: 0px; text-decoration: underline;">contact us</a></p>
   </footer>
 </body>
+
 </html>
-</#macro>
