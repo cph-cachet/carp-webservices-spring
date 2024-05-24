@@ -8,7 +8,7 @@ import dk.cachet.carp.webservices.account.service.AccountService
 import dk.cachet.carp.webservices.common.services.CoreServiceContainer
 import dk.cachet.carp.webservices.protocol.domain.Protocol
 import dk.cachet.carp.webservices.protocol.repository.ProtocolRepository
-import dk.cachet.carp.webservices.protocol.service.impl.ProtocolServiceImpl
+import dk.cachet.carp.webservices.protocol.service.impl.ProtocolServiceWrapper
 import dk.cachet.carp.webservices.security.authentication.domain.Account
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
@@ -44,7 +44,7 @@ class ProtocolServiceTest
         fun `should return null if there are no versions for the id`() = runTest {
             every { protocolRepository.findAllByIdSortByCreatedAt( any() ) } returns emptyList()
 
-            val sut = ProtocolServiceImpl( accountService, protocolRepository, mockk(), services )
+            val sut = ProtocolServiceWrapper( accountService, protocolRepository, mockk(), services )
 
             assertNull( sut.getSingleProtocolOverview( "id" ) )
         }
@@ -79,7 +79,7 @@ class ProtocolServiceTest
             every { objectMapper.treeToValue( any(), any<Class<*>>()) } returns snapshot
             coEvery { accountService.findByUUID( any() ) } returns account
 
-            val sut = ProtocolServiceImpl( accountService, protocolRepository, objectMapper, services )
+            val sut = ProtocolServiceWrapper( accountService, protocolRepository, objectMapper, services )
 
             val result = sut.getSingleProtocolOverview( "id" )
 

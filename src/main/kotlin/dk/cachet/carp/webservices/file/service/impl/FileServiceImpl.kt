@@ -13,6 +13,7 @@ import dk.cachet.carp.webservices.account.service.AccountService
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.exception.responses.ResourceNotFoundException
 import dk.cachet.carp.webservices.common.query.QueryVisitor
+import dk.cachet.carp.webservices.export.service.ResourceExporter
 import dk.cachet.carp.webservices.file.domain.File
 import dk.cachet.carp.webservices.file.repository.FileRepository
 import dk.cachet.carp.webservices.file.service.FileService
@@ -29,6 +30,8 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.StringUtils
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.util.UriComponentsBuilder
+import java.nio.file.Files
+import java.nio.file.Path
 
 
 @Service
@@ -42,7 +45,7 @@ class FileServiceImpl(
     private val accountService: AccountService,
     @Value("\${s3.space.bucket}") private val s3SpaceBucket: String,
     @Value("\${s3.space.endpoint}") private val s3SpaceEndpoint: String
-): FileService
+): FileService, ResourceExporter<File>
 {
     private val backgroundWorker = CoroutineScope(Dispatchers.IO)
 
@@ -79,10 +82,6 @@ class FileServiceImpl(
             }
             return fileRepository.findByStudyIdAndCreatedBy(studyId, id.stringRepresentation)
         }
-    }
-
-    override fun getAllByStudyIdAndDeploymentId(studyId: String, deploymentId: String): List<File> {
-        return fileRepository.findByStudyIdAndDeploymentId(studyId, deploymentId)
     }
 
     override fun getOne(id: Int): File
@@ -183,4 +182,17 @@ class FileServiceImpl(
             DeleteObjectRequest(s3SpaceBucket, uri.key)
         )
     }
+
+    override val dataFileName = "files.json"
+
+    override suspend fun exportDataOrThrow( studyId: UUID, deploymentIds: Set<UUID>, target: Path ) =
+        withContext( Dispatchers.IO )
+        {
+            getAll( null, studyId.stringRepresentation )
+                .onEach {
+                    val resource = fileStorage.getResource( it.storageName )
+                    val copyPath = target.resolve( it.storageName )
+                    Files.copy( resource.file.toPath(), copyPath )
+                }
+        }
 }

@@ -22,9 +22,6 @@ interface FileService
     /** The [getAll] interface for retrieving all files for a given query and study id. */
     fun getAll(query: String?, studyId: String): List<File>
 
-    /** The [getAllByStudyIdAndDeploymentId] interface for retrieving all files for a given study id and deployment id. */
-    fun getAllByStudyIdAndDeploymentId(studyId: String, deploymentId: String): List<File>
-
     fun uploadImage(file: MultipartFile): String
 
     fun deleteImage(url: String)

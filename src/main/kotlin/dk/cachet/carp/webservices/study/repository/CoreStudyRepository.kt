@@ -13,9 +13,8 @@ import dk.cachet.carp.webservices.consent.repository.ConsentDocumentRepository
 import dk.cachet.carp.webservices.dataPoint.repository.DataPointRepository
 import dk.cachet.carp.webservices.document.repository.DocumentRepository
 import dk.cachet.carp.webservices.file.repository.FileRepository
-import dk.cachet.carp.webservices.summary.repository.SummaryRepository
+import dk.cachet.carp.webservices.export.repository.ExportRepository
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -32,7 +31,7 @@ class CoreStudyRepository
     private val collectionRepository: CollectionRepository,
     private val consentDocumentRepository: ConsentDocumentRepository,
     private val documentRepository: DocumentRepository,
-    private val summaryRepository: SummaryRepository,
+    private val exportRepository: ExportRepository,
     private val filesRepository: FileRepository,
     private val objectMapper: ObjectMapper,
     private val validationMessages: MessageBase,
@@ -97,12 +96,12 @@ class CoreStudyRepository
 
         documentRepository.deleteAllByCollectionIds( collectionIds )
 
-        collectionRepository.deleteAllByDeploymentIds( idsToRemove )
-        consentDocumentRepository.deleteAllByDeploymentIds( idsToRemove )
-        dataPointRepository.deleteAllByDeploymentIds( idsToRemove )
+        collectionRepository.deleteAllByDeploymentIds( idsToRemove.map{ it.stringRepresentation } )
+        consentDocumentRepository.deleteAllByDeploymentIds( idsToRemove.map{ it.stringRepresentation } )
+        dataPointRepository.deleteAllByDeploymentIds( idsToRemove.map{ it.stringRepresentation } )
 
         filesRepository.deleteByStudyId( studyId.stringRepresentation )
-        summaryRepository.deleteByStudyId( studyId.stringRepresentation )
+        exportRepository.deleteByStudyId( studyId.stringRepresentation )
         studyRepository.deleteByStudyId( studyId.stringRepresentation )
 
         LOGGER.info("Study with id ${studyId.stringRepresentation} and all associated data deleted.")
@@ -144,10 +143,10 @@ class CoreStudyRepository
             study
         }
 
-    suspend fun getDeploymentIdsOrThrow(studyId: UUID): List<String>
+    suspend fun getDeploymentIdsOrThrow(studyId: UUID): Set<UUID>
     {
         val recruitment = participantRepository.getRecruitment(studyId)
-        return recruitment?.participantGroups?.keys?.map { it.stringRepresentation } ?: emptyList()
+        return recruitment?.participantGroups?.keys ?: emptySet()
     }
 
     suspend fun getStudySnapshotById(id: UUID): StudySnapshot

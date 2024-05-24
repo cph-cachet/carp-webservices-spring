@@ -21,10 +21,6 @@ interface FileRepository: JpaRepository<File, Int>, JpaSpecificationExecutor<Fil
 
     fun findByStudyId(studyId: String): List<File>
 
-    @Query(nativeQuery = true,
-            value = "SELECT * FROM files WHERE study_id = :studyId and study_deployment_id  = :deploymentId")
-    fun findByStudyIdAndDeploymentId(@Param(value = "studyId") studyId: String, @Param(value = "deploymentId") deploymentId: String?): List<File>
-
     @Modifying
     @Transactional
     @Query(nativeQuery = true,

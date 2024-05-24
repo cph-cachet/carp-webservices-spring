@@ -5,7 +5,7 @@ object PathVariableName {
     const val STUDY_ID = "study-id"
     const val DEPLOYMENT_ID = "deployment-id"
     const val FILE_ID = "file-id"
-    const val SUMMARY_ID = "summary-id"
+    const val EXPORT_ID = "export-id"
     const val DOCUMENT_ID = "document-id"
     const val OWNER_ID = "owner-id"
     const val DATA_POINT_ID = "data-point-id"

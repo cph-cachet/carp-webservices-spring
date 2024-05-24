@@ -2,6 +2,8 @@ package dk.cachet.carp.webservices.document.service.impl
 
 import com.fasterxml.jackson.databind.JsonNode
 import cz.jirutka.rsql.parser.RSQLParser
+import dk.cachet.carp.common.application.UUID
+import dk.cachet.carp.webservices.collection.service.CollectionService
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.exception.responses.AlreadyExistsException
 import dk.cachet.carp.webservices.common.exception.responses.ResourceNotFoundException
@@ -13,14 +15,18 @@ import dk.cachet.carp.webservices.document.dto.UpdateDocumentRequestDto
 import dk.cachet.carp.webservices.document.filter.DocumentSpecification
 import dk.cachet.carp.webservices.document.repository.DocumentRepository
 import dk.cachet.carp.webservices.document.service.DocumentService
+import dk.cachet.carp.webservices.export.service.ResourceExporter
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
 import dk.cachet.carp.webservices.security.authorization.Role
 import jakarta.servlet.http.HttpServletRequest
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.nio.file.Path
 
 @Service
 @Transactional
@@ -28,8 +34,9 @@ class DocumentServiceImpl(
     private val documentRepository: DocumentRepository,
     private val documentTraverser: DocumentTraverser,
     private val validationMessages: MessageBase,
-    private val authenticationService: AuthenticationService
-): DocumentService
+    private val authenticationService: AuthenticationService,
+    private val collectionService: CollectionService
+): DocumentService, ResourceExporter<Document>
 {
     companion object
     {
@@ -71,7 +78,8 @@ class DocumentServiceImpl(
         }
     }
 
-    override fun getAll(collectionIds: List<Int>): List<Document> {
+    override fun getAll(collectionIds: List<Int>): List<Document>
+    {
         return documentRepository.findAllByCollectionsIdsWithDocuments(collectionIds)
     }
 
@@ -156,4 +164,20 @@ class DocumentServiceImpl(
         collections = request.collections
         data = request.data
     }
+
+    override val dataFileName = "documents.json"
+
+    // We always want to export deployment-agnostic data, which is the case when the collection
+    // does not have a deployment ID set.
+    override suspend fun exportDataOrThrow( studyId: UUID, deploymentIds: Set<UUID>, target: Path ) =
+        withContext( Dispatchers.IO )
+        {
+            val collections = collectionService.getAll(studyId.stringRepresentation)
+                .filter {
+                    it.studyDeploymentId.isNullOrBlank() ||
+                    it.studyDeploymentId in deploymentIds.map { d -> d.stringRepresentation }
+                }
+
+            getAll( collections.map { it.id } )
+        }
 }

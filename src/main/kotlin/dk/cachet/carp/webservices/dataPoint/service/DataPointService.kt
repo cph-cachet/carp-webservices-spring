@@ -10,8 +10,6 @@ interface DataPointService
 {
     suspend fun getAll(deploymentId: String, pageRequest: PageRequest, query: String?): List<DataPoint>
 
-    fun getAllForDownload(deploymentIds: List<String>): List<DataPoint>
-
     fun getNumberOfDataPoints(deploymentId: String, query: String?): Long
 
     fun getStatistics(deploymentIds: List<String>): DeploymentStatisticsResponseDto

@@ -5,8 +5,8 @@ import dk.cachet.carp.data.infrastructure.DataStreamServiceDecorator
 import dk.cachet.carp.webservices.data.domain.DataStreamSequence
 import kotlinx.datetime.Instant
 
-interface DataStreamService {
+interface DataStreamService
+{
     val core: DataStreamServiceDecorator
-
     fun getLatestUpdatedAt( deploymentId: UUID ): Instant?
 }

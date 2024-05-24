@@ -13,7 +13,7 @@ interface ApplicationServiceAuthorizer<
 {
     fun TRequest.authorize()
 
-    suspend fun TRequest.changeClaimsOnSuccess(result: Any? )
+    suspend fun TRequest.changeClaimsOnSuccess( result: Any? )
 
     fun authorizeRequest( request: TRequest ) = request.authorize()
 
