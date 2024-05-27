@@ -10,4 +10,6 @@ object RequestParamName {
     const val SORT = "sort"
     const val PAGE = "page"
     const val EMAIL = "email"
+    const val OFFSET = "offset"
+    const val LIMIT = "limit"
 }
