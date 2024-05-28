@@ -39,6 +39,8 @@ naming:
 performance:
   ArrayPrimitive:
     active: false
+  SpreadOperator:
+    active: false
 
 potential-bugs:
   EqualsAlwaysReturnsTrueOrFalse:
@@ -53,8 +55,6 @@ style:
     active: false
   LoopWithTooManyJumpStatements:
     active: false
-  MaxLineLength:
-    active: false
   MayBeConst:
     active: false
   ProtectedMemberInFinalClass:
@@ -68,4 +68,6 @@ style:
   UnusedPrivateClass:
     active: false
   WildcardImport:
+    active: false
+  SerialVersionUIDInSerializableClass:
     active: false

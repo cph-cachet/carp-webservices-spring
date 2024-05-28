@@ -1,5 +1,6 @@
 import io.gitlab.arturbosch.detekt.Detekt
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jlleitschuh.gradle.ktlint.KtlintExtension
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
@@ -192,4 +193,13 @@ tasks.withType<Detekt>().configureEach {
     config.from(files("$rootDir/detekt.yml"))
     ignoreFailures = false
     buildUponDefaultConfig = true
+}
+
+configure<KtlintExtension> {
+    ignoreFailures.set(true)
+    additionalEditorconfig.set(
+        mapOf(
+            "ktlint_standard_no-wildcard-imports" to "disabled",
+        ),
+    )
 }
