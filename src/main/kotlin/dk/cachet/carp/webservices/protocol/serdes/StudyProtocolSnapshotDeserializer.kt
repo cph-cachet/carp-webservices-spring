@@ -17,6 +17,7 @@ import org.springframework.util.StringUtils
  * The Class [StudyProtocolSnapshotDeserializer].
  * The [StudyProtocolSnapshotDeserializer] implements the serialization logic for [StudyProtocolSnapshot].
  */
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
 class StudyProtocolSnapshotDeserializer(
     private val validationMessages: MessageBase,
 ) : JsonDeserializer<StudyProtocolSnapshot>() {

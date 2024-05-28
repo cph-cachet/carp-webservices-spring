@@ -6,13 +6,14 @@ import jakarta.persistence.criteria.*
 import org.springframework.data.jpa.domain.Specification
 import java.time.Instant
 import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 import java.util.stream.Collectors
 
 /**
  * The Enum Class [QueryOperation].
  * The [QueryOperation] implements the operation execution for the nested queries.
  */
-enum class QueryOperation constructor(private val operator: ComparisonOperator) {
+enum class QueryOperation(private val operator: ComparisonOperator) {
     EQUAL(RSQLOperators.EQUAL),
     NOT_EQUAL(RSQLOperators.NOT_EQUAL),
     GREATER_THAN(RSQLOperators.GREATER_THAN),
@@ -25,7 +26,7 @@ enum class QueryOperation constructor(private val operator: ComparisonOperator) 
 
     companion object {
         fun getSimpleOperator(operator: ComparisonOperator?): QueryOperation? {
-            for (operation in values()) {
+            for (operation in entries) {
                 if (operation.operator === operator) {
                     return operation
                 }
@@ -63,6 +64,7 @@ class QuerySpecification<T>(
      * @param query The [query] parameter to predicate.
      * @param builder The [builder] parameter to build the predicate.
      */
+    @Suppress("LongMethod", "CyclomaticComplexMethod")
     override fun toPredicate(
         root: Root<T>,
         query: CriteriaQuery<*>,
@@ -74,7 +76,7 @@ class QuerySpecification<T>(
         val allArguments = if (nestedProperties == null) castArguments(root) else arguments
         val firstArgument: Any = allArguments!!.first()
 
-        when (QueryOperation.getSimpleOperator(operator)) {
+        return when (QueryOperation.getSimpleOperator(operator)) {
             QueryOperation.EQUAL ->
                 {
                     return when (firstArgument) {
@@ -122,18 +124,18 @@ class QuerySpecification<T>(
             QueryOperation.LESS_THAN_OR_EQUAL ->
                 {
                     return when (firstArgument) {
-                        is Instant -> builder.lessThanOrEqualTo(
-                            root.get(QueryUtil.toCamelCase(property!!)),
-                            firstArgument
-                        )
+                        is Instant ->
+                            builder.lessThanOrEqualTo(
+                                root.get(QueryUtil.toCamelCase(property!!)),
+                                firstArgument,
+                            )
                         else -> builder.lessThanOrEqualTo(propertyQuery, firstArgument.toString())
                     }
                 }
             QueryOperation.IN -> return propertyQuery.`in`(allArguments)
             QueryOperation.NOT_IN -> return builder.not(propertyQuery.`in`(allArguments))
-            else -> {}
+            else -> null
         }
-        return null
     }
 
     private fun castArguments(root: Root<T>): List<Any> {
@@ -152,7 +154,7 @@ class QuerySpecification<T>(
         return try {
             // If the string looks like a date, convert it to an Instant.
             DateTimeFormatter.ISO_ZONED_DATE_TIME.parse(arg, Instant::from)
-        } catch (e: Exception) {
+        } catch (e: DateTimeParseException) {
             // Otherwise return the string as normal.
             arg
         }

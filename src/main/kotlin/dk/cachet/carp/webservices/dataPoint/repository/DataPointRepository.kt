@@ -16,7 +16,10 @@ import org.springframework.web.multipart.MultipartFile
 import java.util.*
 
 @Repository
-interface DataPointRepository : JpaRepository<DataPoint, String>, JpaSpecificationExecutor<DataPoint>, DataPointRepositoryCustom {
+interface DataPointRepository :
+    JpaRepository<DataPoint, String>,
+    JpaSpecificationExecutor<DataPoint>,
+    DataPointRepositoryCustom {
     companion object {
         /**
          * A nested interface, mainly used as a projection class for the [getStatistics] function.
@@ -37,10 +40,8 @@ interface DataPointRepository : JpaRepository<DataPoint, String>, JpaSpecificati
         }
     }
 
-    /** The [findById] interface to retrieve the data point by [id]. */
     fun findById(id: Int): Optional<DataPoint>
 
-    /** The [findByDeploymentId] interface to retrieve the data point by [deploymentId]. */
     fun findByDeploymentId(
         deploymentId: String,
         pageable: Pageable,
@@ -52,17 +53,14 @@ interface DataPointRepository : JpaRepository<DataPoint, String>, JpaSpecificati
         @Param("deploymentIds") deploymentIds: Collection<String>,
     ): List<DataPoint>
 
-    /** The [findByDeploymentIdAndCreatedBy] interface to retrieve the data point by [deploymentId] and [createdBy]. */
     fun findByDeploymentIdAndCreatedBy(
         deploymentId: String,
         createdBy: String,
         pageable: Pageable,
     ): Page<DataPoint>
 
-    /** The [countByDeploymentId] interface returns the number of [DataPoint]s by [deploymentId]. */
     fun countByDeploymentId(deploymentId: String): Long
 
-    /** The [countByDeploymentIdAndCreatedBy] interface returns the number of [DataPoint]s by [deploymentId] and [createdBy]. */
     fun countByDeploymentIdAndCreatedBy(
         deploymentId: String,
         createdBy: String,
@@ -72,10 +70,11 @@ interface DataPointRepository : JpaRepository<DataPoint, String>, JpaSpecificati
     @Query(
         nativeQuery = true,
         value =
-            "select deployment_id as did, count(*) as total, carp_header->'data_format'->>'name' as format, cast(created_at as DATE) as stamp " +
-                "from data_points " +
-                "where deployment_id in (:ids) " +
-                "group by deployment_id, stamp, format",
+            "select deployment_id as did, " +
+                "count(*) as total, " +
+                "carp_header->'data_format'->>'name' as format, " +
+                "cast(created_at as DATE) as stamp " +
+                "from data_points where deployment_id in (:ids) group by deployment_id, stamp, format",
     )
     fun getStatistics(
         @Param("ids") deploymentIds: Collection<String>,
@@ -91,14 +90,16 @@ interface DataPointRepository : JpaRepository<DataPoint, String>, JpaSpecificati
         @Param(value = "deploymentIds") deploymentIds: Collection<String>,
     )
 
-    /** The [save] interface to insert the data point with the given [dataPoint] request and [uploadedFile]. */
     override fun save(
         dataPoint: DataPoint,
         uploadedFile: MultipartFile?,
     ): DataPoint
 }
 
-/** The [DataPointRepositoryCustom] interface implements a repository for [DataPoint] to insert data with the given [dataPoint] and [uploadedFile].*/
+/**
+ * The [DataPointRepositoryCustom] interface implements a repository for
+ * [DataPoint] to insert data with the given [dataPoint] and [uploadedFile].
+ */
 interface DataPointRepositoryCustom {
     fun save(
         dataPoint: DataPoint,

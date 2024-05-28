@@ -54,6 +54,7 @@ class CoreEventBus(
         }
     }
 
+    @Suppress("TooGenericExceptionCaught")
     suspend fun invokeHandlers(event: IntegrationEvent<*>) {
         // Find all active handlers listening to the published event type.
         val handlers =

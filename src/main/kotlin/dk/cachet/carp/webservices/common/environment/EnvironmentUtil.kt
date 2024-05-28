@@ -7,9 +7,9 @@ import org.springframework.stereotype.Component
 class EnvironmentUtil(
     @Value("\${environment.url}") val url: String,
     @Value("\${environment.portalUrl}") val portalUrl: String,
-    @Value("\${spring.profiles.active}") private val _profile: String,
+    @Value("\${spring.profiles.active}") private val activeProfile: String,
 ) {
     val profile: EnvironmentProfile by lazy {
-        EnvironmentProfile.getEnvironmentProfile(_profile)
+        EnvironmentProfile.getEnvironmentProfile(activeProfile)
     }
 }

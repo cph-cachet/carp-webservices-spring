@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger
  * The Class [DeviceRegistrationSerializer].
  * The [DeviceRegistrationSerializer] implements the serialization logic for [DeviceRegistration].
  */
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
 class DeviceRegistrationSerializer(private val validationMessages: MessageBase) : JsonSerializer<DeviceRegistration>() {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()

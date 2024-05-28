@@ -13,22 +13,12 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.util.StringUtils
 
-/**
- * The Class [StudyStatusDeserializer].
- * The [StudyStatusDeserializer] implements the deserialization logic for [StudyStatus].
- */
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
 class StudyStatusDeserializer(private val validationMessages: MessageBase) : JsonDeserializer<StudyStatus>() {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
-    /**
-     * The [deserialize] function is used to deserialize the parsed object.
-     *
-     * @param jsonParser The [jsonParser] object containing the json object parsed.
-     * @throws SerializationException If the [StudyStatus] is blank or empty. Also, if the [StudyStatus] contains invalid format.
-     * @return The deserialized [StudyStatus] object.
-     */
     override fun deserialize(
         jsonParser: JsonParser?,
         context: DeserializationContext?,

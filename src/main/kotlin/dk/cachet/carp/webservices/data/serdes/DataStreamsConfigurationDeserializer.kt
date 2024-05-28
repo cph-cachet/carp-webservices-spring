@@ -13,7 +13,9 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.util.StringUtils
 
-class DataStreamsConfigurationDeserializer(private val validationMessages: MessageBase) : JsonDeserializer<DataStreamsConfiguration>() {
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
+class DataStreamsConfigurationDeserializer(private val validationMessages: MessageBase) :
+    JsonDeserializer<DataStreamsConfiguration>() {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }

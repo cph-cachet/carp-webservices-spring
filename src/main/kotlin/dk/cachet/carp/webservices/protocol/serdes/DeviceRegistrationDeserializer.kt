@@ -17,6 +17,7 @@ import org.springframework.util.StringUtils
  * The Class [DeviceRegistrationDeserializer].
  * The [DeviceRegistrationDeserializer] implements the serialization logic for [DeviceRegistration].
  */
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
 class DeviceRegistrationDeserializer(
     private val validationMessages: MessageBase,
 ) : JsonDeserializer<DeviceRegistration>() {

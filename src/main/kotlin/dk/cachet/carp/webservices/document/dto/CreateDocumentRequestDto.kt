@@ -5,10 +5,6 @@ import dk.cachet.carp.webservices.collection.domain.Collection
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 
-/**
- * The Data Class [CreateDocumentRequestDto].
- * The [CreateDocumentRequestDto] represents the create document request with the given [name], [collectionId], [collections], and [data].
- */
 data class CreateDocumentRequestDto(
     /** The [name] of the document. */
     @field:NotBlank

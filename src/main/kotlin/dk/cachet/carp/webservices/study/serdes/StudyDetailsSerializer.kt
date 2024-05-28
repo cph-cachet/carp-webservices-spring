@@ -11,22 +11,12 @@ import kotlinx.serialization.encodeToString
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 
-/**
- * The Class [StudyDetailsSerializer].
- * The [StudyDetailsSerializer] implements the serialization logic for [StudyDetails].
- */
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
 class StudyDetailsSerializer(private val validationMessages: MessageBase) : JsonSerializer<StudyDetails>() {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
-    /**
-     * The [serialize] function is used to serialize the parsed object.
-     *
-     * @param studyDetails The [studyDetails] object containing the json object parsed.
-     * @throws SerializationException If the [StudyDetails] is blank or empty. Also, if the [StudyDetails] contains invalid format.
-     * @return The serialization of [StudyDetails] object.
-     */
     override fun serialize(
         studyDetails: StudyDetails?,
         jsonGenerator: JsonGenerator?,

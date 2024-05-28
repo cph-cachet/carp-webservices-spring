@@ -173,7 +173,7 @@ class FileServiceImpl(
             uri = AmazonS3URI(url.replaceBefore(s3SpaceBucket, ""))
             LOGGER.info("Deleting s3 resource with uri: $url")
         } catch (e: IllegalArgumentException) {
-            LOGGER.warn("Ignoring deletion of malformed s3 uri: $url")
+            LOGGER.warn("Ignoring deletion of malformed s3 uri: $url", e)
             return
         }
 

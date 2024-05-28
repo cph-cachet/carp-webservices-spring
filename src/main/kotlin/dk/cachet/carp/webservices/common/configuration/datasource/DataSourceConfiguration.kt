@@ -13,6 +13,7 @@ import javax.sql.DataSource
 @ComponentScan(basePackages = ["dk.cachet.carp.webservices"])
 @PropertySources(PropertySource(value = ["classpath:config/application-\${spring.profiles.active}.yml"]))
 @ConfigurationProperties(prefix = "spring.datasource")
+@Suppress("LongParameterList")
 class DataSourceConfiguration(
     @Value("\${spring.datasource.url}") private val datasourceUrl: String,
     @Value("\${spring.datasource.driver-class-name}") private val dbDriverClassName: String,
@@ -26,6 +27,13 @@ class DataSourceConfiguration(
     @Value("\${spring.datasource.hikari.leak-detection-threshold}") private val leakDetectionThreshold: Number,
     @Value("\${spring.datasource.hikari.idle-timeout}") private val idleTimeout: Number,
 ) : HikariConfig() {
+    companion object DefaultDataSourceProperties {
+        private const val SOCKET_TIMEOUT_MINUTES: Long = 15
+        private const val CHARACTER_ENCODING = "utf-8"
+        private const val AUTO_RECONNECT = true
+        private const val USE_UNICODE = true
+    }
+
     @Bean
     @Qualifier("dataSource")
     fun dataSource(): DataSource {
@@ -36,7 +44,6 @@ class DataSourceConfiguration(
         hikariConfig.password = dbPassword
         hikariConfig.poolName = carpHikariPool
 
-        // Add DataSource Property
         hikariConfig.maximumPoolSize = maxPoolSize.toInt()
         hikariConfig.idleTimeout = idleTimeout.toLong()
         hikariConfig.maxLifetime = maxLifetime.toLong()
@@ -44,18 +51,14 @@ class DataSourceConfiguration(
         hikariConfig.connectionTimeout = connectionTimeout.toLong()
         hikariConfig.leakDetectionThreshold = leakDetectionThreshold.toLong()
 
-        // Set data source properties
-        hikariConfig.addDataSourceProperty("useUnicode", "true")
-        hikariConfig.addDataSourceProperty("characterEncoding", "utf8")
+        hikariConfig.addDataSourceProperty("useUnicode", USE_UNICODE)
+        hikariConfig.addDataSourceProperty("characterEncoding", CHARACTER_ENCODING)
+        hikariConfig.addDataSourceProperty("autoReconnect", AUTO_RECONNECT)
         hikariConfig.addDataSourceProperty(
             "socketTimeout",
-            TimeUnit.SECONDS.convert(15, TimeUnit.MINUTES).toInt(),
+            TimeUnit.SECONDS.convert(SOCKET_TIMEOUT_MINUTES, TimeUnit.MINUTES).toInt(),
         )
 
-        // Auto Reconnect
-        hikariConfig.addDataSourceProperty("autoReconnect", true)
-
-        // Test query
         hikariConfig.connectionTestQuery = "select 1"
 
         return HikariDataSource(hikariConfig)

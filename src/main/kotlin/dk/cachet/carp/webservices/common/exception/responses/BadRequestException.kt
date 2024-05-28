@@ -12,7 +12,8 @@ class BadRequestException : RuntimeException {
     companion object {
         private const val serialVersionUID = 1L
         private const val INVALID_PARAM_MSG = "Invalid value [%s] found for parameter [%s]."
-        private const val INVALID_DATE_PARAM_MSG = "Invalid value [%s] found for parameter [%s]. Expected date format is [%s]"
+        private const val INVALID_DATE_PARAM_MSG =
+            "Invalid value [%s] found for parameter [%s]. Expected date format is [%s]"
     }
 
     /**

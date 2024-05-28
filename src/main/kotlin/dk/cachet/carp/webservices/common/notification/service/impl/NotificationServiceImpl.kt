@@ -59,6 +59,7 @@ class NotificationServiceImpl(
      * The [sendExceptionNotification] function sends a notification message with the given message.
      * @param errorResponse The errorResponse includes the error code, error message, and the error response.
      */
+    @Suppress("MagicNumber")
     override fun sendExceptionNotification(errorResponse: CarpErrorResponse) {
         val messageBuilder = StringBuilder()
         messageBuilder.append("- Exception Code: ${errorResponse.statusCode}$NEW_LINE")
@@ -106,8 +107,8 @@ class NotificationServiceImpl(
                     { error -> LOGGER.error("Error sending message to Teams: ${error.message}") },
                 )
         } catch (ex: IOException) {
-            LOGGER.error("Unexpected Error! WebHook: $ex")
-            throw BadRequestException(validationMessages.get("notification.teams.exception", ex.message.toString()))
+            LOGGER.error("Unexpected Error! Webhook: $ex")
+            throw BadRequestException(validationMessages.get("notification.teams.exception", ex.message.toString()), ex)
         }
     }
 }

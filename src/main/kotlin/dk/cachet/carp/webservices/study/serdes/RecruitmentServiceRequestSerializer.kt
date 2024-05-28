@@ -14,6 +14,7 @@ import org.apache.logging.log4j.Logger
  * The Class [RecruitmentServiceRequestSerializer].
  * [RecruitmentServiceRequestSerializer] implements the serialization logic for [RecruitmentServiceRequest].
  */
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
 class RecruitmentServiceRequestSerializer(
     private val validationMessages: MessageBase,
 ) : JsonSerializer<RecruitmentServiceRequest<*>>() {

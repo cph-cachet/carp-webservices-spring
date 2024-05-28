@@ -83,7 +83,7 @@ class CoreStudyRepository(
 
     /**
      * TODO: This should only remove the study from the study repository.
-     * TODO: All associated data should be deleted by subscribing to `StudyService.Event.StudyRemoved` in the respective services.
+     * TODO: All associated data should be deleted by subscribing to `StudyService.Event.StudyRemoved`
      */
     @Transactional(rollbackFor = [Exception::class])
     override suspend fun remove(studyId: UUID): Boolean =

@@ -165,7 +165,7 @@ class KeycloakFacade(
                 is EmailAccountIdentity -> "email=${identity.emailAddress}"
                 is UsernameAccountIdentity -> "username=${identity.username}"
                 else -> throw IllegalArgumentException(
-                    "Unsupported account identity type: ${identity::class.simpleName}."
+                    "Unsupported account identity type: ${identity::class.simpleName}.",
                 )
             }.plus("&exact=true")
 

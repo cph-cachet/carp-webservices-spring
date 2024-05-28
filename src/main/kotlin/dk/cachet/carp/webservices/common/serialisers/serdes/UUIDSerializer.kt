@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger
  * The Class [UUIDSerializer].
  * The [UUIDSerializer] implements the serialization mechanism for the [UUID] class.
  */
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
 class UUIDSerializer(private val validationMessages: MessageBase) : JsonSerializer<UUID>() {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()

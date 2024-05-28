@@ -12,7 +12,7 @@ import dk.cachet.carp.webservices.common.query.QueryVisitor
 import dk.cachet.carp.webservices.document.domain.Document
 import dk.cachet.carp.webservices.document.dto.CreateDocumentRequestDto
 import dk.cachet.carp.webservices.document.dto.UpdateDocumentRequestDto
-import dk.cachet.carp.webservices.document.filter.DocumentSpecification
+import dk.cachet.carp.webservices.document.filter.DocumentSpecifications
 import dk.cachet.carp.webservices.document.repository.DocumentRepository
 import dk.cachet.carp.webservices.document.service.DocumentService
 import dk.cachet.carp.webservices.export.service.ResourceExporter
@@ -41,6 +41,7 @@ class DocumentServiceImpl(
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
+    @Suppress("TooGenericExceptionCaught")
     override fun getAll(
         pageRequest: PageRequest,
         query: String?,
@@ -50,8 +51,8 @@ class DocumentServiceImpl(
             val role = authenticationService.getRole()
             val id = authenticationService.getId()
             val isAccountResearcher = role >= Role.RESEARCHER
-            val belongsToStudySpec = DocumentSpecification.belongsToStudyId(studyId)
-            val belongsToUserSpec = DocumentSpecification.belongsToUserAccountId(id.stringRepresentation)
+            val belongsToStudySpec = DocumentSpecifications.belongsToStudyId(studyId)
+            val belongsToUserSpec = DocumentSpecifications.belongsToUserAccountId(id.stringRepresentation)
 
             val validatedQuery = query?.let { QueryUtil.validateQuery(it) }
 
@@ -104,6 +105,7 @@ class DocumentServiceImpl(
         return saved
     }
 
+    @Suppress("TooGenericExceptionCaught")
     override fun getOne(id: Int): Document {
         try {
             val optionalDocument = documentRepository.findById(id)

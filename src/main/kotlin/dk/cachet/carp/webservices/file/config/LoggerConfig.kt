@@ -49,10 +49,10 @@ class LoggerConfig(
         }
 
         if (!fileUtil.isWritable(directory)) {
-            if (!fileUtil.setStoragePermission(directory)) {
+            if (!fileUtil.setDefaultStoragePermissions(directory)) {
                 LOGGER.warn("Logger directory cannot be created.")
                 throw FileStorageException(validationMessages.get("file.directory.error", "logging"))
-            } else if (fileUtil.setStoragePermission(directory)) {
+            } else if (fileUtil.setDefaultStoragePermissions(directory)) {
                 LOGGER.info("Logging storage was created: {}", directory)
             }
         } else {

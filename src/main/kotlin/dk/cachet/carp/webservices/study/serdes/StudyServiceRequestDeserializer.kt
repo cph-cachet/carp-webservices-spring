@@ -16,6 +16,7 @@ import org.springframework.util.StringUtils
  * The Class [StudyServiceRequestDeserializer].
  * The [StudyServiceRequestDeserializer] implements the deserialization logic for [StudyServiceRequest].
  */
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
 class StudyServiceRequestDeserializer(
     private val validationMessages: MessageBase,
 ) : JsonDeserializer<StudyServiceRequest<*>>() {

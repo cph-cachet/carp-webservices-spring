@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger
  * The Class [ParticipantDataSerializer].
  * The [ParticipantDataSerializer] implements the serialization logic for [ParticipantData].
  */
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
 class ParticipantDataSerializer(private val validationMessages: MessageBase) : JsonSerializer<ParticipantData>() {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()

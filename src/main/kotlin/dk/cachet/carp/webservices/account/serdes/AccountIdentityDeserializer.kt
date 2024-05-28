@@ -17,6 +17,7 @@ import org.springframework.util.StringUtils
  * The Class [AccountIdentityDeserializer].
  * The [AccountIdentityDeserializer] implements the deserialization logic for [AccountIdentity].
  */
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
 class AccountIdentityDeserializer(private val validationMessage: MessageBase) : JsonDeserializer<AccountIdentity>() {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()

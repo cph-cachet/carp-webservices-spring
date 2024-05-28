@@ -17,6 +17,7 @@ import org.springframework.util.StringUtils
  * The Class [ParticipantDataDeserializer].
  * [ParticipantDataDeserializer] implements the deserialization logic for [ParticipantData].
  */
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
 class ParticipantDataDeserializer(private val validationMessages: MessageBase) : JsonDeserializer<ParticipantData>() {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()

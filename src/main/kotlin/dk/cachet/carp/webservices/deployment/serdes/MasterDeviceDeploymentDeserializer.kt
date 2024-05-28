@@ -17,6 +17,7 @@ import org.springframework.util.StringUtils
  * The Class [MasterDeviceDeploymentDeserializer].
  * The [MasterDeviceDeploymentDeserializer] implements the deserialization logic for [MasterDeviceDeployment].
  */
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
 class MasterDeviceDeploymentDeserializer(
     private val validationMessages: MessageBase,
 ) : JsonDeserializer<PrimaryDeviceDeployment>() {

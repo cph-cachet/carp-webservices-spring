@@ -16,6 +16,7 @@ import org.springframework.util.StringUtils
  * The Class [DeploymentServiceRequestDeserializer].
  * The [DeploymentServiceRequestDeserializer] implements the deserialization logic for [DeploymentServiceRequest].
  */
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
 class DeploymentServiceRequestDeserializer(
     private val validationMessages: MessageBase,
 ) : JsonDeserializer<DeploymentServiceRequest<*>>() {

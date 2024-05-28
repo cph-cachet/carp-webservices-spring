@@ -24,11 +24,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
 
-/**
- * The Class [CollectionServiceImpl].
- * The [CollectionServiceImpl] provides implementation for [CollectionService] to create, invite,
- * delete and find collection for the given parameter requests.
- */
 @Service
 @Transactional
 class CollectionServiceImpl(
@@ -44,12 +39,6 @@ class CollectionServiceImpl(
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
-    /**
-     * The function [delete] deletes the collection.
-     *
-     * @param studyId The [studyId] of the study.
-     * @param id The [id] of the collection.
-     */
     override fun delete(
         studyId: String,
         id: Int,
@@ -64,13 +53,6 @@ class CollectionServiceImpl(
         }
     }
 
-    /**
-     * The function [update] updates a collection [name] with the given parameters.
-     *
-     * @param studyId The [studyId] of the study.
-     * @param id The [id] of the collection.
-     * @return The updated [Collection] by its [studyId] and collection [id].
-     */
     override fun update(
         studyId: String,
         id: Int,
@@ -82,13 +64,6 @@ class CollectionServiceImpl(
         return collection
     }
 
-    /**
-     * The function [create] creates a new collection.
-     *
-     * @param request The [request] object containing the information needed to create a new collection.
-     * @param studyId The [studyId] of the study.
-     * @return The [Collection] created with the given [studyId] and [request] object.
-     */
     override fun create(
         request: CollectionCreateRequestDto,
         studyId: String,
@@ -119,14 +94,6 @@ class CollectionServiceImpl(
         return saved
     }
 
-    /**
-     * The function [getCollectionByStudyIdAndId] retrieves the collection with the given parameters.
-     *
-     * @param studyId The [studyId] of the study.
-     * @param id The collection [id].
-     * @throws ResourceNotFoundException when the [studyId] and  collection [id] are not found.
-     * @return The [Collection] with the given [studyId] and collection [id].
-     */
     override fun getCollectionByStudyIdAndId(
         studyId: String,
         id: Int,
@@ -143,14 +110,6 @@ class CollectionServiceImpl(
         return collection
     }
 
-    /**
-     * The function [getCollectionByStudyIdAndByName] retrieves the collection with the given parameters.
-     *
-     * @param studyId The [studyId] of the study.
-     * @param name The [name] of collection.
-     * @throws ResourceNotFoundException when the [studyId] and collection [name] are not found.
-     * @return The [Collection] with the given [studyId] and collection [name].
-     */
     override fun getCollectionByStudyIdAndByName(
         studyId: String,
         name: String,
@@ -169,10 +128,6 @@ class CollectionServiceImpl(
 
     /**
      * The function [getAll] retrieves all collections with the given [query] parameters.
-     *
-     * @param studyId The [studyId] of the study.
-     * @param query The [query] parameter of the request.
-     * @return The [Collection] with the given [studyId] and [query] parameters.
      */
     override fun getAll(
         studyId: String,
@@ -184,23 +139,10 @@ class CollectionServiceImpl(
         return collectionRepository.findAll(specification)
     }
 
-    /**
-     * The function [getAll] retrieves all collections with the given [studyId] parameter.
-     *
-     * @param studyId The [studyId] of the study.
-     * @return The [Collection] with the given [studyId]
-     */
     override fun getAll(studyId: String): List<Collection> {
         return collectionRepository.findAllByStudyId(studyId)
     }
 
-    /**
-     * The function [getAllByStudyIdAndDeploymentId] retrieves all collections with the given [studyId] and [deploymentId] parameters.
-     *
-     * @param studyId The [studyId] of the study.
-     * @param deploymentId The [deploymentId] of the study.
-     * @return The [Collection] with the given [studyId] and [deploymentId] parameters.
-     */
     override fun getAllByStudyIdAndDeploymentId(
         studyId: String,
         deploymentId: String,

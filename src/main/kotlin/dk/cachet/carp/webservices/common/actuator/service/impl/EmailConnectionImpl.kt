@@ -21,7 +21,7 @@ class EmailConnectionImpl(
      * The function [mailServerConnection] tests the smtp server connection.
      */
     override fun mailServerConnection(): String? {
-        var status: String = "DOWN"
+        var status = "DOWN"
         try {
             if (testConnection()) {
                 status = "UP"
@@ -41,7 +41,7 @@ class EmailConnectionImpl(
         try {
             mailSender.testConnection()
         } catch (ex: MessagingException) {
-            LOGGER.error("SMTP server {}:{} is not responding", mailSender.host, mailSender.port)
+            LOGGER.error("SMTP server {}:{} is not responding", mailSender.host, mailSender.port, ex)
             return false
         }
         return true

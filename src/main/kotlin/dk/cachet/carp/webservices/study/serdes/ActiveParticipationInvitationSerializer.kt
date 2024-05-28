@@ -11,19 +11,13 @@ import kotlinx.serialization.encodeToString
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 
-class ActiveParticipationInvitationSerializer(private val validationMessages: MessageBase) : JsonSerializer<ActiveParticipationInvitation>() {
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
+class ActiveParticipationInvitationSerializer(private val validationMessages: MessageBase) :
+    JsonSerializer<ActiveParticipationInvitation>() {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
-    /**
-     * The [serialize] function is used to serialize the parsed object.
-     *
-     * @param activeParticipationInvitation The [ActiveParticipationInvitation] object containing the json object parsed.
-     * @throws SerializationException If the [ActiveParticipationInvitation] is blank or empty.
-     * Also, if the [ActiveParticipationInvitation] contains invalid format.
-     * @return The serialization [ActiveParticipationInvitation] object.
-     */
     override fun serialize(
         activeParticipationInvitation: ActiveParticipationInvitation?,
         jsonGenerator: JsonGenerator?,

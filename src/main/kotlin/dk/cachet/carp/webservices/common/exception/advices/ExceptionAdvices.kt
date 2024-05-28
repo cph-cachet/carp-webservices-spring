@@ -11,7 +11,6 @@ import jakarta.persistence.EntityNotFoundException
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.hibernate.exception.ConstraintViolationException
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
 import org.springframework.dao.DataAccessException
@@ -25,7 +24,6 @@ import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.util.StringUtils
-import org.springframework.util.unit.DataSize
 import org.springframework.web.HttpRequestMethodNotSupportedException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.MissingServletRequestParameterException
@@ -50,9 +48,9 @@ data class CarpErrorResponse(val statusCode: Int, val exception: String, val mes
  */
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice
+@Suppress("TooManyFunctions")
 internal class ExceptionAdvices(
     private val notificationService: INotificationService,
-    @Value("\${spring.servlet.multipart.max-file-size}") private val maxAllowedSize: DataSize? = null,
 ) : ResponseEntityExceptionHandler() {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
@@ -272,24 +270,6 @@ internal class ExceptionAdvices(
         notificationService.sendExceptionNotification(errorResponse)
         return ResponseEntity(errorResponse, HttpStatus.CONFLICT)
     }
-
-    //  413
-//    @ResponseBody
-//    @ResponseStatus(HttpStatus.PAYLOAD_TOO_LARGE)
-//    @ExceptionHandler(MaxUploadSizeExceededException::class)
-//    protected fun handleMaxUploadSizeExceededException(ex: MaxUploadSizeExceededException, request: WebRequest): ResponseEntity<CarpErrorResponse>
-//    {
-//        val message = "Attempt to upload file with the size exceeded max allowed value = $maxAllowedSize Megabyte(s)."
-//        val errorResponse = CarpErrorResponse(
-//                HttpStatus.CONFLICT.value(),
-//                ex::class.qualifiedName.orEmpty(),
-//                message,
-//                getURIPathFromWebRequest(request)
-//        )
-//        LOGGER.error("Maximum upload size exceeded exception: {}", errorResponse)
-//        notificationService.sendExceptionNotificationToSlack(errorResponse)
-//        return ResponseEntity(errorResponse, HttpStatus.PAYLOAD_TOO_LARGE)
-//    }
 
     // 500 - DEFAULT
     @ResponseBody

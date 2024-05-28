@@ -15,8 +15,9 @@ import org.apache.logging.log4j.Logger
 /**
  * The [RecruitmentSnapshotSerializer] implements the serialization logic for [Recruitment].
  */
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
 class RecruitmentSnapshotSerializer(
-    private val validationMessages: MessageBase
+    private val validationMessages: MessageBase,
 ) : JsonSerializer<RecruitmentSnapshot>() {
     companion object {
         /** The [LOGGER]. */

@@ -11,6 +11,7 @@ import dk.cachet.carp.webservices.common.exception.serialization.SerializationEx
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
 class MeasurementSerializer(private val validationMessages: MessageBase) : JsonSerializer<Measurement<Data>>() {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()

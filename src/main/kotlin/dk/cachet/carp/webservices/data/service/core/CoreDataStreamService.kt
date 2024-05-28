@@ -50,11 +50,11 @@ class CoreDataStreamService(
 
         // whether there is a config present in the database
         val configOptional = configRepository.findById(studyDeploymentId.stringRepresentation)
-        if (!configOptional.isPresent) {
-            throw IllegalArgumentException(
-                "No configuration was found for studyDeploymentId ${studyDeploymentId.stringRepresentation} or study is closed",
-            )
+
+        require(configOptional.isPresent) {
+            "No configuration was found for studyDeploymentId ${studyDeploymentId.stringRepresentation}."
         }
+
         val config = mapToCoreConfig(configOptional.get().config!!)
 
         // checks whether any of the streams wasn't configured for studyDeploymentId
@@ -102,9 +102,9 @@ class CoreDataStreamService(
      */
     override suspend fun closeDataStreams(studyDeploymentIds: Set<UUID>) {
         val configs = configRepository.getConfigurationsForIds(studyDeploymentIds.map { it.stringRepresentation })
-        if (configs.size != studyDeploymentIds.size) {
-            throw IllegalArgumentException("One of the configurations passed is not valid.")
-        }
+
+        require(configs.size == studyDeploymentIds.size) { "One of the configurations passed is not valid." }
+
         configs.forEach { it.closed = true }
         configRepository.saveAll(configs)
     }
@@ -128,26 +128,29 @@ class CoreDataStreamService(
     ): DataStreamBatch {
         when {
             fromSequenceId < 0 -> throw IllegalArgumentException(
-                "[fromSequenceId] is negative for requested dataStream with studyDeploymentId ${dataStream.studyDeploymentId.stringRepresentation}",
+                "[fromSequenceId] is negative for requested dataStream " +
+                    "with studyDeploymentId ${dataStream.studyDeploymentId.stringRepresentation}",
             )
+
             toSequenceIdInclusive != null && fromSequenceId > toSequenceIdInclusive -> throw IllegalArgumentException(
-                "[toSequenceIdInclusive] is smaller than [fromSequenceId] for requested dataStream with studyDeploymentId ${dataStream.studyDeploymentId.stringRepresentation}",
+                "[toSequenceIdInclusive] is smaller than [fromSequenceId] for requested dataStream " +
+                    "with studyDeploymentId ${dataStream.studyDeploymentId.stringRepresentation}",
             )
         }
 
         // whether there is a config present in the database
         val configOptional = configRepository.findById(dataStream.studyDeploymentId.stringRepresentation)
-        if (!configOptional.isPresent) {
-            throw IllegalArgumentException(
-                "No configuration was found for studyDeploymentId ${dataStream.studyDeploymentId.stringRepresentation} or study is closed",
-            )
+
+        require(configOptional.isPresent) {
+            "No configuration was found " +
+                "for studyDeploymentId ${dataStream.studyDeploymentId.stringRepresentation} or study is closed"
         }
 
         val config = mapToCoreConfig(configOptional.get().config!!)
 
         // checks if dataStream is configured for studyDeploymentId
         require(
-            dataStream in config.expectedDataStreamIds
+            dataStream in config.expectedDataStreamIds,
         ) { "Data stream wasn't configured for this study deployment." }
 
         val dataStreamId =
@@ -199,9 +202,11 @@ class CoreDataStreamService(
      */
     override suspend fun openDataStreams(configuration: DataStreamsConfiguration) {
         val id = configuration.studyDeploymentId.stringRepresentation
-        if (configRepository.existsById(id)) {
-            throw IllegalStateException("Data streams for deployment with \"$id\" have already been configured.")
+
+        check(!configRepository.existsById(id)) {
+            "Data streams for deployment with \\\"$id\\\" have already been configured."
         }
+
         val node = objectMapper.valueToTree<JsonNode>(configuration)
         configRepository.save(DataStreamConfiguration(id, node))
         LOGGER.info("New data stream configuration is saved for deployment with id $id.")

@@ -14,6 +14,7 @@ import org.apache.logging.log4j.Logger
  * The Class [DeploymentServiceRequestSerializer].
  * The [DeploymentServiceRequestSerializer] implements the serialization logic for [DeploymentServiceRequest].
  */
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
 class DeploymentServiceRequestSerializer(
     private val validationMessages: MessageBase,
 ) : JsonSerializer<DeploymentServiceRequest<*>>() {

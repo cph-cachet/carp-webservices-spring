@@ -26,6 +26,7 @@ class ThirdPartyProcessorPLQListener {
     @RabbitListener(queues = ["\${rabbit.third-party.processing.plq}"])
     fun receive(failedMessage: Message) {
         LOGGER.info("New 3rd-party Data Point message has arrived in the Parking Lot.")
+        LOGGER.debug(failedMessage)
         notificationService.sendAlertOrGeneralNotification(
             "New 3rd-party Data Point message has arrived in the 3rd-party DataPoint Parking Lot.",
             TeamsChannel.SERVER_ERRORS,

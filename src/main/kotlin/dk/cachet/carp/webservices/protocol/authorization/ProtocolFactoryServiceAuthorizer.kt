@@ -6,7 +6,8 @@ import dk.cachet.carp.webservices.common.authorization.ApplicationServiceAuthori
 import org.springframework.stereotype.Service
 
 @Service
-class ProtocolFactoryServiceAuthorizer : ApplicationServiceAuthorizer<ProtocolFactoryService, ProtocolFactoryServiceRequest<*>> {
+class ProtocolFactoryServiceAuthorizer :
+    ApplicationServiceAuthorizer<ProtocolFactoryService, ProtocolFactoryServiceRequest<*>> {
     override fun ProtocolFactoryServiceRequest<*>.authorize() {
         when (this) {
             is ProtocolFactoryServiceRequest.CreateCustomProtocol -> Unit

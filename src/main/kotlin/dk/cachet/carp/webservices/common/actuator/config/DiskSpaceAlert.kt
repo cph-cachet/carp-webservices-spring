@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.util.ObjectUtils
+import java.util.*
 
 /**
  * The Configuration Class [DiskSpaceAlert].
@@ -34,6 +35,7 @@ class DiskSpaceAlert(
     }
 
     @Scheduled(fixedDelay = 30 * 60 * 1000)
+    @Suppress("MagicNumber")
     fun checkRegularDiskSpace() {
         val statusHealth = diskSpace.statusHealth()
         val diskSpaceHealth = JSONObject(diskSpace.statusDetails())
@@ -45,7 +47,11 @@ class DiskSpaceAlert(
             val usablePercentage = usableSpace / totalStorageSpace.toDouble()
             if (totalStorageSpace.toDouble() > 0 && (usablePercentage * 100).toInt() > LIMIT_PERCENT) {
                 val spaceUsageNotification =
-                    String.format("WARNING: HDD has reached %d%% disk space usage!", (usablePercentage * 100).toInt())
+                    String.format(
+                        Locale.getDefault(),
+                        "WARNING: HDD has reached %d%% disk space usage!",
+                        (usablePercentage * 100).toInt(),
+                    )
                 LOGGER.warn("WARNING: Disk space has reached {} of usage!", (usablePercentage * 100).toInt())
                 notificationService.sendAlertOrGeneralNotification(spaceUsageNotification, TeamsChannel.HEARTBEAT)
                 emailNotificationService.sendNotificationEmail(alertEmail, alertWarning, spaceUsageNotification)

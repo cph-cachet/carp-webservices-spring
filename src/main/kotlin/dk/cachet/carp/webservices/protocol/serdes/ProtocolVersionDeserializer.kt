@@ -14,6 +14,7 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.util.StringUtils
 
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
 class ProtocolVersionDeserializer(private val validationMessages: MessageBase) : JsonDeserializer<ProtocolVersion>() {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()

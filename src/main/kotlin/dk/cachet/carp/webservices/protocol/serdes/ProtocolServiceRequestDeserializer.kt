@@ -16,6 +16,7 @@ import org.springframework.util.StringUtils
  * The Class [ProtocolServiceRequestDeserializer].
  * [ProtocolServiceRequestDeserializer] implements the serialization logic for [ProtocolServiceRequest].
  */
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
 class ProtocolServiceRequestDeserializer(
     private val validationMessages: MessageBase,
 ) : JsonDeserializer<ProtocolServiceRequest<*>>() {

@@ -17,6 +17,7 @@ import org.springframework.util.StringUtils
  * The Class [ParticipantGroupStatusDeserializer].
  * The [ParticipantGroupStatusDeserializer] implements the deserialization logic for [ParticipantGroupStatus].
  */
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
 class ParticipantGroupStatusDeserializer(
     private val validationMessages: MessageBase,
 ) : JsonDeserializer<ParticipantGroupStatus>() {

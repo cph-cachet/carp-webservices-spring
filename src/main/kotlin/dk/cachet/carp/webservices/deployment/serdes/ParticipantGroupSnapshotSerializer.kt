@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger
  * The Class [ParticipantGroupSnapshotSerializer].
  * The [ParticipantGroupSnapshotSerializer] implements the serialization logic for [ParticipantGroupSnapshot].
  */
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
 class ParticipantGroupSnapshotSerializer(
     private val validationMessages: MessageBase,
 ) : JsonSerializer<ParticipantGroupSnapshot>() {

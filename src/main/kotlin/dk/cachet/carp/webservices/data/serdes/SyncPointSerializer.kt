@@ -11,6 +11,7 @@ import kotlinx.serialization.encodeToString
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
 class SyncPointSerializer(private val validationMessages: MessageBase) : JsonSerializer<SyncPoint>() {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()

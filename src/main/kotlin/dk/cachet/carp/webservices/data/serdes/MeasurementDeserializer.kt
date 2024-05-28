@@ -13,6 +13,7 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.util.StringUtils
 
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
 class MeasurementDeserializer(private val validationMessages: MessageBase) : JsonDeserializer<Measurement<Data>>() {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
@@ -42,7 +43,7 @@ class MeasurementDeserializer(private val validationMessages: MessageBase) : Jso
             parsed = JSON.decodeFromString(dk.cachet.carp.data.application.MeasurementSerializer, syncPoint)
         } catch (ex: Exception) {
             LOGGER.error(
-                "The dataStreamServiceRequest.measurement deserializer is not valid. Exception: ${ex.printStackTrace()}",
+                "The dataStreamServiceRequest.measurement deserializer is not valid. Exception: $ex",
             )
             throw SerializationException(
                 validationMessages.get("data.stream.measurement.deserialization.error", ex.message.toString()),

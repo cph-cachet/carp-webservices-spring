@@ -48,29 +48,36 @@ class AccountServiceImpl(
         return account
     }
 
-    override suspend fun findByUUID(uuid: UUID): Account? =
-        try {
-            issuerFacade.getAccount(uuid)
-        } catch (e: Exception) {
+    override suspend fun findByUUID(uuid: UUID): Account? {
+        val result = runCatching { issuerFacade.getAccount(uuid) }.getOrNull()
+
+        if (result == null) {
             LOGGER.warn("Account not found for UUID: $uuid")
-            null
         }
 
-    override suspend fun findByAccountIdentity(identity: AccountIdentity): Account? =
-        try {
-            issuerFacade.getAccount(identity)
-        } catch (e: Exception) {
+        return result
+    }
+
+    override suspend fun findByAccountIdentity(identity: AccountIdentity): Account? {
+        val result = runCatching { issuerFacade.getAccount(identity) }.getOrNull()
+
+        if (result == null) {
             LOGGER.warn("Account not found for identity: $identity")
-            null
         }
 
-    override suspend fun findAllByClaim(claim: Claim): List<Account> =
-        try {
-            issuerFacade.getAllByClaim(claim)
-        } catch (e: Exception) {
+        return result
+    }
+
+    override suspend fun findAllByClaim(claim: Claim): List<Account> {
+        val result = runCatching { issuerFacade.getAllByClaim(claim) }.getOrNull()
+
+        if (result == null) {
             LOGGER.warn("No accounts found for claim: $claim")
-            emptyList()
+            return emptyList()
         }
+
+        return result
+    }
 
     override suspend fun hasRoleByEmail(
         email: EmailAddress,

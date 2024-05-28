@@ -13,7 +13,9 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.util.StringUtils
 
-class ActiveParticipationInvitationDeserializer(private val validationMessages: MessageBase) : JsonDeserializer<ActiveParticipationInvitation>() {
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
+class ActiveParticipationInvitationDeserializer(private val validationMessages: MessageBase) :
+    JsonDeserializer<ActiveParticipationInvitation>() {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }

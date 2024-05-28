@@ -14,6 +14,7 @@ import org.apache.logging.log4j.Logger
  * The Class [ProtocolServiceRequestSerializer].
  * [ProtocolServiceRequestSerializer] implements the serialization logic for [ProtocolServiceRequest].
  */
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
 class ProtocolServiceRequestSerializer(
     private val validationMessages: MessageBase,
 ) : JsonSerializer<ProtocolServiceRequest<*>>() {

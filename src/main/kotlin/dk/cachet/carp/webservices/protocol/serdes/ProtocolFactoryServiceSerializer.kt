@@ -10,7 +10,9 @@ import dk.cachet.carp.webservices.common.exception.serialization.SerializationEx
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 
-class ProtocolFactoryServiceSerializer(private val validationMessages: MessageBase) : JsonSerializer<ProtocolFactoryServiceRequest<*>>() {
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
+class ProtocolFactoryServiceSerializer(private val validationMessages: MessageBase) :
+    JsonSerializer<ProtocolFactoryServiceRequest<*>>() {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }

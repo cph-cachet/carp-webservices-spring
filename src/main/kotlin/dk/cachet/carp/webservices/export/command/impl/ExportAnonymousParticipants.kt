@@ -51,7 +51,7 @@ class ExportAnonymousParticipants(
 
         val anonymousParticipants = mutableSetOf<AnonymousParticipant>()
 
-        for (i in 1..payload.amountOfAccounts) {
+        repeat(payload.amountOfAccounts) {
             val (identity, link) =
                 accountService.generateAnonymousAccount(
                     payload.expirationSeconds,

@@ -17,6 +17,7 @@ import org.springframework.util.StringUtils
  * The Class [StudyDeploymentStatusDeserializer].
  * [StudyDeploymentStatusDeserializer] implements the deserialization logic for [StudyDeploymentStatus].
  */
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
 class StudyDeploymentStatusDeserializer(
     private val validationMessages: MessageBase,
 ) : JsonDeserializer<StudyDeploymentStatus>() {

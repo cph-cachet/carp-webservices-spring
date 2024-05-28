@@ -49,9 +49,9 @@ class StorageConfig(
         }
 
         if (!fileUtil.isWritable(directory)) {
-            if (!fileUtil.setStoragePermission(directory)) {
+            if (!fileUtil.setDefaultStoragePermissions(directory)) {
                 throw FileStorageException(validationMessages.get("file.directory.error", "file"))
-            } else if (fileUtil.setStoragePermission(directory)) {
+            } else if (fileUtil.setDefaultStoragePermissions(directory)) {
                 LOGGER.info("File storage created: {}", directory)
             }
         } else {

@@ -13,6 +13,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 @Service
+@Suppress("TooGenericExceptionCaught")
 class ResourceExporterServiceImpl(
     private val objectMapper: ObjectMapper,
     private val studyRepository: CoreStudyRepository,
@@ -29,15 +30,15 @@ class ResourceExporterServiceImpl(
         val studyDeploymentIds = deploymentIds ?: studyRepository.getDeploymentIdsOrThrow(studyId)
 
         exporters.forEach {
-            val exports =
-                try {
-                    it.exportDataOrThrow(studyId, studyDeploymentIds, targetDir)
-                } catch (e: Throwable) {
-                    log.error("Failed to export data for: ${it.dataFileName}", e)
-                    return@forEach
-                }
+            val exportResult = runCatching { it.exportDataOrThrow(studyId, studyDeploymentIds, targetDir) }
 
-            if (exports.isEmpty()) {
+            if (exportResult.isFailure) {
+                log.error("Failed to export data for: ${it.dataFileName}", exportResult.exceptionOrNull())
+                return@forEach
+            }
+
+            val exports = exportResult.getOrNull()
+            if (exports.isNullOrEmpty()) {
                 log.info("No data found for: ${it.dataFileName}")
                 return@forEach
             }

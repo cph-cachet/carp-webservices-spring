@@ -66,6 +66,7 @@ class EmailServiceImpl(
      * @return The status code of the response.
      */
     @Throws(EmailException::class)
+    @Suppress("TooGenericExceptionCaught")
     fun send(
         recipientEmailAddress: String,
         studyNameAsSubject: String,

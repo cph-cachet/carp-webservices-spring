@@ -14,6 +14,7 @@ import org.apache.logging.log4j.Logger
  * The Class [DataStreamServiceRequestSerializer].
  * The [DataStreamServiceRequestSerializer] implements the deserialization logic for [DataStreamServiceRequest].
  */
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
 class DataStreamServiceRequestSerializer(
     private val validationMessages: MessageBase,
 ) : JsonSerializer<DataStreamServiceRequest<*>>() {

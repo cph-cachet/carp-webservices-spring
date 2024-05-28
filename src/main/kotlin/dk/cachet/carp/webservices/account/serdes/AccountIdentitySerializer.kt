@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger
  * The Class [AccountIdentitySerializer].
  * The [AccountIdentitySerializer] implements the serialization mechanism for the [AccountIdentity].
  */
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
 class AccountIdentitySerializer(private val validationMessages: MessageBase) : JsonSerializer<AccountIdentity>() {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()

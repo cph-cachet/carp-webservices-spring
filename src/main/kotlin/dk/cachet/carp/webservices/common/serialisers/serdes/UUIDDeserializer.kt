@@ -17,6 +17,7 @@ import org.springframework.util.StringUtils
  * The Class [UUIDDeserializer].
  * The [UUIDDeserializer] implements the deserialization logic for [UUID].
  */
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
 class UUIDDeserializer(private val validationMessages: MessageBase) : JsonDeserializer<UUID>() {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()

@@ -3,15 +3,16 @@ package dk.cachet.carp.webservices.deployment.repository
 import com.fasterxml.jackson.databind.ObjectMapper
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.deployments.domain.DeploymentRepository
-import dk.cachet.carp.deployments.domain.StudyDeployment
 import dk.cachet.carp.deployments.domain.StudyDeploymentSnapshot
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
+import dk.cachet.carp.webservices.deployment.domain.StudyDeployment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import dk.cachet.carp.deployments.domain.StudyDeployment as CoreStudyDeployment
 
 @Service
 @Transactional
@@ -25,7 +26,7 @@ class CoreDeploymentRepository(
         private const val VERSION: Int = 0
     }
 
-    override suspend fun add(studyDeployment: StudyDeployment) =
+    override suspend fun add(studyDeployment: CoreStudyDeployment) =
         withContext(Dispatchers.IO) {
             if (studyDeploymentRepository.findByDeploymentId(studyDeployment.id.stringRepresentation).isPresent) {
                 LOGGER.warn("Deployment already exists, id: ${studyDeployment.id.stringRepresentation}")
@@ -36,7 +37,7 @@ class CoreDeploymentRepository(
                     ),
                 )
             }
-            val studyDeploymentToSave = dk.cachet.carp.webservices.deployment.domain.StudyDeployment()
+            val studyDeploymentToSave = StudyDeployment()
 
             val snapshot = StudyDeploymentSnapshot.fromDeployment(studyDeployment, VERSION)
             studyDeploymentToSave.snapshot = objectMapper.valueToTree(snapshot)
@@ -45,14 +46,14 @@ class CoreDeploymentRepository(
             LOGGER.info("Deployment saved, id: ${studyDeployment.id.stringRepresentation}")
         }
 
-    override suspend fun getStudyDeploymentBy(id: UUID): StudyDeployment? =
+    override suspend fun getStudyDeploymentBy(id: UUID) =
         withContext(Dispatchers.IO) {
             val result = getWSDeploymentById(id) ?: return@withContext null
             val snapshot = objectMapper.treeToValue(result.snapshot, StudyDeploymentSnapshot::class.java)
-            StudyDeployment.fromSnapshot(snapshot)
+            CoreStudyDeployment.fromSnapshot(snapshot)
         }
 
-    override suspend fun getStudyDeploymentsBy(ids: Set<UUID>): List<StudyDeployment> =
+    override suspend fun getStudyDeploymentsBy(ids: Set<UUID>) =
         withContext(Dispatchers.IO) {
             val idStrings = ids.map { it.toString() }.toSet()
             studyDeploymentRepository.findAllByStudyDeploymentIds(idStrings).map { mapWSDeploymentToCore(it) }
@@ -69,7 +70,7 @@ class CoreDeploymentRepository(
             idsPresent.map { UUID(it) }.toSet()
         }
 
-    override suspend fun update(studyDeployment: StudyDeployment) =
+    override suspend fun update(studyDeployment: CoreStudyDeployment) =
         withContext(Dispatchers.IO) {
             val deploymentId = studyDeployment.id
             val stored = getWSDeploymentById(deploymentId)
@@ -89,7 +90,7 @@ class CoreDeploymentRepository(
             LOGGER.info("Deployment updated, id: ${studyDeployment.id.stringRepresentation}")
         }
 
-    fun getWSDeploymentById(id: UUID): dk.cachet.carp.webservices.deployment.domain.StudyDeployment? {
+    fun getWSDeploymentById(id: UUID): StudyDeployment? {
         val optionalResult = studyDeploymentRepository.findByDeploymentId(id.stringRepresentation)
         if (!optionalResult.isPresent) {
             LOGGER.info("Deployment is not found, id: ${id.stringRepresentation}")
@@ -98,8 +99,8 @@ class CoreDeploymentRepository(
         return optionalResult.get()
     }
 
-    private fun mapWSDeploymentToCore(deployment: dk.cachet.carp.webservices.deployment.domain.StudyDeployment): StudyDeployment {
+    private fun mapWSDeploymentToCore(deployment: StudyDeployment): CoreStudyDeployment {
         val snapshot = objectMapper.treeToValue(deployment.snapshot, StudyDeploymentSnapshot::class.java)
-        return StudyDeployment.fromSnapshot(snapshot)
+        return CoreStudyDeployment.fromSnapshot(snapshot)
     }
 }

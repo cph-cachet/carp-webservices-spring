@@ -17,6 +17,7 @@ import org.springframework.util.StringUtils
  * The Class [DataStreamServiceRequestDeserializer].
  * The [DataStreamServiceRequestDeserializer] implements the deserialization logic for [DataStreamServiceRequest].
  */
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
 class DataStreamServiceRequestDeserializer(
     private val validationMessages: MessageBase,
 ) : JsonDeserializer<DataStreamServiceRequest<*>>() {

@@ -15,6 +15,7 @@ import org.springframework.util.StringUtils
 /**
  * [RecruitmentServiceRequestDeserializer] implements the deserialization logic for [RecruitmentServiceRequest].
  */
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
 class RecruitmentServiceRequestDeserializer(
     private val validationMessages: MessageBase,
 ) : JsonDeserializer<RecruitmentServiceRequest<*>>() {

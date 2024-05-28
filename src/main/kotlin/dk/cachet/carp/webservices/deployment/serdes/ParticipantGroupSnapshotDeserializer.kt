@@ -17,6 +17,7 @@ import org.springframework.util.StringUtils
  * The Class [ParticipantGroupSnapshotDeserializer].
  * [ParticipantGroupSnapshotDeserializer] implements the deserialization logic for [ParticipantGroupSnapshot].
  */
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
 class ParticipantGroupSnapshotDeserializer(
     private val validationMessages: MessageBase,
 ) : JsonDeserializer<ParticipantGroupSnapshot>() {

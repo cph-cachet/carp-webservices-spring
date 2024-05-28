@@ -26,6 +26,7 @@ class DataPointBatchProcessorPLQListener {
     @RabbitListener(queues = ["\${rabbit.data-point.processing.plq}"])
     fun receive(failedMessage: Message) {
         LOGGER.info("New Data Point message has arrived in the Parking Lot.")
+        LOGGER.debug(failedMessage)
         notificationService.sendAlertOrGeneralNotification(
             "New Data Point message has arrived in the DataPoint Parking Lot.",
             TeamsChannel.SERVER_ERRORS,

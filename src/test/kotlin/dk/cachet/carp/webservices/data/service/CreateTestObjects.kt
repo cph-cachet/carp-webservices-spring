@@ -14,7 +14,7 @@ import kotlinx.datetime.Clock
 val now = Clock.System.now()
 val stubSyncPoint = SyncPoint(now, now.toEpochMicroseconds())
 val stubTriggerIds = listOf(1)
-const val stubSequenceDeviceRoleName = "Device"
+const val STUB_SEQUENCE_DEVICE_ROLE_NAME = "Device"
 
 inline fun <reified T : Data> createStubSequence(
     studyDeploymentId: UUID,
@@ -22,7 +22,7 @@ inline fun <reified T : Data> createStubSequence(
     vararg data: T,
 ): DataStreamSequence<T> =
     createStubSequence(
-        dataStreamId<T>(studyDeploymentId, stubSequenceDeviceRoleName),
+        dataStreamId<T>(studyDeploymentId, STUB_SEQUENCE_DEVICE_ROLE_NAME),
         firstSequenceId,
         *data.map { measurement(it, 0) }.toTypedArray(),
     )

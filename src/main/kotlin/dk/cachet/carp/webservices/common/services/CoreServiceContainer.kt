@@ -99,7 +99,7 @@ class CoreServiceContainer(
     private val _protocolService = ProtocolServiceHost(protocolRepository)
     final val protocolService =
         ProtocolServiceDecorator(
-            _protocolService
+            _protocolService,
         ) { command -> ApplicationServiceRequestAuthorizer(protocolServiceAuthorizer, command) }
 
     private val _recruitmentService =
@@ -120,6 +120,6 @@ class CoreServiceContainer(
         )
     final val studyService =
         StudyServiceDecorator(
-            _studyService
+            _studyService,
         ) { command -> ApplicationServiceRequestAuthorizer(studyServiceAuthorizer, command) }
 }

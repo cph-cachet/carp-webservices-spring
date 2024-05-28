@@ -61,6 +61,7 @@ class DocumentController(
 
     @GetMapping(value = [COLLECTIONS], produces = [MediaType.APPLICATION_JSON_VALUE])
     @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
+    @Suppress("TooGenericExceptionCaught", "SwallowedException")
     fun getByDocumentPath(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         request: HttpServletRequest,

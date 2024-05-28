@@ -22,6 +22,8 @@ import org.springframework.util.MimeTypeUtils
 import org.springframework.util.StreamUtils
 import org.springframework.util.StringUtils
 import java.nio.charset.Charset
+import java.util.*
+import kotlin.collections.ArrayList
 
 // https://stackoverflow.com/q/59898874/13179591
 // https://stackoverflow.com/a/73622024/13179591
@@ -36,13 +38,14 @@ class OpenApi30Config(
     companion object {
         const val SCHEME = "bearer"
         const val FORMAT = "JWT"
-        const val BEARER_DESCRIPTION = "Provide the bearer token. A Bearer token can be acquired from the POST /oauth/token endpoint."
+        const val BEARER_DESCRIPTION =
+            "Provide the bearer token. A Bearer token can be acquired from the POST /oauth/token endpoint."
         const val OPENAPI_FOLDER = "/openapi"
     }
 
     @Bean
     fun customOpenAPI(): OpenAPI? {
-        val apiTitle = String.format("%s API", StringUtils.capitalize(moduleName))
+        val apiTitle = String.format(Locale.getDefault(), "%s API", StringUtils.capitalize(moduleName))
 
         return OpenAPI()
             .addServersItem(Server().url(environmentUtil.url))

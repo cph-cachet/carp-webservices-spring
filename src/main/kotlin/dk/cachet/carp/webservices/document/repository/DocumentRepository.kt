@@ -16,7 +16,10 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.*
 
 @Repository
-interface DocumentRepository : JpaRepository<Document, Int>, JpaSpecificationExecutor<Document>, DocumentRepositoryCustom {
+interface DocumentRepository :
+    JpaRepository<Document, Int>,
+    JpaSpecificationExecutor<Document>,
+    DocumentRepositoryCustom {
     fun findByNameAndCollectionId(
         name: String,
         collectionId: Int,

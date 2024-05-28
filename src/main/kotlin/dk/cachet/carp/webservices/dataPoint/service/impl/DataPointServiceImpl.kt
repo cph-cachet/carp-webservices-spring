@@ -5,7 +5,7 @@ import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.exception.responses.BadRequestException
 import dk.cachet.carp.webservices.common.exception.responses.ResourceNotFoundException
-import dk.cachet.carp.webservices.common.query.QueryUtil.Companion.validateQuery
+import dk.cachet.carp.webservices.common.query.QueryUtil.validateQuery
 import dk.cachet.carp.webservices.common.query.QueryVisitor
 import dk.cachet.carp.webservices.dataPoint.domain.DataPoint
 import dk.cachet.carp.webservices.dataPoint.dto.CreateDataPointRequestDto

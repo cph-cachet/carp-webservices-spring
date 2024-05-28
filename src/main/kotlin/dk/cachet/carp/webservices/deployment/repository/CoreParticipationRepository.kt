@@ -33,9 +33,10 @@ class CoreParticipationRepository(
      */
     override suspend fun getParticipantGroup(studyDeploymentId: UUID): ParticipantGroup? =
         withContext(Dispatchers.IO) {
-            val optionalGroup = participantGroupRepository.findByStudyDeploymentId(
-                studyDeploymentId.stringRepresentation
-            )
+            val optionalGroup =
+                participantGroupRepository.findByStudyDeploymentId(
+                    studyDeploymentId.stringRepresentation,
+                )
 
             if (!optionalGroup.isPresent) {
                 LOGGER.warn(
@@ -87,7 +88,8 @@ class CoreParticipationRepository(
                 newParticipantGroup.snapshot = snapshotToSave
                 val savedGroup = participantGroupRepository.save(newParticipantGroup)
                 LOGGER.info(
-                    "New participant group with id: ${savedGroup.id} saved for deployment with id: ${group.studyDeploymentId.stringRepresentation}",
+                    "New participant group with id: ${savedGroup.id} " +
+                        "saved for deployment with id: ${group.studyDeploymentId.stringRepresentation}",
                 )
                 return@withContext null
             }
@@ -104,7 +106,8 @@ class CoreParticipationRepository(
     /**
      * Remove the [ParticipantGroup]s matching the specified [studyDeploymentIds].
      *
-     * @return The IDs of study deployments for which participant groups were removed. IDs for which no participant group exists are ignored.
+     * @return The IDs of study deployments for which participant groups were removed.
+     * IDs for which no participant group exists are ignored.
      */
     override suspend fun removeParticipantGroups(studyDeploymentIds: Set<UUID>): Set<UUID> =
         withContext(Dispatchers.IO) {

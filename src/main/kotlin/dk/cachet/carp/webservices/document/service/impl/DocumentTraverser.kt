@@ -40,7 +40,8 @@ class DocumentPathException(message: String) : Exception(message)
 
 /**
  * The Service Class [DocumentTraverser].
- * The [DocumentTraverser] implements the [DocumentRepository] and [CollectionRepository] interface to create, retrieve, and delete documents.
+ * The [DocumentTraverser] implements the [DocumentRepository] and [CollectionRepository] interfaces
+ * to create, retrieve, and delete documents.
  */
 @Service
 class DocumentTraverser(
@@ -64,6 +65,7 @@ class DocumentTraverser(
      * @throws DocumentPathException when the document cannot create path from [request] to URL path.
      * @return The created Json object (Collection/Document), or null if the path was invalid.
      */
+    @Suppress("LongMethod")
     fun createAllFromDocumentPath(
         request: HttpServletRequest,
         studyId: String,
@@ -137,7 +139,8 @@ class DocumentTraverser(
                         ),
                     )
 
-                collectionWrapper = CollectionWrapper(document.id, document.name, CollectionWrapperType.Document, scopeToUserId)
+                collectionWrapper =
+                    CollectionWrapper(document.id, document.name, CollectionWrapperType.Document, scopeToUserId)
             }
         }
 
@@ -205,7 +208,8 @@ class DocumentTraverser(
                         )
                     }
 
-                collectionWrapper = CollectionWrapper(document.id, document.name, CollectionWrapperType.Document, scopeToUserId)
+                collectionWrapper =
+                    CollectionWrapper(document.id, document.name, CollectionWrapperType.Document, scopeToUserId)
             }
         }
 
@@ -276,8 +280,7 @@ class DocumentTraverser(
                         if (collectionWrapper.scopeToUserAccountId != null) {
                             // Scope documents to the specified user.
                             collection.documents =
-                                collection.documents?.filter {
-                                        document ->
+                                collection.documents?.filter { document ->
                                     document.createdBy == collectionWrapper.scopeToUserAccountId
                                 }
 

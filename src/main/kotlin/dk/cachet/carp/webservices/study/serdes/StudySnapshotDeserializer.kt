@@ -17,6 +17,7 @@ import org.springframework.util.StringUtils
  * The Class [StudySnapshotDeserializer].
  * The [StudySnapshotDeserializer] implements the deserialization logic for [StudySnapshot].
  */
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
 class StudySnapshotDeserializer(private val validationMessages: MessageBase) : JsonDeserializer<StudySnapshot>() {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()

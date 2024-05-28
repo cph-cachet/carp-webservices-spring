@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger
  * The Class [SexSerializer].
  * The [SexSerializer] implements the serialization mechanism for the [Sex] class.e
  */
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
 class SexSerializer(private val validationMessages: MessageBase) : JsonSerializer<Sex>() {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()

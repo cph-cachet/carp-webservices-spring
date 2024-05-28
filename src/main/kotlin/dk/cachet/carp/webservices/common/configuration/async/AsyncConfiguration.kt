@@ -13,10 +13,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import java.util.concurrent.Executor
 import java.util.concurrent.ThreadPoolExecutor
 
-/**
- * The Configuration Class [AsyncConfiguration].
- * The [AsyncConfiguration] implements the [AsyncConfigurer] interface to enable asynchronous functionality for the application.
- */
 @Configuration
 @EnableAsync
 @EnableScheduling
@@ -26,10 +22,6 @@ class AsyncConfiguration : AsyncConfigurer {
         private const val QUEUE_CAPACITY = 100
     }
 
-    /**
-     * The function [getAsyncExecutor] implements the [Executor] interface for an extensible thread pool implementation.
-     * @return The [ThreadPoolTaskExecutor] initialized.
-     */
     @Bean(value = ["asyncExecutor"])
     override fun getAsyncExecutor(): Executor {
         val threadPoolTaskExecutor = ThreadPoolTaskExecutor()
@@ -57,18 +49,10 @@ class AsyncConfiguration : AsyncConfigurer {
         return threadPoolTaskExecutor
     }
 
-    /**
-     * The function [getAsyncUncaughtExceptionHandler] retrieves the uncaught exceptions thrown from asynchronous methods.
-     * @return The [AsyncExceptionHandler].
-     */
     override fun getAsyncUncaughtExceptionHandler(): AsyncUncaughtExceptionHandler {
         return AsyncExceptionHandler()
     }
 
-    /**
-     * The function [taskScheduler] initializes a new [ConcurrentTaskScheduler], using a single thread executor as default.
-     * @returns The [ConcurrentTaskScheduler] created.
-     */
     @Bean
     fun taskScheduler(): TaskScheduler {
         return ConcurrentTaskScheduler()

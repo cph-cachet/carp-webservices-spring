@@ -67,7 +67,8 @@ class ProxiesMethodSecurityExpressionRoot(
     fun isCollectionOwner(collectionId: Int?): Boolean =
         collectionId != null && auth.getClaims().contains(Claim.CollectionOwner(collectionId)) || isAdmin()
 
-    fun isFileOwner(fileId: Int?): Boolean = fileId != null && auth.getClaims().contains(Claim.FileOwner(fileId)) || isAdmin()
+    fun isFileOwner(fileId: Int?): Boolean =
+        fileId != null && auth.getClaims().contains(Claim.FileOwner(fileId)) || isAdmin()
 
     // HACK: it is not easy to assign a claim with a studyId when creating deployments,
     // so we inject `CoreParticipantRepository` here to check whether the user is in a deployment

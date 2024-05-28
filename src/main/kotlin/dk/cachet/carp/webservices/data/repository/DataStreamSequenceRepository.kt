@@ -12,7 +12,12 @@ import org.springframework.transaction.annotation.Transactional
 interface DataStreamSequenceRepository : JpaRepository<DataStreamSequence, Int> {
     @Query(
         nativeQuery = true,
-        value = "SELECT * FROM data_stream_sequence WHERE data_stream_id = :dataStreamId and ( (first_sequence_id <= :from and last_sequence_id >= :from) OR (last_sequence_id <= :to and last_sequence_id >= :from) OR (first_sequence_id <= :to and first_sequence_id >= :from) )",
+        value =
+            "SELECT * FROM data_stream_sequence " +
+                "WHERE data_stream_id = :dataStreamId " +
+                "AND ( (first_sequence_id <= :from AND last_sequence_id >= :from) " +
+                "OR (last_sequence_id <= :to AND last_sequence_id >= :from) " +
+                "OR (first_sequence_id <= :to AND first_sequence_id >= :from) )",
     )
     fun findAllBySequenceIdRange(
         @Param("dataStreamId") dataStreamId: Int,
@@ -23,9 +28,10 @@ interface DataStreamSequenceRepository : JpaRepository<DataStreamSequence, Int> 
     @Query(
         nativeQuery = true,
         value =
-            "SELECT dsi.id, ds.data_stream_id, ds.snapshot, ds.first_sequence_id, ds.last_sequence_id, ds.updated_at, ds.created_at, ds.created_by, ds.updated_by \n" +
+            "SELECT dsi.id, ds.data_stream_id, ds.snapshot, ds.first_sequence_id, " +
+                "ds.last_sequence_id, ds.updated_at, ds.created_at, ds.created_by, ds.updated_by \n" +
                 "FROM data_stream_sequence ds\n" +
-                "left join data_stream_ids dsi on ds.data_stream_id = dsi.id\n" +
+                "LEFT JOIN data_stream_ids dsi ON ds.data_stream_id = dsi.id\n" +
                 "WHERE dsi.study_deployment_id IN (:deploymentIds)",
     )
     fun findAllByDeploymentIds(

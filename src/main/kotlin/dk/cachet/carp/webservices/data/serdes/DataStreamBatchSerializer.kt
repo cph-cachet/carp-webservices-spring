@@ -11,6 +11,7 @@ import dk.cachet.carp.webservices.common.exception.serialization.SerializationEx
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
 class DataStreamBatchSerializer(private val validationMessages: MessageBase) : JsonSerializer<DataStreamBatch>() {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()

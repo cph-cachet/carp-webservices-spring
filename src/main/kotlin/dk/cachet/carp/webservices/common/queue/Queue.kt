@@ -11,109 +11,110 @@ import org.springframework.core.env.Environment
  * It contains the AMPQ Queue, Exchange and Binding configurations.
  * */
 @Configuration
+@Suppress("TooManyFunctions")
 class Queue(environment: Environment) {
     /** DataPoint queues */
-    val DATA_POINT_PROCESSING_QUEUE = environment.getProperty("rabbit.data-point.processing.queue")
-    val DATA_POINT_DIRECT_EXCHANGE = environment.getProperty("rabbit.data-point.processing.direct-ex")
-    val DATA_POINT_PROCESSING_DLQ = environment.getProperty("rabbit.data-point.processing.dlq")
-    val DATA_POINT_PROCESSING_DLX = environment.getProperty("rabbit.data-point.processing.dlx")
-    val DATA_POINT_PROCESSING_PLQ = environment.getProperty("rabbit.data-point.processing.plq")
-    val DATA_POINT_PROCESSING_PLX = environment.getProperty("rabbit.data-point.processing.plx")
+    val dataPointProcessingQueue = environment.getProperty("rabbit.data-point.processing.queue")
+    val dataPointDirectExchange = environment.getProperty("rabbit.data-point.processing.direct-ex")
+    val dataPointProcessingDlq = environment.getProperty("rabbit.data-point.processing.dlq")
+    val dataPointProcessingDlx = environment.getProperty("rabbit.data-point.processing.dlx")
+    val dataPointProcessingPlq = environment.getProperty("rabbit.data-point.processing.plq")
+    val dataPointProcessingPlx = environment.getProperty("rabbit.data-point.processing.plx")
 
     /** Email queues */
-    val EMAIL_SENDING_QUEUE = environment.getProperty("rabbit.email.sending.queue")
-    val EMAIL_SENDING_DIRECT_EXCHANGE = environment.getProperty("rabbit.email.sending.direct-ex")
-    val EMAIL_SENDING_DLQ = environment.getProperty("rabbit.email.sending.dlq")
-    val EMAIL_SENDING_DLX = environment.getProperty("rabbit.email.sending.dlx")
-    val EMAIL_SENDING_PLQ = environment.getProperty("rabbit.email.sending.plq")
-    val EMAIL_SENDING_PLX = environment.getProperty("rabbit.email.sending.plx")
+    val emailSendingQueue = environment.getProperty("rabbit.email.sending.queue")
+    val emailSendingDirectExchange = environment.getProperty("rabbit.email.sending.direct-ex")
+    val emailSendingDlq = environment.getProperty("rabbit.email.sending.dlq")
+    val emailSendingDlx = environment.getProperty("rabbit.email.sending.dlx")
+    val emailSendingPlq = environment.getProperty("rabbit.email.sending.plq")
+    val emailSendingPlx = environment.getProperty("rabbit.email.sending.plx")
 
     /** 3rd party queues */
-    val THIRD_PARTY_QUEUE = environment.getProperty("rabbit.third-party.processing.queue")
-    val THIRD_PARTY_DIRECT_EXCHANGE = environment.getProperty("rabbit.third-party.processing.direct-ex")
-    val THIRD_PARTY_DLQ = environment.getProperty("rabbit.third-party.processing.dlq")
-    val THIRD_PARTY_DLX = environment.getProperty("rabbit.third-party.processing.dlx")
-    val THIRD_PARTY_PLQ = environment.getProperty("rabbit.third-party.processing.plq")
-    val THIRD_PARTY_PLX = environment.getProperty("rabbit.third-party.processing.plx")
+    val thirdPartyQueue = environment.getProperty("rabbit.third-party.processing.queue")
+    val thirdPartyDirectExchange = environment.getProperty("rabbit.third-party.processing.direct-ex")
+    val thirdPartyDlq = environment.getProperty("rabbit.third-party.processing.dlq")
+    val thirdPartyDlx = environment.getProperty("rabbit.third-party.processing.dlx")
+    val thirdPartyPlq = environment.getProperty("rabbit.third-party.processing.plq")
+    val thirdPartyPlx = environment.getProperty("rabbit.third-party.processing.plx")
 
     /** Study queues */
-    val STUDIES_QUEUE = environment.getProperty("rabbit.study.queue")
-    val STUDIES_DIRECT_EXCHANGE = environment.getProperty("rabbit.study.direct-ex")
-    val STUDIES_DLQ = environment.getProperty("rabbit.study.dlq")
-    val STUDIES_DLX = environment.getProperty("rabbit.study.dlx")
+    val studiesQueue = environment.getProperty("rabbit.study.queue")
+    val studiesDirectExchange = environment.getProperty("rabbit.study.direct-ex")
+    val studiesDlq = environment.getProperty("rabbit.study.dlq")
+    val studiesDlx = environment.getProperty("rabbit.study.dlx")
 
     /** Deployment queues */
-    val DEPLOYMENTS_QUEUE = environment.getProperty("rabbit.deployment.queue")
-    val DEPLOYMENTS_DIRECT_EXCHANGE = environment.getProperty("rabbit.deployment.direct-ex")
-    val DEPLOYMENTS_DLQ = environment.getProperty("rabbit.deployment.dlq")
-    val DEPLOYMENTS_DLX = environment.getProperty("rabbit.deployment.dlx")
+    val deploymentsQueue = environment.getProperty("rabbit.deployment.queue")
+    val deploymentsDirectExchange = environment.getProperty("rabbit.deployment.direct-ex")
+    val deploymentsDlq = environment.getProperty("rabbit.deployment.dlq")
+    val deploymentsDlx = environment.getProperty("rabbit.deployment.dlx")
 
     /**
      * Exchange declarations
      */
     @Bean
     fun dataPointProcessingDirectExchange(): DirectExchange {
-        return DirectExchange(DATA_POINT_DIRECT_EXCHANGE)
+        return DirectExchange(dataPointDirectExchange)
     }
 
     @Bean
     fun dataPointProcessingDLX(): FanoutExchange {
-        return FanoutExchange(DATA_POINT_PROCESSING_DLX)
+        return FanoutExchange(dataPointProcessingDlx)
     }
 
     @Bean
     fun dataPointProcessingPLX(): FanoutExchange {
-        return FanoutExchange(DATA_POINT_PROCESSING_PLX)
+        return FanoutExchange(dataPointProcessingPlx)
     }
 
     @Bean
     fun emailSendingDirectExchange(): DirectExchange {
-        return DirectExchange(EMAIL_SENDING_DIRECT_EXCHANGE)
+        return DirectExchange(emailSendingDirectExchange)
     }
 
     @Bean
     fun emailSendingDLX(): FanoutExchange {
-        return FanoutExchange(EMAIL_SENDING_DLX)
+        return FanoutExchange(emailSendingDlx)
     }
 
     @Bean
     fun emailSendingPLX(): FanoutExchange {
-        return FanoutExchange(EMAIL_SENDING_PLX)
+        return FanoutExchange(emailSendingPlx)
     }
 
     @Bean
     fun thirdPartyDirectExchange(): DirectExchange {
-        return DirectExchange(THIRD_PARTY_DIRECT_EXCHANGE)
+        return DirectExchange(thirdPartyDirectExchange)
     }
 
     @Bean
     fun thirdPartyDLX(): FanoutExchange {
-        return FanoutExchange(THIRD_PARTY_DLX)
+        return FanoutExchange(thirdPartyDlx)
     }
 
     @Bean
     fun thirdPartyPLX(): FanoutExchange {
-        return FanoutExchange(THIRD_PARTY_PLX)
+        return FanoutExchange(thirdPartyPlx)
     }
 
     @Bean
     fun studyDirectExchange(): DirectExchange {
-        return DirectExchange(STUDIES_DIRECT_EXCHANGE)
+        return DirectExchange(studiesDirectExchange)
     }
 
     @Bean
     fun studyDLX(): FanoutExchange {
-        return FanoutExchange(STUDIES_DLX)
+        return FanoutExchange(studiesDlx)
     }
 
     @Bean
     fun deploymentDirectExchange(): DirectExchange {
-        return DirectExchange(DEPLOYMENTS_DIRECT_EXCHANGE)
+        return DirectExchange(deploymentsDirectExchange)
     }
 
     @Bean
     fun deploymentDLX(): FanoutExchange {
-        return FanoutExchange(DEPLOYMENTS_DLX)
+        return FanoutExchange(deploymentsDlx)
     }
 
     /**
@@ -122,81 +123,81 @@ class Queue(environment: Environment) {
     @Bean
     fun dataPointProcessingQueue(): Queue {
         return QueueBuilder
-            .durable(DATA_POINT_PROCESSING_QUEUE)
-            .withArgument("x-dead-letter-exchange", DATA_POINT_PROCESSING_DLX)
+            .durable(dataPointProcessingQueue)
+            .withArgument("x-dead-letter-exchange", dataPointProcessingDlx)
             .build()
     }
 
     @Bean
     fun dataPointProcessingDLQ(): Queue {
-        return QueueBuilder.durable(DATA_POINT_PROCESSING_DLQ).build()
+        return QueueBuilder.durable(dataPointProcessingDlq).build()
     }
 
     @Bean
     fun dataPointProcessingPLQ(): Queue {
-        return QueueBuilder.durable(DATA_POINT_PROCESSING_PLQ).build()
+        return QueueBuilder.durable(dataPointProcessingPlq).build()
     }
 
     @Bean
     fun emailSendingQueue(): Queue {
         return QueueBuilder
-            .durable(EMAIL_SENDING_QUEUE)
-            .withArgument("x-dead-letter-exchange", EMAIL_SENDING_DLX)
+            .durable(emailSendingQueue)
+            .withArgument("x-dead-letter-exchange", emailSendingDlx)
             .build()
     }
 
     @Bean
     fun emailSendingDLQ(): Queue {
-        return QueueBuilder.durable(EMAIL_SENDING_DLQ).build()
+        return QueueBuilder.durable(emailSendingDlq).build()
     }
 
     @Bean
     fun emailSendingPLQ(): Queue {
-        return QueueBuilder.durable(EMAIL_SENDING_PLQ).build()
+        return QueueBuilder.durable(emailSendingPlq).build()
     }
 
     @Bean
     fun thirdPartyQueue(): Queue {
         return QueueBuilder
-            .durable(THIRD_PARTY_QUEUE)
-            .withArgument("x-dead-letter-exchange", THIRD_PARTY_DLX)
+            .durable(thirdPartyQueue)
+            .withArgument("x-dead-letter-exchange", thirdPartyDlx)
             .build()
     }
 
     @Bean
     fun thirdPartyDLQ(): Queue {
-        return QueueBuilder.durable(THIRD_PARTY_DLQ).build()
+        return QueueBuilder.durable(thirdPartyDlq).build()
     }
 
     @Bean
     fun thirdPartyPLQ(): Queue {
-        return QueueBuilder.durable(THIRD_PARTY_PLQ).build()
+        return QueueBuilder.durable(thirdPartyPlq).build()
     }
 
     @Bean
     fun studyQueue(): Queue {
         return QueueBuilder
-            .durable(STUDIES_QUEUE)
-            .withArgument("x-dead-letter-exchange", STUDIES_DLX)
+            .durable(studiesQueue)
+            .withArgument("x-dead-letter-exchange", studiesDlx)
             .build()
     }
 
     @Bean
     fun studyDLQ(): Queue {
-        return QueueBuilder.durable(STUDIES_DLQ).build()
+        return QueueBuilder.durable(studiesDlq).build()
     }
 
     @Bean
     fun deploymentQueue(): Queue {
         return QueueBuilder
-            .durable(DEPLOYMENTS_QUEUE)
-            .withArgument("x-dead-letter-exchange", DEPLOYMENTS_DLX)
+            .durable(deploymentsQueue)
+            .withArgument("x-dead-letter-exchange", deploymentsDlx)
             .build()
     }
 
     @Bean
     fun deploymentDLQ(): Queue {
-        return QueueBuilder.durable(DEPLOYMENTS_DLQ).build()
+        return QueueBuilder.durable(deploymentsDlq).build()
     }
 
     /**
@@ -206,7 +207,7 @@ class Queue(environment: Environment) {
     fun dataPointProcessingBinding(): Binding {
         return BindingBuilder.bind(
             dataPointProcessingQueue(),
-        ).to(dataPointProcessingDirectExchange()).with(DATA_POINT_PROCESSING_QUEUE)
+        ).to(dataPointProcessingDirectExchange()).with(dataPointProcessingQueue)
     }
 
     @Bean
@@ -221,7 +222,7 @@ class Queue(environment: Environment) {
 
     @Bean
     fun emailSendingBinding(): Binding {
-        return BindingBuilder.bind(emailSendingQueue()).to(emailSendingDirectExchange()).with(EMAIL_SENDING_QUEUE)
+        return BindingBuilder.bind(emailSendingQueue()).to(emailSendingDirectExchange()).with(emailSendingQueue)
     }
 
     @Bean
@@ -236,7 +237,7 @@ class Queue(environment: Environment) {
 
     @Bean
     fun thirdPartyBinding(): Binding {
-        return BindingBuilder.bind(thirdPartyQueue()).to(thirdPartyDirectExchange()).with(THIRD_PARTY_QUEUE)
+        return BindingBuilder.bind(thirdPartyQueue()).to(thirdPartyDirectExchange()).with(thirdPartyQueue)
     }
 
     @Bean
@@ -251,7 +252,7 @@ class Queue(environment: Environment) {
 
     @Bean
     fun studyBinding(): Binding {
-        return BindingBuilder.bind(studyQueue()).to(studyDirectExchange()).with(STUDIES_QUEUE)
+        return BindingBuilder.bind(studyQueue()).to(studyDirectExchange()).with(studiesQueue)
     }
 
     @Bean
@@ -261,7 +262,7 @@ class Queue(environment: Environment) {
 
     @Bean
     fun deploymentBinding(): Binding {
-        return BindingBuilder.bind(deploymentQueue()).to(deploymentDirectExchange()).with(DEPLOYMENTS_QUEUE)
+        return BindingBuilder.bind(deploymentQueue()).to(deploymentDirectExchange()).with(deploymentsQueue)
     }
 
     @Bean

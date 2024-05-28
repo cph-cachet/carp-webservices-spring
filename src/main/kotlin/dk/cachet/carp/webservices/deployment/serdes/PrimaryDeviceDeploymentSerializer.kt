@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger
  * The Class [PrimaryDeviceDeploymentSerializer].
  * The [PrimaryDeviceDeploymentSerializer] implements the serialization logic for [PrimaryDeviceDeployment].
  */
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
 class PrimaryDeviceDeploymentSerializer(
     private val validationMessages: MessageBase,
 ) : JsonSerializer<PrimaryDeviceDeployment>() {

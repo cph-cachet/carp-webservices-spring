@@ -98,7 +98,8 @@ class CoreProtocolRepository(
     /**
      * Return the [StudyProtocol] with the specified protocol [id], or null when no such protocol is found.
      *
-     * @param versionTag The tag of the specific version of the protocol to return. The latest version is returned when not specified.
+     * @param versionTag The tag of the specific version of the protocol to return.
+     * The latest version is returned when not specified.
      */
     override suspend fun getBy(
         id: UUID,
@@ -157,7 +158,8 @@ class CoreProtocolRepository(
         val newVersion = convertCoreProtocolToWSProtocol(protocol, version)
         protocolRepository.save(newVersion)
         LOGGER.info(
-            "Protocol(${protocol.ownerId.stringRepresentation}, ${protocol.name}) replace successful! Deleted version: ${oldVersion.versionTag}, new version: ${version.tag}",
+            "Protocol(${protocol.ownerId.stringRepresentation}, ${protocol.name}) replace successful! " +
+                "Deleted version: ${oldVersion.versionTag}, new version: ${version.tag}",
         )
     }
 

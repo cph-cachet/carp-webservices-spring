@@ -12,7 +12,9 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.util.StringUtils
 
-class ProtocolFactoryServiceDeserializer(private val validationMessages: MessageBase) : JsonDeserializer<ProtocolFactoryServiceRequest<*>>() {
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
+class ProtocolFactoryServiceDeserializer(private val validationMessages: MessageBase) :
+    JsonDeserializer<ProtocolFactoryServiceRequest<*>>() {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }

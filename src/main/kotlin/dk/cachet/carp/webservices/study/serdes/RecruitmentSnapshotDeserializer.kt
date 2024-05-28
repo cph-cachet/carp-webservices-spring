@@ -16,6 +16,7 @@ import org.springframework.util.StringUtils
 /**
  * [RecruitmentSnapshotDeserializer] implements the deserialization logic for [RecruitmentSnapshot].
  */
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
 class RecruitmentSnapshotDeserializer(
     private val validationMessages: MessageBase,
 ) : JsonDeserializer<RecruitmentSnapshot>() {
