@@ -1,5 +1,6 @@
-import org.springframework.boot.gradle.tasks.bundling.BootJar
+import io.gitlab.arturbosch.detekt.Detekt
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
     idea
@@ -12,6 +13,8 @@ plugins {
     id("io.spring.dependency-management")
     id("org.flywaydb.flyway")
     id("org.jetbrains.kotlin.plugin.allopen")
+    id("io.gitlab.arturbosch.detekt")
+    id("org.jlleitschuh.gradle.ktlint")
 }
 
 repositories {
@@ -85,7 +88,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-amqp")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa") {
-        exclude(module="org.apache.tomcat:tomcat-jdbc")
+        exclude(module = "org.apache.tomcat:tomcat-jdbc")
     }
     implementation("org.springframework.boot:spring-boot-starter-data-rest")
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -174,4 +177,19 @@ dependencyManagement {
     imports {
         mavenBom("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}")
     }
+}
+
+detekt {
+    autoCorrect = true
+    allRules = false
+    dependencies {
+        detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:${property("detektVersion")}")
+    }
+}
+
+tasks.withType<Detekt>().configureEach {
+    jvmTarget = "17"
+    config.from(files("$rootDir/detekt.yml"))
+    ignoreFailures = false
+    buildUponDefaultConfig = true
 }
