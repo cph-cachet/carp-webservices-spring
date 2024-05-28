@@ -22,6 +22,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.util.StringUtils
 import org.springframework.util.unit.DataSize
@@ -36,7 +37,6 @@ import org.springframework.web.context.request.ServletWebRequest
 import org.springframework.web.context.request.WebRequest
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 import java.lang.reflect.UndeclaredThrowableException
-import org.springframework.security.access.AccessDeniedException
 
 /**
  * The Data Class [CarpErrorResponse]
@@ -52,11 +52,9 @@ data class CarpErrorResponse(val statusCode: Int, val exception: String, val mes
 @ControllerAdvice
 internal class ExceptionAdvices(
     private val notificationService: INotificationService,
-    @Value("\${spring.servlet.multipart.max-file-size}") private val maxAllowedSize: DataSize? = null
-): ResponseEntityExceptionHandler()
-{
-    companion object
-    {
+    @Value("\${spring.servlet.multipart.max-file-size}") private val maxAllowedSize: DataSize? = null,
+) : ResponseEntityExceptionHandler() {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
@@ -67,15 +65,15 @@ internal class ExceptionAdvices(
         ex: HttpMessageNotReadableException,
         headers: HttpHeaders,
         status: HttpStatusCode,
-        request: WebRequest
-    ): ResponseEntity<Any>?
-    {
-        val errorResponse = CarpErrorResponse(
+        request: WebRequest,
+    ): ResponseEntity<Any>? {
+        val errorResponse =
+            CarpErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 ex::class.qualifiedName.orEmpty(),
                 ex.message.orEmpty(),
-                getURIPathFromWebRequest(request)
-        )
+                getURIPathFromWebRequest(request),
+            )
         LOGGER.error("Message not readable: {}", errorResponse)
         notificationService.sendExceptionNotification(errorResponse)
         return ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST)
@@ -87,15 +85,15 @@ internal class ExceptionAdvices(
         ex: MissingServletRequestParameterException,
         headers: HttpHeaders,
         status: HttpStatusCode,
-        request: WebRequest
-    ): ResponseEntity<Any>?
-    {
-        val errorResponse = CarpErrorResponse(
+        request: WebRequest,
+    ): ResponseEntity<Any>? {
+        val errorResponse =
+            CarpErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 ex::class.qualifiedName.orEmpty(),
                 ex.localizedMessage,
-                getURIPathFromWebRequest(request)
-        )
+                getURIPathFromWebRequest(request),
+            )
         LOGGER.error("Missing request parameter: {}", request)
         notificationService.sendExceptionNotification(errorResponse)
         return ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST)
@@ -107,15 +105,15 @@ internal class ExceptionAdvices(
         ex: MethodArgumentNotValidException,
         headers: HttpHeaders,
         status: HttpStatusCode,
-        request: WebRequest
-    ): ResponseEntity<Any>?
-    {
-        val errorResponse = CarpErrorResponse(
+        request: WebRequest,
+    ): ResponseEntity<Any>? {
+        val errorResponse =
+            CarpErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 ex::class.qualifiedName.orEmpty(),
                 ex.message,
-                getURIPathFromWebRequest(request)
-        )
+                getURIPathFromWebRequest(request),
+            )
         LOGGER.error("Argument validation failed: {}", errorResponse)
         notificationService.sendExceptionNotification(errorResponse)
         return ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST)
@@ -124,22 +122,26 @@ internal class ExceptionAdvices(
     @ResponseBody
     @ResponseStatus(code = HttpStatus.BAD_REQUEST)
     @ExceptionHandler(
-            value = [
-                DataIntegrityViolationException::class,
-                BadRequestException::class,
-                IllegalArgumentException::class,
-                ConstraintViolationException::class,
-                SerializationException::class,
-                RSQLParserException::class
-            ])
-    protected fun handleBadRequests(ex: RuntimeException, request: WebRequest): ResponseEntity<CarpErrorResponse>
-    {
-        val errorResponse = CarpErrorResponse(
+        value = [
+            DataIntegrityViolationException::class,
+            BadRequestException::class,
+            IllegalArgumentException::class,
+            ConstraintViolationException::class,
+            SerializationException::class,
+            RSQLParserException::class,
+        ],
+    )
+    protected fun handleBadRequests(
+        ex: RuntimeException,
+        request: WebRequest,
+    ): ResponseEntity<CarpErrorResponse> {
+        val errorResponse =
+            CarpErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 ex::class.qualifiedName.orEmpty(),
                 ex.message.orEmpty(),
-                getURIPathFromWebRequest(request)
-        )
+                getURIPathFromWebRequest(request),
+            )
         LOGGER.error("Bad Request Exception: {}", errorResponse)
         notificationService.sendExceptionNotification(errorResponse)
         return ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST)
@@ -149,14 +151,17 @@ internal class ExceptionAdvices(
     @ResponseBody
     @ResponseStatus(code = HttpStatus.UNAUTHORIZED)
     @ExceptionHandler(value = [UnauthorizedException::class])
-    protected fun handleUnauthorized(ex: RuntimeException, request: WebRequest): ResponseEntity<CarpErrorResponse>
-    {
-        val errorResponse = CarpErrorResponse(
+    protected fun handleUnauthorized(
+        ex: RuntimeException,
+        request: WebRequest,
+    ): ResponseEntity<CarpErrorResponse> {
+        val errorResponse =
+            CarpErrorResponse(
                 HttpStatus.UNAUTHORIZED.value(),
                 ex::class.qualifiedName.orEmpty(),
                 ex.message.orEmpty(),
-                getURIPathFromWebRequest(request)
-        )
+                getURIPathFromWebRequest(request),
+            )
         LOGGER.error("Unauthorized exception: {}", errorResponse)
         notificationService.sendExceptionNotification(errorResponse)
         return ResponseEntity(errorResponse, HttpStatus.UNAUTHORIZED)
@@ -166,14 +171,17 @@ internal class ExceptionAdvices(
     @ResponseBody
     @ResponseStatus(code = HttpStatus.FORBIDDEN)
     @ExceptionHandler(value = [ForbiddenException::class])
-    protected fun handleAuthenticationException(ex: ForbiddenException, request: WebRequest): ResponseEntity<CarpErrorResponse>
-    {
-        val errorResponse = CarpErrorResponse(
+    protected fun handleAuthenticationException(
+        ex: ForbiddenException,
+        request: WebRequest,
+    ): ResponseEntity<CarpErrorResponse> {
+        val errorResponse =
+            CarpErrorResponse(
                 HttpStatus.FORBIDDEN.value(),
                 ex::class.qualifiedName.orEmpty(),
                 ex.message.orEmpty(),
-                getURIPathFromWebRequest(request)
-        )
+                getURIPathFromWebRequest(request),
+            )
         LOGGER.error("Authentication exception: {}", errorResponse)
         notificationService.sendExceptionNotification(errorResponse)
         return ResponseEntity(errorResponse, HttpStatus.FORBIDDEN)
@@ -182,14 +190,17 @@ internal class ExceptionAdvices(
     @ResponseBody
     @ResponseStatus(code = HttpStatus.FORBIDDEN)
     @ExceptionHandler(value = [AccessDeniedException::class])
-    protected fun handleAccessDeniedException(ex: AccessDeniedException, request: WebRequest): ResponseEntity<CarpErrorResponse>
-    {
-        val errorResponse = CarpErrorResponse(
+    protected fun handleAccessDeniedException(
+        ex: AccessDeniedException,
+        request: WebRequest,
+    ): ResponseEntity<CarpErrorResponse> {
+        val errorResponse =
+            CarpErrorResponse(
                 HttpStatus.FORBIDDEN.value(),
                 ex::class.qualifiedName.orEmpty(),
                 ex.message.orEmpty(),
-                getURIPathFromWebRequest(request)
-        )
+                getURIPathFromWebRequest(request),
+            )
         LOGGER.error("Access denied exception: {}", errorResponse)
         notificationService.sendExceptionNotification(errorResponse)
         return ResponseEntity(errorResponse, HttpStatus.FORBIDDEN)
@@ -199,20 +210,23 @@ internal class ExceptionAdvices(
     @ResponseBody
     @ResponseStatus(code = HttpStatus.NOT_FOUND)
     @ExceptionHandler(
-            value = [
-                UsernameNotFoundException::class,
-                EntityNotFoundException::class,
-                ResourceNotFoundException::class
-            ]
+        value = [
+            UsernameNotFoundException::class,
+            EntityNotFoundException::class,
+            ResourceNotFoundException::class,
+        ],
     )
-    protected fun handleNotFound(ex: RuntimeException, request: WebRequest): ResponseEntity<CarpErrorResponse>
-    {
-        val errorResponse = CarpErrorResponse(
+    protected fun handleNotFound(
+        ex: RuntimeException,
+        request: WebRequest,
+    ): ResponseEntity<CarpErrorResponse> {
+        val errorResponse =
+            CarpErrorResponse(
                 HttpStatus.NOT_FOUND.value(),
                 ex::class.qualifiedName.orEmpty(),
                 ex.message.orEmpty(),
-                getURIPathFromWebRequest(request)
-        )
+                getURIPathFromWebRequest(request),
+            )
         LOGGER.error("Resource not found: {}", errorResponse)
         notificationService.sendExceptionNotification(errorResponse)
         return ResponseEntity(errorResponse, HttpStatus.NOT_FOUND)
@@ -225,15 +239,15 @@ internal class ExceptionAdvices(
         ex: HttpRequestMethodNotSupportedException,
         headers: HttpHeaders,
         status: HttpStatusCode,
-        request: WebRequest
-    ): ResponseEntity<Any>?
-    {
-        val errorResponse = CarpErrorResponse(
+        request: WebRequest,
+    ): ResponseEntity<Any>? {
+        val errorResponse =
+            CarpErrorResponse(
                 HttpStatus.METHOD_NOT_ALLOWED.value(),
                 ex::class.qualifiedName.orEmpty(),
                 ex.message.orEmpty(),
-                getURIPathFromWebRequest(request)
-        )
+                getURIPathFromWebRequest(request),
+            )
         LOGGER.error("Request method not supported: {}", errorResponse)
         notificationService.sendExceptionNotification(errorResponse)
         return ResponseEntity(errorResponse, HttpStatus.METHOD_NOT_ALLOWED)
@@ -243,14 +257,17 @@ internal class ExceptionAdvices(
     @ResponseBody
     @ResponseStatus(code = HttpStatus.CONFLICT)
     @ExceptionHandler(value = [InvalidDataAccessApiUsageException::class, DataAccessException::class])
-    protected fun handleConflict(ex: RuntimeException, request: WebRequest): ResponseEntity<CarpErrorResponse>
-    {
-        val errorResponse = CarpErrorResponse(
+    protected fun handleConflict(
+        ex: RuntimeException,
+        request: WebRequest,
+    ): ResponseEntity<CarpErrorResponse> {
+        val errorResponse =
+            CarpErrorResponse(
                 HttpStatus.CONFLICT.value(),
                 ex::class.qualifiedName.orEmpty(),
                 ex.message.orEmpty(),
-                getURIPathFromWebRequest(request)
-        )
+                getURIPathFromWebRequest(request),
+            )
         LOGGER.error("Conflict exception: {}", errorResponse)
         notificationService.sendExceptionNotification(errorResponse)
         return ResponseEntity(errorResponse, HttpStatus.CONFLICT)
@@ -277,14 +294,17 @@ internal class ExceptionAdvices(
     // 500 - DEFAULT
     @ResponseBody
     @ExceptionHandler(Exception::class)
-    protected fun handleUncaughtException(ex: Exception, request: WebRequest): ResponseEntity<CarpErrorResponse>
-    {
-        val errorResponse = CarpErrorResponse(
+    protected fun handleUncaughtException(
+        ex: Exception,
+        request: WebRequest,
+    ): ResponseEntity<CarpErrorResponse> {
+        val errorResponse =
+            CarpErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 ex::class.qualifiedName.orEmpty(),
                 ex.message.orEmpty(),
-                getURIPathFromWebRequest(request)
-        )
+                getURIPathFromWebRequest(request),
+            )
         LOGGER.error("Uncaught Exception: {}", errorResponse)
         notificationService.sendExceptionNotification(errorResponse)
         return ResponseEntity(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR)
@@ -292,28 +312,29 @@ internal class ExceptionAdvices(
 
     @ResponseBody
     @ExceptionHandler(UndeclaredThrowableException::class)
-    fun handleException(ex: UndeclaredThrowableException, request: WebRequest): ResponseEntity<CarpErrorResponse>
-    {
-        val errorResponse = CarpErrorResponse(
-            HttpStatus.INTERNAL_SERVER_ERROR.value(),
-            ex::class.qualifiedName.orEmpty(),
-            ex.undeclaredThrowable.message.orEmpty(),
-            getURIPathFromWebRequest(request)
-        )
+    fun handleException(
+        ex: UndeclaredThrowableException,
+        request: WebRequest,
+    ): ResponseEntity<CarpErrorResponse> {
+        val errorResponse =
+            CarpErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                ex::class.qualifiedName.orEmpty(),
+                ex.undeclaredThrowable.message.orEmpty(),
+                getURIPathFromWebRequest(request),
+            )
         LOGGER.error("UndeclaredThrowableException: {}", errorResponse)
         notificationService.sendExceptionNotification(errorResponse)
         return ResponseEntity(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
-    private fun getURIPathFromWebRequest(request: WebRequest): String
-    {
+    private fun getURIPathFromWebRequest(request: WebRequest): String {
         val builder = StringBuilder()
         builder.append((request as ServletWebRequest).httpMethod.toString())
         builder.append(" ")
         builder.append(request.request.requestURI.toString())
 
-        if (StringUtils.hasLength(request.request.queryString))
-        {
+        if (StringUtils.hasLength(request.request.queryString)) {
             builder.append("?${request.request.queryString}")
         }
         return builder.toString()

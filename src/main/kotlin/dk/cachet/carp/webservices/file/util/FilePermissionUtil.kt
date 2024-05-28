@@ -15,10 +15,8 @@ import java.nio.file.attribute.PosixFilePermissions
  * The [FilePermissionUtil] implements the functionalities to validate/set the main file storage with the read/write permissions.
  */
 @Component
-class FilePermissionUtil
-{
-    companion object
-    {
+class FilePermissionUtil {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
@@ -29,8 +27,7 @@ class FilePermissionUtil
      * @return The directory permission.
      */
     @Throws(IOException::class)
-    fun getPermissions(path: Path?): String?
-    {
+    fun getPermissions(path: Path?): String? {
         val fileAttributeView = Files.getFileAttributeView(path, PosixFileAttributeView::class.java)
         val readAttributes = fileAttributeView.readAttributes()
         val permissions = readAttributes.permissions()
@@ -47,14 +44,15 @@ class FilePermissionUtil
      * @return The directory permission code.
      */
     @Throws(IOException::class)
-    fun setPermissions(filePath: File, permissionCode: String?, recursive: Boolean): String?
-    {
+    fun setPermissions(
+        filePath: File,
+        permissionCode: String?,
+        recursive: Boolean,
+    ): String? {
         val fileAttributeView = Files.getFileAttributeView(filePath.toPath(), PosixFileAttributeView::class.java)
         fileAttributeView.setPermissions(PosixFilePermissions.fromString(permissionCode))
-        if(filePath.isDirectory && recursive && filePath.listFiles() != null)
-        {
-            for(f in filePath.listFiles())
-            {
+        if (filePath.isDirectory && recursive && filePath.listFiles() != null) {
+            for (f in filePath.listFiles()) {
                 setPermissions(f, permissionCode, true)
             }
         }

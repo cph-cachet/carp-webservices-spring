@@ -17,10 +17,8 @@ import org.springframework.util.StringUtils
  * The Class [StudyDetailsDeserializer].
  * [StudyDetailsDeserializer] implements the deserialization logic for [StudyDetails].
  */
-class StudyDetailsDeserializer(private val validationMessages: MessageBase): JsonDeserializer<StudyDetails>()
-{
-    companion object
-    {
+class StudyDetailsDeserializer(private val validationMessages: MessageBase) : JsonDeserializer<StudyDetails>() {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
@@ -32,34 +30,33 @@ class StudyDetailsDeserializer(private val validationMessages: MessageBase): Jso
      * Also, if the [StudyDetails] contains invalid format.
      * @return The deserialized [StudyDetails] object.
      */
-    override fun deserialize(jsonParser: JsonParser?, context: DeserializationContext?): StudyDetails
-    {
+    override fun deserialize(
+        jsonParser: JsonParser?,
+        context: DeserializationContext?,
+    ): StudyDetails {
         val studyDetails: String
-        try
-        {
+        try {
             studyDetails = jsonParser?.codec?.readTree<TreeNode>(jsonParser).toString()
 
-            if (!StringUtils.hasLength(studyDetails))
-            {
+            if (!StringUtils.hasLength(studyDetails)) {
                 LOGGER.error("The StudyDetails cannot be blank or empty.")
                 throw SerializationException(validationMessages.get("study.details.deserialization.empty"))
             }
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The core StudyDetails request contains bad format. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("study.details.deserialization.bad_format", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("study.details.deserialization.bad_format", ex.message.toString()),
+            )
         }
 
         val parsed: StudyDetails
-        try
-        {
+        try {
             parsed = JSON.decodeFromString(studyDetails)
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The core StudyDetails serializer is not valid. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("study.details.deserialization.error", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("study.details.deserialization.error", ex.message.toString()),
+            )
         }
 
         return parsed

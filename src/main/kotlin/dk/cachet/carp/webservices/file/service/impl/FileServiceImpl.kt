@@ -33,9 +33,10 @@ import org.springframework.web.util.UriComponentsBuilder
 import java.nio.file.Files
 import java.nio.file.Path
 
-
 @Service
 @Transactional
+// Extract S3 methods into a separate service
+@Suppress("LongParameterList")
 class FileServiceImpl(
     private val fileRepository: FileRepository,
     private val fileStorage: FileStorage,
@@ -44,38 +45,36 @@ class FileServiceImpl(
     private val authenticationService: AuthenticationService,
     private val accountService: AccountService,
     @Value("\${s3.space.bucket}") private val s3SpaceBucket: String,
-    @Value("\${s3.space.endpoint}") private val s3SpaceEndpoint: String
-): FileService, ResourceExporter<File>
-{
+    @Value("\${s3.space.endpoint}") private val s3SpaceEndpoint: String,
+) : FileService, ResourceExporter<File> {
     private val backgroundWorker = CoroutineScope(Dispatchers.IO)
 
-    companion object
-    {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
-    override fun getAll(query: String?, studyId: String): List<File>
-    {
+    override fun getAll(
+        query: String?,
+        studyId: String,
+    ): List<File> {
         val id = authenticationService.getId()
         val role = authenticationService.getRole()
         val isResearcher = role >= Role.RESEARCHER
 
-        if (isResearcher && query == null)
-        {
+        if (isResearcher && query == null) {
             return fileRepository.findByStudyId(studyId)
-        }
-        else
-        {
+        } else {
             query?.let {
-                val queryForRole = if (!isResearcher)
-                     // Return data relevant to this user only.
-                    "$query;created_by==${id};study_id==$studyId"
-                else
-                {
-                    // Return data relevant to this study.
-                    "$query;study_id==$studyId"
-                }
-                val specification = RSQLParser()
+                val queryForRole =
+                    if (!isResearcher) {
+                        // Return data relevant to this user only.
+                        "$query;created_by==$id;study_id==$studyId"
+                    } else {
+                        // Return data relevant to this study.
+                        "$query;study_id==$studyId"
+                    }
+                val specification =
+                    RSQLParser()
                         .parse(queryForRole)
                         .accept(QueryVisitor<File>())
                 return fileRepository.findAll(specification)
@@ -84,27 +83,29 @@ class FileServiceImpl(
         }
     }
 
-    override fun getOne(id: Int): File
-    {
+    override fun getOne(id: Int): File {
         val optionalFile = fileRepository.findById(id)
-        if (!optionalFile.isPresent)
-        {
+        if (!optionalFile.isPresent) {
             LOGGER.warn("File is not found with id = $id")
             throw ResourceNotFoundException(validateMessages.get("file.not_found", id))
         }
         return optionalFile.get()
     }
 
-    override fun create(studyId: String, file: MultipartFile, metadata: String?): File
-    {
-        val filename= fileStorage.store(file)
+    override fun create(
+        studyId: String,
+        file: MultipartFile,
+        metadata: String?,
+    ): File {
+        val filename = fileStorage.store(file)
 
-        val saved = fileRepository.save(
+        val saved =
+            fileRepository.save(
                 studyId,
                 file,
                 filename,
-                metadata?.let { json -> ObjectMapper().readTree(json) }
-        )
+                metadata?.let { json -> ObjectMapper().readTree(json) },
+            )
 
         LOGGER.info("File saved, id = ${saved.id}")
 
@@ -116,8 +117,7 @@ class FileServiceImpl(
         return saved
     }
 
-    override fun delete(id: Int)
-    {
+    override fun delete(id: Int) {
         val file = getOne(id)
         fileStorage.deleteFile(file.storageName)
         fileRepository.delete(file)
@@ -143,8 +143,7 @@ class FileServiceImpl(
      * @param file The [file] is the file that needs to be uploaded
      * @return The url where you can access the content
      */
-    override fun uploadImage(file: MultipartFile): String
-    {
+    override fun uploadImage(file: MultipartFile): String {
         val extension = StringUtils.getFilenameExtension(file.originalFilename)
         val filename = "${UUID.randomUUID().stringRepresentation}.$extension"
 
@@ -157,7 +156,7 @@ class FileServiceImpl(
 
         s3Client.putObject(
             PutObjectRequest(s3SpaceBucket, filename, file.inputStream, metadata)
-                .withCannedAcl(CannedAccessControlList.PublicRead)
+                .withCannedAcl(CannedAccessControlList.PublicRead),
         )
 
         return UriComponentsBuilder
@@ -179,20 +178,22 @@ class FileServiceImpl(
         }
 
         s3Client.deleteObject(
-            DeleteObjectRequest(s3SpaceBucket, uri.key)
+            DeleteObjectRequest(s3SpaceBucket, uri.key),
         )
     }
 
     override val dataFileName = "files.json"
 
-    override suspend fun exportDataOrThrow( studyId: UUID, deploymentIds: Set<UUID>, target: Path ) =
-        withContext( Dispatchers.IO )
-        {
-            getAll( null, studyId.stringRepresentation )
-                .onEach {
-                    val resource = fileStorage.getResource( it.storageName )
-                    val copyPath = target.resolve( it.storageName )
-                    Files.copy( resource.file.toPath(), copyPath )
-                }
-        }
+    override suspend fun exportDataOrThrow(
+        studyId: UUID,
+        deploymentIds: Set<UUID>,
+        target: Path,
+    ) = withContext(Dispatchers.IO) {
+        getAll(null, studyId.stringRepresentation)
+            .onEach {
+                val resource = fileStorage.getResource(it.storageName)
+                val copyPath = target.resolve(it.storageName)
+                Files.copy(resource.file.toPath(), copyPath)
+            }
+    }
 }

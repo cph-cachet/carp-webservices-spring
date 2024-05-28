@@ -16,30 +16,24 @@ import java.io.Serializable
 @DynamicUpdate
 @Entity(name = "collections")
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
-data class Collection
-(
-        /** The collection [id].*/
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        val id: Int = 0,
-
-        /** Name of the collection.*/
-        @field:NotNull
-        var name: String = "",
-
-        /** The ID of the study the collection belongs to.*/
-        @field:NotNull
-        var studyId: String = "",
-
-        /** The deploymentId of the study the collection belongs to.*/
-        var studyDeploymentId: String? = "",
-
-        /** The [documentId] of the collection.*/
-        val documentId: Int? = null,
-
-        /** The [Document] instances the collection contains.*/
-        @OneToMany(cascade = [CascadeType.ALL], fetch = FetchType.LAZY, orphanRemoval = true)
-        @JoinColumn(name = "collectionId")
-        @OrderBy("createdAt desc")
-        var documents: List<Document>? = null
-): Auditable(), Serializable
+data class Collection(
+    /** The collection [id].*/
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Int = 0,
+    /** Name of the collection.*/
+    @field:NotNull
+    var name: String = "",
+    /** The ID of the study the collection belongs to.*/
+    @field:NotNull
+    var studyId: String = "",
+    /** The deploymentId of the study the collection belongs to.*/
+    var studyDeploymentId: String? = "",
+    /** The [documentId] of the collection.*/
+    val documentId: Int? = null,
+    /** The [Document] instances the collection contains.*/
+    @OneToMany(cascade = [CascadeType.ALL], fetch = FetchType.LAZY, orphanRemoval = true)
+    @JoinColumn(name = "collectionId")
+    @OrderBy("createdAt desc")
+    var documents: List<Document>? = null,
+) : Auditable(), Serializable

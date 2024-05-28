@@ -9,9 +9,12 @@ import java.nio.file.Path
  *
  * @param TExport The type of data to export.
  */
-interface ResourceExporter<out TExport>
-{
+interface ResourceExporter<out TExport> {
     val dataFileName: String
 
-    suspend fun exportDataOrThrow( studyId: UUID, deploymentIds: Set<UUID>, target: Path ): Collection<TExport>
+    suspend fun exportDataOrThrow(
+        studyId: UUID,
+        deploymentIds: Set<UUID>,
+        target: Path,
+    ): Collection<TExport>
 }

@@ -11,30 +11,29 @@ import dk.cachet.carp.webservices.common.exception.serialization.SerializationEx
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 
-class DataStreamBatchSerializer(private val validationMessages: MessageBase): JsonSerializer<DataStreamBatch>()
-{
-    companion object
-    {
+class DataStreamBatchSerializer(private val validationMessages: MessageBase) : JsonSerializer<DataStreamBatch>() {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
-    override fun serialize(value: DataStreamBatch?, gen: JsonGenerator?, serializers: SerializerProvider?)
-    {
-        if (value == null)
-        {
+    override fun serialize(
+        value: DataStreamBatch?,
+        gen: JsonGenerator?,
+        serializers: SerializerProvider?,
+    ) {
+        if (value == null) {
             LOGGER.error("The DataStreamBatch value is null.")
             throw SerializationException(validationMessages.get("dataStreamBatch.serialization.empty"))
         }
 
         val serialized: String
-        try
-        {
+        try {
             serialized = JSON.encodeToString(DataStreamBatchSerializer, value)
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The dataStreamBatch is not valid. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("dataStreamBatch.serialization.error", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("dataStreamBatch.serialization.error", ex.message.toString()),
+            )
         }
 
         gen!!.writeRawValue(serialized)

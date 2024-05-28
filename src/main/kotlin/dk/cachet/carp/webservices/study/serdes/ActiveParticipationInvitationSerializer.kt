@@ -11,11 +11,8 @@ import kotlinx.serialization.encodeToString
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 
-class ActiveParticipationInvitationSerializer(private val validationMessages: MessageBase): JsonSerializer<ActiveParticipationInvitation>()
-{
-
-    companion object
-    {
+class ActiveParticipationInvitationSerializer(private val validationMessages: MessageBase) : JsonSerializer<ActiveParticipationInvitation>() {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
@@ -27,23 +24,29 @@ class ActiveParticipationInvitationSerializer(private val validationMessages: Me
      * Also, if the [ActiveParticipationInvitation] contains invalid format.
      * @return The serialization [ActiveParticipationInvitation] object.
      */
-    override fun serialize(activeParticipationInvitation: ActiveParticipationInvitation?, jsonGenerator: JsonGenerator?, serializers: SerializerProvider?)
-    {
-        if (activeParticipationInvitation == null)
-        {
+    override fun serialize(
+        activeParticipationInvitation: ActiveParticipationInvitation?,
+        jsonGenerator: JsonGenerator?,
+        serializers: SerializerProvider?,
+    ) {
+        if (activeParticipationInvitation == null) {
             LOGGER.error("The ActiveParticipationInvitation is null.")
-            throw SerializationException(validationMessages.get("study.active.participation.invitation.serialization.empty"))
+            throw SerializationException(
+                validationMessages.get("study.active.participation.invitation.serialization.empty"),
+            )
         }
 
         val serialized: String
-        try
-        {
+        try {
             serialized = JSON.encodeToString(activeParticipationInvitation)
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The activeParticipationInvitation is not valid. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("study.active.participation.invitation.serialization.error", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get(
+                    "study.active.participation.invitation.serialization.error",
+                    ex.message.toString(),
+                ),
+            )
         }
 
         jsonGenerator!!.writeRawValue(serialized)

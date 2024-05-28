@@ -7,28 +7,25 @@ import kotlin.coroutines.CoroutineContext
 
 // https://blog.jdriven.com/2021/07/propagating-the-spring-securitycontext-to-your-kotlin-coroutines/
 class SecurityCoroutineContext(
-    private val securityContext: SecurityContext = SecurityContextHolder.getContext()
-) : ThreadContextElement<SecurityContext?>
-{
+    private val securityContext: SecurityContext = SecurityContextHolder.getContext(),
+) : ThreadContextElement<SecurityContext?> {
     companion object Key : CoroutineContext.Key<SecurityCoroutineContext>
 
     override val key: CoroutineContext.Key<SecurityCoroutineContext> get() = Key
 
-    override fun updateThreadContext( context: CoroutineContext ): SecurityContext?
-    {
+    override fun updateThreadContext(context: CoroutineContext): SecurityContext? {
         val previousSecurityContext = SecurityContextHolder.getContext()
         SecurityContextHolder.setContext(securityContext)
         return previousSecurityContext.takeIf { it.authentication != null }
     }
 
-    override fun restoreThreadContext(context: CoroutineContext, oldState: SecurityContext?)
-    {
-        if ( oldState == null )
-        {
+    override fun restoreThreadContext(
+        context: CoroutineContext,
+        oldState: SecurityContext?,
+    ) {
+        if (oldState == null) {
             SecurityContextHolder.clearContext()
-        }
-        else
-        {
+        } else {
             SecurityContextHolder.setContext(oldState)
         }
     }

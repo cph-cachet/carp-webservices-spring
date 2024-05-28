@@ -16,18 +16,16 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer
  * The [PropertiesConfig] defines the properties that specify the sources of the environment properties.
  */
 @Configuration
-@ComponentScan(basePackages=["dk.cachet.carp.webservices"])
+@ComponentScan(basePackages = ["dk.cachet.carp.webservices"])
 @PropertySources(PropertySource(value = ["classpath:config/application-\${spring.profiles.active}.yml"]))
-class PropertiesConfig
-{
+class PropertiesConfig {
     /**
      * The function [propertySourcesPlaceholderConfigurer] resolves the placeholders within bean definition property values
      * and annotations against the current Spring Environment and its set of [PropertySources].
      * @return The [PropertySourcesPlaceholderConfigurer].
      */
     @Bean
-    fun propertySourcesPlaceholderConfigurer(): PropertySourcesPlaceholderConfigurer?
-    {
+    fun propertySourcesPlaceholderConfigurer(): PropertySourcesPlaceholderConfigurer? {
         return PropertySourcesPlaceholderConfigurer()
     }
 }

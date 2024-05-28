@@ -11,24 +11,22 @@ import java.time.Duration
 import java.time.Instant
 
 @Configuration
-@ConditionalOnProperty( value = ["storage.exports.expiration.enabled"], havingValue = "true" )
+@ConditionalOnProperty(value = ["storage.exports.expiration.enabled"], havingValue = "true")
 class ExportExpirationConfig(
-    @Value( "\${storage.exports.expiration.days}" ) private val expirationDays: Long,
+    @Value("\${storage.exports.expiration.days}") private val expirationDays: Long,
     private val exportRepository: ExportRepository,
-    private val fileStorage: FileStorage
-)
-{
-    @Scheduled( cron = "@daily" )
-    fun expireOldExports()
-    {
-        exportRepository.findAllCreatedBefore( Instant.now().minus( Duration.ofDays( expirationDays ) ) )
+    private val fileStorage: FileStorage,
+) {
+    @Scheduled(cron = "@daily")
+    fun expireOldExports() {
+        exportRepository.findAllCreatedBefore(Instant.now().minus(Duration.ofDays(expirationDays)))
             .filter { it.status == ExportStatus.AVAILABLE }
             .forEach {
                 exportRepository.updateExportStatus(
                     ExportStatus.EXPIRED,
-                    it.id
+                    it.id,
                 )
-                fileStorage.deleteFile( it.fileName )
+                fileStorage.deleteFile(it.fileName)
             }
     }
 }

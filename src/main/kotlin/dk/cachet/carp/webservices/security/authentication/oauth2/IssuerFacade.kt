@@ -9,22 +9,40 @@ import dk.cachet.carp.webservices.security.authorization.Claim
 import dk.cachet.carp.webservices.security.authorization.Role
 
 interface IssuerFacade {
-    suspend fun createAccount(account: Account, accountType: AccountType = AccountType.NEW): Account
+    suspend fun createAccount(
+        account: Account,
+        accountType: AccountType = AccountType.NEW,
+    ): Account
+
     suspend fun getAccount(uuid: UUID): Account?
+
     suspend fun getAccount(identity: AccountIdentity): Account?
+
     suspend fun getAllByClaim(claim: Claim): List<Account>
-    suspend fun updateAccount(account: Account, requiredActions: List<RequiredAction> = emptyList()): Account
+
+    suspend fun updateAccount(
+        account: Account,
+        requiredActions: List<RequiredAction> = emptyList(),
+    ): Account
+
     suspend fun deleteAccount(id: String)
-    suspend fun addRole(account: Account, role: Role)
+
+    suspend fun addRole(
+        account: Account,
+        role: Role,
+    )
+
     suspend fun getRoles(id: UUID): Set<Role>
+
     suspend fun sendInvitation(
         account: Account,
         redirectUri: String?,
-        accountType: AccountType = AccountType.NEW
+        accountType: AccountType = AccountType.NEW,
     )
+
     suspend fun recoverAccount(
         account: Account,
         redirectUri: String?,
-        expirationSeconds: Long?
+        expirationSeconds: Long?,
     ): String
 }

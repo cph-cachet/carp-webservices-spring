@@ -37,11 +37,9 @@ class DataPointServiceImpl(
     private val dataPointBatchProcessorJob: DataPointBatchProcessorJob,
     private val authenticationService: AuthenticationService,
     private val validateMessage: MessageBase,
-    meterRegistry: MeterRegistry
-): DataPointService, ResourceExporter<DataPoint>
-{
-    companion object
-    {
+    meterRegistry: MeterRegistry,
+) : DataPointService, ResourceExporter<DataPoint> {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
         private const val CREATED_ENTITY_COUNTER_NAME = "datapoints.created"
         private const val DATE_TAG = "date"
@@ -51,71 +49,80 @@ class DataPointServiceImpl(
      * TODO: needs to be revisited, not sure if micrometer is even working at all.
      * Micrometer counter for measuring how many entities are created in a day.
      */
-    private val createdEntityCounter = Counter
+    private val createdEntityCounter =
+        Counter
             .builder(CREATED_ENTITY_COUNTER_NAME)
             .description("keeps track of datapoints created on a given day")
             .tags(DATE_TAG, LocalDate.now().toString())
             .register(meterRegistry)
 
-
-    override suspend fun getAll(deploymentId: String, pageRequest: PageRequest, query: String?): List<DataPoint>
-    {
+    override suspend fun getAll(
+        deploymentId: String,
+        pageRequest: PageRequest,
+        query: String?,
+    ): List<DataPoint> {
         val role = authenticationService.getRole()
         val id = authenticationService.getId()
 
         val validatedQuery = query?.let { validateQuery(it) }
 
         validatedQuery?.let {
-            val queryForRole = if ( role < Role.RESEARCHER )
-                // Return data relevant to this user only.
-                "$validatedQuery;deployment_id==$deploymentId;created_by==${id}"
-            else
-            {
-                // Return data relevant to this deployment.
-                "$validatedQuery;deployment_id==$deploymentId"
-            }
+            val queryForRole =
+                if (role < Role.RESEARCHER) {
+                    // Return data relevant to this user only.
+                    "$validatedQuery;deployment_id==$deploymentId;created_by==$id"
+                } else {
+                    // Return data relevant to this deployment.
+                    "$validatedQuery;deployment_id==$deploymentId"
+                }
 
-            val specification = RSQLParser()
+            val specification =
+                RSQLParser()
                     .parse(queryForRole)
                     .accept(QueryVisitor<DataPoint>())
 
             return dataPointRepository.findAll(specification, pageRequest).content
         }
 
-        if( role < Role.RESEARCHER )
-        {
+        if (role < Role.RESEARCHER) {
             return dataPointRepository.findByDeploymentId(deploymentId, pageRequest).content
         }
 
-        return dataPointRepository.findByDeploymentIdAndCreatedBy(deploymentId, id.stringRepresentation, pageRequest).content
+        return dataPointRepository.findByDeploymentIdAndCreatedBy(
+            deploymentId,
+            id.stringRepresentation,
+            pageRequest,
+        ).content
     }
 
-    override fun getNumberOfDataPoints(deploymentId: String, query: String?): Long
-    {
+    override fun getNumberOfDataPoints(
+        deploymentId: String,
+        query: String?,
+    ): Long {
         val role = authenticationService.getRole()
         val id = authenticationService.getId()
 
         val validatedQuery = query?.let { validateQuery(it) }
 
         validatedQuery?.let {
-            val queryForRole = if ( role < Role.RESEARCHER )
-            // Return data relevant to this user only.
-                "$validatedQuery;deployment_id==$deploymentId"
-            else
-            {
-                // Return data relevant to this deployment.
-                "$validatedQuery;deployment_id==$deploymentId"
-            }
+            val queryForRole =
+                if (role < Role.RESEARCHER) {
+                    // Return data relevant to this user only.
+                    "$validatedQuery;deployment_id==$deploymentId"
+                } else {
+                    // Return data relevant to this deployment.
+                    "$validatedQuery;deployment_id==$deploymentId"
+                }
 
-            val specification = RSQLParser()
+            val specification =
+                RSQLParser()
                     .parse(queryForRole)
                     .accept(QueryVisitor<DataPoint>())
 
             return dataPointRepository.count(specification)
         }
 
-        if( role < Role.RESEARCHER)
-        {
+        if (role < Role.RESEARCHER) {
             return dataPointRepository.countByDeploymentId(deploymentId)
         }
 
@@ -130,9 +137,13 @@ class DataPointServiceImpl(
      * @param deploymentIds A list of deployment ID's
      * @return [DeploymentStatisticsResponseDto]
      */
-    override fun getStatistics(deploymentIds: List<String>): DeploymentStatisticsResponseDto
-    {
-        val statistics: List<DataPointRepository.Companion.Statistics> = dataPointRepository.getStatistics(deploymentIds)
+    @Deprecated("To be removed in the future")
+    @Suppress("NestedBlockDepth")
+    override fun getStatistics(deploymentIds: List<String>): DeploymentStatisticsResponseDto {
+        val statistics: List<DataPointRepository.Companion.Statistics> =
+            dataPointRepository.getStatistics(
+                deploymentIds,
+            )
         // Initialize the result data structure
         val result: MutableMap<String, MutableMap<String, StatisticsDto>> = mutableMapOf()
         // Iterate through the result list
@@ -149,18 +160,20 @@ class DataPointServiceImpl(
                     }
                 } else {
                     // Else add the new format/dataType to the Map with the current values
-                    val statDto = StatisticsDto().apply {
-                        count += it.total
-                        uploads[it.stamp] = it.total
-                    }
+                    val statDto =
+                        StatisticsDto().apply {
+                            count += it.total
+                            uploads[it.stamp] = it.total
+                        }
                     typeMap[it.format] = statDto
                 }
             } else {
                 // Else add the new deploymentId to the map along with the current format/dataType and current values
-                val statDto = StatisticsDto().apply {
-                    count += it.total
-                    uploads[it.stamp] = it.total
-                }
+                val statDto =
+                    StatisticsDto().apply {
+                        count += it.total
+                        uploads[it.stamp] = it.total
+                    }
                 val initializedMap: MutableMap<String, StatisticsDto> = mutableMapOf(it.format to statDto)
                 result[it.did] = initializedMap
             }
@@ -169,28 +182,30 @@ class DataPointServiceImpl(
         return DeploymentStatisticsResponseDto(result)
     }
 
-    override fun getOne(id: Int): DataPoint
-    {
+    override fun getOne(id: Int): DataPoint {
         val optionalDataPoint = dataPointRepository.findById(id)
-        if (!optionalDataPoint.isPresent)
-        {
+        if (!optionalDataPoint.isPresent) {
             LOGGER.warn("DataPoint is not found, id: $id")
             throw ResourceNotFoundException(validateMessage.get("datapoint.not_found", id))
         }
         return optionalDataPoint.get()
     }
 
-    override fun create(deploymentId: String, file: MultipartFile?, request: CreateDataPointRequestDto): DataPoint
-    {
+    override fun create(
+        deploymentId: String,
+        file: MultipartFile?,
+        request: CreateDataPointRequestDto,
+    ): DataPoint {
         val id = authenticationService.getId()
-        val dataPoint = DataPoint().apply {
-            this.deploymentId = deploymentId
-            carpHeader = request.carpHeader
-            carpBody = request.carpBody
-            storageName = request.storageName
-            createdBy = id.stringRepresentation
-            updatedBy = id.stringRepresentation
-        }
+        val dataPoint =
+            DataPoint().apply {
+                this.deploymentId = deploymentId
+                carpHeader = request.carpHeader
+                carpBody = request.carpBody
+                storageName = request.storageName
+                createdBy = id.stringRepresentation
+                updatedBy = id.stringRepresentation
+            }
 
         val saved = dataPointRepository.save(dataPoint, file)
         LOGGER.info("Datapoint created, id: ${saved.id}")
@@ -198,19 +213,21 @@ class DataPointServiceImpl(
         return saved
     }
 
-    override fun create(dataPoint: DataPoint): DataPoint
-    {
+    override fun create(dataPoint: DataPoint): DataPoint {
         val saved = dataPointRepository.save(dataPoint, null)
         LOGGER.info("Datapoint created, id: ${saved.id}")
         createdEntityCounter.increment()
         return saved
     }
 
-    override fun createMany(file: MultipartFile, deploymentId: String)
-    {
+    override fun createMany(
+        file: MultipartFile,
+        deploymentId: String,
+    ) {
         val id = authenticationService.getId()
-        val dataPoints: Array<DataPoint> = dataPointBatchProcessorJob.parseBatchFile(file)
-            ?: throw BadRequestException(validateMessage.get("datapoint.file.batch.failed"))
+        val dataPoints: Array<DataPoint> =
+            dataPointBatchProcessorJob.parseBatchFile(file)
+                ?: throw BadRequestException(validateMessage.get("datapoint.file.batch.failed"))
         dataPoints.forEach { d ->
             run {
                 d.deploymentId = deploymentId
@@ -221,17 +238,19 @@ class DataPointServiceImpl(
         dataPointBatchProcessorJob.process(dataPoints)
     }
 
-    override fun delete(id: Int)
-    {
+    override fun delete(id: Int) {
         val dataPoint = getOne(id)
         dataPointRepository.delete(dataPoint)
         LOGGER.info("Datapoint deleted, id: $id")
     }
 
     override val dataFileName = "data-points.json"
-    override suspend fun exportDataOrThrow( studyId: UUID, deploymentIds: Set<UUID>, target: Path ) =
-        withContext( Dispatchers.IO )
-        {
-            dataPointRepository.findAllByDeploymentIds( deploymentIds.map { it.stringRepresentation } )
-        }
+
+    override suspend fun exportDataOrThrow(
+        studyId: UUID,
+        deploymentIds: Set<UUID>,
+        target: Path,
+    ) = withContext(Dispatchers.IO) {
+        dataPointRepository.findAllByDeploymentIds(deploymentIds.map { it.stringRepresentation })
+    }
 }

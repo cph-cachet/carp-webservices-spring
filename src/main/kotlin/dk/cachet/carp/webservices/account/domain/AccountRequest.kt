@@ -8,6 +8,5 @@ data class AccountRequest(
     @field:NotBlank
     @field:Email
     val emailAddress: String,
-
-    val role: Role
+    val role: Role,
 )

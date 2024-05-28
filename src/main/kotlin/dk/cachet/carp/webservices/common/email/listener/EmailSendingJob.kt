@@ -13,26 +13,20 @@ import org.apache.logging.log4j.Logger
 import org.springframework.amqp.core.Message
 import org.springframework.amqp.rabbit.annotation.RabbitListener
 import org.springframework.amqp.rabbit.core.RabbitTemplate
-import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter
-import org.springframework.amqp.utils.SerializationUtils
 import org.springframework.core.env.Environment
-import org.springframework.messaging.support.GenericMessage
 import org.springframework.stereotype.Component
 
 /**
  * The configuration class for sending and receiving email messages.
  */
 @Component
-class EmailSendingJob
-(
+class EmailSendingJob(
     private val rabbitTemplate: RabbitTemplate,
     private val emailSend: EmailServiceImpl,
     private val validationMessages: MessageBase,
-    private val environment: Environment
-)
-{
-    companion object
-    {
+    private val environment: Environment,
+) {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
@@ -42,8 +36,7 @@ class EmailSendingJob
      *
      * @param emailRequest The request to be sent to the queue.
      */
-    fun send(emailRequest: EmailRequest)
-    {
+    fun send(emailRequest: EmailRequest) {
         val encodedEmailRequest = JSON.encodeToString(emailRequest)
         rabbitTemplate.convertAndSend(environment.getProperty("rabbit.email.sending.queue")!!, encodedEmailRequest)
     }
@@ -57,18 +50,17 @@ class EmailSendingJob
      * @throws EmailException When there is a fail signal received.
      */
     @RabbitListener(queues = ["\${rabbit.email.sending.queue}"])
-    fun receive(message: Message)
-    {
+    fun receive(message: Message) {
         val emailRequest: EmailRequest = JSON.decodeFromString(message.body.decodeToString())
-        val responseFuture = emailSend.invoke(
+        val responseFuture =
+            emailSend.invoke(
                 emailRequest.destinationEmail,
                 emailRequest.subject,
-                emailRequest.content
-        )
+                emailRequest.content,
+            )
 
         val response = responseFuture.get()
-        if (response == EmailSendResult.FAILURE.status)
-        {
+        if (response == EmailSendResult.FAILURE.status) {
             LOGGER.info("Email sending to email: ${emailRequest.destinationEmail} failed.")
             throw EmailException(validationMessages.get("email.sending.job.failed", emailRequest.destinationEmail))
         }

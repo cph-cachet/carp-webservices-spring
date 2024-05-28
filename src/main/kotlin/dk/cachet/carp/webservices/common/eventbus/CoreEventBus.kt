@@ -19,17 +19,17 @@ import kotlin.reflect.KClass
  * */
 @Component
 class CoreEventBus(
-        private val rabbitTemplate: RabbitTemplate,
-        private val environment: Environment
-): EventBus()
-{
-    companion object
-    {
+    private val rabbitTemplate: RabbitTemplate,
+    private val environment: Environment,
+) : EventBus() {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
-    override fun activateHandlers(subscriber: Any, handlers: List<Handler>)
-    {
+    override fun activateHandlers(
+        subscriber: Any,
+        handlers: List<Handler>,
+    ) {
         // Nothing to do.
     }
 
@@ -37,17 +37,16 @@ class CoreEventBus(
      * Publish the specified [event] belonging to [publishingService].
      * It serializes the event and sends it to the application service specific queue.
      */
-    override suspend fun <TService : ApplicationService<TService, TEvent>, TEvent : IntegrationEvent<TService>> publish(publishingService: KClass<TService>, event: TEvent)
-    {
-        if (StudyService::class == publishingService)
-        {
+    override suspend fun <TService : ApplicationService<TService, TEvent>, TEvent : IntegrationEvent<TService>> publish(
+        publishingService: KClass<TService>,
+        event: TEvent,
+    ) {
+        if (StudyService::class == publishingService) {
             val castedEvent = event as StudyService.Event
             val serializedEvent = JSON.encodeToString(castedEvent)
             rabbitTemplate.convertAndSend(environment.getProperty("rabbit.study.queue")!!, serializedEvent)
             LOGGER.info("New StudyService event '${castedEvent::class.simpleName}' is published.")
-        }
-        else if (DeploymentService::class == publishingService)
-        {
+        } else if (DeploymentService::class == publishingService) {
             val castedEvent = event as DeploymentService.Event
             val serializedEvent = JSON.encodeToString(castedEvent)
             rabbitTemplate.convertAndSend(environment.getProperty("rabbit.deployment.queue")!!, serializedEvent)
@@ -55,21 +54,18 @@ class CoreEventBus(
         }
     }
 
-    suspend fun invokeHandlers(event: IntegrationEvent<*>)
-    {
+    suspend fun invokeHandlers(event: IntegrationEvent<*>) {
         // Find all active handlers listening to the published event type.
-        val handlers = subscribers.values
+        val handlers =
+            subscribers.values
                 .filter { it.isActivated }
                 .flatMap { it.eventHandlers.filter { handler -> handler.eventType.isInstance(event) } }
 
         // Publish.
         handlers.forEach {
-            try
-            {
+            try {
                 it.handler(event)
-            }
-            catch (ex: Exception)
-            {
+            } catch (ex: Exception) {
                 LOGGER.info("An error is encountered while invoking handlers for event $event: ${ex.message}")
                 ex.printStackTrace()
             }

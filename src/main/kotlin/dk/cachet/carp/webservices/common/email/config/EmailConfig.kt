@@ -12,16 +12,13 @@ import org.springframework.mail.javamail.JavaMailSenderImpl
 @Configuration
 @ComponentScan(basePackages = ["dk.cachet.carp.webservices"])
 @PropertySources(PropertySource(value = ["classpath:config/application-\${spring.profiles.active}.yml"]))
-class EmailConfig
-(
+class EmailConfig(
     @Value("\${spring.mail.host}") private val host: String,
     @Value("\${spring.mail.address}") private val emailAddress: String,
     @Value("\${spring.mail.password}") private val password: String,
-    @Value("\${spring.mail.port}") private val port: Int
-)
-{
-    companion object
-    {
+    @Value("\${spring.mail.port}") private val port: Int,
+) {
+    companion object {
         const val MAIL_SMTP_AUTH = "true"
         const val MAIL_TRANSPORT_PROTOCOL = "smtp"
         const val MAIL_SMTP_STARTTLS_ENABLE = "true"
@@ -32,11 +29,10 @@ class EmailConfig
      * @return A new instance of [JavaMailSender].
      */
     @Bean
-    fun mailConfig(): JavaMailSender
-    {
+    fun mailConfig(): JavaMailSender {
         val mailSender = JavaMailSenderImpl()
-        mailSender.host     = host
-        mailSender.port     = port
+        mailSender.host = host
+        mailSender.port = port
         mailSender.username = emailAddress
         mailSender.password = password
 

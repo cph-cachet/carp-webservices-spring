@@ -26,74 +26,73 @@ class ExportAnonymousParticipants(
     private val services: CoreServiceContainer,
     private val accountService: AccountService,
     private val resourceExporter: ResourceExporterService,
-    private val fileUtil: FileUtil
-): ExportCommand( entry )
-{
-    private val studyId = UUID( entry.studyId )
+    private val fileUtil: FileUtil,
+) : ExportCommand(entry) {
+    private val studyId = UUID(entry.studyId)
 
-    companion object
-    {
+    companion object {
         const val MAX_AMOUNT = 1000
         const val CSV_HEADER = "username,study_deployment_id,access_link,expiry_date"
     }
 
-    override fun canExecute(): Boolean
-    {
-        val protocol = runBlocking ( Dispatchers.IO + SecurityCoroutineContext() ) {
-            services.studyService.getStudyDetails( studyId ).protocolSnapshot
-        }
+    override fun canExecute(): Boolean {
+        val protocol =
+            runBlocking(Dispatchers.IO + SecurityCoroutineContext()) {
+                services.studyService.getStudyDetails(studyId).protocolSnapshot
+            }
 
         return protocol != null &&
-               protocol.participantRoles.any { it.role == payload.participantRoleName } &&
-               payload.amountOfAccounts in 1..MAX_AMOUNT
+            protocol.participantRoles.any { it.role == payload.participantRoleName } &&
+            payload.amountOfAccounts in 1..MAX_AMOUNT
     }
 
-    override suspend fun execute()
-    {
+    override suspend fun execute() {
         logger.info("Generating ${payload.amountOfAccounts} anonymous participants for study $studyId")
 
         val anonymousParticipants = mutableSetOf<AnonymousParticipant>()
 
-        for ( i in 1..payload.amountOfAccounts )
-        {
-            val ( identity, link ) = accountService.generateAnonymousAccount(
-                payload.expirationSeconds, payload.redirectUri
-            )
-            anonymousParticipants.add( createAnonymousParticipant( identity, link ) )
+        for (i in 1..payload.amountOfAccounts) {
+            val (identity, link) =
+                accountService.generateAnonymousAccount(
+                    payload.expirationSeconds,
+                    payload.redirectUri,
+                )
+            anonymousParticipants.add(createAnonymousParticipant(identity, link))
         }
 
-        val csvBody = anonymousParticipants.map {
-            "${it.username},${it.studyDeploymentId},\"${it.magicLink}\",${it.expiryDate}"
-        }
+        val csvBody =
+            anonymousParticipants.map {
+                "${it.username},${it.studyDeploymentId},\"${it.magicLink}\",${it.expiryDate}"
+            }
 
-        val csvPath = fileUtil.resolveFileStorage( entry.fileName )
-        resourceExporter.exportCSV( CSV_HEADER, csvBody, csvPath, logger )
+        val csvPath = fileUtil.resolveFileStorage(entry.fileName)
+        resourceExporter.exportCSV(CSV_HEADER, csvBody, csvPath, logger)
     }
 
     private suspend fun createAnonymousParticipant(
         identity: UsernameAccountIdentity,
-        link: String
-    ): AnonymousParticipant
-    {
-        val participant = services.recruitmentService.addParticipant( studyId, identity.username )
+        link: String,
+    ): AnonymousParticipant {
+        val participant = services.recruitmentService.addParticipant(studyId, identity.username)
 
-        val groupStatus = services.recruitmentService.inviteNewParticipantGroup(
-            studyId,
-            setOf(
-                AssignedParticipantRoles(
-                    participant.id,
-                    AssignedTo.Roles( setOf(payload.participantRoleName) )
-                )
-            )
-        ) as ParticipantGroupStatus.InDeployment
+        val groupStatus =
+            services.recruitmentService.inviteNewParticipantGroup(
+                studyId,
+                setOf(
+                    AssignedParticipantRoles(
+                        participant.id,
+                        AssignedTo.Roles(setOf(payload.participantRoleName)),
+                    ),
+                ),
+            ) as ParticipantGroupStatus.InDeployment
 
         val deploymentId = groupStatus.studyDeploymentStatus.studyDeploymentId
 
         return AnonymousParticipant(
-            UUID.parse( identity.username.name ),
+            UUID.parse(identity.username.name),
             deploymentId,
             link,
-            Clock.System.now() + payload.expirationSeconds.toDuration(DurationUnit.SECONDS)
+            Clock.System.now() + payload.expirationSeconds.toDuration(DurationUnit.SECONDS),
         )
     }
 }

@@ -15,10 +15,8 @@ import org.apache.logging.log4j.Logger
  * The Class [StudyStatusSerializer].
  * The [StudyStatusSerializer] implements the serialization logic for [StudyStatus].
  */
-class StudyStatusSerializer(private val validationMessages: MessageBase): JsonSerializer<StudyStatus>()
-{
-    companion object
-    {
+class StudyStatusSerializer(private val validationMessages: MessageBase) : JsonSerializer<StudyStatus>() {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
@@ -29,23 +27,24 @@ class StudyStatusSerializer(private val validationMessages: MessageBase): JsonSe
      * @throws SerializationException If the [StudyStatus] is blank or empty. Also, if the [StudyStatus] contains invalid format.
      * @return The serialization of [StudyStatus] object.
      */
-    override fun serialize(studyStatus: StudyStatus?, jsonGenerator: JsonGenerator?, serializers: SerializerProvider?)
-    {
-        if (studyStatus == null)
-        {
+    override fun serialize(
+        studyStatus: StudyStatus?,
+        jsonGenerator: JsonGenerator?,
+        serializers: SerializerProvider?,
+    ) {
+        if (studyStatus == null) {
             LOGGER.error("The StudyStatus is null.")
             throw SerializationException(validationMessages.get("study.status.serialization.empty"))
         }
 
         val serialized: String
-        try
-        {
+        try {
             serialized = JSON.encodeToString(studyStatus)
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The StudyStatus is not valid. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("study.status.serialization.error", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("study.status.serialization.error", ex.message.toString()),
+            )
         }
 
         jsonGenerator!!.writeRawValue(serialized)

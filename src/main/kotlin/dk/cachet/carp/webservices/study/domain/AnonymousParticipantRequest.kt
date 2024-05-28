@@ -14,12 +14,12 @@ import jakarta.validation.constraints.Positive
  */
 data class AnonymousParticipantRequest(
     @field:Positive
-    @field:Max( 100 )
+    @field:Max(100)
     val amountOfAccounts: Int,
     @field:Positive
     val expirationSeconds: Long,
     @field:NotEmpty
     val redirectUri: String,
     @field:NotBlank
-    val participantRoleName: String
+    val participantRoleName: String,
 )

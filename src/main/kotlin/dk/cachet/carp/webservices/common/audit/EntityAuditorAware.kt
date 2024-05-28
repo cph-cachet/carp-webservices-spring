@@ -10,13 +10,12 @@ import java.util.*
  * `lastModifiedBy` fields set.
  */
 class EntityAuditorAware(
-    private val authenticationService: AuthenticationService
-): AuditorAware<String>
-{
+    private val authenticationService: AuthenticationService,
+) : AuditorAware<String> {
     override fun getCurrentAuditor(): Optional<String> =
         try {
-            Optional.of( authenticationService.getId().stringRepresentation )
+            Optional.of(authenticationService.getId().stringRepresentation)
         } catch (e: Exception) {
-            Optional.of( "SYSTEM" )
+            Optional.of("SYSTEM")
         }
 }

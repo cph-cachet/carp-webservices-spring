@@ -9,12 +9,10 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import org.springframework.web.filter.CorsFilter
 
 @Configuration
-class CorsConfig
-{
+class CorsConfig {
     // It handles CORS preflight requests and intercepts CORS requests
     @Bean
-    fun corsFilter(): CorsFilter?
-    {
+    fun corsFilter(): CorsFilter? {
         val source = UrlBasedCorsConfigurationSource()
         val config = CorsConfiguration()
         config.allowCredentials = true

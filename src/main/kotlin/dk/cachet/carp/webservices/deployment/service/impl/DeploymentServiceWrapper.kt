@@ -17,16 +17,18 @@ class DeploymentServiceWrapper(
     private val repository: StudyDeploymentRepository,
     private val objectMapper: ObjectMapper,
     services: CoreServiceContainer,
-): DeploymentService, ResourceExporter<StudyDeploymentSnapshot>
-{
+) : DeploymentService, ResourceExporter<StudyDeploymentSnapshot> {
     final override val core = services.deploymentService
 
     final override val dataFileName = "deployments.json"
 
-    override suspend fun exportDataOrThrow( studyId: UUID, deploymentIds: Set<UUID>, target: Path ) =
-        withContext( Dispatchers.IO ) {
-            repository
-                .findAllByStudyDeploymentIds( deploymentIds.map { it.stringRepresentation } )
-                .map { objectMapper.treeToValue( it.snapshot, StudyDeploymentSnapshot::class.java ) }
-        }
+    override suspend fun exportDataOrThrow(
+        studyId: UUID,
+        deploymentIds: Set<UUID>,
+        target: Path,
+    ) = withContext(Dispatchers.IO) {
+        repository
+            .findAllByStudyDeploymentIds(deploymentIds.map { it.stringRepresentation })
+            .map { objectMapper.treeToValue(it.snapshot, StudyDeploymentSnapshot::class.java) }
+    }
 }

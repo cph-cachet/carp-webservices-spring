@@ -11,8 +11,7 @@ import org.springframework.core.env.Environment
  * It contains the AMPQ Queue, Exchange and Binding configurations.
  * */
 @Configuration
-class Queue(environment: Environment)
-{
+class Queue(environment: Environment) {
     /** DataPoint queues */
     val DATA_POINT_PROCESSING_QUEUE = environment.getProperty("rabbit.data-point.processing.queue")
     val DATA_POINT_DIRECT_EXCHANGE = environment.getProperty("rabbit.data-point.processing.direct-ex")
@@ -53,80 +52,67 @@ class Queue(environment: Environment)
      * Exchange declarations
      */
     @Bean
-    fun dataPointProcessingDirectExchange(): DirectExchange
-    {
+    fun dataPointProcessingDirectExchange(): DirectExchange {
         return DirectExchange(DATA_POINT_DIRECT_EXCHANGE)
     }
 
     @Bean
-    fun dataPointProcessingDLX(): FanoutExchange
-    {
+    fun dataPointProcessingDLX(): FanoutExchange {
         return FanoutExchange(DATA_POINT_PROCESSING_DLX)
     }
 
     @Bean
-    fun dataPointProcessingPLX(): FanoutExchange
-    {
+    fun dataPointProcessingPLX(): FanoutExchange {
         return FanoutExchange(DATA_POINT_PROCESSING_PLX)
     }
 
     @Bean
-    fun emailSendingDirectExchange(): DirectExchange
-    {
+    fun emailSendingDirectExchange(): DirectExchange {
         return DirectExchange(EMAIL_SENDING_DIRECT_EXCHANGE)
     }
 
     @Bean
-    fun emailSendingDLX(): FanoutExchange
-    {
+    fun emailSendingDLX(): FanoutExchange {
         return FanoutExchange(EMAIL_SENDING_DLX)
     }
 
     @Bean
-    fun emailSendingPLX(): FanoutExchange
-    {
+    fun emailSendingPLX(): FanoutExchange {
         return FanoutExchange(EMAIL_SENDING_PLX)
     }
 
     @Bean
-    fun thirdPartyDirectExchange(): DirectExchange
-    {
+    fun thirdPartyDirectExchange(): DirectExchange {
         return DirectExchange(THIRD_PARTY_DIRECT_EXCHANGE)
     }
 
     @Bean
-    fun thirdPartyDLX(): FanoutExchange
-    {
+    fun thirdPartyDLX(): FanoutExchange {
         return FanoutExchange(THIRD_PARTY_DLX)
     }
 
     @Bean
-    fun thirdPartyPLX(): FanoutExchange
-    {
+    fun thirdPartyPLX(): FanoutExchange {
         return FanoutExchange(THIRD_PARTY_PLX)
     }
 
     @Bean
-    fun studyDirectExchange(): DirectExchange
-    {
+    fun studyDirectExchange(): DirectExchange {
         return DirectExchange(STUDIES_DIRECT_EXCHANGE)
     }
 
     @Bean
-    fun studyDLX(): FanoutExchange
-    {
+    fun studyDLX(): FanoutExchange {
         return FanoutExchange(STUDIES_DLX)
     }
 
     @Bean
-    fun deploymentDirectExchange(): DirectExchange
-    {
+    fun deploymentDirectExchange(): DirectExchange {
         return DirectExchange(DEPLOYMENTS_DIRECT_EXCHANGE)
     }
 
     @Bean
-    fun deploymentDLX(): FanoutExchange
-    {
+    fun deploymentDLX(): FanoutExchange {
         return FanoutExchange(DEPLOYMENTS_DLX)
     }
 
@@ -134,95 +120,82 @@ class Queue(environment: Environment)
      * Queue declarations
      */
     @Bean
-    fun dataPointProcessingQueue(): Queue
-    {
+    fun dataPointProcessingQueue(): Queue {
         return QueueBuilder
-                .durable(DATA_POINT_PROCESSING_QUEUE)
-                .withArgument("x-dead-letter-exchange", DATA_POINT_PROCESSING_DLX)
-                .build()
+            .durable(DATA_POINT_PROCESSING_QUEUE)
+            .withArgument("x-dead-letter-exchange", DATA_POINT_PROCESSING_DLX)
+            .build()
     }
 
     @Bean
-    fun dataPointProcessingDLQ(): Queue
-    {
+    fun dataPointProcessingDLQ(): Queue {
         return QueueBuilder.durable(DATA_POINT_PROCESSING_DLQ).build()
     }
 
     @Bean
-    fun dataPointProcessingPLQ(): Queue
-    {
+    fun dataPointProcessingPLQ(): Queue {
         return QueueBuilder.durable(DATA_POINT_PROCESSING_PLQ).build()
     }
 
     @Bean
-    fun emailSendingQueue(): Queue
-    {
+    fun emailSendingQueue(): Queue {
         return QueueBuilder
-                .durable(EMAIL_SENDING_QUEUE)
-                .withArgument("x-dead-letter-exchange", EMAIL_SENDING_DLX)
-                .build();
+            .durable(EMAIL_SENDING_QUEUE)
+            .withArgument("x-dead-letter-exchange", EMAIL_SENDING_DLX)
+            .build()
     }
 
     @Bean
-    fun emailSendingDLQ(): Queue
-    {
+    fun emailSendingDLQ(): Queue {
         return QueueBuilder.durable(EMAIL_SENDING_DLQ).build()
     }
 
     @Bean
-    fun emailSendingPLQ(): Queue
-    {
+    fun emailSendingPLQ(): Queue {
         return QueueBuilder.durable(EMAIL_SENDING_PLQ).build()
     }
 
     @Bean
-    fun thirdPartyQueue(): Queue
-    {
+    fun thirdPartyQueue(): Queue {
         return QueueBuilder
-                .durable(THIRD_PARTY_QUEUE)
-                .withArgument("x-dead-letter-exchange", THIRD_PARTY_DLX)
-                .build()
+            .durable(THIRD_PARTY_QUEUE)
+            .withArgument("x-dead-letter-exchange", THIRD_PARTY_DLX)
+            .build()
     }
 
     @Bean
-    fun thirdPartyDLQ(): Queue
-    {
+    fun thirdPartyDLQ(): Queue {
         return QueueBuilder.durable(THIRD_PARTY_DLQ).build()
     }
 
     @Bean
-    fun thirdPartyPLQ(): Queue
-    {
+    fun thirdPartyPLQ(): Queue {
         return QueueBuilder.durable(THIRD_PARTY_PLQ).build()
     }
 
     @Bean
-    fun studyQueue(): Queue
-    {
+    fun studyQueue(): Queue {
         return QueueBuilder
-                .durable(STUDIES_QUEUE)
-                .withArgument("x-dead-letter-exchange", STUDIES_DLX)
-                .build()
+            .durable(STUDIES_QUEUE)
+            .withArgument("x-dead-letter-exchange", STUDIES_DLX)
+            .build()
     }
 
     @Bean
-    fun studyDLQ(): Queue
-    {
+    fun studyDLQ(): Queue {
         return QueueBuilder.durable(STUDIES_DLQ).build()
     }
 
     @Bean
-    fun deploymentQueue(): Queue
-    {
+    fun deploymentQueue(): Queue {
         return QueueBuilder
-                .durable(DEPLOYMENTS_QUEUE)
-                .withArgument("x-dead-letter-exchange", DEPLOYMENTS_DLX)
-                .build()
+            .durable(DEPLOYMENTS_QUEUE)
+            .withArgument("x-dead-letter-exchange", DEPLOYMENTS_DLX)
+            .build()
     }
 
     @Bean
-    fun deploymentDLQ(): Queue
-    {
+    fun deploymentDLQ(): Queue {
         return QueueBuilder.durable(DEPLOYMENTS_DLQ).build()
     }
 
@@ -230,80 +203,69 @@ class Queue(environment: Environment)
      * Binding declarations
      */
     @Bean
-    fun dataPointProcessingBinding(): Binding
-    {
-        return BindingBuilder.bind(dataPointProcessingQueue()).to(dataPointProcessingDirectExchange()).with(DATA_POINT_PROCESSING_QUEUE)
+    fun dataPointProcessingBinding(): Binding {
+        return BindingBuilder.bind(
+            dataPointProcessingQueue(),
+        ).to(dataPointProcessingDirectExchange()).with(DATA_POINT_PROCESSING_QUEUE)
     }
 
     @Bean
-    fun dataPointProcessingQueueDeadLetterBinding(): Binding
-    {
+    fun dataPointProcessingQueueDeadLetterBinding(): Binding {
         return BindingBuilder.bind(dataPointProcessingDLQ()).to(dataPointProcessingDLX())
     }
 
     @Bean
-    fun dataPointProcessingParkingLotBinding(): Binding
-    {
+    fun dataPointProcessingParkingLotBinding(): Binding {
         return BindingBuilder.bind(dataPointProcessingPLQ()).to(dataPointProcessingPLX())
     }
 
     @Bean
-    fun emailSendingBinding(): Binding
-    {
+    fun emailSendingBinding(): Binding {
         return BindingBuilder.bind(emailSendingQueue()).to(emailSendingDirectExchange()).with(EMAIL_SENDING_QUEUE)
     }
 
     @Bean
-    fun emailSendingQueueDeadLetterBinding(): Binding
-    {
+    fun emailSendingQueueDeadLetterBinding(): Binding {
         return BindingBuilder.bind(emailSendingDLQ()).to(emailSendingDLX())
     }
 
     @Bean
-    fun emailSendingParkingLotBinding(): Binding
-    {
+    fun emailSendingParkingLotBinding(): Binding {
         return BindingBuilder.bind(emailSendingPLQ()).to(emailSendingPLX())
     }
 
     @Bean
-    fun thirdPartyBinding(): Binding
-    {
+    fun thirdPartyBinding(): Binding {
         return BindingBuilder.bind(thirdPartyQueue()).to(thirdPartyDirectExchange()).with(THIRD_PARTY_QUEUE)
     }
 
     @Bean
-    fun thirdPartyQueueDeadLetterBinding(): Binding
-    {
+    fun thirdPartyQueueDeadLetterBinding(): Binding {
         return BindingBuilder.bind(thirdPartyDLQ()).to(thirdPartyDLX())
     }
 
     @Bean
-    fun thirdPartyParkingLotBinding(): Binding
-    {
+    fun thirdPartyParkingLotBinding(): Binding {
         return BindingBuilder.bind(thirdPartyPLQ()).to(thirdPartyPLX())
     }
 
     @Bean
-    fun studyBinding(): Binding
-    {
+    fun studyBinding(): Binding {
         return BindingBuilder.bind(studyQueue()).to(studyDirectExchange()).with(STUDIES_QUEUE)
     }
 
     @Bean
-    fun studyQueueDeadLetterBinding(): Binding
-    {
+    fun studyQueueDeadLetterBinding(): Binding {
         return BindingBuilder.bind(studyDLQ()).to(studyDLX())
     }
 
     @Bean
-    fun deploymentBinding(): Binding
-    {
+    fun deploymentBinding(): Binding {
         return BindingBuilder.bind(deploymentQueue()).to(deploymentDirectExchange()).with(DEPLOYMENTS_QUEUE)
     }
 
     @Bean
-    fun deploymentQueueDeadLetterBinding(): Binding
-    {
+    fun deploymentQueueDeadLetterBinding(): Binding {
         return BindingBuilder.bind(deploymentDLQ()).to(deploymentDLX())
     }
 }

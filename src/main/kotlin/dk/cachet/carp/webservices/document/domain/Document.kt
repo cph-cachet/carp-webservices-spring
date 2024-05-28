@@ -26,44 +26,38 @@ import org.springframework.stereotype.Component
 @EntityListeners(DocumentListener::class)
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
 @Entity(name = "documents")
-data class Document
-    (
+data class Document(
     /** The document [id]. */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int = 0,
-
     /** The document [name]. */
     @field:NotNull
     var name: String = "",
-
     /** The document [collectionId] is associated with. */
     @field:NotNull
     var collectionId: Int? = null,
-
     /** The document [collection] is associated with. */
     @JsonIgnore
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "collectionId", insertable = false, updatable = false)
     var collection: Collection? = null,
-
     /** The document [collections] is associated with. */
     @JsonIgnore
     @OneToMany(cascade = [CascadeType.ALL], fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = "documentId")
     var collections: List<Collection>? = null,
-
     /** The document [data] object request. */
     @JsonMerge
     @field:JsonMerge
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
-    var data: JsonNode? = null
+    var data: JsonNode? = null,
 ) : Auditable()
 
 @Component
 @DependsOn("springApplicationContext")
-class DocumentListener: InitializingBean {
+class DocumentListener : InitializingBean {
     companion object {
         private lateinit var fileService: FileService
     }

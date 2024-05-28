@@ -17,10 +17,8 @@ import org.springframework.util.StringUtils
  * The Class [StudyStatusDeserializer].
  * The [StudyStatusDeserializer] implements the deserialization logic for [StudyStatus].
  */
-class StudyStatusDeserializer(private val validationMessages: MessageBase): JsonDeserializer<StudyStatus>()
-{
-    companion object
-    {
+class StudyStatusDeserializer(private val validationMessages: MessageBase) : JsonDeserializer<StudyStatus>() {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
@@ -31,32 +29,27 @@ class StudyStatusDeserializer(private val validationMessages: MessageBase): Json
      * @throws SerializationException If the [StudyStatus] is blank or empty. Also, if the [StudyStatus] contains invalid format.
      * @return The deserialized [StudyStatus] object.
      */
-    override fun deserialize(jsonParser: JsonParser?, context: DeserializationContext?): StudyStatus
-    {
+    override fun deserialize(
+        jsonParser: JsonParser?,
+        context: DeserializationContext?,
+    ): StudyStatus {
         val studyStatus: String
-        try
-        {
-            studyStatus =  jsonParser?.codec?.readTree<TreeNode>(jsonParser).toString()
+        try {
+            studyStatus = jsonParser?.codec?.readTree<TreeNode>(jsonParser).toString()
 
-            if (!StringUtils.hasLength(studyStatus))
-            {
+            if (!StringUtils.hasLength(studyStatus)) {
                 LOGGER.error("The StudyStatus cannot be blank or empty.")
                 throw SerializationException(validationMessages.get("study.status.deserialization.empty"))
             }
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The StudyStatus contains bad format. Exception: $ex")
             throw SerializationException(validationMessages.get("study.status.deserialization.bad_format"))
         }
 
         val parsed: StudyStatus
-        try
-        {
+        try {
             parsed = JSON.decodeFromString(studyStatus)
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The StudyStatus is not valid. Exception: $ex")
             throw SerializationException(validationMessages.get("study.status.deserialization.error"))
         }

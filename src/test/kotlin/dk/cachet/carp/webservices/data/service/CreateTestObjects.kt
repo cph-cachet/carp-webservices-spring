@@ -12,29 +12,29 @@ import dk.cachet.carp.data.infrastructure.measurement
 import kotlinx.datetime.Clock
 
 val now = Clock.System.now()
-val stubSyncPoint = SyncPoint( now, now.toEpochMicroseconds() )
-val stubTriggerIds = listOf( 1 )
+val stubSyncPoint = SyncPoint(now, now.toEpochMicroseconds())
+val stubTriggerIds = listOf(1)
 const val stubSequenceDeviceRoleName = "Device"
 
 inline fun <reified T : Data> createStubSequence(
     studyDeploymentId: UUID,
     firstSequenceId: Long,
-    vararg data: T
+    vararg data: T,
 ): DataStreamSequence<T> =
     createStubSequence(
-        dataStreamId<T>( studyDeploymentId, stubSequenceDeviceRoleName ),
+        dataStreamId<T>(studyDeploymentId, stubSequenceDeviceRoleName),
         firstSequenceId,
-        *data.map { measurement( it, 0 ) }.toTypedArray()
+        *data.map { measurement(it, 0) }.toTypedArray(),
     )
 
 inline fun <reified T : Data> createStubSequence(
     dataStreamId: DataStreamId,
     firstSequenceId: Long,
-    vararg measurements: Measurement<T>
+    vararg measurements: Measurement<T>,
 ): DataStreamSequence<T> =
     MutableDataStreamSequence<T>(
         dataStreamId,
         firstSequenceId,
         stubTriggerIds,
-        stubSyncPoint
-    ).apply { appendMeasurements( measurements.toList() ) }
+        stubSyncPoint,
+    ).apply { appendMeasurements(measurements.toList()) }

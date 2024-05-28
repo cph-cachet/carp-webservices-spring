@@ -17,10 +17,10 @@ import org.springframework.util.StringUtils
  * The Class [StudyDeploymentStatusDeserializer].
  * [StudyDeploymentStatusDeserializer] implements the deserialization logic for [StudyDeploymentStatus].
  */
-class StudyDeploymentStatusDeserializer(private val validationMessages: MessageBase): JsonDeserializer<StudyDeploymentStatus>()
-{
-    companion object
-    {
+class StudyDeploymentStatusDeserializer(
+    private val validationMessages: MessageBase,
+) : JsonDeserializer<StudyDeploymentStatus>() {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
@@ -33,34 +33,33 @@ class StudyDeploymentStatusDeserializer(private val validationMessages: MessageB
      * Also, if the [StudyDeploymentStatus] contains invalid format.
      * @return The deserialised study deployment status object.
      */
-    override fun deserialize(jsonParser: JsonParser?, deserializationContext: DeserializationContext?): StudyDeploymentStatus
-    {
+    override fun deserialize(
+        jsonParser: JsonParser?,
+        deserializationContext: DeserializationContext?,
+    ): StudyDeploymentStatus {
         val studyDeploymentStatus: String
-        try
-        {
+        try {
             studyDeploymentStatus = jsonParser?.codec?.readTree<TreeNode>(jsonParser).toString()
 
-            if (!StringUtils.hasLength(studyDeploymentStatus))
-            {
+            if (!StringUtils.hasLength(studyDeploymentStatus)) {
                 LOGGER.error("The core StudyDeploymentStatus cannot be blank or empty.")
                 throw SerializationException(validationMessages.get("deployment.status.deserialization.empty"))
             }
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The core StudyDeploymentStatus contains bad format. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("deployment.status.deserialization.bad_format", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("deployment.status.deserialization.bad_format", ex.message.toString()),
+            )
         }
 
         val parsed: StudyDeploymentStatus
-        try
-        {
+        try {
             parsed = JSON.decodeFromString(studyDeploymentStatus)
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The core StudyDeploymentStatus serializer is not valid. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("deployment.status.deserialization.error", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("deployment.status.deserialization.error", ex.message.toString()),
+            )
         }
 
         return parsed

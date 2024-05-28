@@ -6,10 +6,6 @@ import dk.cachet.carp.webservices.export.command.ExportCommand
 import dk.cachet.carp.webservices.export.domain.Export
 import dk.cachet.carp.webservices.export.service.ResourceExporterService
 import dk.cachet.carp.webservices.file.util.FileUtil
-import kotlinx.datetime.Clock
-import kotlinx.datetime.toJavaInstant
-import java.nio.ByteBuffer
-import java.time.temporal.ChronoUnit
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.deleteRecursively
@@ -18,29 +14,23 @@ class ExportSummary(
     entry: Export,
     private val deploymentIds: Set<UUID>?,
     private val resourceExporter: ResourceExporterService,
-    private val fileUtil: FileUtil
-): ExportCommand( entry )
-{
+    private val fileUtil: FileUtil,
+) : ExportCommand(entry) {
     override fun canExecute(): Boolean = true
 
-    @OptIn( ExperimentalPathApi::class )
-    override suspend fun execute()
-    {
+    @OptIn(ExperimentalPathApi::class)
+    override suspend fun execute() {
         val workingDir = createTempDirectory()
-        val zipPath = fileUtil.resolveFileStorage( entry.fileName )
+        val zipPath = fileUtil.resolveFileStorage(entry.fileName)
 
-        resourceExporter.exportStudyData( UUID( entry.studyId ), deploymentIds, workingDir, logger )
+        resourceExporter.exportStudyData(UUID(entry.studyId), deploymentIds, workingDir, logger)
 
-        try
-        {
-            fileUtil.zipDirectory( workingDir, zipPath )
-        }
-        catch ( e: Throwable )
-        {
-            fileUtil.deleteFile( zipPath )
-            throw FileStorageException( e.message )
-        }
-        finally
+        try {
+            fileUtil.zipDirectory(workingDir, zipPath)
+        } catch (e: Throwable) {
+            fileUtil.deleteFile(zipPath)
+            throw FileStorageException(e.message)
+        } finally
         {
             workingDir.deleteRecursively()
         }

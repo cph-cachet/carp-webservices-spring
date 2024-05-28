@@ -17,28 +17,23 @@ import org.hibernate.type.SqlTypes
  */
 @Entity(name = "files")
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
-data class File
-(
-        /** The file [id] field. */
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        val id: Int = 0,
-
-        /** The file [storageName] field. */
-        @field:NotNull
-        var storageName: String = "",
-
-        /** The file [originalName] field. */
-        @field:NotNull
-        var originalName: String = "",
-
-        /** The file [metadata] field. */
-        @JdbcTypeCode(SqlTypes.JSON)
-        @Column(columnDefinition = "jsonb")
-        @Type(JsonBinaryType::class)
-        var metadata: JsonNode? = null,
-
-        /** The file [studyId] field. */
-        @field:NotNull
-        var studyId: String = ""
-): Auditable()
+data class File(
+    /** The file [id] field. */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Int = 0,
+    /** The file [storageName] field. */
+    @field:NotNull
+    var storageName: String = "",
+    /** The file [originalName] field. */
+    @field:NotNull
+    var originalName: String = "",
+    /** The file [metadata] field. */
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    @Type(JsonBinaryType::class)
+    var metadata: JsonNode? = null,
+    /** The file [studyId] field. */
+    @field:NotNull
+    var studyId: String = "",
+) : Auditable()

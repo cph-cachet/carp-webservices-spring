@@ -8,13 +8,11 @@ import jakarta.validation.constraints.NotNull
  * The Data Class [UpdateDocumentRequestDto].
  * The [UpdateDocumentRequestDto] represents an document request with the given [name] and [data].
  */
-data class UpdateDocumentRequestDto
-(
-        /** The [name] of the document. */
-        @field:NotBlank
-        val name: String?,
-
-        /** The [data] object containing the document information. */
-        @field:NotNull
-        var data: JsonNode? = null
+data class UpdateDocumentRequestDto(
+    /** The [name] of the document. */
+    @field:NotBlank
+    val name: String?,
+    /** The [data] object containing the document information. */
+    @field:NotNull
+    var data: JsonNode? = null,
 )

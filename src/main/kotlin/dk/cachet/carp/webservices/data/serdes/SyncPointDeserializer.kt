@@ -13,41 +13,38 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.util.StringUtils
 
-class SyncPointDeserializer(private val validationMessages: MessageBase): JsonDeserializer<SyncPoint>() {
-
-    companion object
-    {
+class SyncPointDeserializer(private val validationMessages: MessageBase) : JsonDeserializer<SyncPoint>() {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
-    override fun deserialize(p: JsonParser?, ctxt: DeserializationContext?): SyncPoint
-    {
+    override fun deserialize(
+        p: JsonParser?,
+        ctxt: DeserializationContext?,
+    ): SyncPoint {
         val syncPoint: String
-        try
-        {
-            syncPoint =  p?.codec?.readTree<TreeNode>(p).toString()
+        try {
+            syncPoint = p?.codec?.readTree<TreeNode>(p).toString()
 
-            if (!StringUtils.hasLength(syncPoint))
-            {
+            if (!StringUtils.hasLength(syncPoint)) {
                 LOGGER.error("The dataStreamServiceRequest.syncPoint cannot be blank or empty.")
                 throw SerializationException(validationMessages.get("data.stream.syncPoint.deserialization.empty"))
             }
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The dataStreamServiceRequest.syncPoint request contains bad format. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("data.stream.syncPoint.deserialization.bad_format", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("data.stream.syncPoint.deserialization.bad_format", ex.message.toString()),
+            )
         }
 
         val parsed: SyncPoint
-        try
-        {
+        try {
             parsed = JSON.decodeFromString(syncPoint)
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The dataStreamServiceRequest.syncPoint deserializer is not valid. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("data.stream.syncPoint.deserialization.error", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("data.stream.syncPoint.deserialization.error", ex.message.toString()),
+            )
         }
 
         return parsed

@@ -12,14 +12,10 @@ import org.hibernate.type.SqlTypes
 @Entity(name = "data_stream_configurations")
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
 data class DataStreamConfiguration(
-
     @Id
     var studyDeploymentId: String? = "",
-
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     var config: JsonNode? = null,
-
-    var closed: Boolean = false
-
+    var closed: Boolean = false,
 )

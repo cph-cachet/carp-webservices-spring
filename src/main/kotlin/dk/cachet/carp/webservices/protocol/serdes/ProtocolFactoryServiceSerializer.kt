@@ -10,30 +10,29 @@ import dk.cachet.carp.webservices.common.exception.serialization.SerializationEx
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 
-class ProtocolFactoryServiceSerializer(private val validationMessages: MessageBase): JsonSerializer<ProtocolFactoryServiceRequest<*>>()
-{
-    companion object
-    {
+class ProtocolFactoryServiceSerializer(private val validationMessages: MessageBase) : JsonSerializer<ProtocolFactoryServiceRequest<*>>() {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
-    override fun serialize(value: ProtocolFactoryServiceRequest<*>?, jsonGenerator: JsonGenerator?, serializers: SerializerProvider?)
-    {
-        if (value == null)
-        {
+    override fun serialize(
+        value: ProtocolFactoryServiceRequest<*>?,
+        jsonGenerator: JsonGenerator?,
+        serializers: SerializerProvider?,
+    ) {
+        if (value == null) {
             LOGGER.error("The core ProtocolFactoryServiceRequest is null.")
             throw SerializationException(validationMessages.get("protocol.factory.serialization.empty"))
         }
 
         val serialized: String
-        try
-        {
+        try {
             serialized = JSON.encodeToString(ProtocolFactoryServiceRequest.Serializer, value)
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The core DeviceRegistration is not valid. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("protocol.factory.serialization.error", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("protocol.factory.serialization.error", ex.message.toString()),
+            )
         }
 
         jsonGenerator!!.writeRawValue(serialized)

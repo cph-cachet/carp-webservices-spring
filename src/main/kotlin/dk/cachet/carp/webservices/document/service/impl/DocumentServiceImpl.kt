@@ -35,16 +35,17 @@ class DocumentServiceImpl(
     private val documentTraverser: DocumentTraverser,
     private val validationMessages: MessageBase,
     private val authenticationService: AuthenticationService,
-    private val collectionService: CollectionService
-): DocumentService, ResourceExporter<Document>
-{
-    companion object
-    {
+    private val collectionService: CollectionService,
+) : DocumentService, ResourceExporter<Document> {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
-    override fun getAll(pageRequest: PageRequest, query: String?, studyId: String): List<Document>
-    {
+    override fun getAll(
+        pageRequest: PageRequest,
+        query: String?,
+        studyId: String,
+    ): List<Document> {
         try {
             val role = authenticationService.getRole()
             val id = authenticationService.getId()
@@ -55,14 +56,18 @@ class DocumentServiceImpl(
             val validatedQuery = query?.let { QueryUtil.validateQuery(it) }
 
             validatedQuery?.let {
-                val queryForRole = if (!isAccountResearcher) {
-                    // Return data relevant to this user only.
-                    "$validatedQuery;created_by==${id}"
-                } else validatedQuery
+                val queryForRole =
+                    if (!isAccountResearcher) {
+                        // Return data relevant to this user only.
+                        "$validatedQuery;created_by==$id"
+                    } else {
+                        validatedQuery
+                    }
 
-                val specification = RSQLParser()
-                    .parse(queryForRole)
-                    .accept(QueryVisitor<Document>())
+                val specification =
+                    RSQLParser()
+                        .parse(queryForRole)
+                        .accept(QueryVisitor<Document>())
 
                 return documentRepository.findAll(specification.and(belongsToStudySpec), pageRequest).content
             }
@@ -72,35 +77,37 @@ class DocumentServiceImpl(
             }
 
             return documentRepository.findAll(belongsToStudySpec.and(belongsToUserSpec), pageRequest).content
-        } catch (e :Exception) {
+        } catch (e: Exception) {
             LOGGER.error("Error occurred when invoking get all documents for study id: $studyId", e)
             throw e
         }
     }
 
-    override fun getAll(collectionIds: List<Int>): List<Document>
-    {
+    override fun getAll(collectionIds: List<Int>): List<Document> {
         return documentRepository.findAllByCollectionsIdsWithDocuments(collectionIds)
     }
 
-    override fun getByDocumentPath(studyId: String, request: HttpServletRequest): String?
-    {
+    override fun getByDocumentPath(
+        studyId: String,
+        request: HttpServletRequest,
+    ): String? {
         return documentTraverser.getAllFromDocumentPath(request, studyId, null)
     }
 
-    override fun createByDocumentPath(studyId: String, data: JsonNode?, request: HttpServletRequest): String?
-    {
+    override fun createByDocumentPath(
+        studyId: String,
+        data: JsonNode?,
+        request: HttpServletRequest,
+    ): String? {
         val saved = documentTraverser.createAllFromDocumentPath(request, studyId, data, null)
         LOGGER.info("Document saved, path: $saved")
         return saved
     }
 
-    override fun getOne(id: Int): Document
-    {
+    override fun getOne(id: Int): Document {
         try {
             val optionalDocument = documentRepository.findById(id)
-            if (!optionalDocument.isPresent)
-            {
+            if (!optionalDocument.isPresent) {
                 LOGGER.warn("Document is not found, id: $id")
                 throw ResourceNotFoundException(validationMessages.get("document.id.not_found", id))
             }
@@ -112,72 +119,79 @@ class DocumentServiceImpl(
     }
 
     // FIXME: saving document without validating its relationships? e.g. collection
+
     /**
      *  The function [create] creates a new document with the given [request] object.
      *  @param request The [request] containing the document object request.
      *  @return The saved [Document] object.
      */
-    override fun create(request: CreateDocumentRequestDto): Document
-    {
+    override fun create(request: CreateDocumentRequestDto): Document {
         val document = mapCreateDocumentRequestToDocument(request)
         val documentByName = documentRepository.findByNameAndCollectionId(request.name, document.collectionId!!)
         if (documentByName.isPresent) {
-            throw AlreadyExistsException(validationMessages.get("document.already_exists", request.collectionId!!, request.name))
+            throw AlreadyExistsException(
+                validationMessages.get("document.already_exists", request.collectionId!!, request.name),
+            )
         }
         val saved = documentRepository.save(document)
         LOGGER.info("Document saved, id: ${saved.id}")
         return saved
     }
 
-    override fun delete(id: Int)
-    {
+    override fun delete(id: Int) {
         val document = getOne(id)
         documentRepository.delete(document)
         LOGGER.info("Document deleted, id: $id")
     }
 
-    override fun update(id: Int, updateRequest: UpdateDocumentRequestDto): Document
-    {
+    override fun update(
+        id: Int,
+        updateRequest: UpdateDocumentRequestDto,
+    ): Document {
         val updated = documentRepository.update(id, updateRequest)
-        if (!updated.isPresent)
-        {
+        if (!updated.isPresent) {
             LOGGER.warn("Document is not found, id: $id")
             throw ResourceNotFoundException(validationMessages.get("document.id.not_found", id))
         }
         return updated.get()
     }
 
-    override fun append(id: Int, updateRequest: UpdateDocumentRequestDto): Document
-    {
+    override fun append(
+        id: Int,
+        updateRequest: UpdateDocumentRequestDto,
+    ): Document {
         val updated = documentRepository.appendDocument(id, updateRequest)
-        if (!updated.isPresent)
-        {
+        if (!updated.isPresent) {
             LOGGER.warn("Document is not found, id: $id")
             throw ResourceNotFoundException(validationMessages.get("document.id.not_found", id))
         }
         return updated.get()
     }
 
-    private fun mapCreateDocumentRequestToDocument(request: CreateDocumentRequestDto) = Document().apply {
-        name = request.name
-        collectionId = request.collectionId
-        collections = request.collections
-        data = request.data
-    }
+    private fun mapCreateDocumentRequestToDocument(request: CreateDocumentRequestDto) =
+        Document().apply {
+            name = request.name
+            collectionId = request.collectionId
+            collections = request.collections
+            data = request.data
+        }
 
     override val dataFileName = "documents.json"
 
     // We always want to export deployment-agnostic data, which is the case when the collection
     // does not have a deployment ID set.
-    override suspend fun exportDataOrThrow( studyId: UUID, deploymentIds: Set<UUID>, target: Path ) =
-        withContext( Dispatchers.IO )
-        {
-            val collections = collectionService.getAll(studyId.stringRepresentation)
+    override suspend fun exportDataOrThrow(
+        studyId: UUID,
+        deploymentIds: Set<UUID>,
+        target: Path,
+    ) = withContext(Dispatchers.IO) {
+        val collections =
+            collectionService.getAll(studyId.stringRepresentation)
                 .filter {
                     it.studyDeploymentId.isNullOrBlank() ||
-                    it.studyDeploymentId in deploymentIds.map { d -> d.stringRepresentation }
+                        it.studyDeploymentId in deploymentIds.map { d -> d.stringRepresentation }
                 }
 
-            getAll( collections.map { it.id } )
-        }
+        getAll(collections.map { it.id })
+    }
 }

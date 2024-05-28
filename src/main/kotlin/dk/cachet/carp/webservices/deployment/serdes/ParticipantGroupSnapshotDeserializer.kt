@@ -17,10 +17,10 @@ import org.springframework.util.StringUtils
  * The Class [ParticipantGroupSnapshotDeserializer].
  * [ParticipantGroupSnapshotDeserializer] implements the deserialization logic for [ParticipantGroupSnapshot].
  */
-class ParticipantGroupSnapshotDeserializer(private val validationMessages: MessageBase): JsonDeserializer<ParticipantGroupSnapshot>()
-{
-    companion object
-    {
+class ParticipantGroupSnapshotDeserializer(
+    private val validationMessages: MessageBase,
+) : JsonDeserializer<ParticipantGroupSnapshot>() {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
@@ -33,34 +33,41 @@ class ParticipantGroupSnapshotDeserializer(private val validationMessages: Messa
      * Also, if the [ParticipantGroupSnapshot] contains invalid format.
      * @return The deserialized study deployment snapshot object.
      */
-    override fun deserialize(p: JsonParser?, ctxt: DeserializationContext?): ParticipantGroupSnapshot
-    {
+    override fun deserialize(
+        p: JsonParser?,
+        ctxt: DeserializationContext?,
+    ): ParticipantGroupSnapshot {
         val participantGroupSnapshot: String
-        try
-        {
-            participantGroupSnapshot =  p?.codec?.readTree<TreeNode>(p).toString()
+        try {
+            participantGroupSnapshot = p?.codec?.readTree<TreeNode>(p).toString()
 
-            if (!StringUtils.hasLength(participantGroupSnapshot))
-            {
+            if (!StringUtils.hasLength(participantGroupSnapshot)) {
                 LOGGER.error("The core ParticipantGroupSnapshot cannot be blank or empty.")
-                throw SerializationException(validationMessages.get("deployment.participant_group_snapshot.deserialization.empty"))
+                throw SerializationException(
+                    validationMessages.get("deployment.participant_group_snapshot.deserialization.empty"),
+                )
             }
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The core ParticipantGroupSnapshot contains bad format. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("deployment.participant_group_snapshot.deserialization.bad_format", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get(
+                    "deployment.participant_group_snapshot.deserialization.bad_format",
+                    ex.message.toString(),
+                ),
+            )
         }
 
         val parsed: ParticipantGroupSnapshot
-        try
-        {
+        try {
             parsed = JSON.decodeFromString(participantGroupSnapshot)
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The core ParticipantGroupSnapshot is not valid. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("deployment.participant_group_snapshot.deserialization.error", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get(
+                    "deployment.participant_group_snapshot.deserialization.error",
+                    ex.message.toString(),
+                ),
+            )
         }
 
         return parsed

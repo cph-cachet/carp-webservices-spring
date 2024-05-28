@@ -8,10 +8,10 @@ import java.time.Instant
  *
  * TODO: why are we using Java Instant here?
  */
-data class ProtocolOverview (
+data class ProtocolOverview(
     val ownerName: String?,
     val firstVersionCreatedDate: Instant?,
     val lastVersionCreatedDate: Instant?,
     val versionTag: String,
-    val snapshot: StudyProtocolSnapshot
+    val snapshot: StudyProtocolSnapshot,
 )

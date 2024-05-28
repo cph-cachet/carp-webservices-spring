@@ -12,21 +12,18 @@ import org.jetbrains.annotations.Nullable
  * The [CreateDataPointRequestDto] represents a data point request to a user with the given [carpHeader], [carpBody], and [storageName].
  */
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
-data class CreateDataPointRequestDto
-(
+data class CreateDataPointRequestDto(
     /** The [carpHeader] of the request. */
-        @field:Valid
-        @field:NotNull
-        @SerializedName("carp_header")
-        var carpHeader: DataPointHeaderDto? = null,
-
+    @field:Valid
+    @field:NotNull
+    @SerializedName("carp_header")
+    var carpHeader: DataPointHeaderDto? = null,
     /** The [carpBody] of the request. */
-        @field:NotNull
-        @SerializedName("carp_body")
-        var carpBody: HashMap<*, *>? = null,
-
+    @field:NotNull
+    @SerializedName("carp_body")
+    var carpBody: HashMap<*, *>? = null,
     /** The [storageName] of the request. */
-        @field:Nullable
-        @SerializedName("storage_name")
-        var storageName: String? = null
+    @field:Nullable
+    @SerializedName("storage_name")
+    var storageName: String? = null,
 )

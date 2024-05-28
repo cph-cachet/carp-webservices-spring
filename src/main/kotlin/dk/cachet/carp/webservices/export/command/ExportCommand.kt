@@ -26,9 +26,8 @@ import java.time.temporal.ChronoUnit
  */
 abstract class ExportCommand(
     open val entry: Export,
-    open val logger: ExportLog = ExportLog()
-)
-{
+    open val logger: ExportLog = ExportLog(),
+) {
     abstract fun canExecute(): Boolean
 
     abstract suspend fun execute()
@@ -40,54 +39,61 @@ class ExportCommandFactory(
     private val accountService: AccountService,
     private val resourceExporter: ResourceExporterService,
     private val fileUtil: FileUtil,
-)
-{
-    companion object
-    {
+) {
+    companion object {
         const val INT_BUFFER_SIZE = 4
     }
 
-    suspend fun createExportSummary( studyId: UUID, deploymentIds: Set<UUID>? ) : ExportCommand
-    {
+    suspend fun createExportSummary(
+        studyId: UUID,
+        deploymentIds: Set<UUID>?,
+    ): ExportCommand {
         // This hash will prohibit the creation of new exports for the same study and deployments within the same hour.
         // TODO: better rate limiting
-        val id = createHash(
-            studyId.stringRepresentation,
-            deploymentIds?.joinToString( separator = "" ) ?: "",
-            Clock.System.now().toJavaInstant().truncatedTo( ChronoUnit.HOURS ).toString()
-        )
+        val id =
+            createHash(
+                studyId.stringRepresentation,
+                deploymentIds?.joinToString(separator = "") ?: "",
+                Clock.System.now().toJavaInstant().truncatedTo(ChronoUnit.HOURS).toString(),
+            )
 
         val exportType =
-            if ( deploymentIds.isNullOrEmpty() )
+            if (deploymentIds.isNullOrEmpty()) {
                 ExportType.STUDY_DATA
-            else
+            } else {
                 ExportType.PARTICIPANT_GROUP_DATA
+            }
 
-        val entry = Export(
-            id = id.toString(),
-            fileName = getDefaultFileName( studyId, exportType, "zip" ),
-            studyId = studyId.toString(),
-            status = ExportStatus.IN_PROGRESS,
-            type = exportType,
-        )
+        val entry =
+            Export(
+                id = id.toString(),
+                fileName = getDefaultFileName(studyId, exportType, "zip"),
+                studyId = studyId.toString(),
+                status = ExportStatus.IN_PROGRESS,
+                type = exportType,
+            )
 
-        return ExportSummary( entry, deploymentIds, resourceExporter, fileUtil )
+        return ExportSummary(entry, deploymentIds, resourceExporter, fileUtil)
     }
 
-    suspend fun createExportAnonymousParticipants( studyId: UUID, payload: AnonymousParticipantRequest ) : ExportCommand
-    {
-        val id = createHash(
-            studyId.stringRepresentation,
-            Clock.System.now().toJavaInstant().truncatedTo( ChronoUnit.SECONDS ).toString()
-        )
+    suspend fun createExportAnonymousParticipants(
+        studyId: UUID,
+        payload: AnonymousParticipantRequest,
+    ): ExportCommand {
+        val id =
+            createHash(
+                studyId.stringRepresentation,
+                Clock.System.now().toJavaInstant().truncatedTo(ChronoUnit.SECONDS).toString(),
+            )
 
-        val entry = Export(
-            id = id.toString(),
-            fileName = getDefaultFileName( studyId, ExportType.ANONYMOUS_PARTICIPANTS, "csv" ),
-            studyId = studyId.toString(),
-            status = ExportStatus.IN_PROGRESS,
-            type = ExportType.ANONYMOUS_PARTICIPANTS,
-        )
+        val entry =
+            Export(
+                id = id.toString(),
+                fileName = getDefaultFileName(studyId, ExportType.ANONYMOUS_PARTICIPANTS, "csv"),
+                studyId = studyId.toString(),
+                status = ExportStatus.IN_PROGRESS,
+                type = ExportType.ANONYMOUS_PARTICIPANTS,
+            )
 
         return ExportAnonymousParticipants(
             entry,
@@ -95,30 +101,30 @@ class ExportCommandFactory(
             services,
             accountService,
             resourceExporter,
-            fileUtil
+            fileUtil,
         )
     }
 
-    private suspend fun getDefaultFileName( studyId: UUID, type: ExportType, extension: String ): String
-    {
-        val studyName = services.studyService.getStudyDetails( studyId ).name.toSlug()
+    private suspend fun getDefaultFileName(
+        studyId: UUID,
+        type: ExportType,
+        extension: String,
+    ): String {
+        val studyName = services.studyService.getStudyDetails(studyId).name.toSlug()
 
-        val formatter = DateTimeFormatter.ofPattern( "yyyy-MM-dd_HH-mm-ss" )
-        val now = LocalDateTime.now().format( formatter )
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")
+        val now = LocalDateTime.now().format(formatter)
 
-        return "${now}_${type.toString().toSlug()}_${studyName}.${extension}"
+        return "${now}_${type.toString().toSlug()}_$studyName.$extension"
     }
 
     /**
      * Create a hash based on the given components. The hash is used to uniquely identify an export.
      */
-    private fun createHash( vararg components: String ): UUID
-    {
-        val hashCode = components.joinToString( separator = "" ).hashCode()
-        val hashBytes = ByteBuffer.allocate( INT_BUFFER_SIZE ).putInt( hashCode ).array()
+    private fun createHash(vararg components: String): UUID {
+        val hashCode = components.joinToString(separator = "").hashCode()
+        val hashBytes = ByteBuffer.allocate(INT_BUFFER_SIZE).putInt(hashCode).array()
 
-        return UUID( java.util.UUID.nameUUIDFromBytes( hashBytes ).toString() )
+        return UUID(java.util.UUID.nameUUIDFromBytes(hashBytes).toString())
     }
 }
-
-

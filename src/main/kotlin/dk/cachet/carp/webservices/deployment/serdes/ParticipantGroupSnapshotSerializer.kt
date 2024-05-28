@@ -15,10 +15,10 @@ import org.apache.logging.log4j.Logger
  * The Class [ParticipantGroupSnapshotSerializer].
  * The [ParticipantGroupSnapshotSerializer] implements the serialization logic for [ParticipantGroupSnapshot].
  */
-class ParticipantGroupSnapshotSerializer(private val validationMessages: MessageBase): JsonSerializer<ParticipantGroupSnapshot>()
-{
-    companion object
-    {
+class ParticipantGroupSnapshotSerializer(
+    private val validationMessages: MessageBase,
+) : JsonSerializer<ParticipantGroupSnapshot>() {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
@@ -32,23 +32,29 @@ class ParticipantGroupSnapshotSerializer(private val validationMessages: Message
      * Also, if the [ParticipantGroupSnapshot] contains invalid format.
      * @return The serialization of deployment service request object.
      */
-    override fun serialize(value: ParticipantGroupSnapshot?, gen: JsonGenerator?, serializers: SerializerProvider?)
-    {
-        if (value ==  null)
-        {
+    override fun serialize(
+        value: ParticipantGroupSnapshot?,
+        gen: JsonGenerator?,
+        serializers: SerializerProvider?,
+    ) {
+        if (value == null) {
             LOGGER.error("The core ParticipantGroupSnapshot is null.")
-            throw SerializationException(validationMessages.get("deployment.participant_group_snapshot.serialization.empty"))
+            throw SerializationException(
+                validationMessages.get("deployment.participant_group_snapshot.serialization.empty"),
+            )
         }
 
         val serialized: String
-        try
-        {
+        try {
             serialized = JSON.encodeToString(value)
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The core ParticipantGroupSnapshot is not valid. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("deployment.participant_group_snapshot.serialization.error", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get(
+                    "deployment.participant_group_snapshot.serialization.error",
+                    ex.message.toString(),
+                ),
+            )
         }
 
         gen!!.writeRawValue(serialized)

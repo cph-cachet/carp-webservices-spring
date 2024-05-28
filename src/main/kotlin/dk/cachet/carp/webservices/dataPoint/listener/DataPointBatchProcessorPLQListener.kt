@@ -15,10 +15,8 @@ import org.springframework.stereotype.Component
  * and sends notification.
  */
 @Component
-class DataPointBatchProcessorPLQListener
-{
-    companion object
-    {
+class DataPointBatchProcessorPLQListener {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
@@ -26,12 +24,11 @@ class DataPointBatchProcessorPLQListener
     lateinit var notificationService: INotificationService
 
     @RabbitListener(queues = ["\${rabbit.data-point.processing.plq}"])
-    fun receive(failedMessage: Message)
-    {
+    fun receive(failedMessage: Message) {
         LOGGER.info("New Data Point message has arrived in the Parking Lot.")
         notificationService.sendAlertOrGeneralNotification(
-                "New Data Point message has arrived in the DataPoint Parking Lot.",
-                TeamsChannel.SERVER_ERRORS
+            "New Data Point message has arrived in the DataPoint Parking Lot.",
+            TeamsChannel.SERVER_ERRORS,
         )
     }
 }

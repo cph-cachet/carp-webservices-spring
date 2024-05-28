@@ -23,7 +23,6 @@ import org.springframework.util.StreamUtils
 import org.springframework.util.StringUtils
 import java.nio.charset.Charset
 
-
 // https://stackoverflow.com/q/59898874/13179591
 // https://stackoverflow.com/a/73622024/13179591
 @Configuration
@@ -32,8 +31,8 @@ class OpenApi30Config(
     @Value("\${spring.application.version}") private val apiVersion: String,
     @Value("classpath:openapi/description.txt") private val docResource: Resource,
     private val objectMapper: ObjectMapper,
-    private val environmentUtil: EnvironmentUtil
-    ) {
+    private val environmentUtil: EnvironmentUtil,
+) {
     companion object {
         const val SCHEME = "bearer"
         const val FORMAT = "JWT"
@@ -57,14 +56,14 @@ class OpenApi30Config(
                             .type(SecurityScheme.Type.HTTP)
                             .scheme(SCHEME)
                             .description(BEARER_DESCRIPTION)
-                            .bearerFormat(FORMAT)
-                    )
+                            .bearerFormat(FORMAT),
+                    ),
             )
             .info(
                 Info()
                     .title(apiTitle)
                     .version(apiVersion)
-                    .description(getResourceContent(docResource))
+                    .description(getResourceContent(docResource)),
             )
     }
 

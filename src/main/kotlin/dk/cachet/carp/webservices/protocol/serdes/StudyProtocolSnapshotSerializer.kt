@@ -15,13 +15,12 @@ import org.apache.logging.log4j.Logger
  * The Class [StudyProtocolSnapshotSerializer].
  * The [StudyProtocolSnapshotSerializer] implements the serialization logic for [StudyProtocolSnapshot].
  */
-class StudyProtocolSnapshotSerializer(private val validationMessages: MessageBase): JsonSerializer<StudyProtocolSnapshot>()
-{
-    companion object
-    {
+class StudyProtocolSnapshotSerializer(
+    private val validationMessages: MessageBase,
+) : JsonSerializer<StudyProtocolSnapshot>() {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
-
 
     /**
      * The [serialize] function is used to serialize the parsed object.
@@ -31,24 +30,24 @@ class StudyProtocolSnapshotSerializer(private val validationMessages: MessageBas
      * Also, if the [StudyProtocolSnapshot] contains invalid format.
      * @return The serialization [StudyProtocolSnapshot] object.
      */
-    override fun serialize(studyProtocolSnapshot: StudyProtocolSnapshot?,
-                           jsonGeneator: JsonGenerator?, serializers: SerializerProvider?)
-    {
-        if (studyProtocolSnapshot == null)
-        {
+    override fun serialize(
+        studyProtocolSnapshot: StudyProtocolSnapshot?,
+        jsonGeneator: JsonGenerator?,
+        serializers: SerializerProvider?,
+    ) {
+        if (studyProtocolSnapshot == null) {
             LOGGER.error("The core StudyProtocolSnapshot is null.")
             throw SerializationException(validationMessages.get("protocol.snapshot.serialization.empty"))
         }
 
         val serialized: String
-        try
-        {
+        try {
             serialized = JSON.encodeToString(studyProtocolSnapshot)
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The core StudyProtocolSnapshot is not valid. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("protocol.snapshot.serialization.error", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("protocol.snapshot.serialization.error", ex.message.toString()),
+            )
         }
 
         jsonGeneator!!.writeRawValue(serialized)

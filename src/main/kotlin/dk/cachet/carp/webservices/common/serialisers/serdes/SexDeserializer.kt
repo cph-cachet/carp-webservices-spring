@@ -13,10 +13,8 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.util.StringUtils
 
-class SexDeserializer(private val validationMessages: MessageBase): JsonDeserializer<Sex>()
-{
-    companion object
-    {
+class SexDeserializer(private val validationMessages: MessageBase) : JsonDeserializer<Sex>() {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
@@ -29,32 +27,29 @@ class SexDeserializer(private val validationMessages: MessageBase): JsonDeserial
      * Also, if the [Sex] contains invalid format.
      * @return The deserialized account object.
      */
-    override fun deserialize(jsonParser: JsonParser?, deserializationContext: DeserializationContext?): Sex
-    {
+    override fun deserialize(
+        jsonParser: JsonParser?,
+        deserializationContext: DeserializationContext?,
+    ): Sex {
         val sex: String
-        try
-        {
+        try {
             sex = jsonParser?.codec?.readTree<TreeNode>(jsonParser).toString()
 
-            if (!StringUtils.hasLength(sex))
-            {
+            if (!StringUtils.hasLength(sex)) {
                 LOGGER.error("The core Sex cannot be blank or empty!")
                 throw SerializationException(validationMessages.get("deserialization.sex.empty"))
             }
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The core Sex contains bad format. Exception: $ex")
-            throw SerializationException(validationMessages.get("deserialization.sex.bad_format", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("deserialization.sex.bad_format", ex.message.toString()),
+            )
         }
 
         val parsed: Sex
-        try
-        {
-            parsed = JSON.decodeFromString(PolymorphicEnumSerializer( Sex.serializer() ), sex)
-        }
-        catch (ex: Exception)
-        {
+        try {
+            parsed = JSON.decodeFromString(PolymorphicEnumSerializer(Sex.serializer()), sex)
+        } catch (ex: Exception) {
             LOGGER.error("The core Sex is not valid. Exception: $ex")
             throw SerializationException(validationMessages.get("deserialization.sex.error", ex.message.toString()))
         }

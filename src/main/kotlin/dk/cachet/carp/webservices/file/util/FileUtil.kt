@@ -26,12 +26,10 @@ import kotlin.io.path.walk
  */
 @Component
 class FileUtil(
-        private val filePermission: FilePermissionUtil,
-        environment: Environment
-)
-{
-    companion object
-    {
+    private val filePermission: FilePermissionUtil,
+    environment: Environment,
+) {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
@@ -45,10 +43,9 @@ class FileUtil(
      * @param fileName The [fileName] to resolve.
      * @return The resolved path storage.
      */
-    fun resolveFileStorage(fileName: String): Path
-    {
+    fun resolveFileStorage(fileName: String): Path {
         val rootFolder: Path? = Paths.get(filePath.toString()).toAbsolutePath().normalize()
-        return storageDirectory.resolve(removeRootPrefix(rootFolder.toString())+"/"+fileName)
+        return storageDirectory.resolve(removeRootPrefix(rootFolder.toString()) + "/" + fileName)
     }
 
     /**
@@ -58,11 +55,9 @@ class FileUtil(
      * @throws [FileStorageException] The FileStorageException when the directory is not a directory and cannot be created.
      * @return [Boolean] `true` if the directory exists, `false` otherwise.
      */
-    fun isDirectoryOrElseCreate(storagePath: Path?): Path
-    {
+    fun isDirectoryOrElseCreate(storagePath: Path?): Path {
         val path: Path = Paths.get(removeRootPrefix(storagePath.toString()))
-        if (!exists(path))
-        {
+        if (!exists(path)) {
             createDirectories(path) ?: throw FileStorageException("Directories cannot be created.")
         }
         return path
@@ -74,15 +69,12 @@ class FileUtil(
      * @param directory The [directory] to set the permissions.
      * @return [Boolean] `true` if the directory permissions are set, otherwise `false`.
      */
-    fun setStoragePermission(directory: Path?): Boolean
-    {
+    fun setStoragePermission(directory: Path?): Boolean {
         val retrieveDirectoryPermissions = directory?.let { filePermission.getPermissions(it) }
-        if (!retrieveDirectoryPermissions.equals("rwxr-xr-x") )
-        {
+        if (!retrieveDirectoryPermissions.equals("rwxr-xr-x")) {
             directory?.toFile()?.let { filePermission.setPermissions(it, "rwxrwxrwx", true) }
         }
-        if (retrieveDirectoryPermissions.equals("rwxr-xr-x"))
-        {
+        if (retrieveDirectoryPermissions.equals("rwxr-xr-x")) {
             LOGGER.info("Directory $directory permissions are set to TRUE")
             return true
         }
@@ -96,8 +88,7 @@ class FileUtil(
      * @param [path] The [path] to validate.
      * @return [Boolean] `true` if the directory is a directory, `false` otherwise.
      */
-    fun isDirectory(path: Path?): Boolean
-    {
+    fun isDirectory(path: Path?): Boolean {
         return Files.isDirectory(path)
     }
 
@@ -107,8 +98,7 @@ class FileUtil(
      * @param [path] The path to validate.
      * @return [Boolean] `true` if the directory exists, `false` otherwise.
      */
-    fun exists(path: Path?): Boolean
-    {
+    fun exists(path: Path?): Boolean {
         return Files.exists(path)
     }
 
@@ -118,8 +108,7 @@ class FileUtil(
      * @param path The [path] to validate.
      * @return [Boolean] `true` if the directory is writable, `false` otherwise.
      */
-    fun isWritable(path: Path?): Boolean
-    {
+    fun isWritable(path: Path?): Boolean {
         return Files.isWritable(path)
     }
 
@@ -129,10 +118,8 @@ class FileUtil(
      * @param storagePath The [storagePath] to convert.
      * @return The [storagePath] of the directory.
      */
-    private fun convertStoragePath(storagePath: String): String
-    {
-        if (getRunningOS() == OS.WINDOWS)
-        {
+    private fun convertStoragePath(storagePath: String): String {
+        if (getRunningOS() == OS.WINDOWS) {
             return storagePath.replace("/", "\\")
         }
         return storagePath
@@ -145,8 +132,7 @@ class FileUtil(
      * The [getRunningOS] function returns the operating system information.
      * @return [String] The operating system information.
      */
-    fun getRunningOS(): OS
-    {
+    fun getRunningOS(): OS {
         val os = System.getProperty("os.name")
         return when {
             os.startsWith("WIN") -> {
@@ -167,15 +153,12 @@ class FileUtil(
      *
      * @param [filePath] [Path] of the file.
      */
-    fun deleteFile(filePath: Path)
-    {
-        if (!filePath.toFile().exists())
-        {
+    fun deleteFile(filePath: Path) {
+        if (!filePath.toFile().exists()) {
             LOGGER.info("Request file system resource to delete does not exist! File delete operation aborted.")
             return
         }
-        if (!filePath.toFile().isFile)
-        {
+        if (!filePath.toFile().isFile) {
             LOGGER.info("Request file system resource to delete is not a file! File delete operation aborted.")
             return
         }
@@ -185,34 +168,32 @@ class FileUtil(
     }
 
     @OptIn(ExperimentalPathApi::class)
-    fun zipDirectory( dirPath: Path, zipPath: Path )
-    {
-        ZipOutputStream( newOutputStream( zipPath ) ).use { zipStream ->
+    fun zipDirectory(
+        dirPath: Path,
+        zipPath: Path,
+    ) {
+        ZipOutputStream(newOutputStream(zipPath)).use { zipStream ->
             dirPath.walk().forEach { path ->
-                val zipEntry = ZipEntry( dirPath.relativize( path ).toString() )
-                try
-                {
-                    zipStream.putNextEntry( zipEntry )
-                    copy( path, zipStream )
+                val zipEntry = ZipEntry(dirPath.relativize(path).toString())
+                try {
+                    zipStream.putNextEntry(zipEntry)
+                    copy(path, zipStream)
                     zipStream.closeEntry()
-                }
-                catch ( e: IOException )
-                {
-                   LOGGER.error( "An error occurred while zipping the file ${path.fileName}: ${e.message}" )
+                } catch (e: IOException) {
+                    LOGGER.error("An error occurred while zipping the file ${path.fileName}: ${e.message}")
                 }
             }
         }
 
-        LOGGER.info( "Directory ${dirPath.fileName} is zipped and is available as ${zipPath}." )
+        LOGGER.info("Directory ${dirPath.fileName} is zipped and is available as $zipPath.")
     }
 
     /**
      * The [removeRootPrefix] function is used to remove the root prefix.
      * @return The current file path.
      */
-    fun removeRootPrefix(absolutePath: String?): String
-    {
-        val path = absolutePath.toString().replace("/root","")
+    fun removeRootPrefix(absolutePath: String?): String {
+        val path = absolutePath.toString().replace("/root", "")
         LOGGER.info("The absolute path: $path")
         return path
     }

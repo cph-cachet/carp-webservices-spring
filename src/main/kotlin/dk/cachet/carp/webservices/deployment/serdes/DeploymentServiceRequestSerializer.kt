@@ -14,10 +14,10 @@ import org.apache.logging.log4j.Logger
  * The Class [DeploymentServiceRequestSerializer].
  * The [DeploymentServiceRequestSerializer] implements the serialization logic for [DeploymentServiceRequest].
  */
-class DeploymentServiceRequestSerializer(private val validationMessages: MessageBase): JsonSerializer<DeploymentServiceRequest<*>>()
-{
-    companion object
-    {
+class DeploymentServiceRequestSerializer(
+    private val validationMessages: MessageBase,
+) : JsonSerializer<DeploymentServiceRequest<*>>() {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
@@ -31,23 +31,24 @@ class DeploymentServiceRequestSerializer(private val validationMessages: Message
      * Also, if the [DeploymentServiceRequest] contains invalid format.
      * @return The serialization of deployment service request object.
      */
-    override fun serialize(deploymentServiceRequest: DeploymentServiceRequest<*>?, jsonGenerator: JsonGenerator?, serializers: SerializerProvider?)
-    {
-        if (deploymentServiceRequest == null)
-        {
+    override fun serialize(
+        deploymentServiceRequest: DeploymentServiceRequest<*>?,
+        jsonGenerator: JsonGenerator?,
+        serializers: SerializerProvider?,
+    ) {
+        if (deploymentServiceRequest == null) {
             LOGGER.error("The DeploymentServiceRequest value is null.")
             throw SerializationException(validationMessages.get("deployment.serialization.empty"))
         }
 
         val serialized: String
-        try
-        {
+        try {
             serialized = JSON.encodeToString(DeploymentServiceRequest.Serializer, deploymentServiceRequest)
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The DeploymentServiceRequest is not valid. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("deployment.serialization.error", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("deployment.serialization.error", ex.message.toString()),
+            )
         }
 
         jsonGenerator!!.writeRawValue(serialized)

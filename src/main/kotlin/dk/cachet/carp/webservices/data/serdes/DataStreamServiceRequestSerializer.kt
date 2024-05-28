@@ -10,15 +10,14 @@ import dk.cachet.carp.webservices.common.exception.serialization.SerializationEx
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 
-
 /**
  * The Class [DataStreamServiceRequestSerializer].
  * The [DataStreamServiceRequestSerializer] implements the deserialization logic for [DataStreamServiceRequest].
  */
-class DataStreamServiceRequestSerializer(private val validationMessages: MessageBase): JsonSerializer<DataStreamServiceRequest<*>>() {
-
-    companion object
-    {
+class DataStreamServiceRequestSerializer(
+    private val validationMessages: MessageBase,
+) : JsonSerializer<DataStreamServiceRequest<*>>() {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
@@ -32,25 +31,26 @@ class DataStreamServiceRequestSerializer(private val validationMessages: Message
      * Also, if the [DataStreamServiceRequest] contains invalid format.
      * @return The serialization of deployment service request object.
      */
-    override fun serialize(dataStreamServiceRequest: DataStreamServiceRequest<*>?, jsonGenerator: JsonGenerator?, serializers: SerializerProvider?) {
-        if (dataStreamServiceRequest == null)
-        {
+    override fun serialize(
+        dataStreamServiceRequest: DataStreamServiceRequest<*>?,
+        jsonGenerator: JsonGenerator?,
+        serializers: SerializerProvider?,
+    ) {
+        if (dataStreamServiceRequest == null) {
             LOGGER.error("The dataStreamServiceRequest value is null.")
             throw SerializationException(validationMessages.get("dataStream.serialization.empty"))
         }
 
         val serialized: String
-        try
-        {
+        try {
             serialized = JSON.encodeToString(DataStreamServiceRequest.Serializer, dataStreamServiceRequest)
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The DataStreamServiceRequest serializer is not valid. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("dataStreamServiceRequest.serialization.error", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("dataStreamServiceRequest.serialization.error", ex.message.toString()),
+            )
         }
 
         jsonGenerator!!.writeRawValue(serialized)
     }
-
 }

@@ -13,15 +13,17 @@ import java.nio.file.Path
 class ParticipationServiceWrapper(
     private val repository: ParticipationRepository,
     services: CoreServiceContainer,
-): ParticipationService, ResourceExporter<ParticipantData>
-{
+) : ParticipationService, ResourceExporter<ParticipantData> {
     final override val core = services.participationService
 
     final override val dataFileName = "participant-data.json"
 
-    override suspend fun exportDataOrThrow( studyId: UUID, deploymentIds: Set<UUID>, target: Path ) =
-        deploymentIds.map {
-            val group = repository.getParticipantGroupOrThrowBy( it )
-            ParticipantData( group.studyDeploymentId, group.commonData, group.roleData )
-        }
+    override suspend fun exportDataOrThrow(
+        studyId: UUID,
+        deploymentIds: Set<UUID>,
+        target: Path,
+    ) = deploymentIds.map {
+        val group = repository.getParticipantGroupOrThrowBy(it)
+        ParticipantData(group.studyDeploymentId, group.commonData, group.roleData)
+    }
 }

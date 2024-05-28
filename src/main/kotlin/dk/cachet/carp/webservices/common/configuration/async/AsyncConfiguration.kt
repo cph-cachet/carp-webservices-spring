@@ -20,10 +20,8 @@ import java.util.concurrent.ThreadPoolExecutor
 @Configuration
 @EnableAsync
 @EnableScheduling
-class AsyncConfiguration: AsyncConfigurer
-{
-    companion object
-    {
+class AsyncConfiguration : AsyncConfigurer {
+    companion object {
         private const val MAX_POOL_SIZE = 4
         private const val QUEUE_CAPACITY = 100
     }
@@ -33,8 +31,7 @@ class AsyncConfiguration: AsyncConfigurer
      * @return The [ThreadPoolTaskExecutor] initialized.
      */
     @Bean(value = ["asyncExecutor"])
-    override fun getAsyncExecutor(): Executor
-    {
+    override fun getAsyncExecutor(): Executor {
         val threadPoolTaskExecutor = ThreadPoolTaskExecutor()
         val cores = Runtime.getRuntime().availableProcessors()
 
@@ -64,8 +61,7 @@ class AsyncConfiguration: AsyncConfigurer
      * The function [getAsyncUncaughtExceptionHandler] retrieves the uncaught exceptions thrown from asynchronous methods.
      * @return The [AsyncExceptionHandler].
      */
-    override fun getAsyncUncaughtExceptionHandler(): AsyncUncaughtExceptionHandler
-    {
+    override fun getAsyncUncaughtExceptionHandler(): AsyncUncaughtExceptionHandler {
         return AsyncExceptionHandler()
     }
 
@@ -74,8 +70,7 @@ class AsyncConfiguration: AsyncConfigurer
      * @returns The [ConcurrentTaskScheduler] created.
      */
     @Bean
-    fun taskScheduler(): TaskScheduler
-    {
+    fun taskScheduler(): TaskScheduler {
         return ConcurrentTaskScheduler()
     }
 }

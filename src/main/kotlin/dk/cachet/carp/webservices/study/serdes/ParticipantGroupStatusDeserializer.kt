@@ -17,10 +17,10 @@ import org.springframework.util.StringUtils
  * The Class [ParticipantGroupStatusDeserializer].
  * The [ParticipantGroupStatusDeserializer] implements the deserialization logic for [ParticipantGroupStatus].
  */
-class ParticipantGroupStatusDeserializer(private val validationMessages: MessageBase): JsonDeserializer<ParticipantGroupStatus>()
-{
-    companion object
-    {
+class ParticipantGroupStatusDeserializer(
+    private val validationMessages: MessageBase,
+) : JsonDeserializer<ParticipantGroupStatus>() {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
@@ -32,34 +32,38 @@ class ParticipantGroupStatusDeserializer(private val validationMessages: Message
      * Also, if the [ParticipantGroupStatus] contains invalid format.
      * @return The deserialized [ParticipantGroupStatus] object.
      */
-    override fun deserialize(jsonParser: JsonParser?, context: DeserializationContext?): ParticipantGroupStatus
-    {
+    override fun deserialize(
+        jsonParser: JsonParser?,
+        context: DeserializationContext?,
+    ): ParticipantGroupStatus {
         val participantGroupStatus: String
-        try
-        {
-            participantGroupStatus =  jsonParser?.codec?.readTree<TreeNode>(jsonParser).toString()
+        try {
+            participantGroupStatus = jsonParser?.codec?.readTree<TreeNode>(jsonParser).toString()
 
-            if (!StringUtils.hasLength(participantGroupStatus))
-            {
+            if (!StringUtils.hasLength(participantGroupStatus)) {
                 LOGGER.error("The ParticipantGroupStatus cannot be blank or empty.")
-                throw SerializationException(validationMessages.get("study.participant.group.status.deserialization.empty"))
+                throw SerializationException(
+                    validationMessages.get("study.participant.group.status.deserialization.empty"),
+                )
             }
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The core ParticipantGroupStatus request contains bad format. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("study.participant.group.status.deserialization.bad_format", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get(
+                    "study.participant.group.status.deserialization.bad_format",
+                    ex.message.toString(),
+                ),
+            )
         }
 
         val parsed: ParticipantGroupStatus
-        try
-        {
+        try {
             parsed = JSON.decodeFromString(participantGroupStatus)
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The core ParticipantGroupStatus serializer is not valid. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("study.participant.group.status.deserialization.error", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("study.participant.group.status.deserialization.error", ex.message.toString()),
+            )
         }
 
         return parsed

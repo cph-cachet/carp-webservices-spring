@@ -14,78 +14,69 @@ import kotlin.reflect.full.primaryConstructor
  * - User Attribute: "someName"
  * - Token Claim: "some_name"
  */
-sealed class Claim
-{
+sealed class Claim {
     abstract val value: Any
 
-    companion object Factory
-    {
-        fun fromUserAttribute( pair: Pair<String, Any> ): List<Claim>?
-        {
-            val claimKlass = Claim::class.sealedSubclasses.firstOrNull { userAttributeName( it ) == pair.first }
+    companion object Factory {
+        fun fromUserAttribute(pair: Pair<String, Any>): List<Claim>? {
+            val claimKlass = Claim::class.sealedSubclasses.firstOrNull { userAttributeName(it) == pair.first }
 
-            if ( claimKlass == null ) return null
+            if (claimKlass == null) return null
 
-            return (pair.second as? List<*>)?.mapNotNull { instantiate( claimKlass, it.toString() ) }
+            return (pair.second as? List<*>)?.mapNotNull { instantiate(claimKlass, it.toString()) }
         }
 
         // Each authority is mapped to "token_claim_{}" where {} is the value of the claim (ID).
         // you can see how the mapping takes place in the spring boot application properties file
-        fun fromGrantedAuthority( authority: String ): Claim?
-        {
-            val claimName = authority.substringBeforeLast( '_' )
-            val value = authority.substringAfterLast( '_' )
+        fun fromGrantedAuthority(authority: String): Claim? {
+            val claimName = authority.substringBeforeLast('_')
+            val value = authority.substringAfterLast('_')
 
-            val claimKlass = Claim::class.sealedSubclasses.firstOrNull { tokenClaimName( it ) == claimName }
+            val claimKlass = Claim::class.sealedSubclasses.firstOrNull { tokenClaimName(it) == claimName }
 
-            if ( claimKlass == null ) return null
+            if (claimKlass == null) return null
 
-            return instantiate( claimKlass, value )
+            return instantiate(claimKlass, value)
         }
 
-        private fun instantiate( klass: KClass<out Claim>, valueAsString: String ): Claim?
-        {
+        private fun instantiate(
+            klass: KClass<out Claim>,
+            valueAsString: String,
+        ): Claim? {
             // Try to parse the value as an integer or UUID.
-            val value = valueAsString.toIntOrNull() ?: runCatching { UUID( valueAsString ) }.getOrNull()
+            val value = valueAsString.toIntOrNull() ?: runCatching { UUID(valueAsString) }.getOrNull()
 
-            if ( value == null ) return null
+            if (value == null) return null
 
-            return runCatching {  klass.primaryConstructor?.call( value ) }.getOrNull()
+            return runCatching { klass.primaryConstructor?.call(value) }.getOrNull()
         }
 
+        fun tokenClaimName(klass: KClass<*>) = klass.simpleName!!.toSnakeCase()
 
-        fun tokenClaimName( klass: KClass<*> ) = klass.simpleName!!.toSnakeCase()
-        fun userAttributeName( klass: KClass<*> ) = klass.simpleName!!.replaceFirstChar { it.lowercase() }
+        fun userAttributeName(klass: KClass<*>) = klass.simpleName!!.replaceFirstChar { it.lowercase() }
     }
 
-
-    data class ManageStudy( val studyId: UUID ) : Claim()
-    {
+    data class ManageStudy(val studyId: UUID) : Claim() {
         override val value = studyId.toString()
     }
 
-    data class ProtocolOwner( val protocolId: UUID ) : Claim()
-    {
+    data class ProtocolOwner(val protocolId: UUID) : Claim() {
         override val value = protocolId.toString()
     }
 
-    data class InDeployment( val deploymentId: UUID ) : Claim()
-    {
+    data class InDeployment(val deploymentId: UUID) : Claim() {
         override val value = deploymentId.toString()
     }
 
-    data class ConsentOwner( val consentId: Int ) : Claim()
-    {
+    data class ConsentOwner(val consentId: Int) : Claim() {
         override val value = consentId.toString()
     }
 
-    data class CollectionOwner( val collectionId: Int ) : Claim()
-    {
+    data class CollectionOwner(val collectionId: Int) : Claim() {
         override val value = collectionId.toString()
     }
 
-    data class FileOwner( val fileId: Int ) : Claim()
-    {
+    data class FileOwner(val fileId: Int) : Claim() {
         override val value = fileId.toString()
     }
 
@@ -93,11 +84,10 @@ sealed class Claim
      * A virtual claim is a claim which is not directly present as a user attribute,
      * but can be derived from other claims.
      */
-    sealed class VirtualClaim : Claim()
-    {
+    sealed class VirtualClaim : Claim() {
         override val value get() =
-            throw UnsupportedOperationException( "The value of virtual claims cannot be requested." )
+            throw UnsupportedOperationException("The value of virtual claims cannot be requested.")
     }
 
-    data class ManageDeployment( val deploymentId: UUID ) : VirtualClaim()
+    data class ManageDeployment(val deploymentId: UUID) : VirtualClaim()
 }

@@ -11,30 +11,29 @@ import kotlinx.serialization.encodeToString
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 
-class DataStreamsConfigurationSerializer(private val validationMessages: MessageBase): JsonSerializer<DataStreamsConfiguration>()
-{
-    companion object
-    {
+class DataStreamsConfigurationSerializer(private val validationMessages: MessageBase) : JsonSerializer<DataStreamsConfiguration>() {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
-    override fun serialize(value: DataStreamsConfiguration?, gen: JsonGenerator?, serializers: SerializerProvider?)
-    {
-        if (value == null)
-        {
+    override fun serialize(
+        value: DataStreamsConfiguration?,
+        gen: JsonGenerator?,
+        serializers: SerializerProvider?,
+    ) {
+        if (value == null) {
             LOGGER.error("The DataStreamsConfiguration is null.")
             throw SerializationException(validationMessages.get("dataStreamConfig.serialization.empty"))
         }
 
         val serialized: String
-        try
-        {
+        try {
             serialized = JSON.encodeToString(value)
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The dataStream request is not valid. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("dataStreamConfig.serialization.error", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("dataStreamConfig.serialization.error", ex.message.toString()),
+            )
         }
 
         gen!!.writeRawValue(serialized)
