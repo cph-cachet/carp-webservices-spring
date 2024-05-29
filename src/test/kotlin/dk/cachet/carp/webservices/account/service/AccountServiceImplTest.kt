@@ -7,7 +7,7 @@ import dk.cachet.carp.common.application.users.EmailAccountIdentity
 import dk.cachet.carp.webservices.account.service.impl.AccountServiceImpl
 import dk.cachet.carp.webservices.security.authentication.domain.Account
 import dk.cachet.carp.webservices.security.authentication.oauth2.IssuerFacade
-import dk.cachet.carp.webservices.security.authentication.oauth2.issuers.keycloak.domain.AccountType
+import dk.cachet.carp.webservices.security.authentication.oauth2.issuers.keycloak.domain.RequiredActions
 import dk.cachet.carp.webservices.security.authorization.Role
 import io.mockk.*
 import kotlinx.coroutines.test.runTest
@@ -33,7 +33,7 @@ class AccountServiceImplTest {
                 every { foundAccount getProperty "email" } answers { callOriginal() }
 
                 coEvery { issuerFacade.getAccount(any<AccountIdentity>()) } returns foundAccount
-                coEvery { issuerFacade.createAccount(any(), any()) } returns foundAccount
+                coEvery { issuerFacade.createAccount(any()) } returns foundAccount
                 coEvery { issuerFacade.addRole(any(), any()) } just runs
 
                 val sut = AccountServiceImpl(issuerFacade)
@@ -59,7 +59,7 @@ class AccountServiceImplTest {
                 every { createdAccount getProperty "email" } answers { callOriginal() }
 
                 coEvery { issuerFacade.getAccount(any<AccountIdentity>()) } returns foundAccount
-                coEvery { issuerFacade.createAccount(any(), any()) } returns createdAccount
+                coEvery { issuerFacade.createAccount(any()) } returns createdAccount
                 coEvery { issuerFacade.addRole(any(), any()) } just runs
 
                 val sut = AccountServiceImpl(issuerFacade)
@@ -83,15 +83,15 @@ class AccountServiceImplTest {
                 every { account.email } returns email
 
                 coEvery { issuerFacade.getAccount(any<AccountIdentity>()) } returns null
-                coEvery { issuerFacade.createAccount(any(), any()) } returns account
+                coEvery { issuerFacade.createAccount(any()) } returns account
                 coEvery { issuerFacade.addRole(any(), any()) } just runs
-                coEvery { issuerFacade.sendInvitation(any(), any(), any()) } just runs
+                coEvery { issuerFacade.executeActions(any(), any(), any()) } just runs
 
                 val sut = AccountServiceImpl(issuerFacade)
 
                 sut.invite(accountIdentity, Role.PARTICIPANT)
 
-                coVerify(exactly = 1) { issuerFacade.sendInvitation(account, null, AccountType.NEW) }
+                coVerify(exactly = 1) { issuerFacade.executeActions(account, null, RequiredActions.forNewAccounts) }
             }
 
         @Test
@@ -105,15 +105,15 @@ class AccountServiceImplTest {
                 every { account.email } returns email
 
                 coEvery { issuerFacade.getAccount(any<AccountIdentity>()) } returns null
-                coEvery { issuerFacade.createAccount(any(), any()) } returns account
+                coEvery { issuerFacade.createAccount(any()) } returns account
                 coEvery { issuerFacade.addRole(any(), any()) } just runs
-                coEvery { issuerFacade.sendInvitation(any(), any(), any()) } just runs
+                coEvery { issuerFacade.executeActions(any(), any(), any()) } just runs
 
                 val sut = AccountServiceImpl(issuerFacade)
 
                 sut.invite(accountIdentity, Role.PARTICIPANT)
 
-                coVerify(exactly = 0) { issuerFacade.sendInvitation(any(), any(), any()) }
+                coVerify(exactly = 0) { issuerFacade.executeActions(any(), any(), any()) }
             }
     }
 

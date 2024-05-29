@@ -71,17 +71,12 @@ class KeycloakFacade(
                 it.setBasicAuth(clientId, clientSecret)
             }.build()
 
-    override suspend fun createAccount(
-        account: Account,
-        accountType: AccountType,
-    ): Account {
+    override suspend fun createAccount(account: Account): Account {
         val token = authenticate().accessToken
 
         LOGGER.debug("Creating account {}", account)
 
-        val userRepresentation =
-            UserRepresentation
-                .createFromAccount(account, RequiredAction.getForAccountType(accountType))
+        val userRepresentation = UserRepresentation.createFromAccount(account)
 
         adminClient.post().uri("/users")
             .headers {
@@ -182,16 +177,14 @@ class KeycloakFacade(
         return queryAll(queryString)
     }
 
-    override suspend fun sendInvitation(
+    override suspend fun executeActions(
         account: Account,
         redirectUri: String?,
-        accountType: AccountType,
+        actions: List<RequiredActions>,
     ) {
         val token = authenticate().accessToken
 
-        LOGGER.debug("Sending invitation to account with id: ${account.id}")
-
-        val requiredActions = RequiredAction.getForAccountType(accountType)
+        LOGGER.debug("Sending execute actions email to account with id: ${account.id}")
 
         adminClient.put().uri("/users/${account.id}/execute-actions-email") { uriBuilder: UriBuilder ->
             var builder =
@@ -208,22 +201,17 @@ class KeycloakFacade(
             .headers {
                 it.setBearerAuth(token!!)
             }
-            .bodyValue(requiredActions)
+            .bodyValue(actions)
             .retrieve()
             .awaitBodilessEntity()
     }
 
-    override suspend fun updateAccount(
-        account: Account,
-        requiredActions: List<RequiredAction>,
-    ): Account {
+    override suspend fun updateAccount(account: Account): Account {
         val token = authenticate().accessToken
 
         LOGGER.debug("Updating account: {}", account)
 
-        val userRepresentation =
-            UserRepresentation
-                .createFromAccount(account, requiredActions)
+        val userRepresentation = UserRepresentation.createFromAccount(account)
 
         adminClient.put().uri("/users/${account.id}")
             .headers {

@@ -7,7 +7,7 @@ import dk.cachet.carp.common.application.users.UsernameAccountIdentity
 import dk.cachet.carp.webservices.account.service.AccountService
 import dk.cachet.carp.webservices.security.authentication.domain.Account
 import dk.cachet.carp.webservices.security.authentication.oauth2.IssuerFacade
-import dk.cachet.carp.webservices.security.authentication.oauth2.issuers.keycloak.domain.AccountType
+import dk.cachet.carp.webservices.security.authentication.oauth2.issuers.keycloak.domain.RequiredActions
 import dk.cachet.carp.webservices.security.authorization.Claim
 import dk.cachet.carp.webservices.security.authorization.Role
 import org.apache.logging.log4j.LogManager
@@ -27,11 +27,11 @@ class AccountServiceImpl(
         role: Role,
         redirectUri: String?,
     ): Account {
-        var accountType = AccountType.EXISTING
+        var isNewAccount = false
         var account = findByAccountIdentity(identity)
 
         if (account == null) {
-            accountType = AccountType.NEW
+            isNewAccount = true
             account = issuerFacade.createAccount(Account.fromAccountIdentity(identity))
             LOGGER.info("User created for account identity: $identity")
         }
@@ -40,9 +40,8 @@ class AccountServiceImpl(
         issuerFacade.addRole(account, role)
         account.role = role
 
-        if (!account.email.isNullOrBlank()) {
-            LOGGER.info("Sending invitation to user: $identity")
-            issuerFacade.sendInvitation(account, redirectUri, accountType)
+        if (isNewAccount && !account.email.isNullOrBlank()) {
+            issuerFacade.executeActions(account, redirectUri, RequiredActions.forNewAccounts)
         }
 
         return account
@@ -143,7 +142,7 @@ class AccountServiceImpl(
         val username = UUID.randomUUID()
         val identity = UsernameAccountIdentity(username.toString())
 
-        val account = issuerFacade.createAccount(Account.fromAccountIdentity(identity), AccountType.GENERATED)
+        val account = issuerFacade.createAccount(Account.fromAccountIdentity(identity))
 
         return Pair(
             identity,
