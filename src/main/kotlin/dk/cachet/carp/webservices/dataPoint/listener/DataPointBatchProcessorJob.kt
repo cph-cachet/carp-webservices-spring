@@ -21,10 +21,8 @@ import org.springframework.web.multipart.MultipartFile
  */
 @RabbitListener(queues = ["\${rabbit.data-point.processing.queue}"])
 @Component
-class DataPointBatchProcessorJob(private val environment: Environment)
-{
-    companion object
-    {
+class DataPointBatchProcessorJob(private val environment: Environment) {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
@@ -42,15 +40,13 @@ class DataPointBatchProcessorJob(private val environment: Environment)
      * The function [process] queues the data point for processing.
      * @param dataPoints The [dataPoints] to be processed.
      */
-    fun process(dataPoints: Array<DataPoint>)
-    {
+    fun process(dataPoints: Array<DataPoint>) {
         rabbitTemplate.convertAndSend(environment.getProperty("rabbit.data-point.processing.queue")!!, dataPoints)
         LOGGER.info("A new batch of data points is sent to the message queue.")
     }
 
     @RabbitHandler
-    fun receive(dataPoints: Array<DataPoint>)
-    {
+    fun receive(dataPoints: Array<DataPoint>) {
         dataPoints.forEach { dataPoint -> dataPointService.create(dataPoint) }
     }
 
@@ -60,15 +56,11 @@ class DataPointBatchProcessorJob(private val environment: Environment)
      * @param dataPointJsonFile The [dataPointJsonFile] file as a multiple part file.
      * @return A [DataPoint] containing the parsed batch file.
      */
-    fun parseBatchFile(dataPointJsonFile: MultipartFile): Array<DataPoint>?
-    {
+    fun parseBatchFile(dataPointJsonFile: MultipartFile): Array<DataPoint>? {
         val dataPoints: Array<DataPoint>
-        try
-        {
+        try {
             dataPoints = objectMapper.readValue(String(dataPointJsonFile.bytes), Array<DataPoint>::class.java)
-        }
-        catch (ex: JsonParseException)
-        {
+        } catch (ex: JsonParseException) {
             LOGGER.warn("The parsed [Json] file does not have any content.")
             return null
         }

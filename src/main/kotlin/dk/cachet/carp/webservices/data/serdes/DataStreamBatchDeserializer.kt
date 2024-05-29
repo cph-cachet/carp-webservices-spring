@@ -13,41 +13,39 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.util.StringUtils
 
-class DataStreamBatchDeserializer(private val validationMessages: MessageBase): JsonDeserializer<DataStreamBatch>()
-{
-    companion object
-    {
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
+class DataStreamBatchDeserializer(private val validationMessages: MessageBase) : JsonDeserializer<DataStreamBatch>() {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
-    override fun deserialize(p: JsonParser?, ctxt: DeserializationContext?): DataStreamBatch
-    {
+    override fun deserialize(
+        p: JsonParser?,
+        ctxt: DeserializationContext?,
+    ): DataStreamBatch {
         val dataStreamBatch: String
-        try
-        {
-            dataStreamBatch =  p?.codec?.readTree<TreeNode>(p).toString()
+        try {
+            dataStreamBatch = p?.codec?.readTree<TreeNode>(p).toString()
 
-            if (!StringUtils.hasLength(dataStreamBatch))
-            {
+            if (!StringUtils.hasLength(dataStreamBatch)) {
                 LOGGER.error("The dataStreamBatch cannot be blank or empty.")
                 throw SerializationException(validationMessages.get("dataStreamConfig.deserialization.empty"))
             }
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The dataStreamBatch contains bad format. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("dataStreamBatch.deserialization.bad_format", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("dataStreamBatch.deserialization.bad_format", ex.message.toString()),
+            )
         }
 
         val parsed: DataStreamBatch
-        try
-        {
+        try {
             parsed = JSON.decodeFromString(dataStreamBatch)
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The core dataStreamBatch serializer is not valid. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("dataStreamBatch.deserialization.error", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("dataStreamBatch.deserialization.error", ex.message.toString()),
+            )
         }
 
         return parsed

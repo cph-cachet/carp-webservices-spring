@@ -18,27 +18,31 @@ import java.nio.file.Path
 class DataStreamServiceWrapper(
     private val dataStreamIdRepository: DataStreamIdRepository,
     private val dataStreamSequenceRepository: DataStreamSequenceRepository,
-    services: CoreServiceContainer
-): DataStreamService, ResourceExporter<DataStreamSequence>
-{
+    services: CoreServiceContainer,
+) : DataStreamService, ResourceExporter<DataStreamSequence> {
     final override val core = services.dataStreamService
 
-    override fun getLatestUpdatedAt(deploymentId: UUID): Instant?
-    {
-        val dataStreamInputs = dataStreamIdRepository.getAllByDeploymentId(
-            deploymentId.toString())
-        val sortedDataPoint = dataStreamInputs.sortedByDescending {it.updatedAt}.firstOrNull()
-            ?: return null
+    override fun getLatestUpdatedAt(deploymentId: UUID): Instant? {
+        val dataStreamInputs =
+            dataStreamIdRepository.getAllByDeploymentId(
+                deploymentId.toString(),
+            )
+        val sortedDataPoint =
+            dataStreamInputs.sortedByDescending { it.updatedAt }.firstOrNull()
+                ?: return null
 
         return sortedDataPoint.updatedAt?.toKotlinInstant()
     }
 
     override val dataFileName = "data-streams.json"
-    override suspend fun exportDataOrThrow( studyId: UUID, deploymentIds: Set<UUID>, target: Path ) =
-        withContext(Dispatchers.IO)
-        {
-            dataStreamSequenceRepository.findAllByDeploymentIds(
-                deploymentIds.map { it.toString() }
-            )
-        }
+
+    override suspend fun exportDataOrThrow(
+        studyId: UUID,
+        deploymentIds: Set<UUID>,
+        target: Path,
+    ) = withContext(Dispatchers.IO) {
+        dataStreamSequenceRepository.findAllByDeploymentIds(
+            deploymentIds.map { it.toString() },
+        )
+    }
 }

@@ -2,13 +2,9 @@ package dk.cachet.carp.webservices.export.domain
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.databind.annotation.JsonNaming
-import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.webservices.common.audit.Auditable
-import dk.cachet.carp.webservices.export.command.ExportCommand
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
-import org.apache.logging.log4j.LogManager
-import java.time.Instant
 
 /**
  * The Data Class [Export].
@@ -22,22 +18,20 @@ data class Export(
     var fileName: String = "",
     var status: ExportStatus = ExportStatus.UNKNOWN,
     var studyId: String = "",
-    var type: ExportType = ExportType.UNKNOWN
-): Auditable()
+    var type: ExportType = ExportType.UNKNOWN,
+) : Auditable()
 
-enum class ExportStatus
-{
+enum class ExportStatus {
     UNKNOWN,
     IN_PROGRESS,
     AVAILABLE,
     ERROR,
-    EXPIRED
+    EXPIRED,
 }
 
-enum class ExportType
-{
+enum class ExportType {
     UNKNOWN,
     STUDY_DATA,
     PARTICIPANT_GROUP_DATA,
-    ANONYMOUS_PARTICIPANTS
+    ANONYMOUS_PARTICIPANTS,
 }

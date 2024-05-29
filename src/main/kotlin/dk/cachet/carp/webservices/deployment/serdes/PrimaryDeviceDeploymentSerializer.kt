@@ -15,10 +15,11 @@ import org.apache.logging.log4j.Logger
  * The Class [PrimaryDeviceDeploymentSerializer].
  * The [PrimaryDeviceDeploymentSerializer] implements the serialization logic for [PrimaryDeviceDeployment].
  */
-class PrimaryDeviceDeploymentSerializer(private val validationMessages: MessageBase): JsonSerializer<PrimaryDeviceDeployment>()
-{
-    companion object
-    {
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
+class PrimaryDeviceDeploymentSerializer(
+    private val validationMessages: MessageBase,
+) : JsonSerializer<PrimaryDeviceDeployment>() {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
@@ -32,23 +33,24 @@ class PrimaryDeviceDeploymentSerializer(private val validationMessages: MessageB
      * Also, if the [PrimaryDeviceDeployment] contains invalid format.
      * @return The serialization of deployment service request object.
      */
-    override fun serialize(primaryDeviceDeployment: PrimaryDeviceDeployment?, jsonGenerator: JsonGenerator?, serializers: SerializerProvider?)
-    {
-        if (primaryDeviceDeployment == null)
-        {
+    override fun serialize(
+        primaryDeviceDeployment: PrimaryDeviceDeployment?,
+        jsonGenerator: JsonGenerator?,
+        serializers: SerializerProvider?,
+    ) {
+        if (primaryDeviceDeployment == null) {
             LOGGER.error("The MasterDeviceDeployment value is null.")
             throw SerializationException(validationMessages.get("deployment.master_device.serialization.empty"))
         }
 
         val serialized: String
-        try
-        {
+        try {
             serialized = JSON.encodeToString(primaryDeviceDeployment)
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The MasterDeviceDeployment is not valid. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("deployment.master_device.serialization.error", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("deployment.master_device.serialization.error", ex.message.toString()),
+            )
         }
 
         jsonGenerator!!.writeRawValue(serialized)

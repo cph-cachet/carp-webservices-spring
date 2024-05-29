@@ -19,25 +19,24 @@ import java.nio.file.Path
 class StudyServiceWrapper(
     private val accountService: AccountService,
     private val repository: CoreStudyRepository,
-    services: CoreServiceContainer
-) : StudyService, ResourceExporter<StudySnapshot>
-{
+    services: CoreServiceContainer,
+) : StudyService, ResourceExporter<StudySnapshot> {
     final override val core = services.studyService
 
-    override suspend fun getStudiesOverview( accountId: UUID ): List<StudyOverview> =
-        withContext( Dispatchers.IO + SecurityCoroutineContext() )
-        {
-            val account = accountService.findByUUID( accountId ) ?:
-                throw IllegalArgumentException("Account with id $accountId is not found.")
+    override suspend fun getStudiesOverview(accountId: UUID): List<StudyOverview> =
+        withContext(Dispatchers.IO + SecurityCoroutineContext()) {
+            val account =
+                accountService.findByUUID(accountId)
+                    ?: throw IllegalArgumentException("Account with id $accountId is not found.")
 
             account.carpClaims
                 ?.filterIsInstance<Claim.ManageStudy>()
                 ?.map { it.studyId }
-                ?.let { repository.findAllByStudyIds( it ) }
+                ?.let { repository.findAllByStudyIds(it) }
                 ?.map {
                     val status = it.getStatus()
-                    val details = core.getStudyDetails( status.studyId )
-                    val owner = accountService.findByUUID( details.ownerId )
+                    val details = core.getStudyDetails(status.studyId)
+                    val owner = accountService.findByUUID(details.ownerId)
 
                     StudyOverview(
                         status.studyId,
@@ -48,17 +47,17 @@ class StudyServiceWrapper(
                         it.canSetStudyProtocol,
                         it.canDeployToParticipants,
                         details.description,
-                        owner?.fullName
+                        owner?.fullName,
                     )
                 }
                 ?: emptyList()
         }
 
     final override val dataFileName = "study.json"
+
     override suspend fun exportDataOrThrow(
         studyId: UUID,
         deploymentIds: Set<UUID>,
-        target: Path
-    ): Collection<StudySnapshot> =
-        setOf( repository.getStudySnapshotById( studyId ) )
+        target: Path,
+    ): Collection<StudySnapshot> = setOf(repository.getStudySnapshotById(studyId))
 }

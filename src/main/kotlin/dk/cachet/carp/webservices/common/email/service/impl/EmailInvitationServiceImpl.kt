@@ -23,9 +23,8 @@ class EmailInvitationServiceImpl(
     private val emailTemplate: EmailTemplateUtil,
     private val emailService: EmailServiceImpl,
     private val validationMessages: MessageBase,
-    private val emailSendingJob: EmailSendingJob
+    private val emailSendingJob: EmailSendingJob,
 ) : EmailInvitationService {
-
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
@@ -34,28 +33,34 @@ class EmailInvitationServiceImpl(
         email: String,
         deploymentId: UUID,
         invitation: StudyInvitation,
-        emailType: EmailType
+        emailType: EmailType,
     ) {
         val emailAddress = validateEmailAddress(email)
 
-        val mailContent = emailTemplate.inviteAccount(
-            invitation.name,
-            invitation.description,
-            emailType
-        )
+        val mailContent =
+            emailTemplate.inviteAccount(
+                invitation.name,
+                invitation.description,
+                emailType,
+            )
 
-        val request = EmailRequest(
-            destinationEmail = emailAddress,
-            subject = invitation.name,
-            content = mailContent,
-            deploymentId = deploymentId.stringRepresentation,
-            id = UUID.randomUUID().stringRepresentation
-        )
+        val request =
+            EmailRequest(
+                destinationEmail = emailAddress,
+                subject = invitation.name,
+                content = mailContent,
+                deploymentId = deploymentId.stringRepresentation,
+                id = UUID.randomUUID().stringRepresentation,
+            )
 
         emailSendingJob.send(request)
     }
 
-    override fun sendNotificationEmail(recipient: String?, subject: String?, message: String?) {
+    override fun sendNotificationEmail(
+        recipient: String?,
+        subject: String?,
+        message: String?,
+    ) {
         val emailAddress = validateEmailAddress(recipient)
         val mailContent = emailTemplate.sendNotificationEmail(message)
         emailService.invoke(emailAddress, subject!!, mailContent)
@@ -67,8 +72,8 @@ class EmailInvitationServiceImpl(
             throw BadRequestException(
                 validationMessages.get(
                     "email.invitation.service.format.invalid",
-                    emailAddress.toString()
-                )
+                    emailAddress.toString(),
+                ),
             )
         }
 

@@ -31,15 +31,15 @@ import org.springframework.web.util.UriBuilder
 // https://www.keycloak.org/docs-api/21.1.1/rest-api/
 @Service
 @PropertySources(PropertySource(value = ["classpath:config/application-\${spring.profiles.active}.yml"]))
+@Suppress("TooManyFunctions")
 class KeycloakFacade(
     @Value("\${keycloak.auth-server-url}") private val authServerUrl: String,
     @Value("\${keycloak.realm}") private val realm: String,
     @Value("\${keycloak.admin.client-id}") private val clientId: String,
     @Value("\${keycloak.admin.client-secret}") private val clientSecret: String,
     private val objectMapper: ObjectMapper,
-    private val environmentUtil: EnvironmentUtil
-) : IssuerFacade
-{
+    private val environmentUtil: EnvironmentUtil,
+) : IssuerFacade {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
         private const val INVITATION_LIFESPAN = 24 * 60 * 60 * 30 // 30 days
@@ -50,11 +50,11 @@ class KeycloakFacade(
             .codecs { configurer ->
                 configurer.defaultCodecs()
                     .jackson2JsonEncoder(
-                        Jackson2JsonEncoder(objectMapper, MediaType.APPLICATION_JSON)
+                        Jackson2JsonEncoder(objectMapper, MediaType.APPLICATION_JSON),
                     )
                 configurer.defaultCodecs()
                     .jackson2JsonDecoder(
-                        Jackson2JsonDecoder(objectMapper, MediaType.APPLICATION_JSON)
+                        Jackson2JsonDecoder(objectMapper, MediaType.APPLICATION_JSON),
                     )
             }
             .build()
@@ -63,21 +63,25 @@ class KeycloakFacade(
 
     private val resourceClient: WebClient = buildWebClient("$authServerUrl/realms/$realm")
 
-    private val authClient: WebClient = buildWebClient("$authServerUrl/realms/$realm")
-        .mutate().defaultHeaders {
-            it.contentType = MediaType.parseMediaType(APPLICATION_FORM_URLENCODED_VALUE)
-            it.accept = listOf(MediaType.APPLICATION_JSON)
-            it.setBasicAuth(clientId, clientSecret)
-        }.build()
+    private val authClient: WebClient =
+        buildWebClient("$authServerUrl/realms/$realm")
+            .mutate().defaultHeaders {
+                it.contentType = MediaType.parseMediaType(APPLICATION_FORM_URLENCODED_VALUE)
+                it.accept = listOf(MediaType.APPLICATION_JSON)
+                it.setBasicAuth(clientId, clientSecret)
+            }.build()
 
-
-    override suspend fun createAccount(account: Account, accountType: AccountType): Account {
+    override suspend fun createAccount(
+        account: Account,
+        accountType: AccountType,
+    ): Account {
         val token = authenticate().accessToken
 
         LOGGER.debug("Creating account {}", account)
 
-        val userRepresentation = UserRepresentation
-            .createFromAccount(account, RequiredAction.getForAccountType(accountType))
+        val userRepresentation =
+            UserRepresentation
+                .createFromAccount(account, RequiredAction.getForAccountType(accountType))
 
         adminClient.post().uri("/users")
             .headers {
@@ -93,7 +97,10 @@ class KeycloakFacade(
         return createdAccount
     }
 
-    override suspend fun addRole(account: Account, role: Role) {
+    override suspend fun addRole(
+        account: Account,
+        role: Role,
+    ) {
         val token = authenticate().accessToken
 
         LOGGER.debug("Updating role of account: {}", account)
@@ -124,39 +131,43 @@ class KeycloakFacade(
 
         LOGGER.debug("Getting roles of account with id: {}", id)
 
-        val roleRepresentations = adminClient.get().uri("/users/${id}/role-mappings/realm")
-            .headers {
-                it.setBearerAuth(token!!)
-            }
-            .retrieve()
-            .awaitBody<Set<RoleRepresentation>>()
+        val roleRepresentations =
+            adminClient.get().uri("/users/$id/role-mappings/realm")
+                .headers {
+                    it.setBearerAuth(token!!)
+                }
+                .retrieve()
+                .awaitBody<Set<RoleRepresentation>>()
 
         return roleRepresentations.mapNotNull { it.name }.map { Role.fromString(it) }.toSet()
     }
-
 
     override suspend fun getAccount(uuid: UUID): Account? {
         val token = authenticate().accessToken
 
         LOGGER.debug("Getting account with id: {}", uuid)
 
-        val userRepresentation = adminClient.get().uri("/users/${uuid}")
-            .headers {
-                it.setBearerAuth(token!!)
-            }
-            .retrieve()
-            .awaitBody<UserRepresentation>()
+        val userRepresentation =
+            adminClient.get().uri("/users/$uuid")
+                .headers {
+                    it.setBearerAuth(token!!)
+                }
+                .retrieve()
+                .awaitBody<UserRepresentation>()
 
         val roles = getRoles(uuid)
         return userRepresentation.toAccount(roles)
     }
 
     override suspend fun getAccount(identity: AccountIdentity): Account? {
-        val queryString = when (identity) {
-            is EmailAccountIdentity -> "email=${identity.emailAddress}"
-            is UsernameAccountIdentity -> "username=${identity.username}"
-            else -> throw IllegalArgumentException("Unsupported account identity type: ${identity::class.simpleName}.")
-        }.plus("&exact=true")
+        val queryString =
+            when (identity) {
+                is EmailAccountIdentity -> "email=${identity.emailAddress}"
+                is UsernameAccountIdentity -> "username=${identity.username}"
+                else -> throw IllegalArgumentException(
+                    "Unsupported account identity type: ${identity::class.simpleName}.",
+                )
+            }.plus("&exact=true")
 
         LOGGER.debug("Getting account with identity: {}", identity)
 
@@ -171,18 +182,22 @@ class KeycloakFacade(
         return queryAll(queryString)
     }
 
-    override suspend fun sendInvitation(account: Account, redirectUri: String?, accountType: AccountType) {
+    override suspend fun sendInvitation(
+        account: Account,
+        redirectUri: String?,
+        accountType: AccountType,
+    ) {
         val token = authenticate().accessToken
 
         LOGGER.debug("Sending invitation to account with id: ${account.id}")
 
         val requiredActions = RequiredAction.getForAccountType(accountType)
 
-        adminClient.put().uri("/users/${account.id}/execute-actions-email")
-        { uriBuilder: UriBuilder ->
-            var builder = uriBuilder
-                .queryParam("client_id", clientId)
-                .queryParam("lifespan", INVITATION_LIFESPAN)
+        adminClient.put().uri("/users/${account.id}/execute-actions-email") { uriBuilder: UriBuilder ->
+            var builder =
+                uriBuilder
+                    .queryParam("client_id", clientId)
+                    .queryParam("lifespan", INVITATION_LIFESPAN)
 
             if (environmentUtil.profile != EnvironmentProfile.LOCAL) {
                 builder = builder.queryParam("redirect_uri", redirectUri ?: environmentUtil.portalUrl)
@@ -198,13 +213,17 @@ class KeycloakFacade(
             .awaitBodilessEntity()
     }
 
-    override suspend fun updateAccount(account: Account, requiredActions: List<RequiredAction>): Account {
+    override suspend fun updateAccount(
+        account: Account,
+        requiredActions: List<RequiredAction>,
+    ): Account {
         val token = authenticate().accessToken
 
         LOGGER.debug("Updating account: {}", account)
 
-        val userRepresentation = UserRepresentation
-            .createFromAccount(account, requiredActions)
+        val userRepresentation =
+            UserRepresentation
+                .createFromAccount(account, requiredActions)
 
         adminClient.put().uri("/users/${account.id}")
             .headers {
@@ -230,21 +249,23 @@ class KeycloakFacade(
 
         LOGGER.debug("Generating recovery link for account: {}", account)
 
-        val request = MagicLinkRequest(
-            account.email,
-            account.username,
-            clientId,
-            expirationSeconds,
-            redirectUri
-        )
+        val request =
+            MagicLinkRequest(
+                account.email,
+                account.username,
+                clientId,
+                expirationSeconds,
+                redirectUri,
+            )
 
-        val magicLinkResponse = resourceClient.post().uri("/magic-link")
-            .headers {
-                it.setBearerAuth(token!!)
-            }
-            .bodyValue(request)
-            .retrieve()
-            .awaitBody<MagicLinkResponse>()
+        val magicLinkResponse =
+            resourceClient.post().uri("/magic-link")
+                .headers {
+                    it.setBearerAuth(token!!)
+                }
+                .bodyValue(request)
+                .retrieve()
+                .awaitBody<MagicLinkResponse>()
 
         return magicLinkResponse.link
     }
@@ -254,12 +275,13 @@ class KeycloakFacade(
 
         LOGGER.debug("Querying all accounts with query: {}", query)
 
-        val userRepresentations = adminClient.get().uri("/users?$query")
-            .headers {
-                it.setBearerAuth(token!!)
-            }
-            .retrieve()
-            .awaitBody<List<UserRepresentation>>()
+        val userRepresentations =
+            adminClient.get().uri("/users?$query")
+                .headers {
+                    it.setBearerAuth(token!!)
+                }
+                .retrieve()
+                .awaitBody<List<UserRepresentation>>()
 
         return userRepresentations.map { userRepresentation ->
             val roles = getRoles(UUID(userRepresentation.id!!))
@@ -273,12 +295,13 @@ class KeycloakFacade(
             .retrieve()
             .awaitBody()
 
-    private fun buildWebClient(baseUrl: String): WebClient = WebClient.builder()
-        .baseUrl(baseUrl)
-        .exchangeStrategies(serializationStrategies)
-        .defaultHeaders {
-            it.contentType = MediaType.APPLICATION_JSON
-            it.accept = listOf(MediaType.APPLICATION_JSON)
-        }
-        .build()
+    private fun buildWebClient(baseUrl: String): WebClient =
+        WebClient.builder()
+            .baseUrl(baseUrl)
+            .exchangeStrategies(serializationStrategies)
+            .defaultHeaders {
+                it.contentType = MediaType.APPLICATION_JSON
+                it.accept = listOf(MediaType.APPLICATION_JSON)
+            }
+            .build()
 }

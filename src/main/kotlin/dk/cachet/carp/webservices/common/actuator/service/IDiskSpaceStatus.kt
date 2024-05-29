@@ -5,8 +5,7 @@ import org.springframework.boot.actuate.health.Status
 /**
  * The Interface [IDiskSpaceStatus].
  */
-interface IDiskSpaceStatus
-{
+interface IDiskSpaceStatus {
     /** The [statusHealth] interface. */
     fun statusHealth(): Status
 

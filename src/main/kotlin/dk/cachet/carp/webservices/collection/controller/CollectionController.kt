@@ -17,13 +17,11 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping(value= [COLLECTION_BASE])
+@RequestMapping(value = [COLLECTION_BASE])
 class CollectionController(
-    private val collectionService: CollectionService
-)
-{
-    companion object
-    {
+    private val collectionService: CollectionService,
+) {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
 
         /** Endpoint URI constants */
@@ -38,8 +36,8 @@ class CollectionController(
     @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
     fun create(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
-        @Valid @RequestBody request: CollectionCreateRequestDto): Collection
-    {
+        @Valid @RequestBody request: CollectionCreateRequestDto,
+    ): Collection {
         LOGGER.info("Start POST: /api/studies/$studyId/collections")
         return collectionService.create(request, studyId.stringRepresentation, request.deploymentId)
     }
@@ -48,9 +46,9 @@ class CollectionController(
     @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
     @Operation(tags = ["collection/getByStudyIdAndCollectionId.json"])
     fun getByStudyIdAndCollectionId(
-            @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
-            @PathVariable(PathVariableName.COLLECTION_ID) collectionId: Int): Collection
-    {
+        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
+        @PathVariable(PathVariableName.COLLECTION_ID) collectionId: Int,
+    ): Collection {
         LOGGER.info("Start GET: /api/studies/$studyId/collections/id/$collectionId")
         return collectionService.getCollectionByStudyIdAndId(studyId.stringRepresentation, collectionId)
     }
@@ -59,9 +57,9 @@ class CollectionController(
     @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
     @Operation(tags = ["collection/getByStudyIdAndCollectionName.json"])
     fun getByStudyIdAndCollectionName(
-            @PathVariable(PathVariableName.STUDY_ID) studyId: String,
-            @PathVariable(PathVariableName.COLLECTION_NAME) collectionName: String): Collection
-    {
+        @PathVariable(PathVariableName.STUDY_ID) studyId: String,
+        @PathVariable(PathVariableName.COLLECTION_NAME) collectionName: String,
+    ): Collection {
         LOGGER.info("Start GET: /api/studies/$studyId/collections/$collectionName")
         return collectionService.getCollectionByStudyIdAndByName(studyId, collectionName)
     }
@@ -70,9 +68,9 @@ class CollectionController(
     @PreAuthorize("canManageStudy(#studyId)")
     @Operation(tags = ["collection/getAll.json"])
     fun getAll(
-            @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
-            @RequestParam(RequestParamName.QUERY, required = true) query: String?): List<Collection>
-    {
+        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
+        @RequestParam(RequestParamName.QUERY, required = true) query: String?,
+    ): List<Collection> {
         LOGGER.info("Start GET: /api/studies/$studyId/collections?query=$query")
         return collectionService.getAll(studyId.stringRepresentation, query)
     }
@@ -80,13 +78,13 @@ class CollectionController(
     @GetMapping(value = [GET_COLLECTION_BY_DEPLOYMENT_ID])
     @PreAuthorize("canManageStudy(#studyId) or isInDeployment(#deploymentId)")
     fun getByStudyIdAndDeploymentId(
-            @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
-            @PathVariable(PathVariableName.DEPLOYMENT_ID) deploymentId: UUID): List<Collection>
-    {
+        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
+        @PathVariable(PathVariableName.DEPLOYMENT_ID) deploymentId: UUID,
+    ): List<Collection> {
         LOGGER.info("Start GET: /api/studies/$studyId/deployments/$deploymentId/collections")
         return collectionService.getAllByStudyIdAndDeploymentId(
             studyId.stringRepresentation,
-            deploymentId.stringRepresentation
+            deploymentId.stringRepresentation,
         )
     }
 
@@ -94,9 +92,9 @@ class CollectionController(
     @PreAuthorize("canManageStudy(#studyId) or isCollectionOwner(#collectionId)")
     @Operation(tags = ["collection/delete.json"])
     fun delete(
-            @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
-            @PathVariable(PathVariableName.COLLECTION_ID) collectionId: Int)
-    {
+        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
+        @PathVariable(PathVariableName.COLLECTION_ID) collectionId: Int,
+    ) {
         LOGGER.info("Start DELETE: /api/studies/$studyId/collections/id/$collectionId")
         collectionService.delete(studyId.stringRepresentation, collectionId)
     }
@@ -105,10 +103,10 @@ class CollectionController(
     @PreAuthorize("canManageStudy(#studyId) or isCollectionOwner(#collectionId)")
     @Operation(tags = ["collection/update.json"])
     fun update(
-            @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
-            @PathVariable(PathVariableName.COLLECTION_ID) collectionId: Int,
-            @Valid @RequestBody request: CollectionUpdateRequestDto): Collection
-    {
+        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
+        @PathVariable(PathVariableName.COLLECTION_ID) collectionId: Int,
+        @Valid @RequestBody request: CollectionUpdateRequestDto,
+    ): Collection {
         LOGGER.info("Start PUT: /api/studies/$studyId/collections/id/$collectionId")
         return collectionService.update(studyId.stringRepresentation, collectionId, request)
     }

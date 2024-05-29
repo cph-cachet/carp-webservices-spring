@@ -4,9 +4,10 @@ import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.protocols.infrastructure.ProtocolServiceDecorator
 import dk.cachet.carp.webservices.protocol.dto.ProtocolOverview
 
-interface ProtocolService
-{
+interface ProtocolService {
     val core: ProtocolServiceDecorator
-    suspend fun getSingleProtocolOverview(protocolId: String ): ProtocolOverview?
-    suspend fun getProtocolsOverview( accountId: UUID ): List<ProtocolOverview>
+
+    suspend fun getSingleProtocolOverview(protocolId: String): ProtocolOverview?
+
+    suspend fun getProtocolsOverview(accountId: UUID): List<ProtocolOverview>
 }

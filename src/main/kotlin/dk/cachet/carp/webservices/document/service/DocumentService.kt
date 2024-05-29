@@ -11,22 +11,32 @@ import org.springframework.data.domain.PageRequest
  * The Interface [DocumentService].
  * [DocumentService] creates an interface for handling document requests.
  */
-interface DocumentService
-{
+interface DocumentService {
     /** The [getAll] interface retrieves all documents with the given [studyId] and [query] parameters. */
-    fun getAll(pageRequest: PageRequest, query: String?, studyId: String): List<Document>
+    fun getAll(
+        pageRequest: PageRequest,
+        query: String?,
+        studyId: String,
+    ): List<Document>
 
     /** The [getAll] interface retrieves all documents that belong to one of the specified collection id's. */
     fun getAll(collectionIds: List<Int>): List<Document>
 
     /** The [getByDocumentPath] interface for retrieving documents by its [studyId]. */
-    fun getByDocumentPath(studyId: String, request: HttpServletRequest): String?
+    fun getByDocumentPath(
+        studyId: String,
+        request: HttpServletRequest,
+    ): String?
 
     /** The [getOne] interface for retrieving one documents by its [id]. */
     fun getOne(id: Int): Document
 
     /** The [createByDocumentPath] interface for creating documents by its [studyId] and [data] object requested. */
-    fun createByDocumentPath(studyId: String, data: JsonNode?, request: HttpServletRequest): String?
+    fun createByDocumentPath(
+        studyId: String,
+        data: JsonNode?,
+        request: HttpServletRequest,
+    ): String?
 
     /** The [create] interface for creating document by [CreateDocumentRequestDto] object requested. */
     fun create(request: CreateDocumentRequestDto): Document
@@ -35,8 +45,14 @@ interface DocumentService
     fun delete(id: Int)
 
     /** The [update] interface for updating document (replacing) by its [id] and [updateRequest] object request. */
-    fun update(id: Int, updateRequest: UpdateDocumentRequestDto): Document
+    fun update(
+        id: Int,
+        updateRequest: UpdateDocumentRequestDto,
+    ): Document
 
     /** The [append] interface for updating document (appending) by its [id] and [updateRequest] object request. */
-    fun append(id: Int, updateRequest: UpdateDocumentRequestDto): Document
+    fun append(
+        id: Int,
+        updateRequest: UpdateDocumentRequestDto,
+    ): Document
 }

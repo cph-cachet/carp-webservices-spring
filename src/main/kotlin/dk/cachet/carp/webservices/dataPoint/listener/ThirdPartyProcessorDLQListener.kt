@@ -13,25 +13,25 @@ import org.springframework.stereotype.Component
  * or redirects them to the Parking-Lot-Queue.
  */
 @Component
-class ThirdPartyProcessorDLQListener(private val rabbitTemplate: RabbitTemplate, private val environment: Environment): DLQListener()
-{
+class ThirdPartyProcessorDLQListener(
+    private val rabbitTemplate: RabbitTemplate,
+    private val environment: Environment,
+) : DLQListener() {
     @RabbitListener(queues = ["\${rabbit.third-party.processing.dlq}"])
-    fun receive(failedMessage: Message)
-    {
-        if (!assertAndIncrementRetriesHeader(failedMessage))
-        {
+    fun receive(failedMessage: Message) {
+        if (!assertAndIncrementRetriesHeader(failedMessage)) {
             rabbitTemplate.send(
-                    environment.getProperty("rabbit.third-party.processing.plx")!!,
-                    failedMessage.messageProperties.receivedRoutingKey,
-                    failedMessage
+                environment.getProperty("rabbit.third-party.processing.plx")!!,
+                failedMessage.messageProperties.receivedRoutingKey,
+                failedMessage,
             )
             return
         }
 
         rabbitTemplate.send(
-                environment.getProperty("rabbit.third-party.processing.direct-ex")!!,
-                failedMessage.messageProperties.receivedRoutingKey,
-                failedMessage
+            environment.getProperty("rabbit.third-party.processing.direct-ex")!!,
+            failedMessage.messageProperties.receivedRoutingKey,
+            failedMessage,
         )
     }
 }

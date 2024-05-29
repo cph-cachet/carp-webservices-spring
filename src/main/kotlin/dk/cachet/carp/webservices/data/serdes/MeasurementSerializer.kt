@@ -11,12 +11,17 @@ import dk.cachet.carp.webservices.common.exception.serialization.SerializationEx
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 
-class MeasurementSerializer(private val validationMessages: MessageBase): JsonSerializer<Measurement<Data>>() {
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
+class MeasurementSerializer(private val validationMessages: MessageBase) : JsonSerializer<Measurement<Data>>() {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
-    override fun serialize(value: Measurement<Data>?, gen: JsonGenerator?, serializers: SerializerProvider?) {
+    override fun serialize(
+        value: Measurement<Data>?,
+        gen: JsonGenerator?,
+        serializers: SerializerProvider?,
+    ) {
         if (value == null) {
             LOGGER.error("The dataStreamServiceRequest.measurement is null.")
             throw SerializationException(validationMessages.get("data.stream.measurement.serialization.empty"))
@@ -27,7 +32,9 @@ class MeasurementSerializer(private val validationMessages: MessageBase): JsonSe
             serialized = JSON.encodeToString(dk.cachet.carp.data.application.MeasurementSerializer, value)
         } catch (ex: Exception) {
             LOGGER.error("The dataStreamServiceRequest.measurement is not valid. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("data.stream.measurement.serialization.error", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("data.stream.measurement.serialization.error", ex.message.toString()),
+            )
         }
 
         gen!!.writeRawValue(serialized)

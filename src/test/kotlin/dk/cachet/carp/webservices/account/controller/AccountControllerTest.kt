@@ -21,7 +21,6 @@ import dk.cachet.carp.webservices.security.authorization.Role as AccountRole
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class AccountControllerTest {
-
     private val accountService: AccountService = mockk()
     private val objectMapper: ObjectMapper = ObjectMapper()
 
@@ -34,76 +33,86 @@ class AccountControllerTest {
 
     @Nested
     inner class Invite {
-
         private val endpoint = "/api/accounts/invite/"
 
         @Test
-        fun `should return 400 if email is invalid`() = runTest {
-            val accountRequest = AccountRequest("invalid", AccountRole.PARTICIPANT)
+        fun `should return 400 if email is invalid`() =
+            runTest {
+                val accountRequest = AccountRequest("invalid", AccountRole.PARTICIPANT)
 
-            mockMvc.perform(
-                post(endpoint)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(accountRequest)))
-                .andExpect(status().isBadRequest)
-        }
-
-        @Test
-        fun `should return 400 if the request body is missing`() = runTest {
-            mockMvc.perform(
-                post(endpoint)
-                    .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest)
-        }
+                mockMvc.perform(
+                    post(endpoint)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(accountRequest)),
+                )
+                    .andExpect(status().isBadRequest)
+            }
 
         @Test
-        fun `should relay task to account service`() = runTest {
-            coEvery { accountService.invite(any(), any()) } returns mockk()
-            val accountRequest = AccountRequest("address@domain.org", AccountRole.PARTICIPANT)
+        fun `should return 400 if the request body is missing`() =
+            runTest {
+                mockMvc.perform(
+                    post(endpoint)
+                        .contentType(MediaType.APPLICATION_JSON),
+                )
+                    .andExpect(status().isBadRequest)
+            }
 
-            mockMvc.perform(
-                post(endpoint)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(accountRequest)))
-                .andExpect(status().isCreated)
-        }
+        @Test
+        fun `should relay task to account service`() =
+            runTest {
+                coEvery { accountService.invite(any(), any()) } returns mockk()
+                val accountRequest = AccountRequest("address@domain.org", AccountRole.PARTICIPANT)
+
+                mockMvc.perform(
+                    post(endpoint)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(accountRequest)),
+                )
+                    .andExpect(status().isCreated)
+            }
     }
-
 
     @Nested
     inner class Role {
         private val endpoint = "/api/accounts/role/"
 
         @Test
-        fun `should return 400 if email is invalid`() = runTest {
-            val accountRequest = AccountRequest("invalid", AccountRole.PARTICIPANT)
+        fun `should return 400 if email is invalid`() =
+            runTest {
+                val accountRequest = AccountRequest("invalid", AccountRole.PARTICIPANT)
 
-            mockMvc.perform(
-                post(endpoint)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(accountRequest)))
-                .andExpect(status().isBadRequest)
-        }
-
-        @Test
-        fun `should return 400 if the request body is missing`() = runTest {
-            mockMvc.perform(
-                post(endpoint)
-                    .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest)
-        }
+                mockMvc.perform(
+                    post(endpoint)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(accountRequest)),
+                )
+                    .andExpect(status().isBadRequest)
+            }
 
         @Test
-        fun `should relay task to account service`() = runTest {
-            coEvery { accountService.hasRoleByEmail(any(), any()) } returns mockk()
-            val accountRequest = AccountRequest("address@domain.org", AccountRole.PARTICIPANT)
+        fun `should return 400 if the request body is missing`() =
+            runTest {
+                mockMvc.perform(
+                    post(endpoint)
+                        .contentType(MediaType.APPLICATION_JSON),
+                )
+                    .andExpect(status().isBadRequest)
+            }
 
-            mockMvc.perform(
-                post(endpoint)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(accountRequest)))
-                .andExpect(status().isOk)
-        }
+        @Test
+        fun `should relay task to account service`() =
+            runTest {
+                coEvery { accountService.hasRoleByEmail(any(), any()) } returns mockk()
+                val accountRequest = AccountRequest("address@domain.org", AccountRole.PARTICIPANT)
+
+                mockMvc.perform(
+                    post(endpoint)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(accountRequest)),
+                )
+                    .andExpect(status().isOk)
+            }
     }
 
     @Nested
@@ -111,13 +120,15 @@ class AccountControllerTest {
         private val validUUIDEndpoint = "/api/accounts/${UUID.randomUUID().stringRepresentation}"
 
         @Test
-        fun `should relay task to account service`() = runTest {
-            coEvery { accountService.findByUUID(any()) } returns mockk()
+        fun `should relay task to account service`() =
+            runTest {
+                coEvery { accountService.findByUUID(any()) } returns mockk()
 
-            mockMvc.perform(
-                get(validUUIDEndpoint)
-                    .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk)
-        }
+                mockMvc.perform(
+                    get(validUUIDEndpoint)
+                        .contentType(MediaType.APPLICATION_JSON),
+                )
+                    .andExpect(status().isOk)
+            }
     }
 }

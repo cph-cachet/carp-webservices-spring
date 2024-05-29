@@ -13,41 +13,40 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.util.StringUtils
 
-class DataStreamsConfigurationDeserializer(private val validationMessages: MessageBase): JsonDeserializer<DataStreamsConfiguration>()
-{
-    companion object
-    {
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
+class DataStreamsConfigurationDeserializer(private val validationMessages: MessageBase) :
+    JsonDeserializer<DataStreamsConfiguration>() {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
-    override fun deserialize(p: JsonParser?, ctxt: DeserializationContext?): DataStreamsConfiguration
-    {
+    override fun deserialize(
+        p: JsonParser?,
+        ctxt: DeserializationContext?,
+    ): DataStreamsConfiguration {
         val dataStreamConfig: String
-        try
-        {
-            dataStreamConfig =  p?.codec?.readTree<TreeNode>(p).toString()
+        try {
+            dataStreamConfig = p?.codec?.readTree<TreeNode>(p).toString()
 
-            if (!StringUtils.hasLength(dataStreamConfig))
-            {
+            if (!StringUtils.hasLength(dataStreamConfig)) {
                 LOGGER.error("The DataStreamConfiguration cannot be blank or empty.")
                 throw SerializationException(validationMessages.get("dataStreamConfig.deserialization.empty"))
             }
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The core dataStream request contains bad format. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("dataStreamConfig.deserialization.bad_format", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("dataStreamConfig.deserialization.bad_format", ex.message.toString()),
+            )
         }
 
         val parsed: DataStreamsConfiguration
-        try
-        {
+        try {
             parsed = JSON.decodeFromString(dataStreamConfig)
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The core DataStreamConfiguration serializer is not valid. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("dataStreamConfig.deserialization.error", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("dataStreamConfig.deserialization.error", ex.message.toString()),
+            )
         }
 
         return parsed

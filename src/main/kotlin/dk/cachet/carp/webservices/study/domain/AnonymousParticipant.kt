@@ -7,5 +7,5 @@ data class AnonymousParticipant(
     val username: UUID,
     val studyDeploymentId: UUID,
     val magicLink: String,
-    val expiryDate: Instant?
+    val expiryDate: Instant?,
 )

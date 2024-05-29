@@ -16,126 +16,124 @@ import org.junit.jupiter.api.Nested
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 
-class ExportServiceTest
-{
+class ExportServiceTest {
     private val repository = mockk<ExportRepository>()
     private val invoker = mockk<ExportCommandInvoker>()
     private val fileStorage = mockk<FileStorage>()
 
     @Nested
-    inner class CreateExport
-    {
+    inner class CreateExport {
         private val command = mockk<ExportCommand>()
 
         @Test
-        fun `should return existing if found`()
-        {
+        fun `should return existing if found`() {
             val id = UUID.randomUUID().stringRepresentation
             val studyId = UUID.randomUUID().stringRepresentation
 
-            val existingEntry = Export(
-                id = id,
-                studyId = studyId,
-                status = ExportStatus.AVAILABLE
-            )
+            val existingEntry =
+                Export(
+                    id = id,
+                    studyId = studyId,
+                    status = ExportStatus.AVAILABLE,
+                )
 
-            val newEntry = Export(
-                id = id,
-                studyId = studyId,
-                status = ExportStatus.IN_PROGRESS
-            )
+            val newEntry =
+                Export(
+                    id = id,
+                    studyId = studyId,
+                    status = ExportStatus.IN_PROGRESS,
+                )
 
             every { command.entry } returns newEntry
-            every { repository.findByIdAndStudyId( id, studyId ) } returns existingEntry
+            every { repository.findByIdAndStudyId(id, studyId) } returns existingEntry
 
-            val sut = ExportServiceImpl( repository, invoker, fileStorage )
-            sut.createExport( command )
+            val sut = ExportServiceImpl(repository, invoker, fileStorage)
+            sut.createExport(command)
 
-            verify( exactly = 0 ) { repository.save( any() ) }
-            verify( exactly = 0 ) { invoker.invoke( any() ) }
+            verify(exactly = 0) { repository.save(any()) }
+            verify(exactly = 0) { invoker.invoke(any()) }
         }
 
         @Test
         fun `should invoke command and save entry`() {
-            val entry = Export(
-                id = UUID.randomUUID().stringRepresentation,
-                studyId = UUID.randomUUID().stringRepresentation,
-                status = ExportStatus.IN_PROGRESS
-            )
+            val entry =
+                Export(
+                    id = UUID.randomUUID().stringRepresentation,
+                    studyId = UUID.randomUUID().stringRepresentation,
+                    status = ExportStatus.IN_PROGRESS,
+                )
 
             every { command.entry } returns entry
-            every { repository.findByIdAndStudyId( entry.id, entry.studyId ) } returns null
-            every { invoker.invoke( command ) } answers { nothing }
-            every { repository.save( entry ) } returns entry
+            every { repository.findByIdAndStudyId(entry.id, entry.studyId) } returns null
+            every { invoker.invoke(command) } answers { nothing }
+            every { repository.save(entry) } returns entry
 
-            val sut = ExportServiceImpl( repository, invoker, fileStorage )
-            sut.createExport( command )
+            val sut = ExportServiceImpl(repository, invoker, fileStorage)
+            sut.createExport(command)
 
-            verify { invoker.invoke( command ) }
-            verify { repository.save( entry ) }
+            verify { invoker.invoke(command) }
+            verify { repository.save(entry) }
         }
     }
 
     @Nested
-    inner class DeleteExport
-    {
+    inner class DeleteExport {
         @Test
-        fun `should throw if export is in progress`()
-        {
+        fun `should throw if export is in progress`() {
             val id = UUID.randomUUID()
             val studyId = UUID.randomUUID()
 
-            val entry = Export(
-                id = id.stringRepresentation,
-                studyId = studyId.stringRepresentation,
-                status = ExportStatus.IN_PROGRESS
-            )
+            val entry =
+                Export(
+                    id = id.stringRepresentation,
+                    studyId = studyId.stringRepresentation,
+                    status = ExportStatus.IN_PROGRESS,
+                )
 
-            every { repository.findByIdAndStudyId( any(), any() ) } returns entry
+            every { repository.findByIdAndStudyId(any(), any()) } returns entry
 
-            val sut = ExportServiceImpl( repository, invoker, fileStorage )
-            assertFailsWith<ConflictException> { sut.deleteExport( id, studyId ) }
+            val sut = ExportServiceImpl(repository, invoker, fileStorage)
+            assertFailsWith<ConflictException> { sut.deleteExport(id, studyId) }
 
-            verify( exactly = 0 ) { repository.delete( any() ) }
-            verify( exactly = 0 ) { fileStorage.deleteFile( any() ) }
+            verify(exactly = 0) { repository.delete(any()) }
+            verify(exactly = 0) { fileStorage.deleteFile(any()) }
         }
 
         @Test
-        fun `should throw if entry doesn't exist`()
-        {
+        fun `should throw if entry doesn't exist`() {
             val id = UUID.randomUUID()
             val studyId = UUID.randomUUID()
 
-            every { repository.findByIdAndStudyId( any(), any() ) } returns null
+            every { repository.findByIdAndStudyId(any(), any()) } returns null
 
-            val sut = ExportServiceImpl( repository, invoker, fileStorage )
-            assertFailsWith<IllegalArgumentException> { sut.deleteExport( id, studyId ) }
+            val sut = ExportServiceImpl(repository, invoker, fileStorage)
+            assertFailsWith<IllegalArgumentException> { sut.deleteExport(id, studyId) }
 
-            verify( exactly = 0 ) { repository.delete( any() ) }
-            verify( exactly = 0 ) { fileStorage.deleteFile( any() ) }
+            verify(exactly = 0) { repository.delete(any()) }
+            verify(exactly = 0) { fileStorage.deleteFile(any()) }
         }
 
         @Test
-        fun `should delete export and file`()
-        {
+        fun `should delete export and file`() {
             val id = UUID.randomUUID()
             val studyId = UUID.randomUUID()
 
-            val entry = Export(
-                id = id.stringRepresentation,
-                studyId = studyId.stringRepresentation,
-                status = ExportStatus.AVAILABLE
-            )
+            val entry =
+                Export(
+                    id = id.stringRepresentation,
+                    studyId = studyId.stringRepresentation,
+                    status = ExportStatus.AVAILABLE,
+                )
 
-            every { repository.findByIdAndStudyId( any(), any() ) } returns entry
+            every { repository.findByIdAndStudyId(any(), any()) } returns entry
             every { repository.delete(entry) } answers { nothing }
-            every { fileStorage.deleteFile( entry.fileName ) } returns true
+            every { fileStorage.deleteFile(entry.fileName) } returns true
 
-            val sut = ExportServiceImpl( repository, invoker, fileStorage )
+            val sut = ExportServiceImpl(repository, invoker, fileStorage)
             sut.deleteExport(id, studyId)
 
-            verify { repository.delete( entry ) }
-            verify { fileStorage.deleteFile( entry.fileName ) }
+            verify { repository.delete(entry) }
+            verify { fileStorage.deleteFile(entry.fileName) }
         }
     }
 }

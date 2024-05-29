@@ -17,10 +17,11 @@ import org.springframework.util.StringUtils
  * The Class [DeviceRegistrationDeserializer].
  * The [DeviceRegistrationDeserializer] implements the serialization logic for [DeviceRegistration].
  */
-class DeviceRegistrationDeserializer(private val validationMessages: MessageBase): JsonDeserializer<DeviceRegistration>()
-{
-    companion object
-    {
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
+class DeviceRegistrationDeserializer(
+    private val validationMessages: MessageBase,
+) : JsonDeserializer<DeviceRegistration>() {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
@@ -32,34 +33,33 @@ class DeviceRegistrationDeserializer(private val validationMessages: MessageBase
      * Also, if the [DeviceRegistration] contains invalid format.
      * @return The deserialized [DeviceRegistration] object.
      */
-    override fun deserialize(jsonParser: JsonParser?, deserializationContext: DeserializationContext?): DeviceRegistration
-    {
+    override fun deserialize(
+        jsonParser: JsonParser?,
+        deserializationContext: DeserializationContext?,
+    ): DeviceRegistration {
         val deviceRegistration: String
-        try
-        {
-            deviceRegistration =  jsonParser?.codec?.readTree<TreeNode>(jsonParser).toString()
+        try {
+            deviceRegistration = jsonParser?.codec?.readTree<TreeNode>(jsonParser).toString()
 
-            if (!StringUtils.hasLength(deviceRegistration))
-            {
+            if (!StringUtils.hasLength(deviceRegistration)) {
                 LOGGER.error("The core DeviceRegistration cannot be blank or empty.")
                 throw SerializationException(validationMessages.get("protocol.device_reg.deserialization.empty"))
             }
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The core DeviceRegistration contains bad format. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("protocol.device_reg.deserialization.bad_format", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("protocol.device_reg.deserialization.bad_format", ex.message.toString()),
+            )
         }
 
         val parsed: DeviceRegistration
-        try
-        {
+        try {
             parsed = JSON.decodeFromString(deviceRegistration)
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The core DeviceRegistration serializer is not valid. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("protocol.device_reg.deserialization.error", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("protocol.device_reg.deserialization.error", ex.message.toString()),
+            )
         }
 
         return parsed

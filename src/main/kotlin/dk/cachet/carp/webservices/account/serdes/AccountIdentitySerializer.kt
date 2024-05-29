@@ -15,10 +15,9 @@ import org.apache.logging.log4j.Logger
  * The Class [AccountIdentitySerializer].
  * The [AccountIdentitySerializer] implements the serialization mechanism for the [AccountIdentity].
  */
-class AccountIdentitySerializer(private val validationMessages: MessageBase): JsonSerializer<AccountIdentity>()
-{
-    companion object
-    {
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
+class AccountIdentitySerializer(private val validationMessages: MessageBase) : JsonSerializer<AccountIdentity>() {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
@@ -30,21 +29,20 @@ class AccountIdentitySerializer(private val validationMessages: MessageBase): Js
      * @param serializers The [serializers] for serializing the account identity.
      * @return The serialized account identity.
      */
-    override fun serialize(accountIdentity: AccountIdentity?, jsonGenerator: JsonGenerator?, serializers: SerializerProvider?)
-    {
-        if (accountIdentity == null)
-        {
+    override fun serialize(
+        accountIdentity: AccountIdentity?,
+        jsonGenerator: JsonGenerator?,
+        serializers: SerializerProvider?,
+    ) {
+        if (accountIdentity == null) {
             LOGGER.error("The core [AccountIdentity] request is null.")
             throw SerializationException(validationMessages.get("account.identity.request-object-null-value"))
         }
 
         val serialized: String
-        try
-        {
+        try {
             serialized = JSON.encodeToString(accountIdentity)
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The core [AccountIdentity] request is not valid. Exception: $ex")
             throw SerializationException(validationMessages.get("account.identity.request-serialization-not-valid"))
         }

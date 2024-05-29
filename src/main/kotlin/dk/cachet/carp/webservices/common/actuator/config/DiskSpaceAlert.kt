@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.util.ObjectUtils
+import java.util.*
 
 /**
  * The Configuration Class [DiskSpaceAlert].
@@ -21,37 +22,36 @@ import org.springframework.util.ObjectUtils
 @Configuration
 @EnableScheduling
 @ConditionalOnProperty(value = ["disk.space.alert.enabled"], havingValue = "true")
-class DiskSpaceAlert
-(
+class DiskSpaceAlert(
     private val diskSpace: IDiskSpaceStatus,
     private val notificationService: INotificationService,
     private val emailNotificationService: EmailInvitationService,
     @Value("\${alert.admin-email}") private val alertEmail: String,
-    @Value("\${alert.subject}") private val alertWarning: String
-)
-{
-    companion object
-    {
+    @Value("\${alert.subject}") private val alertWarning: String,
+) {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
         private const val LIMIT_PERCENT = 80
     }
 
     @Scheduled(fixedDelay = 30 * 60 * 1000)
-    fun checkRegularDiskSpace()
-    {
+    @Suppress("MagicNumber")
+    fun checkRegularDiskSpace() {
         val statusHealth = diskSpace.statusHealth()
         val diskSpaceHealth = JSONObject(diskSpace.statusDetails())
         val freeStorageSpace: String = diskSpaceHealth.getString("free")
         val totalStorageSpace: String = diskSpaceHealth.getString("total")
 
-        if ("UP" == statusHealth.code && !ObjectUtils.isEmpty(diskSpaceHealth))
-        {
+        if ("UP" == statusHealth.code && !ObjectUtils.isEmpty(diskSpaceHealth)) {
             val usableSpace = totalStorageSpace.toDouble() - freeStorageSpace.toDouble()
             val usablePercentage = usableSpace / totalStorageSpace.toDouble()
-            if (totalStorageSpace.toDouble() > 0 && (usablePercentage * 100).toInt() > LIMIT_PERCENT)
-            {
+            if (totalStorageSpace.toDouble() > 0 && (usablePercentage * 100).toInt() > LIMIT_PERCENT) {
                 val spaceUsageNotification =
-                    String.format("WARNING: HDD has reached %d%% disk space usage!", (usablePercentage * 100).toInt())
+                    String.format(
+                        Locale.getDefault(),
+                        "WARNING: HDD has reached %d%% disk space usage!",
+                        (usablePercentage * 100).toInt(),
+                    )
                 LOGGER.warn("WARNING: Disk space has reached {} of usage!", (usablePercentage * 100).toInt())
                 notificationService.sendAlertOrGeneralNotification(spaceUsageNotification, TeamsChannel.HEARTBEAT)
                 emailNotificationService.sendNotificationEmail(alertEmail, alertWarning, spaceUsageNotification)
