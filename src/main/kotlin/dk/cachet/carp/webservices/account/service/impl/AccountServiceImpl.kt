@@ -22,8 +22,11 @@ class AccountServiceImpl(
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
-    override suspend fun invite(identity: AccountIdentity, role: Role, redirectUri: String?): Account
-    {
+    override suspend fun invite(
+        identity: AccountIdentity,
+        role: Role,
+        redirectUri: String?,
+    ): Account {
         var isNewAccount = false
         var account = findByAccountIdentity(identity)
 

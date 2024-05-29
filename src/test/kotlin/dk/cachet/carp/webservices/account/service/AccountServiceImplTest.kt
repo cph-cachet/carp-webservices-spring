@@ -92,7 +92,7 @@ class AccountServiceImplTest {
                 sut.invite(accountIdentity, Role.PARTICIPANT)
 
                 coVerify(exactly = 1) { issuerFacade.executeActions(account, null, RequiredActions.forNewAccounts) }
-        }
+            }
 
         @Test
         fun `should not send an invitation if the account has no email`() =
@@ -114,7 +114,7 @@ class AccountServiceImplTest {
                 sut.invite(accountIdentity, Role.PARTICIPANT)
 
                 coVerify(exactly = 0) { issuerFacade.executeActions(any(), any(), any()) }
-        }
+            }
     }
 
     @Nested

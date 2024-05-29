@@ -30,7 +30,7 @@ interface IssuerFacade {
     suspend fun executeActions(
         account: Account,
         redirectUri: String?,
-        actions: List<RequiredActions>
+        actions: List<RequiredActions>,
     )
 
     suspend fun recoverAccount(

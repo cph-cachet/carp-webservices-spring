@@ -23,7 +23,7 @@ data class UserRepresentation(
                 firstName = account.firstName,
                 lastName = account.lastName,
                 email = account.email,
-                attributes = account.carpClaims?.groupBy( { Claim.userAttributeName( it::class ) }, { it.value } )
+                attributes = account.carpClaims?.groupBy({ Claim.userAttributeName(it::class) }, { it.value }),
             )
     }
 
@@ -54,10 +54,11 @@ enum class RequiredActions {
     ;
 
     companion object {
-        val forNewAccounts = listOf(
-            VERIFY_EMAIL,
-            UPDATE_PASSWORD,
-            UPDATE_PROFILE
-        )
+        val forNewAccounts =
+            listOf(
+                VERIFY_EMAIL,
+                UPDATE_PASSWORD,
+                UPDATE_PROFILE,
+            )
     }
 }

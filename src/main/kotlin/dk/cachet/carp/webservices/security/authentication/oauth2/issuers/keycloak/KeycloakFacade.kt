@@ -180,7 +180,7 @@ class KeycloakFacade(
     override suspend fun executeActions(
         account: Account,
         redirectUri: String?,
-        actions: List<RequiredActions>
+        actions: List<RequiredActions>,
     ) {
         val token = authenticate().accessToken
 

@@ -48,9 +48,8 @@ class ProxiesMethodSecurityExpressionRoot(
     private val participantRepository: CoreParticipantRepository,
     private val auth: AuthenticationService,
 ) : SpringAddonsMethodSecurityExpressionRoot() {
-    fun canManageStudy(
-        studyId: UUID?
-    ): Boolean = studyId != null && auth.getClaims().contains(Claim.ManageStudy(studyId)) || isAdmin()
+    fun canManageStudy(studyId: UUID?): Boolean =
+        studyId != null && auth.getClaims().contains(Claim.ManageStudy(studyId)) || isAdmin()
 
     fun isProtocolOwner(protocolId: UUID?): Boolean =
         protocolId != null && auth.getClaims().contains(Claim.ProtocolOwner(protocolId)) || isAdmin()
