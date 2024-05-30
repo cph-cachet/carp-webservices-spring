@@ -129,12 +129,12 @@ class CoreDataStreamService(
         when {
             fromSequenceId < 0 -> throw IllegalArgumentException(
                 "[fromSequenceId] is negative for requested dataStream " +
-                    "with studyDeploymentId ${dataStream.studyDeploymentId.stringRepresentation}",
+                        "with studyDeploymentId ${dataStream.studyDeploymentId.stringRepresentation}",
             )
 
             toSequenceIdInclusive != null && fromSequenceId > toSequenceIdInclusive -> throw IllegalArgumentException(
                 "[toSequenceIdInclusive] is smaller than [fromSequenceId] for requested dataStream " +
-                    "with studyDeploymentId ${dataStream.studyDeploymentId.stringRepresentation}",
+                        "with studyDeploymentId ${dataStream.studyDeploymentId.stringRepresentation}",
             )
         }
 
@@ -143,7 +143,7 @@ class CoreDataStreamService(
 
         require(configOptional.isPresent) {
             "No configuration was found " +
-                "for studyDeploymentId ${dataStream.studyDeploymentId.stringRepresentation} or study is closed"
+                    "for studyDeploymentId ${dataStream.studyDeploymentId.stringRepresentation} or study is closed"
         }
 
         val config = mapToCoreConfig(configOptional.get().config!!)
