@@ -10,11 +10,6 @@ class EmailTemplateUtil(private val templateEngine: TemplateEngine)
 {
     companion object
     {
-        const val INLINE_CACHET_LOGO_ID = "logo"
-        const val INLINE_CPH_LOGO_ID = "cph"
-        const val INLINE_DTU_LOGO_ID = "dtu"
-        const val INLINE_H_LOGO_ID = "h"
-        const val INLINE_KU_LOGO_ID = "ku"
         const val INLINE_STUDY_INVITATION_ID = "inv"
         const val INLINE_STUDY_DESCRIPTION_ID = "desc"
         const val NOTIFICATION_EMAIL = "notification_email"
@@ -49,12 +44,6 @@ class EmailTemplateUtil(private val templateEngine: TemplateEngine)
 
     private fun getContextWithDefaults(): Context
     {
-        val context = Context()
-        context.setVariable(INLINE_CACHET_LOGO_ID, INLINE_CACHET_LOGO_ID)
-        context.setVariable(INLINE_CPH_LOGO_ID, INLINE_CPH_LOGO_ID)
-        context.setVariable(INLINE_DTU_LOGO_ID, INLINE_DTU_LOGO_ID)
-        context.setVariable(INLINE_H_LOGO_ID, INLINE_H_LOGO_ID)
-        context.setVariable(INLINE_KU_LOGO_ID, INLINE_KU_LOGO_ID)
-        return context
+        return Context()
     }
 }

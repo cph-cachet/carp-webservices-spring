@@ -78,7 +78,7 @@ class EmailServiceImpl(
             mimeMessageHelper.setText(mailContent, true)
             mimeMessageHelper.setSubject(ifNullOrEmpty(studyNameAsSubject))
             mimeMessageHelper.setFrom(environment.getProperty("spring.mail.from")!!)
-            this.addInlineLogosToMessage(mimeMessageHelper)
+//            this.addInlineLogosToMessage(mimeMessageHelper)
 
             this.mailSender.send(mimeMessage)
         }
@@ -121,37 +121,4 @@ class EmailServiceImpl(
         return if (value.isEmpty() or value.isBlank()) DEFAULT_SUBJECT else value
     }
 
-    private fun getCachetLogo(): ByteArray
-    {
-        return IOUtils.toByteArray(ClassPathResource("image/cachet.png").inputStream)
-    }
-
-    private fun getCPHLogo(): ByteArray
-    {
-        return IOUtils.toByteArray(ClassPathResource("image/footer_CPH.png").inputStream)
-    }
-
-    private fun getDTULogo(): ByteArray
-    {
-        return IOUtils.toByteArray(ClassPathResource("image/footer_CPH.png").inputStream)
-    }
-
-    private fun getHLogo(): ByteArray
-    {
-        return IOUtils.toByteArray(ClassPathResource("image/footer_H.png").inputStream)
-    }
-
-    private fun getKULogo(): ByteArray
-    {
-        return IOUtils.toByteArray(ClassPathResource("image/footer_KU.png").inputStream)
-    }
-
-    private fun addInlineLogosToMessage(mimeMessageHelper: MimeMessageHelper)
-    {
-        mimeMessageHelper.addInline(EmailTemplateUtil.INLINE_CACHET_LOGO_ID, ByteArrayResource(getCachetLogo()), EmailTemplateUtil.PNG_CONTENT_TYPE)
-        mimeMessageHelper.addInline(EmailTemplateUtil.INLINE_CPH_LOGO_ID, ByteArrayResource(getCPHLogo()), EmailTemplateUtil.PNG_CONTENT_TYPE)
-        mimeMessageHelper.addInline(EmailTemplateUtil.INLINE_DTU_LOGO_ID, ByteArrayResource(getDTULogo()), EmailTemplateUtil.PNG_CONTENT_TYPE)
-        mimeMessageHelper.addInline(EmailTemplateUtil.INLINE_H_LOGO_ID, ByteArrayResource(getHLogo()), EmailTemplateUtil.PNG_CONTENT_TYPE)
-        mimeMessageHelper.addInline(EmailTemplateUtil.INLINE_KU_LOGO_ID, ByteArrayResource(getKULogo()), EmailTemplateUtil.PNG_CONTENT_TYPE)
-    }
 }
