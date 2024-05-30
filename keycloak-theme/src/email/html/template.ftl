@@ -1,7 +1,7 @@
 <#macro emailLayout>
 <html>
     <body>
-        <h2>${kcSanitize(msg("welcomeTitle"))?no_esc}</h2>
+        <h3 style="text-align: center;"><strong>${kcSanitize(msg("welcomeTitle"))?no_esc}</strong></h3>
         <#nested>
         <a href="https://carp.cachet.dk/">
             <span>Copenhagen Research Platform (CARP)</span>
