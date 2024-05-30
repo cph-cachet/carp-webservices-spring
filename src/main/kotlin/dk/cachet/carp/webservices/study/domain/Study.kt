@@ -12,15 +12,13 @@ import org.hibernate.type.SqlTypes
 
 @Entity(name = "studies")
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
-data class Study
-(
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        val id: Int = 0,
-
-        /** The core StudyProtocolSnapshot class ([snapshot]) as a JsonNode. */
-        @JdbcTypeCode(SqlTypes.JSON)
-        @Column(columnDefinition = "jsonb")
-        @Type(JsonBinaryType::class)
-        var snapshot: JsonNode? = null,
-): Auditable()
+data class Study(
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Int = 0,
+    /** The core StudyProtocolSnapshot class ([snapshot]) as a JsonNode. */
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    @Type(JsonBinaryType::class)
+    var snapshot: JsonNode? = null,
+) : Auditable()

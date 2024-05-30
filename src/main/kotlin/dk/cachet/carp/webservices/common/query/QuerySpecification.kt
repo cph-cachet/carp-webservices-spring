@@ -6,14 +6,14 @@ import jakarta.persistence.criteria.*
 import org.springframework.data.jpa.domain.Specification
 import java.time.Instant
 import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 import java.util.stream.Collectors
 
 /**
  * The Enum Class [QueryOperation].
  * The [QueryOperation] implements the operation execution for the nested queries.
  */
-enum class QueryOperation constructor(private val operator: ComparisonOperator)
-{
+enum class QueryOperation(private val operator: ComparisonOperator) {
     EQUAL(RSQLOperators.EQUAL),
     NOT_EQUAL(RSQLOperators.NOT_EQUAL),
     GREATER_THAN(RSQLOperators.GREATER_THAN),
@@ -21,16 +21,13 @@ enum class QueryOperation constructor(private val operator: ComparisonOperator)
     LESS_THAN(RSQLOperators.LESS_THAN),
     LESS_THAN_OR_EQUAL(RSQLOperators.LESS_THAN_OR_EQUAL),
     IN(RSQLOperators.IN),
-    NOT_IN(RSQLOperators.NOT_IN);
+    NOT_IN(RSQLOperators.NOT_IN),
+    ;
 
-    companion object
-    {
-        fun getSimpleOperator(operator: ComparisonOperator?): QueryOperation?
-        {
-            for (operation in values())
-            {
-                if (operation.operator === operator)
-                {
+    companion object {
+        fun getSimpleOperator(operator: ComparisonOperator?): QueryOperation? {
+            for (operation in entries) {
+                if (operation.operator === operator) {
                     return operation
                 }
             }
@@ -50,10 +47,12 @@ enum class QueryOperation constructor(private val operator: ComparisonOperator)
  * @param operator ComparisonOperator? The operator used in the query, e.g. ==, >=, <=, !=, etc.
  * @param arguments List? The list or arguments to query against the property.
  */
-class QuerySpecification<T>(private var property: String?, private val operator: ComparisonOperator?, private val arguments: List<String>?): Specification<T>
-{
-    companion object
-    {
+class QuerySpecification<T>(
+    private var property: String?,
+    private val operator: ComparisonOperator?,
+    private val arguments: List<String>?,
+) : Specification<T> {
+    companion object {
         /** The Constant [POSTGRES_JSON_EXTRACT_FUNCTION]. */
         const val POSTGRES_JSON_EXTRACT_FUNCTION = "jsonb_extract_path_text"
     }
@@ -65,82 +64,85 @@ class QuerySpecification<T>(private var property: String?, private val operator:
      * @param query The [query] parameter to predicate.
      * @param builder The [builder] parameter to build the predicate.
      */
-    override fun toPredicate(root: Root<T>, query: CriteriaQuery<*>, builder: CriteriaBuilder): Predicate?
-    {
+    @Suppress("LongMethod", "CyclomaticComplexMethod")
+    override fun toPredicate(
+        root: Root<T>,
+        query: CriteriaQuery<*>,
+        builder: CriteriaBuilder,
+    ): Predicate? {
         // If this is a nested query, explode the string into its constituent parts and build an Expression.
         val nestedProperties = extractNestedProperties(property, root, builder)
         val propertyQuery: Expression<String> = nestedProperties ?: root.get(QueryUtil.toCamelCase(property!!))
         val allArguments = if (nestedProperties == null) castArguments(root) else arguments
         val firstArgument: Any = allArguments!!.first()
 
-        when (QueryOperation.getSimpleOperator(operator))
-        {
+        return when (QueryOperation.getSimpleOperator(operator)) {
             QueryOperation.EQUAL ->
-            {
-                return when (firstArgument)
                 {
-                    is String -> builder.like(propertyQuery, firstArgument.toString().replace('*', '%'))
-                    else -> builder.equal(propertyQuery, firstArgument)
+                    return when (firstArgument) {
+                        is String -> builder.like(propertyQuery, firstArgument.toString().replace('*', '%'))
+                        else -> builder.equal(propertyQuery, firstArgument)
+                    }
                 }
-            }
 
             QueryOperation.NOT_EQUAL ->
-            {
-                return when (firstArgument) {
-                    is String -> builder.notLike(propertyQuery, firstArgument.toString().replace('*', '%'))
-                    else -> builder.notEqual(propertyQuery, firstArgument)
+                {
+                    return when (firstArgument) {
+                        is String -> builder.notLike(propertyQuery, firstArgument.toString().replace('*', '%'))
+                        else -> builder.notEqual(propertyQuery, firstArgument)
+                    }
                 }
-            }
 
             QueryOperation.GREATER_THAN ->
-            {
-                return when (firstArgument)
                 {
-                    is Instant -> builder.greaterThan(root.get(QueryUtil.toCamelCase(property!!)), firstArgument)
-                    else -> builder.greaterThan(propertyQuery, firstArgument.toString())
+                    return when (firstArgument) {
+                        is Instant -> builder.greaterThan(root.get(QueryUtil.toCamelCase(property!!)), firstArgument)
+                        else -> builder.greaterThan(propertyQuery, firstArgument.toString())
+                    }
                 }
-            }
 
             QueryOperation.GREATER_THAN_OR_EQUAL ->
-            {
-                return when (firstArgument)
                 {
-                    is Instant -> builder.greaterThanOrEqualTo(root.get(QueryUtil.toCamelCase(property!!)), firstArgument)
-                    else -> builder.greaterThanOrEqualTo(propertyQuery, firstArgument.toString())
+                    return when (firstArgument) {
+                        is Instant ->
+                            builder.greaterThanOrEqualTo(
+                                root.get(QueryUtil.toCamelCase(property!!)),
+                                firstArgument,
+                            )
+                        else -> builder.greaterThanOrEqualTo(propertyQuery, firstArgument.toString())
+                    }
                 }
-            }
 
             QueryOperation.LESS_THAN ->
-            {
-                return when (firstArgument)
                 {
-                    is Instant -> builder.lessThan(root.get(QueryUtil.toCamelCase(property!!)), firstArgument)
-                    else -> builder.lessThan(propertyQuery, firstArgument.toString())
+                    return when (firstArgument) {
+                        is Instant -> builder.lessThan(root.get(QueryUtil.toCamelCase(property!!)), firstArgument)
+                        else -> builder.lessThan(propertyQuery, firstArgument.toString())
+                    }
                 }
-            }
 
             QueryOperation.LESS_THAN_OR_EQUAL ->
-            {
-                return when (firstArgument)
                 {
-                    is Instant -> builder.lessThanOrEqualTo(root.get(QueryUtil.toCamelCase(property!!)), firstArgument)
-                    else -> builder.lessThanOrEqualTo(propertyQuery, firstArgument.toString())
+                    return when (firstArgument) {
+                        is Instant ->
+                            builder.lessThanOrEqualTo(
+                                root.get(QueryUtil.toCamelCase(property!!)),
+                                firstArgument,
+                            )
+                        else -> builder.lessThanOrEqualTo(propertyQuery, firstArgument.toString())
+                    }
                 }
-            }
             QueryOperation.IN -> return propertyQuery.`in`(allArguments)
             QueryOperation.NOT_IN -> return builder.not(propertyQuery.`in`(allArguments))
-            else -> {}
+            else -> null
         }
-        return null
     }
 
-    private fun castArguments(root: Root<T>): List<Any>
-    {
+    private fun castArguments(root: Root<T>): List<Any> {
         val type = root.get<Any>(QueryUtil.toCamelCase(property!!)).javaType
 
         return arguments!!.stream().map { arg ->
-            when
-            {
+            when {
                 (type == java.lang.Integer::class.java || type == Int::class.java) -> arg.toInt()
                 (type == java.lang.Long::class.java || type == Long::class.java) -> arg.toLong()
                 else -> parseString(arg)
@@ -148,29 +150,32 @@ class QuerySpecification<T>(private var property: String?, private val operator:
         }.collect(Collectors.toList())
     }
 
-    private fun parseString(arg: String): Any
-    {
-        return try
-        {
+    private fun parseString(arg: String): Any {
+        return try {
             // If the string looks like a date, convert it to an Instant.
             DateTimeFormatter.ISO_ZONED_DATE_TIME.parse(arg, Instant::from)
-
-        } catch (e: Exception)
-        {
+        } catch (e: DateTimeParseException) {
             // Otherwise return the string as normal.
             arg
         }
     }
 
-    private fun extractNestedProperties(propertiesString: String?, root: Root<T>, builder: CriteriaBuilder): Expression<String>?
-    {
+    private fun extractNestedProperties(
+        propertiesString: String?,
+        root: Root<T>,
+        builder: CriteriaBuilder,
+    ): Expression<String>? {
         val nestedProperties = propertiesString!!.split('.')
-        if (nestedProperties.size > 1)
-        {
+        if (nestedProperties.size > 1) {
             val rootProperty = root.get<Any>(QueryUtil.toCamelCase(nestedProperties.first()))
             val propertyExpressions: List<Expression<String>> = nestedProperties.drop(1).map { builder.literal(it) }
 
-            return builder.function(POSTGRES_JSON_EXTRACT_FUNCTION, String::class.java, rootProperty, *propertyExpressions.toTypedArray())
+            return builder.function(
+                POSTGRES_JSON_EXTRACT_FUNCTION,
+                String::class.java,
+                rootProperty,
+                *propertyExpressions.toTypedArray(),
+            )
         }
         return null
     }

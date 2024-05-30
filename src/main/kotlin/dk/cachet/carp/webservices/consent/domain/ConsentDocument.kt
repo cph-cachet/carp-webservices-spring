@@ -18,20 +18,17 @@ import java.io.Serializable
  */
 @Entity(name = "consent_documents")
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
-data class ConsentDocument
-(
-        /** The consent document [id]. */
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        val id: Int = 0,
-
-        /** The [deploymentId] of the consent document. */
-        @SerializedName("deployment_id")
-        var deploymentId: String? = null,
-
-        /** The [data] object containing the json object parsed. */
-        @JdbcTypeCode(SqlTypes.JSON)
-        @Column(columnDefinition = "jsonb")
-        @Type(JsonBinaryType::class)
-        var data: JsonNode? = null
-): Auditable(), Serializable
+data class ConsentDocument(
+    /** The consent document [id]. */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Int = 0,
+    /** The [deploymentId] of the consent document. */
+    @SerializedName("deployment_id")
+    var deploymentId: String? = null,
+    /** The [data] object containing the json object parsed. */
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    @Type(JsonBinaryType::class)
+    var data: JsonNode? = null,
+) : Auditable(), Serializable

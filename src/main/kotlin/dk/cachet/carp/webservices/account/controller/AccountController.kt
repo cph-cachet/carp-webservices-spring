@@ -18,10 +18,8 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping(ACCOUNT_BASE)
-class AccountController(private val accountService: AccountService)
-{
-    companion object
-    {
+class AccountController(private val accountService: AccountService) {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
 
         const val ACCOUNT_BASE = "/api/accounts"
@@ -33,8 +31,9 @@ class AccountController(private val accountService: AccountService)
     @PostMapping(INVITE)
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('RESEARCHER') and hasRole(#request.role)")
-    suspend fun invite(@Valid @RequestBody request: AccountRequest)
-    {
+    suspend fun invite(
+        @Valid @RequestBody request: AccountRequest,
+    ) {
         LOGGER.info("Start POST: $ACCOUNT_BASE$INVITE")
         accountService.invite(AccountIdentity.fromEmailAddress(request.emailAddress), request.role)
     }
@@ -42,12 +41,12 @@ class AccountController(private val accountService: AccountService)
     @PostMapping(ROLE)
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('RESEARCHER') and hasRole(#request.role)")
-    suspend fun role(@Valid @RequestBody request: AccountRequest): ResponseEntity<Any>
-    {
+    suspend fun role(
+        @Valid @RequestBody request: AccountRequest,
+    ): ResponseEntity<Any> {
         LOGGER.info("Start POST: $ACCOUNT_BASE$ROLE")
 
-        if ( !accountService.hasRoleByEmail( EmailAddress( request.emailAddress ), request.role ) )
-        {
+        if (!accountService.hasRoleByEmail(EmailAddress(request.emailAddress), request.role)) {
             return ResponseEntity(HttpStatus.NOT_FOUND)
         }
 
@@ -57,8 +56,9 @@ class AccountController(private val accountService: AccountService)
     @GetMapping(ACCOUNT)
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('RESEARCHER')")
-    suspend fun info(@PathVariable(PathVariableName.ACCOUNT_ID) accountId: UUID): Account?
-    {
+    suspend fun info(
+        @PathVariable(PathVariableName.ACCOUNT_ID) accountId: UUID,
+    ): Account? {
         LOGGER.info("Start GET: $ACCOUNT_BASE$ACCOUNT")
         return accountService.findByUUID(accountId)
     }

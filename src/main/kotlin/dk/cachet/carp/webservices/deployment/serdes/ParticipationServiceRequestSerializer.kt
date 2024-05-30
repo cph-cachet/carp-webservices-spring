@@ -10,30 +10,36 @@ import dk.cachet.carp.webservices.common.exception.serialization.SerializationEx
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 
-class ParticipationServiceRequestSerializer(private val validationMessages: MessageBase): JsonSerializer<ParticipationServiceRequest<*>>()
-{
-    companion object
-    {
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
+class ParticipationServiceRequestSerializer(private val validationMessages: MessageBase) :
+    JsonSerializer<ParticipationServiceRequest<*>>() {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
-    override fun serialize(value: ParticipationServiceRequest<*>?, gen: JsonGenerator?, serializers: SerializerProvider?)
-    {
-        if (value == null)
-        {
+    override fun serialize(
+        value: ParticipationServiceRequest<*>?,
+        gen: JsonGenerator?,
+        serializers: SerializerProvider?,
+    ) {
+        if (value == null) {
             LOGGER.error("The ParticipationServiceRequest value is null.")
-            throw SerializationException(validationMessages.get("deployment.participation_service_request.serialization.empty"))
+            throw SerializationException(
+                validationMessages.get("deployment.participation_service_request.serialization.empty"),
+            )
         }
 
         val serialized: String
-        try
-        {
+        try {
             serialized = JSON.encodeToString(ParticipationServiceRequest.Serializer, value)
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The ParticipationServiceRequest is not valid. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("deployment.participation_service_request.serialization.error", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get(
+                    "deployment.participation_service_request.serialization.error",
+                    ex.message.toString(),
+                ),
+            )
         }
 
         gen!!.writeRawValue(serialized)

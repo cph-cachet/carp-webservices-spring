@@ -9,30 +9,28 @@ import org.springframework.stereotype.Service
 
 @Service
 class RecruitmentServiceAuthorizer(
-   private val auth: AuthorizationService
-) : ApplicationServiceAuthorizer<RecruitmentService, RecruitmentServiceRequest<*>>
-{
+    private val auth: AuthorizationService,
+) : ApplicationServiceAuthorizer<RecruitmentService, RecruitmentServiceRequest<*>> {
     override fun RecruitmentServiceRequest<*>.authorize() =
-        when ( this )
-        {
-            is RecruitmentServiceRequest.AddParticipantByEmailAddress -> auth.require( Claim.ManageStudy( studyId ) )
-            is RecruitmentServiceRequest.AddParticipantByUsername -> auth.require( Claim.ManageStudy( studyId ) )
-            is RecruitmentServiceRequest.GetParticipant -> auth.require( Claim.ManageStudy( studyId ) )
-            is RecruitmentServiceRequest.GetParticipants -> auth.require( Claim.ManageStudy( studyId ) )
-            is RecruitmentServiceRequest.InviteNewParticipantGroup -> auth.require( Claim.ManageStudy( studyId ) )
-            is RecruitmentServiceRequest.GetParticipantGroupStatusList -> auth.require( Claim.ManageStudy( studyId ) )
-            is RecruitmentServiceRequest.StopParticipantGroup -> auth.require( Claim.ManageStudy( studyId ) )
+        when (this) {
+            is RecruitmentServiceRequest.AddParticipantByEmailAddress -> auth.require(Claim.ManageStudy(studyId))
+            is RecruitmentServiceRequest.AddParticipantByUsername -> auth.require(Claim.ManageStudy(studyId))
+            is RecruitmentServiceRequest.GetParticipant -> auth.require(Claim.ManageStudy(studyId))
+            is RecruitmentServiceRequest.GetParticipants -> auth.require(Claim.ManageStudy(studyId))
+            is RecruitmentServiceRequest.InviteNewParticipantGroup -> auth.require(Claim.ManageStudy(studyId))
+            is RecruitmentServiceRequest.GetParticipantGroupStatusList -> auth.require(Claim.ManageStudy(studyId))
+            is RecruitmentServiceRequest.StopParticipantGroup -> auth.require(Claim.ManageStudy(studyId))
         }
 
-    override suspend fun RecruitmentServiceRequest<*>.changeClaimsOnSuccess(result: Any? ) =
-        when ( this )
-        {
+    override suspend fun RecruitmentServiceRequest<*>.changeClaimsOnSuccess(result: Any?) =
+        when (this) {
             is RecruitmentServiceRequest.AddParticipantByEmailAddress,
             is RecruitmentServiceRequest.AddParticipantByUsername,
             is RecruitmentServiceRequest.GetParticipant,
             is RecruitmentServiceRequest.GetParticipants,
             is RecruitmentServiceRequest.InviteNewParticipantGroup,
             is RecruitmentServiceRequest.GetParticipantGroupStatusList,
-            is RecruitmentServiceRequest.StopParticipantGroup -> Unit
+            is RecruitmentServiceRequest.StopParticipantGroup,
+            -> Unit
         }
 }

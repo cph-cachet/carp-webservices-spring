@@ -15,10 +15,9 @@ import org.apache.logging.log4j.Logger
  * The Class [ParticipantDataSerializer].
  * The [ParticipantDataSerializer] implements the serialization logic for [ParticipantData].
  */
-class ParticipantDataSerializer(private val validationMessages: MessageBase): JsonSerializer<ParticipantData>()
-{
-    companion object
-    {
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
+class ParticipantDataSerializer(private val validationMessages: MessageBase) : JsonSerializer<ParticipantData>() {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
@@ -32,23 +31,24 @@ class ParticipantDataSerializer(private val validationMessages: MessageBase): Js
      * Also, if the [ParticipantData] contains invalid format.
      * @return The serialization of deployment service request object.
      */
-    override fun serialize(value: ParticipantData?, gen: JsonGenerator?, serializers: SerializerProvider?)
-    {
-        if (value ==  null)
-        {
+    override fun serialize(
+        value: ParticipantData?,
+        gen: JsonGenerator?,
+        serializers: SerializerProvider?,
+    ) {
+        if (value == null) {
             LOGGER.error("The core ParticipantData is null.")
             throw SerializationException(validationMessages.get("deployment.participant_data.serialization.empty"))
         }
 
         val serialized: String
-        try
-        {
+        try {
             serialized = JSON.encodeToString(value)
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The core ParticipantData is not valid. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("deployment.participant_data.serialization.error", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("deployment.participant_data.serialization.error", ex.message.toString()),
+            )
         }
 
         gen!!.writeRawValue(serialized)

@@ -6,6 +6,6 @@ import kotlinx.datetime.Instant
 
 interface DataStreamService {
     val core: DataStreamServiceDecorator
-    fun getLatestUpdatedAt( deploymentId: UUID ): Instant?
 
+    fun getLatestUpdatedAt( deploymentId: UUID ): Instant?
 }

@@ -11,26 +11,24 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.BodyInserters
+import org.springframework.web.reactive.function.client.WebClient
 import java.io.IOException
+
 /**
  * The Class [NotificationServiceImpl].
  * The [NotificationServiceImpl] enables exception notifications [CarpErrorResponse] in Teams channel.
  */
 @Service
-class NotificationServiceImpl
-(
+class NotificationServiceImpl(
     private val environment: EnvironmentUtil,
     private val validationMessages: MessageBase,
     @Value("\${teams.webhook.client}") private val teamsClientChannel: String,
     @Value("\${teams.webhook.server}") private val teamsServerChannel: String,
     @Value("\${teams.webhook.heartbeat}") private val teamsHeartbeatChannel: String,
-    @Value("\${teams.webhook.dev}") private val teamsDevChannel: String
-): INotificationService
-{
-    companion object
-    {
+    @Value("\${teams.webhook.dev}") private val teamsDevChannel: String,
+) : INotificationService {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
         private const val NEW_LINE = "\n\n"
     }
@@ -40,16 +38,17 @@ class NotificationServiceImpl
      * @param notification The [notification] containing the message to send.
      * @param channelToSendTo The value of the Teams channel the message needs to be sent to.
      */
-    override fun sendAlertOrGeneralNotification(notification: String, channelToSendTo: TeamsChannel)
-    {
+    override fun sendAlertOrGeneralNotification(
+        notification: String,
+        channelToSendTo: TeamsChannel,
+    ) {
         val messageBuilder = StringBuilder()
 
         messageBuilder.append(notification)
         messageBuilder.append(NEW_LINE)
         messageBuilder.append(NEW_LINE)
         messageBuilder.append("Environment: ${environment.profile}")
-        when (channelToSendTo)
-        {
+        when (channelToSendTo) {
             TeamsChannel.CLIENT_ERRORS -> processException(messageBuilder.toString(), teamsClientChannel)
             TeamsChannel.SERVER_ERRORS -> processException(messageBuilder.toString(), teamsServerChannel)
             TeamsChannel.HEARTBEAT -> processException(messageBuilder.toString(), teamsHeartbeatChannel)
@@ -60,8 +59,8 @@ class NotificationServiceImpl
      * The [sendExceptionNotification] function sends a notification message with the given message.
      * @param errorResponse The errorResponse includes the error code, error message, and the error response.
      */
-    override fun sendExceptionNotification(errorResponse: CarpErrorResponse)
-    {
+    @Suppress("MagicNumber")
+    override fun sendExceptionNotification(errorResponse: CarpErrorResponse) {
         val messageBuilder = StringBuilder()
         messageBuilder.append("- Exception Code: ${errorResponse.statusCode}$NEW_LINE")
         messageBuilder.append("- Exception: ${errorResponse.exception}$NEW_LINE")
@@ -69,18 +68,13 @@ class NotificationServiceImpl
         messageBuilder.append("- Path: ${errorResponse.path}$NEW_LINE")
         messageBuilder.append("- Environment: ${environment.profile}$NEW_LINE")
 
-        if(environment.profile == EnvironmentProfile.PRODUCTION)
-        {
-            if (errorResponse.statusCode in 400..499)
-            {
+        if (environment.profile == EnvironmentProfile.PRODUCTION) {
+            if (errorResponse.statusCode in 400..499) {
                 processException(messageBuilder.toString(), teamsClientChannel)
-            }
-            else if (errorResponse.statusCode in 500..599)
-            {
+            } else if (errorResponse.statusCode in 500..599) {
                 processException(messageBuilder.toString(), teamsServerChannel)
             }
-        } else if (environment.profile == EnvironmentProfile.DEVELOPMENT)
-        {
+        } else if (environment.profile == EnvironmentProfile.DEVELOPMENT) {
             processException(messageBuilder.toString(), teamsDevChannel)
         }
     }
@@ -90,11 +84,16 @@ class NotificationServiceImpl
      * @param message The message to send on Teams channel.
      * @throws IOException when the webhook cannot be reached.
      */
-    private fun processException(message: String, channelToSend: String) {
-        val payload = mapOf(
-            "text" to message,
-            "title" to "\ud83c\udf81 CARP-Webservices",
-            "themeColor" to "8f4742")
+    private fun processException(
+        message: String,
+        channelToSend: String,
+    ) {
+        val payload =
+            mapOf(
+                "text" to message,
+                "title" to "\ud83c\udf81 CARP-Webservices",
+                "themeColor" to "8f4742",
+            )
 
         try {
             val webClient = WebClient.create()
@@ -105,11 +104,11 @@ class NotificationServiceImpl
                 .bodyToMono(String::class.java)
                 .subscribe(
                     { response -> LOGGER.info("Teams response -> {}", response) },
-                    { error -> LOGGER.error("Error sending message to Teams: ${error.message}") }
+                    { error -> LOGGER.error("Error sending message to Teams: ${error.message}") },
                 )
         } catch (ex: IOException) {
-            LOGGER.error("Unexpected Error! WebHook: $ex")
-            throw BadRequestException(validationMessages.get("notification.teams.exception", ex.message.toString()))
+            LOGGER.error("Unexpected Error! Webhook: $ex")
+            throw BadRequestException(validationMessages.get("notification.teams.exception", ex.message.toString()), ex)
         }
     }
 }

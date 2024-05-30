@@ -19,39 +19,34 @@ import org.springframework.scheduling.annotation.Scheduled
 @Configuration
 @EnableScheduling
 @ConditionalOnProperty(value = ["database.connection.alert.enabled"], havingValue = "true")
-class DatabaseConnectionAlert
-(
+class DatabaseConnectionAlert(
     private var database: IDatabaseConnection,
     private val notificationService: INotificationService,
     private val emailNotificationService: EmailInvitationService,
     @Value("\${alert.admin-email}") private val alertEmail: String,
-    @Value("\${alert.subject}") private val alertWarning: String
-)
-{
-    companion object
-    {
+    @Value("\${alert.subject}") private val alertWarning: String,
+) {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
     @Scheduled(fixedDelay = 30 * 60 * 1000)
-    fun checkRegularDatabaseConnection()
-    {
-        if ("DOWN" == database.statusHealth().code)
-        {
+    fun checkRegularDatabaseConnection() {
+        if ("DOWN" == database.statusHealth().code) {
             LOGGER.warn("Database connection is DOWN!")
             val databaseConnectionStatusNotification =
                 "Database connection is ${database.statusHealth().code}!." +
-                        " More details...: ${database.statusDetails()}"
+                    " More details...: ${database.statusDetails()}"
 
             notificationService.sendAlertOrGeneralNotification(
                 databaseConnectionStatusNotification,
-                TeamsChannel.HEARTBEAT
+                TeamsChannel.HEARTBEAT,
             )
 
             emailNotificationService.sendNotificationEmail(
                 alertEmail,
                 alertWarning,
-                databaseConnectionStatusNotification
+                databaseConnectionStatusNotification,
             )
         }
     }

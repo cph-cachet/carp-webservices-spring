@@ -16,15 +16,12 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 
 @RestController
-class ProtocolController
-(
+class ProtocolController(
     private val services: CoreServiceContainer,
     private val authenticationService: AuthenticationService,
     private val protocolService: ProtocolService,
-)
-{
-    companion object
-    {
+) {
+    companion object {
         val LOGGER: Logger = LogManager.getLogger()
 
         /** Path variables */
@@ -36,37 +33,37 @@ class ProtocolController
 
     @PostMapping(value = [PROTOCOL_SERVICE])
     @Operation(tags = ["protocol/protocols.json"])
-    suspend fun protocols(@RequestBody request: ProtocolServiceRequest<*>): ResponseEntity<Any>
-    {
+    suspend fun protocols(
+        @RequestBody request: ProtocolServiceRequest<*>,
+    ): ResponseEntity<Any> {
         LOGGER.info("Start POST: $PROTOCOL_SERVICE -> ${ request::class.simpleName }")
-        return protocolService.core.invoke( request ).let { ResponseEntity.ok( it ) }
+        return protocolService.core.invoke(request).let { ResponseEntity.ok(it) }
     }
 
     @PostMapping(value = [PROTOCOL_FACTORY_SERVICE])
     @Operation(tags = ["protocol/protocolFactory.json"])
-    suspend fun protocolFactory(@RequestBody request: ProtocolFactoryServiceRequest<*>): ResponseEntity<Any>
-    {
+    suspend fun protocolFactory(
+        @RequestBody request: ProtocolFactoryServiceRequest<*>,
+    ): ResponseEntity<Any> {
         LOGGER.info("Start POST: $PROTOCOL_FACTORY_SERVICE -> ${ request::class.simpleName }")
-        return services.protocolFactoryService.invoke( request ).let { ResponseEntity.ok( it ) }
+        return services.protocolFactoryService.invoke(request).let { ResponseEntity.ok(it) }
     }
 
     @GetMapping(value = [GET_PROTOCOL_OVERVIEW])
     @PreAuthorize("hasRole('RESEARCHER')")
     @Operation(tags = ["protocol/getLatestProtocolById.json"])
     suspend fun getSingleProtocolOverview(
-        @PathVariable(PathVariableName.PROTOCOL_ID) protocolId: String
-    ): ProtocolOverview
-    {
+        @PathVariable(PathVariableName.PROTOCOL_ID) protocolId: String,
+    ): ProtocolOverview {
         LOGGER.info("/api/protocols/$protocolId/latest")
-        return protocolService.getSingleProtocolOverview(protocolId) ?:
-            throw ResourceNotFoundException("No protocol found with id $protocolId.")
+        return protocolService.getSingleProtocolOverview(protocolId)
+            ?: throw ResourceNotFoundException("No protocol found with id $protocolId.")
     }
 
     @GetMapping(value = [GET_PROTOCOLS_OVERVIEW])
     @PreAuthorize("hasRole('RESEARCHER')")
-    suspend fun getProtocolsOverview(): List<ProtocolOverview>
-    {
+    suspend fun getProtocolsOverview(): List<ProtocolOverview> {
         LOGGER.info("Start GET: /api/protocols")
-        return protocolService.getProtocolsOverview( authenticationService.getId() )
+        return protocolService.getProtocolsOverview(authenticationService.getId())
     }
 }

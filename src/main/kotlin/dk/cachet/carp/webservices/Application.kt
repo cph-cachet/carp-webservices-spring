@@ -7,23 +7,20 @@ import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 import org.springframework.scheduling.annotation.EnableAsync
 import org.springframework.stereotype.Component
-import org.springframework.transaction.annotation.EnableTransactionManagement
-
 
 @SpringBootApplication
 @EnableAsync
 class Application
 
-fun main( args: Array<String> )
-{
-    runApplication<Application>( *args )
+fun main(args: Array<String>) {
+    runApplication<Application>(*args)
 }
-
 
 @Component
 class SpringApplicationContext : ApplicationContextAware {
     companion object {
         private var context: ApplicationContext? = null
+
         fun <T> getBean(clazz: Class<T>): T {
             return context!!.getBean(clazz)
         }

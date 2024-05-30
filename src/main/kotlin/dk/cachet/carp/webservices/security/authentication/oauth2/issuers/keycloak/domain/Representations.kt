@@ -5,7 +5,6 @@ import dk.cachet.carp.webservices.security.authentication.domain.Account
 import dk.cachet.carp.webservices.security.authorization.Claim
 import dk.cachet.carp.webservices.security.authorization.Role
 
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class UserRepresentation(
     var id: String? = null,
@@ -13,26 +12,22 @@ data class UserRepresentation(
     var firstName: String? = null,
     var lastName: String? = null,
     var email: String? = null,
-    var emailVerified: Boolean? = false,
-    var requiredActions: List<RequiredAction>? = emptyList(),
     var enabled: Boolean? = true,
-    var attributes: Map<String, Any>? = emptyMap()
+    var attributes: Map<String, Any>? = emptyMap(),
 ) {
     companion object {
-        fun createFromAccount(account: Account, requiredActions: List<RequiredAction> = emptyList()) =
+        fun createFromAccount(account: Account) =
             UserRepresentation(
                 id = account.id,
                 username = account.username ?: account.email,
                 firstName = account.firstName,
                 lastName = account.lastName,
                 email = account.email,
-                requiredActions = requiredActions,
-                emailVerified = !requiredActions.contains( RequiredAction.VERIFY_EMAIL ),
-                attributes = account.carpClaims?.groupBy( { Claim.userAttributeName( it::class ) }, { it.value } )
+                attributes = account.carpClaims?.groupBy({ Claim.userAttributeName(it::class) }, { it.value }),
             )
     }
 
-    fun toAccount( roles: Set<Role> ) =
+    fun toAccount(roles: Set<Role>) =
         Account(
             id = id,
             username = username,
@@ -40,46 +35,30 @@ data class UserRepresentation(
             lastName = lastName,
             email = email,
             role = roles.max(),
-            carpClaims = attributes?.mapNotNull { Claim.fromUserAttribute(it.key to it.value) }?.flatten()?.toSet()
+            carpClaims = attributes?.mapNotNull { Claim.fromUserAttribute(it.key to it.value) }?.flatten()?.toSet(),
         )
-
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class RoleRepresentation(
     var id: String? = null,
-    var name: String? = null
+    var name: String? = null,
 )
 
-enum class RequiredAction {
+enum class RequiredActions {
     VERIFY_EMAIL,
     UPDATE_PROFILE,
     UPDATE_PASSWORD,
     CONFIGURE_TOTP,
-    TERMS_AND_CONDITIONS;
+    TERMS_AND_CONDITIONS,
+    ;
 
     companion object {
-        fun getForAccountType(accountType: AccountType): List<RequiredAction> {
-            return when (accountType) {
-                AccountType.NEW -> listOf(
-                    VERIFY_EMAIL,
-                    UPDATE_PASSWORD,
-                    UPDATE_PROFILE
-                )
-
-                AccountType.EXISTING -> listOf(
-                    UPDATE_PASSWORD,
-                    UPDATE_PROFILE
-                )
-
-                AccountType.GENERATED -> emptyList()
-            }
-        }
+        val forNewAccounts =
+            listOf(
+                VERIFY_EMAIL,
+                UPDATE_PASSWORD,
+                UPDATE_PROFILE,
+            )
     }
-}
-
-enum class AccountType {
-    NEW,
-    EXISTING,
-    GENERATED
 }

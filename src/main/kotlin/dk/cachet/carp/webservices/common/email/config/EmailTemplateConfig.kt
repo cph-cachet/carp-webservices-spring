@@ -11,15 +11,13 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
  * The [EmailTemplateConfig] creates a creates [ClassLoaderTemplateResolver] instances for template resources.
  */
 @Configuration
-class EmailTemplateConfig
-{
+class EmailTemplateConfig {
     /**
      * The function [thymeleafTemplateResolver] configures the template resolver.
      * @return The [ClassLoaderTemplateResolver].
      */
     @Bean
-    fun thymeleafTemplateResolver(): ClassLoaderTemplateResolver
-    {
+    fun thymeleafTemplateResolver(): ClassLoaderTemplateResolver {
         val templateResolver = ClassLoaderTemplateResolver()
         templateResolver.prefix = "/templates/email/"
         templateResolver.suffix = ".html"

@@ -17,10 +17,9 @@ import org.springframework.util.StringUtils
  * The Class [UUIDDeserializer].
  * The [UUIDDeserializer] implements the deserialization logic for [UUID].
  */
-class UUIDDeserializer(private val validationMessages: MessageBase): JsonDeserializer<UUID>()
-{
-    companion object
-    {
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
+class UUIDDeserializer(private val validationMessages: MessageBase) : JsonDeserializer<UUID>() {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
@@ -33,32 +32,29 @@ class UUIDDeserializer(private val validationMessages: MessageBase): JsonDeseria
      * Also, if the [UUID] contains invalid format.
      * @return The deserialized account object.
      */
-    override fun deserialize(jsonParser: JsonParser?, deserializationContext: DeserializationContext?): UUID
-    {
+    override fun deserialize(
+        jsonParser: JsonParser?,
+        deserializationContext: DeserializationContext?,
+    ): UUID {
         val uuid: String
-        try
-        {
+        try {
             uuid = jsonParser?.codec?.readTree<TreeNode>(jsonParser).toString()
 
-            if (!StringUtils.hasLength(uuid))
-            {
+            if (!StringUtils.hasLength(uuid)) {
                 LOGGER.error("The core UUID cannot be blank or empty!")
                 throw SerializationException(validationMessages.get("deserialization.uuid.empty"))
             }
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The core UUID contains bad format. Exception: $ex")
-            throw SerializationException(validationMessages.get("deserialization.uuid.bad_format", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("deserialization.uuid.bad_format", ex.message.toString()),
+            )
         }
 
         val parsed: UUID
-        try
-        {
+        try {
             parsed = JSON.decodeFromString(uuid)
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The core UUID is not valid. Exception: $ex")
             throw SerializationException(validationMessages.get("deserialization.uuid.error", ex.message.toString()))
         }

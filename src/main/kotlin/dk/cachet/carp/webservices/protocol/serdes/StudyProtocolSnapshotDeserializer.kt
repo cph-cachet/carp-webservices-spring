@@ -17,10 +17,11 @@ import org.springframework.util.StringUtils
  * The Class [StudyProtocolSnapshotDeserializer].
  * The [StudyProtocolSnapshotDeserializer] implements the serialization logic for [StudyProtocolSnapshot].
  */
-class StudyProtocolSnapshotDeserializer(private val validationMessages: MessageBase): JsonDeserializer<StudyProtocolSnapshot>()
-{
-    companion object
-    {
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
+class StudyProtocolSnapshotDeserializer(
+    private val validationMessages: MessageBase,
+) : JsonDeserializer<StudyProtocolSnapshot>() {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
@@ -32,34 +33,33 @@ class StudyProtocolSnapshotDeserializer(private val validationMessages: MessageB
      * Also, if the [StudyProtocolSnapshot] contains invalid format.
      * @return The deserialized [StudyProtocolSnapshot] object.
      */
-    override fun deserialize(jsonParser: JsonParser?, deserializationContext: DeserializationContext?): StudyProtocolSnapshot
-    {
+    override fun deserialize(
+        jsonParser: JsonParser?,
+        deserializationContext: DeserializationContext?,
+    ): StudyProtocolSnapshot {
         val studyProtocolSnapshot: String
-        try
-        {
-            studyProtocolSnapshot =  jsonParser?.codec?.readTree<TreeNode>(jsonParser).toString()
+        try {
+            studyProtocolSnapshot = jsonParser?.codec?.readTree<TreeNode>(jsonParser).toString()
 
-            if (!StringUtils.hasLength(studyProtocolSnapshot))
-            {
+            if (!StringUtils.hasLength(studyProtocolSnapshot)) {
                 LOGGER.error("The core StudyProtocolSnapshot cannot be blank or empty.")
                 throw SerializationException(validationMessages.get("protocol.snapshot.deserialization.empty"))
             }
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The core StudyProtocolSnapshot contains bad format. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("protocol.snapshot.deserialization.bad_format", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("protocol.snapshot.deserialization.bad_format", ex.message.toString()),
+            )
         }
 
         val parsed: StudyProtocolSnapshot
-        try
-        {
+        try {
             parsed = JSON.decodeFromString(studyProtocolSnapshot)
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The core StudyProtocolSnapshot serializer is not valid. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("protocol.snapshot.deserialization.error", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("protocol.snapshot.deserialization.error", ex.message.toString()),
+            )
         }
 
         return parsed
