@@ -1,51 +1,12 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <style type="text/css" th:fragment="header-css">
-        .table-container {
-            width: 100%;
-            table-layout: fixed;
-        }
-
-        .header-content {
-            margin-top: 30px;
-            margin-bottom: 30px;
-            text-align: center;
-        }
-
-        .logo {
-            max-width: 100%;
-            height: auto;
-            float: right;
-        }
-
-        .main-title {
-            color: #61C3D9;
-            font-size: 38px;
-            margin: 10px 10px;
-        }
-
-        .subtitle {
-            color: #61C3D9;
-            font-size: 23px;
-            margin: 10px 10px;
-        }
+    <style type="text/css" th:fragment="header-logo-only-css">
     </style>
 </head>
 <body>
-<div th:fragment="header">
+<div th:fragment="header-logo-only">
     <div class="header-content">
-        <table class="table-container">
-            <tr>
-                <th>
-                    <p class="main-title">Welcome to the CARP Research Platform</p>
-                    <p class="subtitle">You are invited to join the study <span th:text="*{__${study_invitation_id}__}" th:with="study_invitation_id=${T(dk.cachet.carp.webservices.common.email.util.EmailTemplateUtil).INLINE_CACHET_LOGO_ID}"></span>!</p>
-                </th>
-                <th>
-                    <img th:src="|cid:${cachet_logo_id}|" th:with="cachet_logo_id=${T(dk.cachet.carp.webservices.common.email.util.EmailTemplateUtil).INLINE_CACHET_LOGO_ID}" class="logo"/>
-                </th>
-            </tr>
-        </table>
     </div>
 </div>
 </body>
