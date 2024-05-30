@@ -18,11 +18,11 @@ class IDataStreamServiceImpl(
         return dataStreamSequenceRepository.findAllByDeploymentIds(deploymentIds)
     }
 
-    override fun getLatestUpdatedAt(deploymentId: UUID): Instant?
-    {
+    override fun getLatestUpdatedAt(deploymentId: UUID): Instant? {
         val dataStreamInputs = dataStreamIdRepository.getAllByDeploymentId(
-            deploymentId.toString())
-        val sortedDataPoint = dataStreamInputs.sortedByDescending {it.updatedAt}.firstOrNull()
+            deploymentId.toString()
+        )
+        val sortedDataPoint = dataStreamInputs.sortedByDescending { it.updatedAt }.firstOrNull()
             ?: return null
 
         return sortedDataPoint.updatedAt?.toKotlinInstant()
@@ -65,5 +65,23 @@ class IDataStreamServiceImpl(
             return null
         }
     */
+
+    // Function to process the zip file and create a DataStreamBatch
+/*    fun processZipFile(zipFile: MultipartFile): DataStreamBatch {
+        val zipFileStream = zipFile.inputStream
+        val cborContent = extractCborFromZip(zipFileStream)
+        val appendToDataStreamsRequest =
+            Cbor.decodeFromByteArray<DataStreamServiceRequestZip.AppendToDataStreams>(cborContent)
+        dataStreamBatch1 = DataStreamBatch(appendToDataStreamsRequest.batch)
+        return dataStreamBatch1
+    }
+
+    fun extractCborFromZip(zipFileStream: InputStream): ByteArray {
+        ZipFile(zipFileStream).use { zipFile ->
+            val entry: ZipArchiveEntry = zipFile.entries.asSequence().first { it.name.endsWith(".cbor") }
+            val inputStream = zipFile.getInputStream(entry)
+            return inputStream.readBytes()
+        }
+    }*/
 
 }

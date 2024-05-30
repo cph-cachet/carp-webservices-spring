@@ -1,16 +1,13 @@
 package dk.cachet.carp.webservices.data.controller
 
 import dk.cachet.carp.data.infrastructure.DataStreamServiceRequest
-import dk.cachet.carp.webservices.data.domain.DataStreamRequest
 import dk.cachet.carp.webservices.data.service.DataStreamService
 import io.swagger.v3.oas.annotations.Operation
-import kotlinx.coroutines.runBlocking
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 
@@ -36,14 +33,37 @@ class DataStreamController(
         return dataStreamService.core.invoke( request ).let { ResponseEntity.ok( it ) }
     }
 
-    // New endpoint specifically for AppendToDataStreams with zip file
+/*    // New endpoint specifically for AppendToDataStreams with zip file
     @PostMapping(value = [DATA_STREAM_SERVICE_OPEN])
     @Operation(tags = ["dataStream/getDataStream.json"])
-    fun appendToDataStreamWithZip(
+    suspend fun appendToDataStreamWithZip(
         @RequestParam request: DataStreamRequest
-    ): ResponseEntity<Any> = runBlocking {
+    ): ResponseEntity<Any> {
         LOGGER.info("Start POST: $DATA_STREAM_SERVICE -> AppendToDataStreams with zip file")
-        val result = dataStreamService.appendToDataStreams(request.studyDeploymentId, request.zipFile)
+        val result = dataStreamService.core.invoke( request ).let { ResponseEntity.ok( it ) }
         ResponseEntity.ok(result)
-    }
+    }*/
+
+    // New endpoint specifically for AppendToDataStreams with zip file
+/*    @PostMapping(value = [DATA_STREAM_SERVICE_OPEN], consumes = ["multipart/form-data"])
+    @Operation(tags = ["dataStream/getDataStream.json"])
+    fun appendToDataStreamWithZip(
+        @RequestParam("studyDeploymentId") studyDeploymentId: UUID,
+        @RequestParam("zipFile") zipFile: MultipartFile
+    ): ResponseEntity<Any> = runBlocking {
+        LOGGER.info("Start POST: $DATA_STREAM_SERVICE_OPEN -> AppendToDataStreams with zip file")
+        return@runBlocking try {
+            // Process the MultipartFile and create a DataStreamBatch
+            val batch = processZipFile(zipFile)
+            // Create a request object for the existing service method
+            val request = DataStreamServiceRequest.AppendToDataStreams(studyDeploymentId, batch)
+            // Invoke the existing service method
+            val result = dataStreamService.core.invoke(request)
+            ResponseEntity.ok(result)
+        } catch (e: Exception) {
+            LOGGER.error("Error in POST: $DATA_STREAM_SERVICE_OPEN -> AppendToDataStreams with zip file", e)
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.message)
+        }
+    }*/
+
 }

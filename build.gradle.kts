@@ -71,7 +71,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-cbor:${property("kotlinxCborVersion")}")
 
     // APACHE
-    implementation("org.apache.commons:commons-compress:${property("commonsCompressVersion")}")
+    implementation("org.apache.commons:commons-compress:${property("apacheCommonsCompressVersion")}")
 
     // JACKSON
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:${property("jacksonVersion")}")
