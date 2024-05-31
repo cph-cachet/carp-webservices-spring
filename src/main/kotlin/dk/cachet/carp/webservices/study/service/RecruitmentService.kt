@@ -18,7 +18,11 @@ interface RecruitmentService {
         email: String,
     ): Boolean
 
-    suspend fun getParticipants(studyId: UUID): List<Account>
+    suspend fun getParticipants(
+        studyId: UUID,
+        offset: Int = 0,
+        limit: Int = -1,
+    ): List<Account>
 
     fun isParticipant(
         studyId: UUID,

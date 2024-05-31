@@ -1,20 +1,16 @@
 package dk.cachet.carp.webservices.common.email.service.impl.javamail
 
 import dk.cachet.carp.webservices.common.email.domain.EmailSendResult
-import dk.cachet.carp.webservices.common.email.util.EmailTemplateUtil
 import dk.cachet.carp.webservices.common.exception.email.EmailException
 import dk.cachet.carp.webservices.common.notification.domain.TeamsChannel
 import dk.cachet.carp.webservices.common.notification.service.INotificationService
 import jakarta.mail.MessagingException
 import jakarta.mail.internet.MimeMessage
-import org.apache.commons.io.IOUtils
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.eclipse.angus.mail.smtp.SMTPSendFailedException
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.core.env.Environment
-import org.springframework.core.io.ByteArrayResource
-import org.springframework.core.io.ClassPathResource
 import org.springframework.mail.MailSendException
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMessageHelper
@@ -86,7 +82,6 @@ class EmailServiceImpl(
             mimeMessageHelper.setText(mailContent, true)
             mimeMessageHelper.setSubject(ifNullOrEmpty(studyNameAsSubject))
             mimeMessageHelper.setFrom(environment.getProperty("spring.mail.from")!!)
-            this.addInlineLogosToMessage(mimeMessageHelper)
 
             this.mailSender.send(mimeMessage)
         } catch (ex: MailSendException) {
@@ -130,53 +125,5 @@ class EmailServiceImpl(
 
     private fun ifNullOrEmpty(value: String): String {
         return if (value.isEmpty() or value.isBlank()) DEFAULT_SUBJECT else value
-    }
-
-    private fun getCachetLogo(): ByteArray {
-        return IOUtils.toByteArray(ClassPathResource("image/cachet.png").inputStream)
-    }
-
-    private fun getCPHLogo(): ByteArray {
-        return IOUtils.toByteArray(ClassPathResource("image/footer_CPH.png").inputStream)
-    }
-
-    private fun getDTULogo(): ByteArray {
-        return IOUtils.toByteArray(ClassPathResource("image/footer_CPH.png").inputStream)
-    }
-
-    private fun getHLogo(): ByteArray {
-        return IOUtils.toByteArray(ClassPathResource("image/footer_H.png").inputStream)
-    }
-
-    private fun getKULogo(): ByteArray {
-        return IOUtils.toByteArray(ClassPathResource("image/footer_KU.png").inputStream)
-    }
-
-    private fun addInlineLogosToMessage(mimeMessageHelper: MimeMessageHelper) {
-        mimeMessageHelper.addInline(
-            EmailTemplateUtil.INLINE_CACHET_LOGO_ID,
-            ByteArrayResource(getCachetLogo()),
-            EmailTemplateUtil.PNG_CONTENT_TYPE,
-        )
-        mimeMessageHelper.addInline(
-            EmailTemplateUtil.INLINE_CPH_LOGO_ID,
-            ByteArrayResource(getCPHLogo()),
-            EmailTemplateUtil.PNG_CONTENT_TYPE,
-        )
-        mimeMessageHelper.addInline(
-            EmailTemplateUtil.INLINE_DTU_LOGO_ID,
-            ByteArrayResource(getDTULogo()),
-            EmailTemplateUtil.PNG_CONTENT_TYPE,
-        )
-        mimeMessageHelper.addInline(
-            EmailTemplateUtil.INLINE_H_LOGO_ID,
-            ByteArrayResource(getHLogo()),
-            EmailTemplateUtil.PNG_CONTENT_TYPE,
-        )
-        mimeMessageHelper.addInline(
-            EmailTemplateUtil.INLINE_KU_LOGO_ID,
-            ByteArrayResource(getKULogo()),
-            EmailTemplateUtil.PNG_CONTENT_TYPE,
-        )
     }
 }

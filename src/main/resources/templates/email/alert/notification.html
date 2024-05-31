@@ -3,31 +3,15 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 
-    <div th:replace="fragments/header-logo-only :: header-logo-only-css"></div>
+    <div th:replace="fragments/header :: header-css"></div>
     <div th:replace="fragments/footer :: footer-css"></div>
-    <style type="text/css">
-        .body-container {
-            background-color: #f1f9fa;
-            color: #1D1D1B;
-            margin: 0;
-        }
 
-        .content {
-            padding: 20px 50px 20px 50px;
-            box-sizing: border-box;
-            width: 100%;
-            margin: auto;
-            background-color: #fff;
-            font-size: 20px;
-            color: #1D1D1B;
-        }
-    </style>
 </head>
 <body class="body-container">
-<div th:replace="fragments/header-logo-only :: header-logo-only"></div>
+<div th:replace="fragments/header :: header"></div>
 
 <div class="content">
-    <p>CARP Research Platform.</p>
+    <p>Copenhagen Research Platform.</p>
     <p></p>
     <p></p>
     <p>WARNING ALERT: </p>
@@ -36,7 +20,7 @@
     <p></p>
     <p></p>
     <p>Thank you!</p>
-    <p>The CACHET Team</p>
+    <p>The CARP Team</p>
 </div>
 
 <div th:replace="fragments/footer :: footer"></div>

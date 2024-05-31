@@ -68,19 +68,22 @@ class RecruitmentServiceWrapper(
             account.carpClaims?.intersect(claims)?.isEmpty() ?: false
         }
 
-    override suspend fun getParticipants(studyId: UUID): List<Account> =
+    override suspend fun getParticipants(
+        studyId: UUID,
+        offset: Int,
+        limit: Int,
+    ): List<Account> =
         withContext(Dispatchers.IO + SecurityCoroutineContext()) {
-            val participants = core.getParticipants(studyId)
+            var participants = core.getParticipants(studyId)
             val accounts = arrayListOf<Account>()
-            for (participant in participants) {
-                val account = accountService.findByAccountIdentity(participant.accountIdentity)
-                if (account != null) {
-                    accounts.add(account)
-                } else {
-                    accounts.add(Account.fromAccountIdentity(participant.accountIdentity))
-                }
+            if (offset >= 0 && limit > 0) {
+                participants = participants.drop(offset * limit).take(limit).toMutableList()
             }
 
+            for (participant in participants) {
+                val account = accountService.findByAccountIdentity(participant.accountIdentity)
+                accounts.add(account ?: Account.fromAccountIdentity(participant.accountIdentity))
+            }
             accounts
         }
 
