@@ -1,5 +1,4 @@
 import io.gitlab.arturbosch.detekt.Detekt
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jlleitschuh.gradle.ktlint.KtlintExtension
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
@@ -40,13 +39,6 @@ tasks.withType<BootJar> {
     archiveFileName.set("carp-platform.jar")
 }
 
-tasks.withType<KotlinCompile>().configureEach {
-    kotlinOptions {
-        freeCompilerArgs = listOf("-Xjsr305=strict")
-        jvmTarget = "17"
-    }
-}
-
 configurations {
     compileOnly {
         extendsFrom(configurations.annotationProcessor.get())
@@ -56,6 +48,10 @@ configurations {
 allprojects {
     group = "dk.cachet"
     version = "1.2.0"
+}
+
+kotlin {
+    jvmToolchain(17)
 }
 
 java {
