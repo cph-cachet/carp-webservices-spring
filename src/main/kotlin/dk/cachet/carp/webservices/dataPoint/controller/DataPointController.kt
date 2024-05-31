@@ -85,7 +85,7 @@ class DataPointController(private val dataPointService: DataPointService) {
     }
 
     @DeleteMapping(value = [GET_DATAPOINT_BY_ID])
-    @PreAuthorize("canManageDeployment(#deploymentId)")
+    @PreAuthorize("canManageDeployment(#deploymentId) or isInDeploymentOfStudy(#deploymentId)")
     @Operation(tags = ["dataPoint/delete.json"])
     fun delete(
         @PathVariable(PathVariableName.DEPLOYMENT_ID) deploymentId: UUID,
@@ -96,7 +96,7 @@ class DataPointController(private val dataPointService: DataPointService) {
     }
 
     @GetMapping(value = [COUNT])
-    @PreAuthorize("canManageDeployment(#deploymentId)")
+    @PreAuthorize("canManageDeployment(#deploymentId) or isInDeployment(#deploymentId)")
     @Operation(tags = ["dataPoint/count.json"])
     fun count(
         @RequestParam(RequestParamName.QUERY, required = false) query: String?,

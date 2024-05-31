@@ -68,10 +68,6 @@ sealed class Claim {
         override val value = deploymentId.toString()
     }
 
-    data class ConsentOwner(val consentId: Int) : Claim() {
-        override val value = consentId.toString()
-    }
-
     data class CollectionOwner(val collectionId: Int) : Claim() {
         override val value = collectionId.toString()
     }

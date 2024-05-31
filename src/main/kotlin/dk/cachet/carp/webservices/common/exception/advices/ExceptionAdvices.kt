@@ -109,7 +109,7 @@ internal class ExceptionAdvices(
             CarpErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 ex::class.qualifiedName.orEmpty(),
-                ex.message,
+                ex.message.orEmpty(),
                 getURIPathFromWebRequest(request),
             )
         LOGGER.error("Argument validation failed: {}", errorResponse)
