@@ -72,7 +72,6 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${property("kotlinCoroutinesVersion")}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:${property("kotlinCoroutinesVersion")}")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:${property("kotlinDatetimeVersion")}")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-cbor:${property("kotlinxCborVersion")}")
 
     // APACHE
     implementation("org.apache.commons:commons-compress:${property("apacheCommonsCompressVersion")}")
@@ -80,6 +79,7 @@ dependencies {
     // JACKSON
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:${property("jacksonVersion")}")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${property("jacksonVersion")}")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.0")
 
     // CARP CORE
     implementation("dk.cachet.carp.common:carp.common-jvm:${property("carpCoreVersion")}")
