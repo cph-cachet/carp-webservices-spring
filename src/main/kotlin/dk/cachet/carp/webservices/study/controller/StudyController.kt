@@ -53,6 +53,7 @@ class StudyController(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @RequestParam(RequestParamName.EMAIL) email: String,
     ) {
+        
         LOGGER.info("Start POST: /api/studies/$studyId/researchers")
         return recruitmentService.inviteResearcher(studyId, email)
     }
