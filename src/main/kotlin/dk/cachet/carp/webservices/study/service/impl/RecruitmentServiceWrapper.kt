@@ -46,7 +46,6 @@ class RecruitmentServiceWrapper(
         if (account.role!! < Role.RESEARCHER) {
             accountService.addRole(accountIdentity, Role.RESEARCHER)
             LOGGER.info("Account with email $email is granted the role RESEARCHER.")
-            LOGGER.info("Account with email $email is granted the role RESEARCHER.")
         }
 
         // grant it claims for the study and every deployment within it

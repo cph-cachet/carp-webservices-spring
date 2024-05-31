@@ -82,7 +82,6 @@ class EmailServiceImpl(
             mimeMessageHelper.setText(mailContent, true)
             mimeMessageHelper.setSubject(ifNullOrEmpty(studyNameAsSubject))
             mimeMessageHelper.setFrom(environment.getProperty("spring.mail.from")!!)
-//            this.addInlineLogosToMessage(mimeMessageHelper)
 
             this.mailSender.send(mimeMessage)
         } catch (ex: MailSendException) {
