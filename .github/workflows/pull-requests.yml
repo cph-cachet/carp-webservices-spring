@@ -3,7 +3,7 @@ name: verify pull requests
 on:
   pull_request:
     branches:
-      - develop, testing, master
+      - develop
 
 jobs:
   build:
