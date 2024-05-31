@@ -17,16 +17,14 @@ import org.hibernate.type.SqlTypes
 @Entity
 @Table(name = "deployments")
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
-data class StudyDeployment
-(
-        /** The deployment [id]. */
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        val id: Int = 0,
-
-        /** The study protocol [snapshot] as a JsonNode */
-        @JdbcTypeCode(SqlTypes.JSON)
-        @Column(columnDefinition = "jsonb")
-        @Type(JsonBinaryType::class)
-        var snapshot: JsonNode? = null
-): Auditable()
+data class StudyDeployment(
+    /** The deployment [id]. */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Int = 0,
+    /** The study protocol [snapshot] as a JsonNode */
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    @Type(JsonBinaryType::class)
+    var snapshot: JsonNode? = null,
+) : Auditable()

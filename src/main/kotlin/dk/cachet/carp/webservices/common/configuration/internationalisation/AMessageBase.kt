@@ -4,11 +4,10 @@ import org.springframework.context.support.MessageSourceAccessor
 
 /**
  * The Abstract Class [AMessageBase].
- * The [AMessageBase] enables easy access to messages from a MessageSource, providing various overloaded getMessage methods.
+ * The [AMessageBase] enables easy access to messages from a MessageSource,
+ * providing various overloaded getMessage methods.
  */
-abstract class AMessageBase
-{
-    // [MessageSourceAccessor] enables easy access to messages from a MessageSource, providing various overloaded getMessage methods
+abstract class AMessageBase {
     protected var accessor: MessageSourceAccessor? = null
 
     /**
@@ -17,8 +16,7 @@ abstract class AMessageBase
      * @param code The [code] of the message.
      * @returns The [MessageSourceAccessor] message with the given code and the default Locale.
      */
-    fun get(code: String): String
-    {
+    fun get(code: String): String {
         return accessor!!.getMessage(code)
     }
 
@@ -28,8 +26,10 @@ abstract class AMessageBase
      * @param code The [code] of the message.
      * @returns The [MessageSourceAccessor] message with the given code and the default Locale.
      */
-    fun get(code: String, vararg params: Any): String
-    {
+    fun get(
+        code: String,
+        vararg params: Any,
+    ): String {
         return accessor!!.getMessage(code, params)
     }
 }

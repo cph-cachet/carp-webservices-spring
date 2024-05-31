@@ -12,44 +12,50 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.util.StringUtils
 
-class ParticipationServiceRequestDeserializer(private val validationMessages: MessageBase): JsonDeserializer<ParticipationServiceRequest<*>>()
-{
-    companion object
-    {
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
+class ParticipationServiceRequestDeserializer(private val validationMessages: MessageBase) :
+    JsonDeserializer<ParticipationServiceRequest<*>>() {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
-    override fun deserialize(p: JsonParser?, ctxt: DeserializationContext?): ParticipationServiceRequest<*>
-    {
+    override fun deserialize(
+        p: JsonParser?,
+        ctxt: DeserializationContext?,
+    ): ParticipationServiceRequest<*> {
         val participationServiceRequest: String
-        try
-        {
+        try {
             participationServiceRequest = p?.codec?.readTree<TreeNode>(p).toString()
 
-            if (!StringUtils.hasLength(participationServiceRequest))
-            {
+            if (!StringUtils.hasLength(participationServiceRequest)) {
                 LOGGER.error("The ParticipationServiceRequest cannot be blank or empty.")
-                throw SerializationException(validationMessages.get("deployment.participation_service_request.deserialization.empty"))
+                throw SerializationException(
+                    validationMessages.get("deployment.participation_service_request.deserialization.empty"),
+                )
             }
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The ParticipationServiceRequest contains bad format. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("deployment.participation_service_request.deserialization.bad_format", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get(
+                    "deployment.participation_service_request.deserialization.bad_format",
+                    ex.message.toString(),
+                ),
+            )
         }
 
         val parsed: ParticipationServiceRequest<*>
-        try
-        {
+        try {
             parsed = JSON.decodeFromString(ParticipationServiceRequest.Serializer, participationServiceRequest)
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The ParticipationServiceRequest is not valid. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("deployment.participation_service_request.deserialization.error", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get(
+                    "deployment.participation_service_request.deserialization.error",
+                    ex.message.toString(),
+                ),
+            )
         }
 
         return parsed
     }
-
 }

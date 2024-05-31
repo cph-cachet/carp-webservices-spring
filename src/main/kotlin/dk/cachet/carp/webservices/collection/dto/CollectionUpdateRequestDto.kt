@@ -10,9 +10,8 @@ import java.io.Serializable
  * The [CollectionUpdateRequestDto] represents a user updated collection request, with the given [name].
  */
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
-data class CollectionUpdateRequestDto
-(
-        /** The [name] of the collection. */
-        @field:NotBlank
-        val name: String
-): Serializable
+data class CollectionUpdateRequestDto(
+    /** The [name] of the collection. */
+    @field:NotBlank
+    val name: String,
+) : Serializable

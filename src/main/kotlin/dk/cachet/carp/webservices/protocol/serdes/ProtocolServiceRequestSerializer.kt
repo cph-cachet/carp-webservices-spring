@@ -14,28 +14,28 @@ import org.apache.logging.log4j.Logger
  * The Class [ProtocolServiceRequestSerializer].
  * [ProtocolServiceRequestSerializer] implements the serialization logic for [ProtocolServiceRequest].
  */
-class ProtocolServiceRequestSerializer(private val validationMessages: MessageBase): JsonSerializer<ProtocolServiceRequest<*>>()
-{
-    companion object
-    {
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
+class ProtocolServiceRequestSerializer(
+    private val validationMessages: MessageBase,
+) : JsonSerializer<ProtocolServiceRequest<*>>() {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
-    override fun serialize(protocolServiceRequest: ProtocolServiceRequest<*>?, jsonGenerator: JsonGenerator?, serializers: SerializerProvider?)
-    {
-        if (protocolServiceRequest == null)
-        {
+    override fun serialize(
+        protocolServiceRequest: ProtocolServiceRequest<*>?,
+        jsonGenerator: JsonGenerator?,
+        serializers: SerializerProvider?,
+    ) {
+        if (protocolServiceRequest == null) {
             LOGGER.error("The core ProtocolServiceRequest is null.")
             throw SerializationException(validationMessages.get("protocol.service.serialization.empty"))
         }
 
         val serialized: String
-        try
-        {
+        try {
             serialized = JSON.encodeToString(ProtocolServiceRequest.Serializer, protocolServiceRequest)
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The core ProtocolServiceRequest is not valid. Exception: $ex")
             throw SerializationException(validationMessages.get("protocol.service.serialization.error"))
         }

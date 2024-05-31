@@ -29,14 +29,12 @@ import java.util.concurrent.CompletableFuture
  */
 @Service
 class EmailServiceImpl(
-        @Qualifier("mailConfig")
-        private val mailSender: JavaMailSender,
-        private val environment: Environment,
-        private val notificationService: INotificationService
-)
-{
-    companion object
-    {
+    @Qualifier("mailConfig")
+    private val mailSender: JavaMailSender,
+    private val environment: Environment,
+    private val notificationService: INotificationService,
+) {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
         private const val DEFAULT_SUBJECT = "Welcome to the CARP Research Platform"
     }
@@ -50,8 +48,11 @@ class EmailServiceImpl(
      * @return The status code of the response.
      */
     @Async
-    fun invoke(destinationEmail: String, subject: String, content: String): CompletableFuture<Int>
-    {
+    fun invoke(
+        destinationEmail: String,
+        subject: String,
+        content: String,
+    ): CompletableFuture<Int> {
         val response = send(destinationEmail, subject, content)
         return CompletableFuture.completedFuture(response)
     }
@@ -65,15 +66,22 @@ class EmailServiceImpl(
      * @return The status code of the response.
      */
     @Throws(EmailException::class)
-    fun send(recipientEmailAddress: String, studyNameAsSubject: String, mailContent: String): Int
-    {
-        try
-        {
+    @Suppress("TooGenericExceptionCaught")
+    fun send(
+        recipientEmailAddress: String,
+        studyNameAsSubject: String,
+        mailContent: String,
+    ): Int {
+        try {
             val mimeMessage: MimeMessage = mailSender.createMimeMessage()
             mimeMessage.setContent(mailContent, "text/html; charset=utf-8")
 
-            val mimeMessageHelper = MimeMessageHelper(
-                    mimeMessage, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name())
+            val mimeMessageHelper =
+                MimeMessageHelper(
+                    mimeMessage,
+                    MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+                    StandardCharsets.UTF_8.name(),
+                )
             mimeMessageHelper.setTo(recipientEmailAddress)
             mimeMessageHelper.setText(mailContent, true)
             mimeMessageHelper.setSubject(ifNullOrEmpty(studyNameAsSubject))
@@ -81,43 +89,46 @@ class EmailServiceImpl(
 //            this.addInlineLogosToMessage(mimeMessageHelper)
 
             this.mailSender.send(mimeMessage)
-        }
-        catch (ex: MailSendException)
-        {
+        } catch (ex: MailSendException) {
             LOGGER.warn("Email message not sent.", ex)
-            notificationService.sendAlertOrGeneralNotification("Email message not sent. Exception: $ex.", TeamsChannel.SERVER_ERRORS)
+            notificationService.sendAlertOrGeneralNotification(
+                "Email message not sent. Exception: $ex.",
+                TeamsChannel.SERVER_ERRORS,
+            )
             return EmailSendResult.FAILURE.status
-        }
-        catch (ex: SMTPSendFailedException)
-        {
+        } catch (ex: SMTPSendFailedException) {
             LOGGER.warn("Email message not sent.", ex)
-            notificationService.sendAlertOrGeneralNotification("Email message not sent. Exception: $ex.", TeamsChannel.SERVER_ERRORS)
+            notificationService.sendAlertOrGeneralNotification(
+                "Email message not sent. Exception: $ex.",
+                TeamsChannel.SERVER_ERRORS,
+            )
             return EmailSendResult.FAILURE.status
-        }
-        catch (ex: MessagingException)
-        {
+        } catch (ex: MessagingException) {
             LOGGER.warn("Email message not sent.", ex)
-            notificationService.sendAlertOrGeneralNotification("Email message not sent. Exception: $ex.", TeamsChannel.SERVER_ERRORS)
+            notificationService.sendAlertOrGeneralNotification(
+                "Email message not sent. Exception: $ex.",
+                TeamsChannel.SERVER_ERRORS,
+            )
             return EmailSendResult.FAILURE.status
-        }
-        catch (ex: NullPointerException)
-        {
+        } catch (ex: NullPointerException) {
             LOGGER.warn("No invitation email was found.", ex)
-            notificationService.sendAlertOrGeneralNotification("No invitation email was found. Exception: $ex.", TeamsChannel.SERVER_ERRORS)
+            notificationService.sendAlertOrGeneralNotification(
+                "No invitation email was found. Exception: $ex.",
+                TeamsChannel.SERVER_ERRORS,
+            )
             return EmailSendResult.FAILURE.status
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.warn("Failed to send mail, mailAddress= $recipientEmailAddress", ex)
             notificationService.sendAlertOrGeneralNotification(
-                    "Failed to send mail, mailAddress= $recipientEmailAddress. Exception: $ex.", TeamsChannel.SERVER_ERRORS)
+                "Failed to send mail, mailAddress= $recipientEmailAddress. Exception: $ex.",
+                TeamsChannel.SERVER_ERRORS,
+            )
             return EmailSendResult.FAILURE.status
         }
         return EmailSendResult.SUCCESS.status
     }
 
-    private fun ifNullOrEmpty(value:String): String
-    {
+    private fun ifNullOrEmpty(value: String): String {
         return if (value.isEmpty() or value.isBlank()) DEFAULT_SUBJECT else value
     }
 

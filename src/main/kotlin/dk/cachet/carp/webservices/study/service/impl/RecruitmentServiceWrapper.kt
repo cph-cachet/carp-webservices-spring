@@ -25,100 +25,109 @@ class RecruitmentServiceWrapper(
     private val accountService: AccountService,
     private val dataStreamService: DataStreamService,
     private val recruitmentRepository: RecruitmentRepository,
-    services: CoreServiceContainer
-) : RecruitmentService
-{
+    services: CoreServiceContainer,
+) : RecruitmentService {
     final override val core = services.recruitmentService
 
-    companion object
-    {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
-    override suspend fun inviteResearcher( studyId: UUID, email: String ) =
-        withContext( Dispatchers.IO + SecurityCoroutineContext() )
-        {
-            val accountIdentity = AccountIdentity.fromEmailAddress( email )
-            var account = accountService.findByAccountIdentity(accountIdentity)
+    override suspend fun inviteResearcher(
+        studyId: UUID,
+        email: String,
+    ) = withContext(Dispatchers.IO + SecurityCoroutineContext()) {
+        val accountIdentity = AccountIdentity.fromEmailAddress(email)
+        var account = accountService.findByAccountIdentity(accountIdentity)
 
-            if ( account == null )
-            {
-                LOGGER.info("Account with email $email is not found. Inviting...")
-                account = accountService.invite(accountIdentity, Role.RESEARCHER)
-            }
-
-            if ( account.role!! < Role.RESEARCHER ) {
-                accountService.addRole( accountIdentity, Role.RESEARCHER )
-                LOGGER.info("Account with email $email is granted the role RESEARCHER.")
-            }
-
-            // grant it claims for the study and every deployment within it
-            accountService.grant( accountIdentity, setOf( Claim.ManageStudy( studyId ) ) )
-
-            LOGGER.info("Account with email $email is added as a researcher to study with id $studyId.")
-    }
-
-    override suspend fun removeResearcher( studyId: UUID, email: String ): Boolean =
-        withContext( Dispatchers.IO + SecurityCoroutineContext() )
-        {
-            val accountIdentity = AccountIdentity.fromEmailAddress( email )
-
-            val claims = setOf( Claim.ManageStudy( studyId ) )
-
-            val account = accountService.revoke( accountIdentity, claims )
-
-            account.carpClaims?.intersect( claims )?.isEmpty() ?: false
+        if (account == null) {
+            LOGGER.info("Account with email $email is not found. Inviting...")
+            account = accountService.invite(accountIdentity, Role.RESEARCHER)
         }
 
-    override suspend fun getParticipants(studyId: UUID, offset: Int, limit: Int ) : List<Account> =
-        withContext( Dispatchers.IO + SecurityCoroutineContext() )
-        {
-            var participants = core.getParticipants( studyId )
-            val accounts = arrayListOf<Account>()
+        if (account.role!! < Role.RESEARCHER) {
+            accountService.addRole(accountIdentity, Role.RESEARCHER)
+            LOGGER.info("Account with email $email is granted the role RESEARCHER.")
+            LOGGER.info("Account with email $email is granted the role RESEARCHER.")
+        }
 
-            if ( offset >= 0 && limit > 0 ) {
+        // grant it claims for the study and every deployment within it
+        accountService.grant(accountIdentity, setOf(Claim.ManageStudy(studyId)))
+
+        LOGGER.info("Account with email $email is added as a researcher to study with id $studyId.")
+    }
+
+    override suspend fun removeResearcher(
+        studyId: UUID,
+        email: String,
+    ): Boolean =
+        withContext(Dispatchers.IO + SecurityCoroutineContext()) {
+            val accountIdentity = AccountIdentity.fromEmailAddress(email)
+
+            val claims = setOf(Claim.ManageStudy(studyId))
+
+            val account = accountService.revoke(accountIdentity, claims)
+
+            account.carpClaims?.intersect(claims)?.isEmpty() ?: false
+        }
+
+    override suspend fun getParticipants(
+        studyId: UUID,
+        offset: Int,
+        limit: Int,
+    ): List<Account> =
+        withContext(Dispatchers.IO + SecurityCoroutineContext()) {
+            var participants = core.getParticipants(studyId)
+            val accounts = arrayListOf<Account>()
+            if (offset >= 0 && limit > 0) {
                 participants = participants.drop( offset * limit).take( limit ).toMutableList()
             }
 
-            for ( participant in participants ) {
-                val account = accountService.findByAccountIdentity( participant.accountIdentity )
-                accounts.add( account ?: Account.fromAccountIdentity( participant.accountIdentity ) )
+            for (participant in participants) {
+                val account = accountService.findByAccountIdentity(participant.accountIdentity)
+                accounts.add(account ?: Account.fromAccountIdentity(participant.accountIdentity))
             }
             accounts
         }
 
-    override fun isParticipant(studyId: UUID, accountId: UUID): Boolean =
-        runBlocking( SecurityCoroutineContext() ) {
+    override fun isParticipant(
+        studyId: UUID,
+        accountId: UUID,
+    ): Boolean =
+        runBlocking(SecurityCoroutineContext()) {
             getParticipants(studyId).any { it.id == accountId.toString() }
         }
 
-    override suspend fun getParticipantGroupsStatus( studyId: UUID ): ParticipantGroupsStatus =
-        withContext( Dispatchers.IO + SecurityCoroutineContext() )
-        {
-            val participantGroupStatusList = core.getParticipantGroupStatusList( studyId )
+    override suspend fun getParticipantGroupsStatus(studyId: UUID): ParticipantGroupsStatus =
+        withContext(Dispatchers.IO + SecurityCoroutineContext()) {
+            val participantGroupStatusList = core.getParticipantGroupStatusList(studyId)
 
-            val participantGroupInfoList = participantGroupStatusList
-                .filterIsInstance<ParticipantGroupStatus.InDeployment>()
-                .map {
-                    val participantAccounts = it.participants.map { participant ->
-                        val participantAccount = ParticipantAccount.fromParticipant( participant )
-                        val account = accountService.findByAccountIdentity( participant.accountIdentity )
+            val participantGroupInfoList =
+                participantGroupStatusList
+                    .filterIsInstance<ParticipantGroupStatus.InDeployment>()
+                    .map {
+                        val participantAccounts =
+                            it.participants.map { participant ->
+                                val participantAccount = ParticipantAccount.fromParticipant(participant)
+                                val account = accountService.findByAccountIdentity(participant.accountIdentity)
 
-                        if ( account != null )
-                        {
-                            val lastDataUpload = dataStreamService.getLatestUpdatedAt( it.studyDeploymentStatus.studyDeploymentId )
-                            participantAccount.lateInitFrom( account )
+                                if (account != null) {
+                                    val lastDataUpload =
+                                        dataStreamService.getLatestUpdatedAt(
+                                            it.studyDeploymentStatus.studyDeploymentId,
+                                        )
+                                    participantAccount.lateInitFrom(account)
 
-                            // TODO: we cannot track this for participants, only for deployments
-                            participantAccount.dateOfLastDataUpload = lastDataUpload
-                        }
+                                    // TODO: we cannot track this for participants, only for deployments
+                                    participantAccount.dateOfLastDataUpload = lastDataUpload
+                                }
 
-                        participantAccount
+                                participantAccount
+                            }
+
+                        ParticipantGroupInfo(it.id, it.studyDeploymentStatus, participantAccounts)
                     }
 
-                    ParticipantGroupInfo( it.id, it.studyDeploymentStatus, participantAccounts )
-                }
-
-            ParticipantGroupsStatus( participantGroupInfoList, participantGroupStatusList )
+            ParticipantGroupsStatus(participantGroupInfoList, participantGroupStatusList)
         }
 }

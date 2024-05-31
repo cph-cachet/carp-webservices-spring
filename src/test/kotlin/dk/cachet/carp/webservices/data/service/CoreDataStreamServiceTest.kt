@@ -13,58 +13,60 @@ import org.junit.jupiter.api.assertThrows
 import java.util.*
 import kotlin.test.assertFailsWith
 
-class CoreDataStreamServiceTest
-{
+class CoreDataStreamServiceTest {
     @Nested
-    inner class AppendToDataStreams
-    {
+    inner class AppendToDataStreams {
         @Test
-        fun `should throw if there are incorrect study deployment IDs in any of the batches`() = runTest {
-            val incorrectId = UUID.randomUUID()
-            val correctId = UUID.randomUUID()
+        fun `should throw if there are incorrect study deployment IDs in any of the batches`() =
+            runTest {
+                val incorrectId = UUID.randomUUID()
+                val correctId = UUID.randomUUID()
 
-            val batch = MutableDataStreamBatch()
-            batch.appendSequence( createStubSequence( correctId, 0, StubDataPoint() ) )
-            batch.appendSequence( createStubSequence( incorrectId, 0, StubDataPoint() ) )
+                val batch = MutableDataStreamBatch()
+                batch.appendSequence(createStubSequence(correctId, 0, StubDataPoint()))
+                batch.appendSequence(createStubSequence(incorrectId, 0, StubDataPoint()))
 
-            val sut = CoreDataStreamService(
-                mockk(),
-                mockk(),
-                mockk(),
-                mockk()
-            )
+                val sut =
+                    CoreDataStreamService(
+                        mockk(),
+                        mockk(),
+                        mockk(),
+                        mockk(),
+                    )
 
-            assertThrows<IllegalArgumentException> {
-                sut.appendToDataStreams( correctId, batch )
+                assertThrows<IllegalArgumentException> {
+                    sut.appendToDataStreams(correctId, batch)
+                }
             }
-        }
 
         @Test
-        fun `should throw if study deployment ID is not in configuration`() = runTest {
-            val dataStreamConfigurationRepository = mockk<DataStreamConfigurationRepository>()
-            val studyDeploymentId = UUID.randomUUID()
+        fun `should throw if study deployment ID is not in configuration`() =
+            runTest {
+                val dataStreamConfigurationRepository = mockk<DataStreamConfigurationRepository>()
+                val studyDeploymentId = UUID.randomUUID()
 
-            val batch = MutableDataStreamBatch()
-            batch.appendSequence( createStubSequence( studyDeploymentId, 0, StubDataPoint() ) )
+                val batch = MutableDataStreamBatch()
+                batch.appendSequence(createStubSequence(studyDeploymentId, 0, StubDataPoint()))
 
-            coEvery {
-                dataStreamConfigurationRepository.findById( studyDeploymentId.stringRepresentation )
-            } returns Optional.empty()
+                coEvery {
+                    dataStreamConfigurationRepository.findById(studyDeploymentId.stringRepresentation)
+                } returns Optional.empty()
 
-            val sut = CoreDataStreamService(
-                dataStreamConfigurationRepository,
-                mockk(),
-                mockk(),
-                mockk()
-            )
+                val sut =
+                    CoreDataStreamService(
+                        dataStreamConfigurationRepository,
+                        mockk(),
+                        mockk(),
+                        mockk(),
+                    )
 
-            assertFailsWith<IllegalArgumentException> {
-                sut.appendToDataStreams(studyDeploymentId, batch)
+                assertFailsWith<IllegalArgumentException> {
+                    sut.appendToDataStreams(studyDeploymentId, batch)
+                }
+
+                coVerify(exactly = 1) {
+                    dataStreamConfigurationRepository.findById(studyDeploymentId.stringRepresentation)
+                }
             }
-
-            coVerify(exactly = 1) {
-                dataStreamConfigurationRepository.findById( studyDeploymentId.stringRepresentation )
-            }
-        }
     }
 }

@@ -19,32 +19,30 @@ class ProtocolServiceWrapper(
     private val accountService: AccountService,
     private val protocolRepository: ProtocolRepository,
     private val objectMapper: ObjectMapper,
-    services: CoreServiceContainer
-): ProtocolService
-{
+    services: CoreServiceContainer,
+) : ProtocolService {
     final override val core = services.protocolService
 
-    override suspend fun getSingleProtocolOverview( protocolId: String ): ProtocolOverview? =
-        withContext( Dispatchers.IO )
-        {
-            val versions = protocolRepository.findAllByIdSortByCreatedAt( protocolId )
-            if ( versions.isEmpty() ) return@withContext null
+    override suspend fun getSingleProtocolOverview(protocolId: String): ProtocolOverview? =
+        withContext(Dispatchers.IO) {
+            val versions = protocolRepository.findAllByIdSortByCreatedAt(protocolId)
+            if (versions.isEmpty()) return@withContext null
 
-            createProtocolOverview( versions )
+            createProtocolOverview(versions)
         }
 
-    override suspend fun getProtocolsOverview( accountId: UUID ): List<ProtocolOverview> =
-        withContext( Dispatchers.IO )
-        {
-            val account = accountService.findByUUID( accountId ) ?:
-                throw IllegalArgumentException("Account with id $accountId is not found.")
+    override suspend fun getProtocolsOverview(accountId: UUID): List<ProtocolOverview> =
+        withContext(Dispatchers.IO) {
+            val account =
+                accountService.findByUUID(accountId)
+                    ?: throw IllegalArgumentException("Account with id $accountId is not found.")
 
-            protocolRepository.findAllByOwnerId( account.id!! )
+            protocolRepository.findAllByOwnerId(account.id!!)
                 .filter { it.snapshot != null }
                 .groupBy { it.snapshot?.get("id").toString() }
-                .map {(_, versions) ->
+                .map { (_, versions) ->
                     val sorted = versions.sortedBy { it.createdAt }
-                    createProtocolOverview( sorted, account )
+                    createProtocolOverview(sorted, account)
                 }
         }
 
@@ -54,18 +52,20 @@ class ProtocolServiceWrapper(
      * @param versions A list of all the versions of a protocol sorted by creation date.
      * @param account The account to use in the protocol overview. Will be looked up if not provided.
      */
-    private suspend fun createProtocolOverview( versions: List<Protocol>, account: Account? = null ): ProtocolOverview
-    {
-        val snapshot = objectMapper.treeToValue( versions.last().snapshot, StudyProtocolSnapshot::class.java )
+    private suspend fun createProtocolOverview(
+        versions: List<Protocol>,
+        account: Account? = null,
+    ): ProtocolOverview {
+        val snapshot = objectMapper.treeToValue(versions.last().snapshot, StudyProtocolSnapshot::class.java)
 
-        val owner = account ?: accountService.findByUUID( snapshot.ownerId )
+        val owner = account ?: accountService.findByUUID(snapshot.ownerId)
 
         return ProtocolOverview(
             owner?.fullName,
             versions.first().createdAt,
             versions.last().createdAt,
             versions.last().versionTag,
-            snapshot
+            snapshot,
         )
     }
 }

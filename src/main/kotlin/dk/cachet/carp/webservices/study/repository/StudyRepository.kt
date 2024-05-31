@@ -9,23 +9,30 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.*
 
 @Repository
-interface StudyRepository: JpaRepository<Study, Int>
-{
-    @Query(nativeQuery = true,
-            value = "SELECT * FROM studies WHERE snapshot->>'id' = ?1")
+interface StudyRepository : JpaRepository<Study, Int> {
+    @Query(
+        nativeQuery = true,
+        value = "SELECT * FROM studies WHERE snapshot->>'id' = ?1",
+    )
     fun getByStudyId(id: String): Study?
 
-    @Query(nativeQuery = true,
-            value = "SELECT * FROM studies WHERE snapshot->>'ownerId' = ?1")
+    @Query(
+        nativeQuery = true,
+        value = "SELECT * FROM studies WHERE snapshot->>'ownerId' = ?1",
+    )
     fun findAllByOwnerId(ownerId: String): List<Study>
 
-    @Query(nativeQuery = true,
-            value = "SELECT * FROM studies WHERE snapshot->>'id' IN ?1")
-    fun findAllByStudyIds( studyIds: List<String> ): List<Study>
+    @Query(
+        nativeQuery = true,
+        value = "SELECT * FROM studies WHERE snapshot->>'id' IN ?1",
+    )
+    fun findAllByStudyIds(studyIds: List<String>): List<Study>
 
     @Modifying
     @Transactional
-    @Query(nativeQuery = true,
-            value = "DELETE FROM studies WHERE snapshot->>'id' = ?1")
+    @Query(
+        nativeQuery = true,
+        value = "DELETE FROM studies WHERE snapshot->>'id' = ?1",
+    )
     fun deleteByStudyId(studyId: String)
 }

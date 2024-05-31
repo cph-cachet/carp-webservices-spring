@@ -15,8 +15,7 @@ import java.time.Instant
  */
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener::class)
-abstract class Auditable
-{
+abstract class Auditable {
     /** The [createdBy] creator identity. */
     @CreatedBy
     var createdBy: String? = null

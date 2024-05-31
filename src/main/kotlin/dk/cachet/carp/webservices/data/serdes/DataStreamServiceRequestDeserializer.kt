@@ -17,10 +17,11 @@ import org.springframework.util.StringUtils
  * The Class [DataStreamServiceRequestDeserializer].
  * The [DataStreamServiceRequestDeserializer] implements the deserialization logic for [DataStreamServiceRequest].
  */
-class DataStreamServiceRequestDeserializer(private val validationMessages: MessageBase): JsonDeserializer<DataStreamServiceRequest<*>>()
-{
-    companion object
-    {
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
+class DataStreamServiceRequestDeserializer(
+    private val validationMessages: MessageBase,
+) : JsonDeserializer<DataStreamServiceRequest<*>>() {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
@@ -33,34 +34,33 @@ class DataStreamServiceRequestDeserializer(private val validationMessages: Messa
      * Also, if the [DataStreamServiceRequest] contains invalid format.
      * @return The deserialized deployment service request object.
      */
-    override fun deserialize(jsonParser: JsonParser?, deserializationContext: DeserializationContext?): DataStreamServiceRequest<*>
-    {
+    override fun deserialize(
+        jsonParser: JsonParser?,
+        deserializationContext: DeserializationContext?,
+    ): DataStreamServiceRequest<*> {
         val dataStreamServiceRequest: String
-        try
-        {
+        try {
             dataStreamServiceRequest = jsonParser?.codec?.readTree<TreeNode>(jsonParser).toString()
 
-            if (!StringUtils.hasLength(dataStreamServiceRequest))
-            {
+            if (!StringUtils.hasLength(dataStreamServiceRequest)) {
                 LOGGER.error("The DataStreamServiceRequest cannot be blank or empty.")
                 throw SerializationException(validationMessages.get("dataStream.deserialization.empty"))
             }
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The DataStreamServiceRequest deserializer contains bad format. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("dataStream.deserialization.bad_format", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("dataStream.deserialization.bad_format", ex.message.toString()),
+            )
         }
 
         val parsed: DataStreamServiceRequest<*>
-        try
-        {
+        try {
             parsed = JSON.decodeFromString(DataStreamServiceRequest.Serializer, dataStreamServiceRequest)
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The DataStreamServiceRequest deserializer is not valid. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("dataStreamServiceRequest.deserialization.error", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("dataStreamServiceRequest.deserialization.error", ex.message.toString()),
+            )
         }
 
         return parsed

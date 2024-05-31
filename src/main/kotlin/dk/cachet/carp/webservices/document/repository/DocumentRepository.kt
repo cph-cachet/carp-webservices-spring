@@ -5,8 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
 import dk.cachet.carp.webservices.document.domain.Document
 import dk.cachet.carp.webservices.document.dto.UpdateDocumentRequestDto
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
@@ -18,29 +16,45 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.*
 
 @Repository
-interface DocumentRepository: JpaRepository<Document, Int>, JpaSpecificationExecutor<Document>, DocumentRepositoryCustom
-{
-    fun findByNameAndCollectionId(name: String, collectionId: Int): Optional<Document>
+interface DocumentRepository :
+    JpaRepository<Document, Int>,
+    JpaSpecificationExecutor<Document>,
+    DocumentRepositoryCustom {
+    fun findByNameAndCollectionId(
+        name: String,
+        collectionId: Int,
+    ): Optional<Document>
 
     @Query(value = "SELECT d FROM documents d LEFT JOIN FETCH d.collections WHERE d.collectionId IN (:collectionIds)")
-    fun findAllByCollectionsIdsWithDocuments(@Param(value = "collectionIds") collectionIds: Collection<Int>): List<Document>
+    fun findAllByCollectionsIdsWithDocuments(
+        @Param(value = "collectionIds") collectionIds: Collection<Int>,
+    ): List<Document>
 
     @Modifying
     @Transactional
-    @Query(nativeQuery = true,
-            value = "DELETE FROM documents WHERE collection_id IN (:collectionIds)")
-    fun deleteAllByCollectionIds(@Param(value = "collectionIds") collectionIds: Collection<Int>)
+    @Query(
+        nativeQuery = true,
+        value = "DELETE FROM documents WHERE collection_id IN (:collectionIds)",
+    )
+    fun deleteAllByCollectionIds(
+        @Param(value = "collectionIds") collectionIds: Collection<Int>,
+    )
 }
 
 /**
  * The Interface [DocumentRepositoryCustom].
  * The [DocumentRepositoryCustom] creates an interface for handling document requests.
  */
-interface DocumentRepositoryCustom
-{
-    fun update(id: Int, document: UpdateDocumentRequestDto): Optional<Document>
+interface DocumentRepositoryCustom {
+    fun update(
+        id: Int,
+        document: UpdateDocumentRequestDto,
+    ): Optional<Document>
 
-    fun appendDocument(id: Int, document: UpdateDocumentRequestDto): Optional<Document>
+    fun appendDocument(
+        id: Int,
+        document: UpdateDocumentRequestDto,
+    ): Optional<Document>
 }
 
 /**
@@ -48,8 +62,9 @@ interface DocumentRepositoryCustom
  * The [DocumentRepositoryImpl] implements the repository logout for [DocumentRepositoryCustom] interface.
  */
 @Repository
-class DocumentRepositoryImpl(@Lazy private val documentRepository: DocumentRepository): DocumentRepositoryCustom
-{
+class DocumentRepositoryImpl(
+    @Lazy private val documentRepository: DocumentRepository,
+) : DocumentRepositoryCustom {
     /**
      * The function [update] updates the [Document] with the given [id] and [document] parameters.
      *
@@ -57,25 +72,29 @@ class DocumentRepositoryImpl(@Lazy private val documentRepository: DocumentRepos
      * @param document The [document] requested to update the existing document.
      * @return The [Document] updated.
      */
-    override fun update(id: Int, document: UpdateDocumentRequestDto): Optional<Document>
-    {
-        documentRepository.findById(id).map { existingDocument -> document.name?.also { existingDocument.name = it }
+    override fun update(
+        id: Int,
+        document: UpdateDocumentRequestDto,
+    ): Optional<Document> {
+        documentRepository.findById(id).map { existingDocument ->
+            document.name?.also { existingDocument.name = it }
 
-                    if (existingDocument.data?.isArray!!) (existingDocument.data as JsonNode).removeAll { true }
+            if (existingDocument.data?.isArray!!) (existingDocument.data as JsonNode).removeAll { true }
 
-                    if (existingDocument.data?.isObject!!) (existingDocument.data as ObjectNode).removeAll()
+            if (existingDocument.data?.isObject!!) (existingDocument.data as ObjectNode).removeAll()
 
-                    document.data?.also {
-                        val updatedData = ObjectMapper()
-                                .setDefaultMergeable(true)
-                                .readerForUpdating(existingDocument.data)
-                                .readValue<JsonNode>(it)
+            document.data?.also {
+                val updatedData =
+                    ObjectMapper()
+                        .setDefaultMergeable(true)
+                        .readerForUpdating(existingDocument.data)
+                        .readValue<JsonNode>(it)
 
-                        existingDocument.data = updatedData
-                    }
+                existingDocument.data = updatedData
+            }
 
-                    documentRepository.save(existingDocument)
-                }
+            documentRepository.save(existingDocument)
+        }
 
         return documentRepository.findById(id)
     }
@@ -87,23 +106,26 @@ class DocumentRepositoryImpl(@Lazy private val documentRepository: DocumentRepos
      * @param document The [document] requested to update the existing document.
      * @return The updated (appended) [Document].
      */
-    override fun appendDocument(id: Int, document: UpdateDocumentRequestDto): Optional<Document>
-    {
+    override fun appendDocument(
+        id: Int,
+        document: UpdateDocumentRequestDto,
+    ): Optional<Document> {
         documentRepository.findById(id)
-                .map { existingDocument -> document.name?.also { existingDocument.name = it }
+            .map { existingDocument ->
+                document.name?.also { existingDocument.name = it }
 
-                    document.data?.also {
+                document.data?.also {
+                    val updatedData =
+                        ObjectMapper()
+                            .setDefaultMergeable(true)
+                            .readerForUpdating(existingDocument.data)
+                            .readValue<JsonNode>(it)
 
-                        val updatedData = ObjectMapper()
-                                .setDefaultMergeable(true)
-                                .readerForUpdating(existingDocument.data)
-                                .readValue<JsonNode>(it)
-
-                        existingDocument.data = updatedData
-                    }
-                    
-                    documentRepository.save(existingDocument)
+                    existingDocument.data = updatedData
                 }
+
+                documentRepository.save(existingDocument)
+            }
 
         return documentRepository.findById(id)
     }

@@ -10,22 +10,27 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 
 @Repository
-interface ExportRepository: JpaRepository<Export, String>
-{
-    fun findByIdAndStudyId( id: String, studyId: String ): Export?
+interface ExportRepository : JpaRepository<Export, String> {
+    fun findByIdAndStudyId(
+        id: String,
+        studyId: String,
+    ): Export?
 
-    fun findAllByStudyId( studyId: String ): List<Export>
-
-    @Modifying
-    @Transactional
-    @Query( nativeQuery = true, value = "DELETE FROM exports WHERE study_id = :studyId" )
-    fun deleteByStudyId( studyId: String )
+    fun findAllByStudyId(studyId: String): List<Export>
 
     @Modifying
     @Transactional
-    @Query( "UPDATE exports SET status = :status WHERE id = :exportId" )
-    fun updateExportStatus( status: ExportStatus, exportId: String )
+    @Query(nativeQuery = true, value = "DELETE FROM exports WHERE study_id = :studyId")
+    fun deleteByStudyId(studyId: String)
 
-    @Query( nativeQuery = true, value = "SELECT * FROM exports WHERE created_at < :timestamp" )
-    fun findAllCreatedBefore( timestamp: Instant ): List<Export>
+    @Modifying
+    @Transactional
+    @Query("UPDATE exports SET status = :status WHERE id = :exportId")
+    fun updateExportStatus(
+        status: ExportStatus,
+        exportId: String,
+    )
+
+    @Query(nativeQuery = true, value = "SELECT * FROM exports WHERE created_at < :timestamp")
+    fun findAllCreatedBefore(timestamp: Instant): List<Export>
 }

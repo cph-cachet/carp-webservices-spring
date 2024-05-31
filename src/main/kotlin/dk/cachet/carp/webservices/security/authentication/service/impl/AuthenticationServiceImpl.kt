@@ -5,26 +5,23 @@ import dk.cachet.carp.common.application.users.AccountIdentity
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
 import dk.cachet.carp.webservices.security.authorization.Claim
 import dk.cachet.carp.webservices.security.authorization.Role
-import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
-import org.springframework.stereotype.Service
 import dk.cachet.carp.webservices.security.config.SecurityCoroutineContext
 import dk.cachet.carp.webservices.study.repository.CoreParticipantRepository
 import kotlinx.coroutines.runBlocking
-
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
+import org.springframework.stereotype.Service
 
 @Service
 class AuthenticationServiceImpl(
-    private val participantRepository: CoreParticipantRepository
-) : AuthenticationService
-{
-    override fun getId(): UUID = UUID( getJwtAuthenticationToken().token.subject )
+    private val participantRepository: CoreParticipantRepository,
+) : AuthenticationService {
+    override fun getId(): UUID = UUID(getJwtAuthenticationToken().token.subject)
 
-    override fun getRole(): Role
-    {
-        val role = getJwtAuthenticationToken().authorities.map { Role.fromString( it.authority ) }.maxOfOrNull { it }
+    override fun getRole(): Role {
+        val role = getJwtAuthenticationToken().authorities.map { Role.fromString(it.authority) }.maxOfOrNull { it }
 
-        check( role != null && role != Role.UNKNOWN ) { "No role found for the current authentication." }
+        check(role != null && role != Role.UNKNOWN) { "No role found for the current authentication." }
 
         return role
     }
@@ -35,32 +32,28 @@ class AuthenticationServiceImpl(
             .flatMap { claim ->
                 // if the study has `Claim.ManageStudy`,
                 // also add `Claim.ManageDeployment` for all deployments in the study
-                when ( claim ) {
+                when (claim) {
                     is Claim.ManageStudy -> {
                         runBlocking {
-                            participantRepository.getRecruitment( claim.studyId )
+                            participantRepository.getRecruitment(claim.studyId)
                                 ?.participantGroups?.keys
-                                ?.map { deploymentId -> Claim.ManageDeployment( deploymentId ) }
-                                ?.plus( claim )
-                                ?: listOf( claim )
+                                ?.map { deploymentId -> Claim.ManageDeployment(deploymentId) }
+                                ?.plus(claim)
+                                ?: listOf(claim)
                         }
                     }
-                    else -> setOf( claim )
+                    else -> setOf(claim)
                 }
             }
 
-    override fun getCarpIdentity(): AccountIdentity
-    {
+    override fun getCarpIdentity(): AccountIdentity {
         val authentication = getJwtAuthenticationToken()
         val isEmailVerified: Boolean = authentication.token.getClaim("email_verified")
 
-        return if ( isEmailVerified )
-        {
-            AccountIdentity.fromEmailAddress( authentication.token.getClaim("email") )
-        }
-        else
-        {
-            AccountIdentity.fromUsername( authentication.token.getClaim("preferred_username") )
+        return if (isEmailVerified) {
+            AccountIdentity.fromEmailAddress(authentication.token.getClaim("email"))
+        } else {
+            AccountIdentity.fromUsername(authentication.token.getClaim("preferred_username"))
         }
     }
 
@@ -72,11 +65,10 @@ class AuthenticationServiceImpl(
      * want to do this whenever you are trying to access an authorized core service from a service layer instead of
      * a controller.
      */
-    private fun getJwtAuthenticationToken(): JwtAuthenticationToken
-    {
+    private fun getJwtAuthenticationToken(): JwtAuthenticationToken {
         val authentication = SecurityContextHolder.getContext().authentication
 
-        checkNotNull( authentication ) { "No authentication found. Are you trying to access it from a spawned thread?" }
+        checkNotNull(authentication) { "No authentication found. Are you trying to access it from a spawned thread?" }
 
         return authentication as JwtAuthenticationToken
     }

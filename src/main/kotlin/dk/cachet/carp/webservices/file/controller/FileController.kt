@@ -19,10 +19,8 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 
 @RestController
-class FileController(private val fileStorage: FileStorage, private val fileService: FileService)
-{
-    companion object
-    {
+class FileController(private val fileStorage: FileStorage, private val fileService: FileService) {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
 
         /** Endpoint URI constants */
@@ -37,8 +35,8 @@ class FileController(private val fileStorage: FileStorage, private val fileServi
     @PreAuthorize("canManageStudy(#studyId)")
     fun getAll(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
-        @RequestParam(RequestParamName.QUERY) query: String?): List<File>
-    {
+        @RequestParam(RequestParamName.QUERY) query: String?,
+    ): List<File> {
         LOGGER.info("Start GET: /api/studies/$studyId/files")
         return fileService.getAll(query, studyId.stringRepresentation)
     }
@@ -48,8 +46,8 @@ class FileController(private val fileStorage: FileStorage, private val fileServi
     @PreAuthorize("canManageStudy(#studyId) or isFileOwner(#fileId)")
     fun getOne(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
-        @PathVariable(PathVariableName.FILE_ID) fileId: Int): File
-    {
+        @PathVariable(PathVariableName.FILE_ID) fileId: Int,
+    ): File {
         LOGGER.info("Start GET: /api/studies/$studyId/files/$fileId")
         return fileService.getOne(fileId)
     }
@@ -57,31 +55,33 @@ class FileController(private val fileStorage: FileStorage, private val fileServi
     @GetMapping(
         produces = [
             MediaType.MULTIPART_FORM_DATA_VALUE,
-            MediaType.APPLICATION_OCTET_STREAM_VALUE
+            MediaType.APPLICATION_OCTET_STREAM_VALUE,
         ],
-        value = [DOWNLOAD]
+        value = [DOWNLOAD],
     )
     @ResponseBody
     @Operation(tags = ["file/download.json"])
     @PreAuthorize("canManageStudy(#studyId) or isFileOwner(#id)")
     fun download(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
-        @PathVariable(PathVariableName.FILE_ID) id: Int): ResponseEntity<Resource>
-    {
+        @PathVariable(PathVariableName.FILE_ID) id: Int,
+    ): ResponseEntity<Resource> {
         LOGGER.info("Start GET: /api/studies/$studyId/files/$id/download")
         val file = fileService.getOne(id)
         val fileToDownload = fileStorage.getFile(file.storageName)
-        return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
-                "attachment; filename=\"" + file.originalName + "\"").body<Resource>(fileToDownload)
+        return ResponseEntity.ok().header(
+            HttpHeaders.CONTENT_DISPOSITION,
+            "attachment; filename=\"" + file.originalName + "\"",
+        ).body<Resource>(fileToDownload)
     }
 
     @PostMapping(
         consumes = [
             MediaType.MULTIPART_FORM_DATA_VALUE,
-            MediaType.APPLICATION_OCTET_STREAM_VALUE
+            MediaType.APPLICATION_OCTET_STREAM_VALUE,
         ],
         produces = [MediaType.APPLICATION_JSON_VALUE],
-        value = [FILE_BASE]
+        value = [FILE_BASE],
     )
     @Operation(tags = ["file/create.json"])
     @ResponseStatus(HttpStatus.CREATED)
@@ -89,9 +89,8 @@ class FileController(private val fileStorage: FileStorage, private val fileServi
     fun create(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @RequestParam(RequestParamName.METADATA, required = false) metadata: String?,
-        @RequestPart file: MultipartFile
-    ): File
-    {
+        @RequestPart file: MultipartFile,
+    ): File {
         LOGGER.info("Start POST: /api/studies/$studyId/files")
         return fileService.create(studyId.stringRepresentation, file, metadata)
     }
@@ -102,8 +101,8 @@ class FileController(private val fileStorage: FileStorage, private val fileServi
     @PreAuthorize("canManageStudy(#studyId) or isFileOwner(#fileId)")
     fun delete(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
-        @PathVariable(PathVariableName.FILE_ID) fileId: Int)
-    {
+        @PathVariable(PathVariableName.FILE_ID) fileId: Int,
+    ) {
         LOGGER.info("Start DELETE: /api/studies/$studyId/files/$fileId")
         fileService.delete(fileId)
     }
@@ -113,8 +112,8 @@ class FileController(private val fileStorage: FileStorage, private val fileServi
     @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
     fun uploadS3(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
-        @RequestParam(RequestParamName.IMAGE, required = true) image: MultipartFile): String
-    {
+        @RequestParam(RequestParamName.IMAGE, required = true) image: MultipartFile,
+    ): String {
         LOGGER.info("Start PUT: /api/studies/$studyId/images")
         return fileService.uploadImage(image)
     }
