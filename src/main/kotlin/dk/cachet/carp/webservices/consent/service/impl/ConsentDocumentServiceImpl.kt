@@ -3,15 +3,12 @@ package dk.cachet.carp.webservices.consent.service.impl
 import com.fasterxml.jackson.databind.JsonNode
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.studies.application.users.ParticipantGroupStatus
-import dk.cachet.carp.webservices.account.service.AccountService
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.exception.responses.ResourceNotFoundException
 import dk.cachet.carp.webservices.consent.domain.ConsentDocument
 import dk.cachet.carp.webservices.consent.repository.ConsentDocumentRepository
 import dk.cachet.carp.webservices.consent.service.ConsentDocumentService
 import dk.cachet.carp.webservices.export.service.ResourceExporter
-import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
-import dk.cachet.carp.webservices.security.authorization.Claim
 import dk.cachet.carp.webservices.security.config.SecurityCoroutineContext
 import dk.cachet.carp.webservices.study.service.RecruitmentService
 import kotlinx.coroutines.*
@@ -29,13 +26,9 @@ import java.nio.file.Path
 @Transactional
 class ConsentDocumentServiceImpl(
     private val consentDocumentRepository: ConsentDocumentRepository,
-    private val accountService: AccountService,
-    private val authenticationService: AuthenticationService,
     private val validationMessages: MessageBase,
     private val recruitmentService: RecruitmentService,
 ) : ConsentDocumentService, ResourceExporter<ConsentDocument> {
-    private val backgroundWorker = CoroutineScope(Dispatchers.IO)
-
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
@@ -68,11 +61,6 @@ class ConsentDocumentServiceImpl(
         val consent = getOne(consentId)
         consentDocumentRepository.delete(consent)
         LOGGER.info("Consent document deleted, id: ${consent.id}")
-
-        val identity = authenticationService.getCarpIdentity()
-        backgroundWorker.launch {
-            accountService.revoke(identity, setOf(Claim.ConsentOwner(consent.id)))
-        }
     }
 
     override fun create(
@@ -88,10 +76,6 @@ class ConsentDocumentServiceImpl(
             )
         LOGGER.info("Consent document created, id: ${saved.id}")
 
-        val identity = authenticationService.getCarpIdentity()
-        backgroundWorker.launch {
-            accountService.grant(identity, setOf(Claim.ConsentOwner(saved.id)))
-        }
         return saved
     }
 

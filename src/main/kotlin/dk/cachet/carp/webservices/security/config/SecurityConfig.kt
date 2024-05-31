@@ -60,9 +60,6 @@ class ProxiesMethodSecurityExpressionRoot(
     fun canManageDeployment(deploymentId: UUID?): Boolean =
         deploymentId != null && auth.getClaims().contains(Claim.ManageDeployment(deploymentId)) || isAdmin()
 
-    fun isConsentOwner(consentId: Int?): Boolean =
-        consentId != null && auth.getClaims().contains(Claim.ConsentOwner(consentId)) || isAdmin()
-
     fun isCollectionOwner(collectionId: Int?): Boolean =
         collectionId != null && auth.getClaims().contains(Claim.CollectionOwner(collectionId)) || isAdmin()
 

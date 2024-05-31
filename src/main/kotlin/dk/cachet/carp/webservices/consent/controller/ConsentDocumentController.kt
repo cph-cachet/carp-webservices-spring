@@ -46,7 +46,7 @@ class ConsentDocumentController(
     }
 
     @GetMapping(CONSENT_BY_DEPLOYMENT_ID + CONSENT_BY_ID)
-    @PreAuthorize("isConsentOwner( #consentId )")
+    @PreAuthorize("canManageDeployment( #deploymentId ) or isInDeployment( #deploymentId )")
     @Operation(tags = ["consentDocument/getOne.json"])
     fun getOne(
         @PathVariable(PathVariableName.DEPLOYMENT_ID) deploymentId: UUID,
@@ -69,7 +69,7 @@ class ConsentDocumentController(
     }
 
     @DeleteMapping(CONSENT_BY_DEPLOYMENT_ID + CONSENT_BY_ID)
-    @PreAuthorize("isConsentOwner( #consentId )")
+    @PreAuthorize("canManageDeployment( #deploymentId ) or isInDeployment( #deploymentId )")
     @Operation(tags = ["consentDocument/delete.json"])
     fun delete(
         @PathVariable(PathVariableName.DEPLOYMENT_ID) deploymentId: UUID,
