@@ -53,7 +53,6 @@ class StudyController(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @RequestParam(RequestParamName.EMAIL) email: String,
     ) {
-        
         LOGGER.info("Start POST: /api/studies/$studyId/researchers")
         return recruitmentService.inviteResearcher(studyId, email)
     }
@@ -64,7 +63,7 @@ class StudyController(
     suspend fun getParticipantAccounts(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @RequestParam(name = RequestParamName.OFFSET, required = false, defaultValue = "0") offset: Int,
-        @RequestParam(name = RequestParamName.LIMIT, required = false, defaultValue = "-1") limit: Int
+        @RequestParam(name = RequestParamName.LIMIT, required = false, defaultValue = "-1") limit: Int,
     ): List<Account> {
         LOGGER.info("Start GET: /api/studies/$studyId/participants/accounts")
         return recruitmentService.getParticipants(studyId, offset, limit)
@@ -105,8 +104,8 @@ class StudyController(
     suspend fun getParticipantAccountInfo(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @RequestParam(name = RequestParamName.OFFSET, required = false, defaultValue = "0") offset: Int,
-        @RequestParam(name = RequestParamName.LIMIT, required = false, defaultValue = "-1") limit: Int
-    ) : List<Account> {
+        @RequestParam(name = RequestParamName.LIMIT, required = false, defaultValue = "-1") limit: Int,
+    ): List<Account> {
         LOGGER.info("Start POST: /api/studies/$studyId/participants")
         return recruitmentService.getParticipants(studyId, offset, limit)
     }

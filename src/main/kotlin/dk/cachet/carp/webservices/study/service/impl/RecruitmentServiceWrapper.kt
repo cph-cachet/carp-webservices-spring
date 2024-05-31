@@ -13,7 +13,6 @@ import dk.cachet.carp.webservices.security.config.SecurityCoroutineContext
 import dk.cachet.carp.webservices.study.domain.ParticipantAccount
 import dk.cachet.carp.webservices.study.domain.ParticipantGroupInfo
 import dk.cachet.carp.webservices.study.domain.ParticipantGroupsStatus
-import dk.cachet.carp.webservices.study.repository.RecruitmentRepository
 import dk.cachet.carp.webservices.study.service.RecruitmentService
 import kotlinx.coroutines.*
 import org.apache.logging.log4j.LogManager
@@ -24,7 +23,6 @@ import org.springframework.stereotype.Service
 class RecruitmentServiceWrapper(
     private val accountService: AccountService,
     private val dataStreamService: DataStreamService,
-    private val recruitmentRepository: RecruitmentRepository,
     services: CoreServiceContainer,
 ) : RecruitmentService {
     final override val core = services.recruitmentService
@@ -80,7 +78,7 @@ class RecruitmentServiceWrapper(
             var participants = core.getParticipants(studyId)
             val accounts = arrayListOf<Account>()
             if (offset >= 0 && limit > 0) {
-                participants = participants.drop( offset * limit).take( limit ).toMutableList()
+                participants = participants.drop(offset * limit).take(limit).toMutableList()
             }
 
             for (participant in participants) {

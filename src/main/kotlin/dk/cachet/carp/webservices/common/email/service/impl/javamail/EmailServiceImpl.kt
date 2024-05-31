@@ -1,20 +1,16 @@
 package dk.cachet.carp.webservices.common.email.service.impl.javamail
 
 import dk.cachet.carp.webservices.common.email.domain.EmailSendResult
-import dk.cachet.carp.webservices.common.email.util.EmailTemplateUtil
 import dk.cachet.carp.webservices.common.exception.email.EmailException
 import dk.cachet.carp.webservices.common.notification.domain.TeamsChannel
 import dk.cachet.carp.webservices.common.notification.service.INotificationService
 import jakarta.mail.MessagingException
 import jakarta.mail.internet.MimeMessage
-import org.apache.commons.io.IOUtils
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.eclipse.angus.mail.smtp.SMTPSendFailedException
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.core.env.Environment
-import org.springframework.core.io.ByteArrayResource
-import org.springframework.core.io.ClassPathResource
 import org.springframework.mail.MailSendException
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMessageHelper
@@ -131,5 +127,4 @@ class EmailServiceImpl(
     private fun ifNullOrEmpty(value: String): String {
         return if (value.isEmpty() or value.isBlank()) DEFAULT_SUBJECT else value
     }
-
 }
