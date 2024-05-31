@@ -8,4 +8,4 @@ import org.springframework.web.bind.annotation.ResponseStatus
  * The [ForbiddenException] is thrown when the user is not authorized/permitted to perform the request.
  */
 @ResponseStatus(HttpStatus.FORBIDDEN)
-class ForbiddenException(message: String?): RuntimeException(message)
+class ForbiddenException(message: String?) : RuntimeException(message)

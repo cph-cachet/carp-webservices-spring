@@ -9,10 +9,8 @@ import java.lang.reflect.Method
  * The Class [AsyncExceptionHandler].
  * The [AsyncExceptionHandler] handle the uncaught exceptions thrown from asynchronous methods.
  */
-class AsyncExceptionHandler: AsyncUncaughtExceptionHandler
-{
-    companion object
-    {
+class AsyncExceptionHandler : AsyncUncaughtExceptionHandler {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
@@ -20,8 +18,11 @@ class AsyncExceptionHandler: AsyncUncaughtExceptionHandler
      * The [handleUncaughtException] function for handling uncaught exceptions thrown from asynchronous methods.
      * @link [AsyncExceptionHandler]
      */
-    override fun handleUncaughtException(ex: Throwable, method: Method, vararg params: Any?)
-    {
+    override fun handleUncaughtException(
+        ex: Throwable,
+        method: Method,
+        vararg params: Any?,
+    ) {
         LOGGER.error("Exception message: ${ex.message}")
         LOGGER.error("Method name: ${method.name}")
         for (param in params)

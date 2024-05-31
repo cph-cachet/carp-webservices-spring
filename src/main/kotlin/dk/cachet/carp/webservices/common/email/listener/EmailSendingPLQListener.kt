@@ -17,10 +17,8 @@ import org.springframework.stereotype.Component
  *
  */
 @Component
-class EmailSendingPLQListener
-{
-    companion object
-    {
+class EmailSendingPLQListener {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
@@ -28,13 +26,16 @@ class EmailSendingPLQListener
     lateinit var notificationService: INotificationService
 
     @RabbitListener(queues = ["\${rabbit.email.sending.plq}"])
-    fun receive(message: Message)
-    {
+    fun receive(message: Message) {
         val emailRequest: EmailRequest = JSON.decodeFromString(message.body.decodeToString())
-        LOGGER.info("New Email message for ${emailRequest.destinationEmail} with id ${emailRequest.id} has arrived in the Email Parking Lot.")
+        LOGGER.info(
+            "New Email message for ${emailRequest.destinationEmail} " +
+                "with id ${emailRequest.id} has arrived in the Email Parking Lot.",
+        )
         notificationService.sendAlertOrGeneralNotification(
-                "New Email message for ${emailRequest.destinationEmail} with id ${emailRequest.id} has arrived in the Parking Lot.",
-                TeamsChannel.SERVER_ERRORS
+            "New Email message for ${emailRequest.destinationEmail} " +
+                "with id ${emailRequest.id} has arrived in the Parking Lot.",
+            TeamsChannel.SERVER_ERRORS,
         )
     }
 }

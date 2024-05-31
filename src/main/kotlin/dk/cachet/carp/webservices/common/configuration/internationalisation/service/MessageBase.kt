@@ -13,8 +13,7 @@ import org.springframework.stereotype.Service
  * and internationalization of the messages.
  */
 @Service
-class MessageBase: AMessageBase()
-{
+class MessageBase : AMessageBase() {
     init
     {
         // Initialize the [messageSource]
@@ -26,8 +25,7 @@ class MessageBase: AMessageBase()
      * @return The [ResourceBundleMessageSource] with the given Map that is keyed with the message code.
      */
     @Bean
-    final fun messageSource(): MessageSource
-    {
+    final fun messageSource(): MessageSource {
         val resourceBundleMessageSource = ResourceBundleMessageSource()
         resourceBundleMessageSource.setBasename("messages/messages")
         resourceBundleMessageSource.setDefaultEncoding("UTF-8")

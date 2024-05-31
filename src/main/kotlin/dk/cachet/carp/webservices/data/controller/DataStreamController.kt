@@ -10,14 +10,11 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 
-
 @RestController
 class DataStreamController(
-    private val dataStreamService: DataStreamService
-)
-{
-    companion object
-    {
+    private val dataStreamService: DataStreamService,
+) {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
 
         /** Endpoint URI constants */
@@ -26,9 +23,10 @@ class DataStreamController(
 
     @PostMapping(value = [DATA_STREAM_SERVICE])
     @Operation(tags = ["dataStream/getDataStream.json"])
-    suspend fun invoke( @RequestBody request: DataStreamServiceRequest<*> ) : ResponseEntity<Any>
-    {
+    suspend fun invoke(
+        @RequestBody request: DataStreamServiceRequest<*>,
+    ): ResponseEntity<Any> {
         LOGGER.info("Start POST: $DATA_STREAM_SERVICE -> ${ request::class.simpleName }")
-        return dataStreamService.core.invoke( request ).let { ResponseEntity.ok( it ) }
+        return dataStreamService.core.invoke(request).let { ResponseEntity.ok(it) }
     }
 }

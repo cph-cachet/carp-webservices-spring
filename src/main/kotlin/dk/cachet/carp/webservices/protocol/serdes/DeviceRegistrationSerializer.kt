@@ -15,10 +15,9 @@ import org.apache.logging.log4j.Logger
  * The Class [DeviceRegistrationSerializer].
  * The [DeviceRegistrationSerializer] implements the serialization logic for [DeviceRegistration].
  */
-class DeviceRegistrationSerializer(private val validationMessages: MessageBase): JsonSerializer<DeviceRegistration>()
-{
-    companion object
-    {
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
+class DeviceRegistrationSerializer(private val validationMessages: MessageBase) : JsonSerializer<DeviceRegistration>() {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
@@ -32,23 +31,24 @@ class DeviceRegistrationSerializer(private val validationMessages: MessageBase):
      * Also, if the [StudyProtocolSnapshot] contains invalid format.
      * @return The serialization [StudyProtocolSnapshot] object.
      */
-    override fun serialize(deviceRegistration: DeviceRegistration?, jsonGenerator: JsonGenerator?, serializers: SerializerProvider?)
-    {
-        if (deviceRegistration == null)
-        {
+    override fun serialize(
+        deviceRegistration: DeviceRegistration?,
+        jsonGenerator: JsonGenerator?,
+        serializers: SerializerProvider?,
+    ) {
+        if (deviceRegistration == null) {
             LOGGER.error("The core DeviceRegistration is null.")
             throw SerializationException(validationMessages.get("protocol.device_reg.serialization.empty"))
         }
 
         val serialized: String
-        try
-        {
+        try {
             serialized = JSON.encodeToString(deviceRegistration)
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The core DeviceRegistration is not valid. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("protocol.device_reg.serialization.error", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("protocol.device_reg.serialization.error", ex.message.toString()),
+            )
         }
 
         jsonGenerator!!.writeRawValue(serialized)

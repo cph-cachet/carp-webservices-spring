@@ -19,7 +19,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 
 class FileServiceTest {
-
     private val fileRepository: FileRepository = mockk()
     private val fileStorage: FileStorage = mockk()
     private val messageBase: MessageBase = mockk()
@@ -38,16 +37,17 @@ class FileServiceTest {
             every { s3Client.putObject(capture(slot)) } returns mockk()
 
             val multipartFile = MockMultipartFile("name", "originalName.png", null, byteArrayOf(0))
-            val sut = FileServiceImpl(
-                fileRepository,
-                fileStorage,
-                messageBase,
-                s3Client,
-                authenticationService,
-                accountService,
-                s3SpaceBucket,
-                s3SpaceEndpoint
-            )
+            val sut =
+                FileServiceImpl(
+                    fileRepository,
+                    fileStorage,
+                    messageBase,
+                    s3Client,
+                    authenticationService,
+                    accountService,
+                    s3SpaceBucket,
+                    s3SpaceEndpoint,
+                )
 
             sut.uploadImage(multipartFile)
 
@@ -63,16 +63,17 @@ class FileServiceTest {
             val expectedExtension = "png"
             val originalKey = "originalName.$expectedExtension"
             val multipartFile = MockMultipartFile("name", originalKey, null, byteArrayOf(0))
-            val sut = FileServiceImpl(
-                fileRepository,
-                fileStorage,
-                messageBase,
-                s3Client,
-                authenticationService,
-                accountService,
-                s3SpaceBucket,
-                s3SpaceEndpoint
-            )
+            val sut =
+                FileServiceImpl(
+                    fileRepository,
+                    fileStorage,
+                    messageBase,
+                    s3Client,
+                    authenticationService,
+                    accountService,
+                    s3SpaceBucket,
+                    s3SpaceEndpoint,
+                )
 
             sut.uploadImage(multipartFile)
 
@@ -94,16 +95,17 @@ class FileServiceTest {
         fun `if url is invalid, do nothing`() {
             every { s3Client.deleteObject(any()) } returns mockk()
             val url = "some not valid url"
-            val sut = FileServiceImpl(
-                fileRepository,
-                fileStorage,
-                messageBase,
-                s3Client,
-                authenticationService,
-                accountService,
-                s3SpaceBucket,
-                s3SpaceEndpoint
-            )
+            val sut =
+                FileServiceImpl(
+                    fileRepository,
+                    fileStorage,
+                    messageBase,
+                    s3Client,
+                    authenticationService,
+                    accountService,
+                    s3SpaceBucket,
+                    s3SpaceEndpoint,
+                )
 
             sut.deleteImage(url)
 
@@ -117,16 +119,17 @@ class FileServiceTest {
 
             val expectedKey = "filename.png"
             val url = "$s3SpaceEndpoint/$s3SpaceBucket/filename.png"
-            val sut = FileServiceImpl(
-                fileRepository,
-                fileStorage,
-                messageBase,
-                s3Client,
-                authenticationService,
-                accountService,
-                s3SpaceBucket,
-                s3SpaceEndpoint
-            )
+            val sut =
+                FileServiceImpl(
+                    fileRepository,
+                    fileStorage,
+                    messageBase,
+                    s3Client,
+                    authenticationService,
+                    accountService,
+                    s3SpaceBucket,
+                    s3SpaceEndpoint,
+                )
 
             sut.deleteImage(url)
 

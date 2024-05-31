@@ -16,5 +16,45 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  render: () => <PageStory />,
+  render: () => (
+    <PageStory
+      kcContext={{
+        realm: { registrationEmailAsUsername: true },
+      }}
+    />
+  ),
+};
+
+export const DefaultUsernameEnabled: Story = {
+  render: () => (
+    <PageStory
+      kcContext={{
+        locale: { currentLanguageTag: "da" },
+      }}
+    />
+  ),
+};
+
+export const Danish: Story = {
+  render: () => (
+    <PageStory
+      kcContext={{
+        locale: { currentLanguageTag: "da" },
+        realm: { registrationEmailAsUsername: true },
+      }}
+    />
+  ),
+};
+
+export const DanishUsernameEnabled: Story = {
+  render: () => (
+    <PageStory
+      kcContext={{
+        locale: {
+          currentLanguageTag: "da",
+        },
+        realm: { registrationEmailAsUsername: true },
+      }}
+    />
+  ),
 };

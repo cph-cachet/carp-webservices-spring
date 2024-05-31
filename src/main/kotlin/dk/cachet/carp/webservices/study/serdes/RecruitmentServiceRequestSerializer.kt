@@ -10,16 +10,15 @@ import dk.cachet.carp.webservices.common.exception.serialization.SerializationEx
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 
-
 /**
  * The Class [RecruitmentServiceRequestSerializer].
  * [RecruitmentServiceRequestSerializer] implements the serialization logic for [RecruitmentServiceRequest].
  */
-class RecruitmentServiceRequestSerializer(private val validationMessages: MessageBase): JsonSerializer<RecruitmentServiceRequest<*>>()
-{
-
-    companion object
-    {
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
+class RecruitmentServiceRequestSerializer(
+    private val validationMessages: MessageBase,
+) : JsonSerializer<RecruitmentServiceRequest<*>>() {
+    companion object {
         /** The [LOGGER]. */
         private val LOGGER: Logger = LogManager.getLogger()
     }
@@ -31,26 +30,24 @@ class RecruitmentServiceRequestSerializer(private val validationMessages: Messag
      * @throws SerializationException If the [value] is blank or empty. Also, if the [value] contains invalid format.
      * @return The serialization of [RecruitmentServiceRequest] object.
      */
-    override fun serialize(value: RecruitmentServiceRequest<*>?, gen: JsonGenerator?, serializers: SerializerProvider?) {
-        if (value == null)
-        {
+    override fun serialize(
+        value: RecruitmentServiceRequest<*>?,
+        gen: JsonGenerator?,
+        serializers: SerializerProvider?,
+    ) {
+        if (value == null) {
             LOGGER.error("The RecruitmentServiceRequest is null.")
             throw SerializationException(validationMessages.get("study.details.serialization.empty"))
         }
 
         val serialized: String
-        try
-        {
+        try {
             serialized = JSON.encodeToString(RecruitmentServiceRequest.Serializer, value)
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The RecruitmentServiceRequest is not valid. Exception: $ex")
             throw SerializationException(validationMessages.get("study.details.serialization.error"))
         }
 
         gen!!.writeRawValue(serialized)
     }
-
-
 }

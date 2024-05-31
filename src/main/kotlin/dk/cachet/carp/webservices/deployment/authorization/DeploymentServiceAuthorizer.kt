@@ -13,51 +13,48 @@ import org.springframework.stereotype.Service
 @Service
 class DeploymentServiceAuthorizer(
     private val authorizationService: AuthorizationService,
-    private val authenticationService: AuthenticationService
-) : ApplicationServiceAuthorizer<DeploymentService, DeploymentServiceRequest<*>>
-{
+    private val authenticationService: AuthenticationService,
+) : ApplicationServiceAuthorizer<DeploymentService, DeploymentServiceRequest<*>> {
     override fun DeploymentServiceRequest<*>.authorize() =
-        when ( this )
-        {
+        when (this) {
             // Participants should be able to deploy themselves if needed,
             // we shouldn't restrict study deployment creation to researchers only
             is DeploymentServiceRequest.CreateStudyDeployment -> Unit
             is DeploymentServiceRequest.RemoveStudyDeployments ->
-                authorizationService.require( studyDeploymentIds.map { Claim.ManageDeployment( it ) }.toSet() )
+                authorizationService.require(studyDeploymentIds.map { Claim.ManageDeployment(it) }.toSet())
             is DeploymentServiceRequest.GetStudyDeploymentStatus ->
-                authorizationService.require( Claim.InDeployment( studyDeploymentId ) )
+                authorizationService.require(Claim.InDeployment(studyDeploymentId))
             is DeploymentServiceRequest.GetStudyDeploymentStatusList ->
-                authorizationService.require( studyDeploymentIds.map { Claim.InDeployment( it ) }.toSet() )
+                authorizationService.require(studyDeploymentIds.map { Claim.InDeployment(it) }.toSet())
             is DeploymentServiceRequest.RegisterDevice ->
-                authorizationService.require( Claim.InDeployment( studyDeploymentId ) )
+                authorizationService.require(Claim.InDeployment(studyDeploymentId))
             is DeploymentServiceRequest.UnregisterDevice ->
-                authorizationService.require( Claim.InDeployment( studyDeploymentId ) )
+                authorizationService.require(Claim.InDeployment(studyDeploymentId))
             is DeploymentServiceRequest.GetDeviceDeploymentFor ->
-                authorizationService.require( Claim.InDeployment( studyDeploymentId ) )
+                authorizationService.require(Claim.InDeployment(studyDeploymentId))
             is DeploymentServiceRequest.DeviceDeployed ->
-                authorizationService.require( Claim.InDeployment( studyDeploymentId ) )
+                authorizationService.require(Claim.InDeployment(studyDeploymentId))
             is DeploymentServiceRequest.Stop ->
-                authorizationService.require( Claim.InDeployment( studyDeploymentId ) )
+                authorizationService.require(Claim.InDeployment(studyDeploymentId))
         }
 
-    override suspend fun DeploymentServiceRequest<*>.changeClaimsOnSuccess( result: Any? ) =
-        when ( this )
-        {
+    override suspend fun DeploymentServiceRequest<*>.changeClaimsOnSuccess(result: Any?) =
+        when (this) {
             is DeploymentServiceRequest.CreateStudyDeployment -> {
-                require( result is StudyDeploymentStatus )
+                require(result is StudyDeploymentStatus)
 
-                if ( authenticationService.getRole() == Role.PARTICIPANT )
-                {
+                if (authenticationService.getRole() == Role.PARTICIPANT) {
                     authorizationService.grantCurrentAuthentication(
-                        setOf( Claim.InDeployment( result.studyDeploymentId ) )
+                        setOf(Claim.InDeployment(result.studyDeploymentId)),
                     )
+                } else {
+                    Unit
                 }
-                else Unit
             }
             is DeploymentServiceRequest.RemoveStudyDeployments -> {
                 studyDeploymentIds.forEach {
                     authorizationService.revokeClaimsFromAllAccounts(
-                        setOf( Claim.InDeployment( it ) )
+                        setOf(Claim.InDeployment(it)),
                     )
                 }
             }
@@ -67,6 +64,7 @@ class DeploymentServiceAuthorizer(
             is DeploymentServiceRequest.UnregisterDevice,
             is DeploymentServiceRequest.GetDeviceDeploymentFor,
             is DeploymentServiceRequest.DeviceDeployed,
-            is DeploymentServiceRequest.Stop -> Unit
+            is DeploymentServiceRequest.Stop,
+            -> Unit
         }
 }

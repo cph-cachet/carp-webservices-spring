@@ -15,10 +15,11 @@ import org.apache.logging.log4j.Logger
  * The Class [ParticipantGroupStatusSerializer].
  * [ParticipantGroupStatusSerializer] implements the serialization logic for [ParticipantGroupStatus].
  */
-class ParticipantGroupStatusSerializer(private val validationMessages: MessageBase): JsonSerializer<ParticipantGroupStatus>()
-{
-    companion object
-    {
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
+class ParticipantGroupStatusSerializer(
+    private val validationMessages: MessageBase,
+) : JsonSerializer<ParticipantGroupStatus>() {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
@@ -30,23 +31,24 @@ class ParticipantGroupStatusSerializer(private val validationMessages: MessageBa
      * Also, if the [ParticipantGroupStatus] contains invalid format.
      * @return The serialization [ParticipantGroupStatus] object.
      */
-    override fun serialize(participantGroupStatus: ParticipantGroupStatus?, jsonGenerator: JsonGenerator?, serializers: SerializerProvider?)
-    {
-        if (participantGroupStatus == null)
-        {
+    override fun serialize(
+        participantGroupStatus: ParticipantGroupStatus?,
+        jsonGenerator: JsonGenerator?,
+        serializers: SerializerProvider?,
+    ) {
+        if (participantGroupStatus == null) {
             LOGGER.error("The ParticipantGroupStatus is null.")
             throw SerializationException(validationMessages.get("study.participant.group.status.serialization.empty"))
         }
 
         val serialized: String
-        try
-        {
+        try {
             serialized = JSON.encodeToString(participantGroupStatus)
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The ParticipantGroupStatus is not valid. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("study.participant.group.status.serialization.error", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("study.participant.group.status.serialization.error", ex.message.toString()),
+            )
         }
 
         jsonGenerator!!.writeRawValue(serialized)

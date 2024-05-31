@@ -15,10 +15,11 @@ import org.apache.logging.log4j.Logger
  * The Class [StudyDeploymentSnapshotSerializer].
  * The [StudyDeploymentSnapshotSerializer] implements the serialization logic for [StudyDeploymentSnapshot].
  */
-class StudyDeploymentSnapshotSerializer(private val validationMessages: MessageBase): JsonSerializer<StudyDeploymentSnapshot>()
-{
-    companion object
-    {
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
+class StudyDeploymentSnapshotSerializer(
+    private val validationMessages: MessageBase,
+) : JsonSerializer<StudyDeploymentSnapshot>() {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
@@ -32,23 +33,24 @@ class StudyDeploymentSnapshotSerializer(private val validationMessages: MessageB
      * Also, if the [StudyDeploymentSnapshot] contains invalid format.
      * @return The serialization of deployment service request object.
      */
-    override fun serialize(studyDeploymentSnapshot: StudyDeploymentSnapshot?, jsonGenerator: JsonGenerator?, serializers: SerializerProvider?)
-    {
-        if (studyDeploymentSnapshot ==  null)
-        {
+    override fun serialize(
+        studyDeploymentSnapshot: StudyDeploymentSnapshot?,
+        jsonGenerator: JsonGenerator?,
+        serializers: SerializerProvider?,
+    ) {
+        if (studyDeploymentSnapshot == null) {
             LOGGER.error("The core StudyDeploymentSnapshot is null.")
             throw SerializationException(validationMessages.get("deployment.study_deployment.serialization.empty"))
         }
 
         val serialized: String
-        try
-        {
+        try {
             serialized = JSON.encodeToString(studyDeploymentSnapshot)
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The core StudyDeploymentSnapshot is not valid. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("deployment.study_deployment.serialization.error", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("deployment.study_deployment.serialization.error", ex.message.toString()),
+            )
         }
 
         jsonGenerator!!.writeRawValue(serialized)

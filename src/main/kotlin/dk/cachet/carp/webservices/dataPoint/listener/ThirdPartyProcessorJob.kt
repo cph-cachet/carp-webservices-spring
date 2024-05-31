@@ -12,20 +12,16 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener
 import org.springframework.stereotype.Component
 
 @Component
-class ThirdPartyProcessorJob
-(
-        private val objectMapper: ObjectMapper,
-        private val dataPointService: DataPointService
-)
-{
-    companion object
-    {
+class ThirdPartyProcessorJob(
+    private val objectMapper: ObjectMapper,
+    private val dataPointService: DataPointService,
+) {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
     @RabbitListener(queues = ["\${rabbit.third-party.processing.queue}"])
-    fun process(message: Message)
-    {
+    fun process(message: Message) {
         LOGGER.info("New message received from Third-party queue.")
         val jsonDataPoint = message.body.decodeToString()
         val datapoint = parseDataPoint(jsonDataPoint)
@@ -33,14 +29,10 @@ class ThirdPartyProcessorJob
         dataPointService.create(datapoint)
     }
 
-    private fun parseDataPoint(json: String): DataPoint
-    {
-        try
-        {
+    private fun parseDataPoint(json: String): DataPoint {
+        try {
             return objectMapper.readValue(json, DataPoint::class.java)
-        }
-        catch (ex: JsonParseException)
-        {
+        } catch (ex: JsonParseException) {
             LOGGER.info("Failed to parse 3rd-party data-point: ${ex.message}")
             throw SerializationException("Failed to parse 3rd-party data-point: ${ex.message}")
         }

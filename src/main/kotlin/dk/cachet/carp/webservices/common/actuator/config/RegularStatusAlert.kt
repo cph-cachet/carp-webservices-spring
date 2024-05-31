@@ -22,40 +22,52 @@ class RegularStatusAlert(
     private val database: IDatabaseConnection,
     private val disk: IDiskSpaceStatus,
     private val mail: IMailConnection,
-    private val notificationService: INotificationService
-)
-{
-    companion object
-    {
+    private val notificationService: INotificationService,
+) {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
         private const val NEW_LINE = "\n\n"
     }
 
     @Scheduled(cron = "0 30 8,12,15,17 * * *", zone = "Europe/Copenhagen")
-    fun statusCheck()
-    {
+    fun statusCheck() {
         val messageBuilder = StringBuilder()
         messageBuilder.append("== CARP Status ==")
         messageBuilder.append(NEW_LINE)
 
-        if (ping.statusHealth().toString() == "UP") { messageBuilder.append("WS-Status: ${ping.statusHealth()} :white_check_mark: ") }
-        else { messageBuilder.append("WS-Status: ${ping.statusHealth()} :no_entry: ") }
+        if (ping.statusHealth().toString() == "UP") {
+            messageBuilder.append("WS-Status: ${ping.statusHealth()} ✅")
+        } else {
+            messageBuilder.append("WS-Status: ${ping.statusHealth()} ❌ ")
+        }
         messageBuilder.append(NEW_LINE)
 
-        if (ping.statusHealth().toString() == "UP") { messageBuilder.append("Db-Status: ${database.statusHealth()} :white_check_mark: | ${database.statusDetails()}") }
-        else { messageBuilder.append("DB-Status: ${database.statusHealth()} :no_entry: | ${database.statusDetails()}") }
+        if (database.statusHealth().toString() == "UP") {
+            messageBuilder.append("Db-Status: ${database.statusHealth()} ✅ | ${database.statusDetails()}")
+        } else {
+            messageBuilder.append("DB-Status: ${database.statusHealth()} ❌ | ${database.statusDetails()}")
+        }
         messageBuilder.append(NEW_LINE)
 
-        if (disk.statusHealth().toString() == "UP") { messageBuilder.append("Disk-Status: ${disk.statusHealth()} :white_check_mark: | ${disk.statusDetails()} ") }
-        else { messageBuilder.append("Disk-Status: ${disk.statusHealth()} :no_entry: | ${disk.statusDetails()} ") }
+        if (disk.statusHealth().toString() == "UP") {
+            messageBuilder.append("Disk-Status: ${disk.statusHealth()} ✅ | ${disk.statusDetails()} ")
+        } else {
+            messageBuilder.append("Disk-Status: ${disk.statusHealth()} ❌ | ${disk.statusDetails()} ")
+        }
         messageBuilder.append(NEW_LINE)
 
-        if (rabbit.statusHealth().toString() == "UP") {  messageBuilder.append("Rabbit-Status: ${rabbit.statusHealth()} :white_check_mark: | ${rabbit.statusDetails()}") }
-        else {  messageBuilder.append("Rabbit-Status: ${rabbit.statusHealth()} :no_entry: | ${rabbit.statusDetails()}") }
+        if (rabbit.statusHealth().toString() == "UP") {
+            messageBuilder.append("Rabbit-Status: ${rabbit.statusHealth()} ✅ | ${rabbit.statusDetails()}")
+        } else {
+            messageBuilder.append("Rabbit-Status: ${rabbit.statusHealth()} ❌ | ${rabbit.statusDetails()}")
+        }
         messageBuilder.append(NEW_LINE)
 
-        if (mail.mailServerConnection().toString() == "UP") { messageBuilder.append("Mail-Server-Status: ${mail.mailServerConnection()} :white_check_mark: ") }
-        else { messageBuilder.append("Mail-Server-Status: ${mail.mailServerConnection()} :no_entry: ") }
+        if (mail.mailServerConnection().toString() == "UP") {
+            messageBuilder.append("Mail-Server-Status: ${mail.mailServerConnection()} ✅ ")
+        } else {
+            messageBuilder.append("Mail-Server-Status: ${mail.mailServerConnection()} ❌ ")
+        }
 
         LOGGER.info("Regular status check: $messageBuilder")
         notificationService.sendAlertOrGeneralNotification(messageBuilder.toString(), TeamsChannel.HEARTBEAT)

@@ -8,13 +8,12 @@ import org.springframework.web.bind.annotation.ResponseStatus
  * The [BadRequestException] is thrown when a request is invalid or missing a required parameter(s).
  */
 @ResponseStatus(HttpStatus.BAD_REQUEST)
-class BadRequestException: RuntimeException
-{
-    companion object
-    {
+class BadRequestException : RuntimeException {
+    companion object {
         private const val serialVersionUID = 1L
         private const val INVALID_PARAM_MSG = "Invalid value [%s] found for parameter [%s]."
-        private const val INVALID_DATE_PARAM_MSG = "Invalid value [%s] found for parameter [%s]. Expected date format is [%s]"
+        private const val INVALID_DATE_PARAM_MSG =
+            "Invalid value [%s] found for parameter [%s]. Expected date format is [%s]"
     }
 
     /**
@@ -37,7 +36,11 @@ class BadRequestException: RuntimeException
      * @param [value] The [value] of the error response.
      * @param [format] The [format].
      */
-    constructor(paramName: String?, value: String?, format: String?) : super(String.format(INVALID_DATE_PARAM_MSG, value, paramName, format))
+    constructor(
+        paramName: String?,
+        value: String?,
+        format: String?,
+    ) : super(String.format(INVALID_DATE_PARAM_MSG, value, paramName, format))
 
     /**
      * Instantiates a new BadRequestException exception.

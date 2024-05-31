@@ -2,8 +2,10 @@ package dk.cachet.carp.webservices.document.controller
 
 import com.fasterxml.jackson.databind.JsonNode
 import dk.cachet.carp.common.application.UUID
+import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.constants.PathVariableName
 import dk.cachet.carp.webservices.common.constants.RequestParamName
+import dk.cachet.carp.webservices.common.exception.responses.ResourceNotFoundException
 import dk.cachet.carp.webservices.common.query.QueryUtil
 import dk.cachet.carp.webservices.document.controller.DocumentController.Companion.DOCUMENT_BASE
 import dk.cachet.carp.webservices.document.domain.Document
@@ -26,11 +28,10 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping(value = [DOCUMENT_BASE])
 class DocumentController(
     private val documentService: DocumentService,
-    private val documentTraverser: DocumentTraverser
-)
-{
-    companion object
-    {
+    private val documentTraverser: DocumentTraverser,
+    private val validationMessages: MessageBase,
+) {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
 
         /** Endpoint URI constants */
@@ -48,12 +49,11 @@ class DocumentController(
     @PreAuthorize("canManageStudy(#studyId)")
     @Operation(tags = ["document/getAll.json"])
     fun getAll(
-            @RequestParam(RequestParamName.QUERY) query: String?,
-            @RequestParam(RequestParamName.SORT, required = false) sort: String?,
-            @RequestParam(RequestParamName.PAGE, required = false) page: Int?,
-            @PathVariable(PathVariableName.STUDY_ID) studyId: UUID
-    ): List<Document>
-    {
+        @RequestParam(RequestParamName.QUERY) query: String?,
+        @RequestParam(RequestParamName.SORT, required = false) sort: String?,
+        @RequestParam(RequestParamName.PAGE, required = false) page: Int?,
+        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
+    ): List<Document> {
         LOGGER.info("Start GET: /api/studies/$studyId/documents")
         val pageRequest = PageRequest.of(page ?: 0, DEFAULT_PAGE_SIZE, QueryUtil.sort(sort))
         return documentService.getAll(pageRequest, query, studyId.stringRepresentation)
@@ -61,24 +61,31 @@ class DocumentController(
 
     @GetMapping(value = [COLLECTIONS], produces = [MediaType.APPLICATION_JSON_VALUE])
     @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
+    @Suppress("TooGenericExceptionCaught", "SwallowedException")
     fun getByDocumentPath(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
-        request: HttpServletRequest
-    ): String?
-    {
-        val path = documentTraverser.requestToUrlPath(request)
-        LOGGER.info("Start GET: $path")
-        return documentService.getByDocumentPath(studyId.stringRepresentation, request)
+        request: HttpServletRequest,
+    ): String? {
+        try {
+            val path = documentTraverser.requestToUrlPath(request)
+            LOGGER.info("Start GET: $path")
+            return documentService.getByDocumentPath(studyId.stringRepresentation, request)
+        } catch (e: NullPointerException) {
+            LOGGER.error("Document not found, studyId: $studyId, path: ${request.requestURI}")
+            throw ResourceNotFoundException(
+                validationMessages.get("document.path.not_found", studyId.stringRepresentation, request.requestURI),
+            )
+        }
     }
 
     @PostMapping(value = [COLLECTIONS], produces = [MediaType.APPLICATION_JSON_VALUE])
     @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
     @ResponseStatus(HttpStatus.CREATED)
     fun createByDocumentPath(
-            @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
-            @RequestBody data: JsonNode?,
-            request: HttpServletRequest): String?
-    {
+        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
+        @RequestBody data: JsonNode?,
+        request: HttpServletRequest,
+    ): String? {
         val path = documentTraverser.requestToUrlPath(request)
         LOGGER.info("Start POST: $path")
         return documentService.createByDocumentPath(studyId.stringRepresentation, data, request)
@@ -88,9 +95,9 @@ class DocumentController(
     @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
     @Operation(tags = ["document/getOne.json"])
     fun getOne(
-            @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
-            @PathVariable(PathVariableName.DOCUMENT_ID) id: Int): Document
-    {
+        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
+        @PathVariable(PathVariableName.DOCUMENT_ID) id: Int,
+    ): Document {
         LOGGER.info("Start GET: /api/studies/$studyId/documents/$id")
         return documentService.getOne(id)
     }
@@ -100,9 +107,9 @@ class DocumentController(
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(tags = ["document/create.json"])
     fun create(
-            @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
-            @Valid @RequestBody request: CreateDocumentRequestDto): Document
-    {
+        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
+        @Valid @RequestBody request: CreateDocumentRequestDto,
+    ): Document {
         LOGGER.info("Start POST: /api/studies/$studyId/documents")
         return documentService.create(request)
     }
@@ -111,9 +118,9 @@ class DocumentController(
     @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
     @Operation(tags = ["document/delete.json"])
     fun delete(
-            @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
-            @PathVariable(PathVariableName.DOCUMENT_ID) id: Int)
-    {
+        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
+        @PathVariable(PathVariableName.DOCUMENT_ID) id: Int,
+    ) {
         LOGGER.info("Start DELETE: /api/studies/$studyId/documents/$id")
         documentService.delete(id)
     }
@@ -122,11 +129,10 @@ class DocumentController(
     @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
     @Operation(tags = ["document/update.json"])
     fun update(
-            @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
-            @PathVariable(PathVariableName.DOCUMENT_ID) id: Int,
-            @Valid @RequestBody document: UpdateDocumentRequestDto
-    ): Document
-    {
+        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
+        @PathVariable(PathVariableName.DOCUMENT_ID) id: Int,
+        @Valid @RequestBody document: UpdateDocumentRequestDto,
+    ): Document {
         LOGGER.info("Start PUT: /api/studies/$studyId/documents/$id")
         return documentService.update(id, document)
     }
@@ -135,11 +141,10 @@ class DocumentController(
     @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
     @Operation(tags = ["document/append.json"])
     fun append(
-            @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
-            @PathVariable(PathVariableName.DOCUMENT_ID) id: Int,
-            @Valid @RequestBody document: UpdateDocumentRequestDto
-    ): Document
-    {
+        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
+        @PathVariable(PathVariableName.DOCUMENT_ID) id: Int,
+        @Valid @RequestBody document: UpdateDocumentRequestDto,
+    ): Document {
         LOGGER.info("Start PUT: /api/studies/$studyId/documents/$id/append")
         return documentService.append(id, document)
     }

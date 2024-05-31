@@ -1,18 +1,20 @@
 // ejected using 'npx eject-keycloak-page'
-import { useGetClassName } from 'keycloakify/login/lib/useGetClassName';
-import type { PageProps } from 'keycloakify/login/pages/PageProps';
-import { clsx } from 'keycloakify/tools/clsx';
-import { useState } from 'react';
-import type { I18n } from '../i18n';
-import type { KcContext } from '../kcContext';
-import { UserProfileFormFields } from './shared/UserProfileFormFields';
+import { useConstCallback } from "keycloakify/tools/useConstCallback";
+import { useState, type FormEventHandler } from "react";
+import { useGetClassName } from "keycloakify/login/lib/useGetClassName";
+import type { PageProps } from "keycloakify/login/pages/PageProps";
+import type { I18n } from "../i18n";
+import type { KcContext } from "../kcContext";
+import { UserProfileFormFields } from "./shared/UserProfileFormFields";
+import AuthActionButton from "../../components/Buttons/AuthActionButton";
 
 export default function RegisterUserProfile(
   props: PageProps<
-    Extract<KcContext, { pageId: 'register-user-profile.ftl' }>,
+    Extract<KcContext, { pageId: "register-user-profile.ftl" }>,
     I18n
-  >
+  >,
 ) {
+  const [isLoading, setIsLoading] = useState(false);
   const { kcContext, i18n, doUseDefaultCss, Template, classes } = props;
 
   const { getClassName } = useGetClassName({
@@ -25,19 +27,28 @@ export default function RegisterUserProfile(
 
   const { msg, msgStr } = i18n;
 
-  const [isFormSubmittable, setIsFormSubmittable] = useState(false);
+  const [, setIsFormSubmittable] = useState(false);
+
+  const onSubmit = useConstCallback<FormEventHandler<HTMLFormElement>>((e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    const formElement = e.target as HTMLFormElement;
+    formElement.submit();
+    setIsLoading(false);
+  });
 
   return (
     <Template
       {...{ kcContext, i18n, doUseDefaultCss, classes }}
-      displayMessage={messagesPerField.exists('global')}
+      displayMessage={messagesPerField.exists("global")}
       displayRequiredFields={true}
-      headerNode={msg('registerTitle')}
+      headerNode={msg("registerTitle")}
     >
       <form
         id="kc-register-form"
-        className={getClassName('kcFormClass')}
+        className={getClassName("kcFormClass")}
         action={url.registrationAction}
+        onSubmit={onSubmit}
         method="post"
       >
         <UserProfileFormFields
@@ -48,7 +59,7 @@ export default function RegisterUserProfile(
         />
         {recaptchaRequired && (
           <div className="form-group">
-            <div className={getClassName('kcInputWrapperClass')}>
+            <div className={getClassName("kcInputWrapperClass")}>
               <div
                 className="g-recaptcha"
                 data-size="compact"
@@ -58,36 +69,10 @@ export default function RegisterUserProfile(
           </div>
         )}
         <div
-          className={getClassName('kcFormGroupClass')}
+          className={getClassName("kcFormGroupClass")}
           style={{ marginBottom: 30 }}
         >
-          <div
-            id="kc-form-options"
-            className={getClassName('kcFormOptionsClass')}
-          >
-            <div className={getClassName('kcFormOptionsWrapperClass')}>
-              <span>
-                <a href={url.loginUrl}>{msg('backToLogin')}</a>
-              </span>
-            </div>
-          </div>
-
-          <div
-            id="kc-form-buttons"
-            className={getClassName('kcFormButtonsClass')}
-          >
-            <input
-              className={clsx(
-                getClassName('kcButtonClass'),
-                getClassName('kcButtonPrimaryClass'),
-                getClassName('kcButtonBlockClass'),
-                getClassName('kcButtonLargeClass')
-              )}
-              type="submit"
-              value={msgStr('doRegister')}
-              disabled={!isFormSubmittable}
-            />
-          </div>
+          <AuthActionButton text={msgStr("doSubmit")} loading={isLoading} />
         </div>
       </form>
     </Template>

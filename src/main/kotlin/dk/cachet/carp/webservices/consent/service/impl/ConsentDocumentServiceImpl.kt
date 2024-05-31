@@ -9,18 +9,17 @@ import dk.cachet.carp.webservices.common.exception.responses.ResourceNotFoundExc
 import dk.cachet.carp.webservices.consent.domain.ConsentDocument
 import dk.cachet.carp.webservices.consent.repository.ConsentDocumentRepository
 import dk.cachet.carp.webservices.consent.service.ConsentDocumentService
+import dk.cachet.carp.webservices.export.service.ResourceExporter
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
 import dk.cachet.carp.webservices.security.authorization.Claim
 import dk.cachet.carp.webservices.security.config.SecurityCoroutineContext
 import dk.cachet.carp.webservices.study.service.RecruitmentService
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.nio.file.Path
 
 /**
  * The Class [ConsentDocumentServiceImpl].
@@ -33,69 +32,76 @@ class ConsentDocumentServiceImpl(
     private val accountService: AccountService,
     private val authenticationService: AuthenticationService,
     private val validationMessages: MessageBase,
-    private val recruitmentService: RecruitmentService
-): ConsentDocumentService
-{
-    private val backgroundWorker = CoroutineScope( Dispatchers.IO )
+    private val recruitmentService: RecruitmentService,
+) : ConsentDocumentService, ResourceExporter<ConsentDocument> {
+    private val backgroundWorker = CoroutineScope(Dispatchers.IO)
 
-    companion object
-    {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
-    override fun getAllByStudyId( studyId: UUID ) : List<ConsentDocument>
-    {
+    override fun getAllByStudyId(studyId: UUID): List<ConsentDocument> {
         val deploymentIds =
-            runBlocking ( Dispatchers.IO + SecurityCoroutineContext() )
-            {
-                recruitmentService.core.getParticipantGroupStatusList( studyId )
+            runBlocking(Dispatchers.IO + SecurityCoroutineContext()) {
+                recruitmentService.core.getParticipantGroupStatusList(studyId)
                     .filterIsInstance<ParticipantGroupStatus.InDeployment>()
                     .map { it.studyDeploymentStatus.studyDeploymentId }
                     .toSet()
             }
 
-        return getAllByDeploymentIds( deploymentIds )
+        return getAllByDeploymentIds(deploymentIds)
     }
 
-    override fun getAllByDeploymentIds( deploymentIds: Set<UUID> ): List<ConsentDocument> =
-        consentDocumentRepository.findAllByDeploymentIds( deploymentIds.map { it.toString() } )
+    override fun getAllByDeploymentIds(deploymentIds: Set<UUID>): List<ConsentDocument> =
+        consentDocumentRepository.findAllByDeploymentIds(deploymentIds.map { it.toString() })
 
-    override fun getOne(consentId: Int): ConsentDocument
-    {
+    override fun getOne(consentId: Int): ConsentDocument {
         val optionalConsent = consentDocumentRepository.findById(consentId)
-        if (!optionalConsent.isPresent)
-        {
+        if (!optionalConsent.isPresent) {
             LOGGER.info("Consent document is not found, id: $consentId")
             throw ResourceNotFoundException(validationMessages.get("consent.document.id.not_found", consentId))
         }
         return optionalConsent.get()
     }
 
-    override fun delete(consentId: Int)
-    {
+    override fun delete(consentId: Int) {
         val consent = getOne(consentId)
         consentDocumentRepository.delete(consent)
         LOGGER.info("Consent document deleted, id: ${consent.id}")
 
         val identity = authenticationService.getCarpIdentity()
         backgroundWorker.launch {
-            accountService.revoke(identity, setOf( Claim.ConsentOwner( consent.id ) ) )
+            accountService.revoke(identity, setOf(Claim.ConsentOwner(consent.id)))
         }
     }
 
-    override fun create( deploymentId: UUID, data: JsonNode? ) : ConsentDocument
-    {
-        val saved = consentDocumentRepository.save(
-            ConsentDocument(
-                deploymentId = deploymentId.stringRepresentation,
-                data = data)
-        )
+    override fun create(
+        deploymentId: UUID,
+        data: JsonNode?,
+    ): ConsentDocument {
+        val saved =
+            consentDocumentRepository.save(
+                ConsentDocument(
+                    deploymentId = deploymentId.stringRepresentation,
+                    data = data,
+                ),
+            )
         LOGGER.info("Consent document created, id: ${saved.id}")
 
         val identity = authenticationService.getCarpIdentity()
         backgroundWorker.launch {
-            accountService.grant( identity, setOf( Claim.ConsentOwner( saved.id ) ) )
+            accountService.grant(identity, setOf(Claim.ConsentOwner(saved.id)))
         }
         return saved
+    }
+
+    override val dataFileName = "consent-documents.json"
+
+    override suspend fun exportDataOrThrow(
+        studyId: UUID,
+        deploymentIds: Set<UUID>,
+        target: Path,
+    ) = withContext(Dispatchers.IO) {
+        getAllByDeploymentIds(deploymentIds)
     }
 }

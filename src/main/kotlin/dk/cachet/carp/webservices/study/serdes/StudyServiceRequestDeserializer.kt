@@ -16,10 +16,11 @@ import org.springframework.util.StringUtils
  * The Class [StudyServiceRequestDeserializer].
  * The [StudyServiceRequestDeserializer] implements the deserialization logic for [StudyServiceRequest].
  */
-class StudyServiceRequestDeserializer(private val validationMessages: MessageBase): JsonDeserializer<StudyServiceRequest<*>>()
-{
-    companion object
-    {
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
+class StudyServiceRequestDeserializer(
+    private val validationMessages: MessageBase,
+) : JsonDeserializer<StudyServiceRequest<*>>() {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
@@ -31,34 +32,33 @@ class StudyServiceRequestDeserializer(private val validationMessages: MessageBas
      * Also, if the [StudyServiceRequest] contains invalid format.
      * @return The deserialized [StudyServiceRequest] object.
      */
-    override fun deserialize(jsonParser: JsonParser?, context: DeserializationContext?): StudyServiceRequest<*>
-    {
+    override fun deserialize(
+        jsonParser: JsonParser?,
+        context: DeserializationContext?,
+    ): StudyServiceRequest<*> {
         val studyServiceRequest: String
-        try
-        {
-            studyServiceRequest =  jsonParser?.codec?.readTree<TreeNode>(jsonParser).toString()
+        try {
+            studyServiceRequest = jsonParser?.codec?.readTree<TreeNode>(jsonParser).toString()
 
-            if (!StringUtils.hasLength(studyServiceRequest))
-            {
+            if (!StringUtils.hasLength(studyServiceRequest)) {
                 LOGGER.error("The StudyServiceRequest cannot be blank or empty.")
                 throw SerializationException(validationMessages.get("study.service.deserialization.empty"))
             }
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The core study request contains bad format. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("study.service.deserialization.bad_format", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("study.service.deserialization.bad_format", ex.message.toString()),
+            )
         }
 
         val parsed: StudyServiceRequest<*>
-        try
-        {
+        try {
             parsed = JSON.decodeFromString(StudyServiceRequest.Serializer, studyServiceRequest)
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The core study serializer is not valid. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("study.service.deserialization.error", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("study.service.deserialization.error", ex.message.toString()),
+            )
         }
 
         return parsed

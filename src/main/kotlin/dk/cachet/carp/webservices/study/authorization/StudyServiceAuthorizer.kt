@@ -11,35 +11,32 @@ import org.springframework.stereotype.Service
 
 @Service
 class StudyServiceAuthorizer(
-    private val auth: AuthorizationService
-) : ApplicationServiceAuthorizer<StudyService, StudyServiceRequest<*>>
-{
+    private val auth: AuthorizationService,
+) : ApplicationServiceAuthorizer<StudyService, StudyServiceRequest<*>> {
     override fun StudyServiceRequest<*>.authorize() =
-        when ( this )
-        {
+        when (this) {
             is StudyServiceRequest.CreateStudy -> {
-                auth.require( Role.RESEARCHER )
-                auth.requireOwner( ownerId )
+                auth.require(Role.RESEARCHER)
+                auth.requireOwner(ownerId)
             }
-            is StudyServiceRequest.GetStudiesOverview -> auth.requireOwner( ownerId )
+            is StudyServiceRequest.GetStudiesOverview -> auth.requireOwner(ownerId)
 
             // the duplication seems unavoidable if we still want to keep exhaustive pattern matching
-            is StudyServiceRequest.SetInternalDescription -> auth.require( Claim.ManageStudy( studyId ) )
-            is StudyServiceRequest.GetStudyDetails -> auth.require( Claim.ManageStudy( studyId ) )
-            is StudyServiceRequest.GetStudyStatus -> auth.require( Claim.ManageStudy( studyId ) )
-            is StudyServiceRequest.SetInvitation -> auth.require( Claim.ManageStudy( studyId ) )
-            is StudyServiceRequest.SetProtocol -> auth.require( Claim.ManageStudy( studyId ) )
-            is StudyServiceRequest.RemoveProtocol -> auth.require( Claim.ManageStudy( studyId ) )
-            is StudyServiceRequest.GoLive -> auth.require( Claim.ManageStudy( studyId ) )
-            is StudyServiceRequest.Remove -> auth.require( Claim.ManageStudy( studyId ) )
+            is StudyServiceRequest.SetInternalDescription -> auth.require(Claim.ManageStudy(studyId))
+            is StudyServiceRequest.GetStudyDetails -> auth.require(Claim.ManageStudy(studyId))
+            is StudyServiceRequest.GetStudyStatus -> auth.require(Claim.ManageStudy(studyId))
+            is StudyServiceRequest.SetInvitation -> auth.require(Claim.ManageStudy(studyId))
+            is StudyServiceRequest.SetProtocol -> auth.require(Claim.ManageStudy(studyId))
+            is StudyServiceRequest.RemoveProtocol -> auth.require(Claim.ManageStudy(studyId))
+            is StudyServiceRequest.GoLive -> auth.require(Claim.ManageStudy(studyId))
+            is StudyServiceRequest.Remove -> auth.require(Claim.ManageStudy(studyId))
         }
 
-    override suspend fun StudyServiceRequest<*>.changeClaimsOnSuccess(result: Any? ) =
-        when ( this )
-        {
+    override suspend fun StudyServiceRequest<*>.changeClaimsOnSuccess(result: Any?) =
+        when (this) {
             is StudyServiceRequest.CreateStudy -> {
-                require( result is StudyStatus )
-                auth.grantCurrentAuthentication( Claim.ManageStudy( result.studyId ) )
+                require(result is StudyStatus)
+                auth.grantCurrentAuthentication(Claim.ManageStudy(result.studyId))
             }
             is StudyServiceRequest.SetInternalDescription,
             is StudyServiceRequest.GetStudyDetails,
@@ -48,10 +45,10 @@ class StudyServiceAuthorizer(
             is StudyServiceRequest.SetInvitation,
             is StudyServiceRequest.SetProtocol,
             is StudyServiceRequest.RemoveProtocol,
-            is StudyServiceRequest.GoLive -> Unit
+            is StudyServiceRequest.GoLive,
+            -> Unit
             is StudyServiceRequest.Remove -> {
-                auth.revokeClaimFromAllAccounts( Claim.ManageStudy( studyId ) )
+                auth.revokeClaimFromAllAccounts(Claim.ManageStudy(studyId))
             }
-
         }
 }

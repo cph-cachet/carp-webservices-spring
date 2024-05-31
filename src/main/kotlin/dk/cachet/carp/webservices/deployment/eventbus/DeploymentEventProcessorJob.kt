@@ -16,10 +16,8 @@ import org.springframework.stereotype.Component
  * and invokes handlers.
  * */
 @Component
-class DeploymentEventProcessorJob(private val coreEventBus: CoreEventBus)
-{
-    companion object
-    {
+class DeploymentEventProcessorJob(private val coreEventBus: CoreEventBus) {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
@@ -28,8 +26,7 @@ class DeploymentEventProcessorJob(private val coreEventBus: CoreEventBus)
      * registered for that event.
      */
     @RabbitListener(queues = ["\${rabbit.deployment.queue}"])
-    fun process(message: Message)
-    {
+    fun process(message: Message) {
         LOGGER.info("New message received from the deployment event queue.")
         val event: DeploymentService.Event = JSON.decodeFromString(message.body.decodeToString())
         runBlocking {

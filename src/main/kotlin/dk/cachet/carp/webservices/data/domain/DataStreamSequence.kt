@@ -11,19 +11,14 @@ import java.io.Serializable
 
 @Entity(name = "data_stream_sequence")
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
-data class DataStreamSequence (
+data class DataStreamSequence(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int = 0,
-
     val dataStreamId: Int? = 0,
-
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     var snapshot: JsonNode? = null,
-
     var firstSequenceId: Long? = 0,
-
-    var lastSequenceId: Long? = 0
-
-): Auditable(), Serializable
+    var lastSequenceId: Long? = 0,
+) : Auditable(), Serializable

@@ -9,7 +9,7 @@ type Props = {
 
 const StyledLink = ({ children, to, isBold }: Props) => {
   return (
-    <StyledStyledLink href={to} isBold={isBold}>
+    <StyledStyledLink href={to} isBold={isBold} target='_blank'>
       {children}
     </StyledStyledLink>
   );

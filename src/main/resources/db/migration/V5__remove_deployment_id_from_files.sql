@@ -1,0 +1,1 @@
+ALTER TABLE files DROP COLUMN study_deployment_id;
