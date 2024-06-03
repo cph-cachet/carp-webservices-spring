@@ -14,6 +14,11 @@ interface ConsentDocumentService {
 
     fun getOne(consentId: Int): ConsentDocument
 
+    fun getOneByDeploymentIdAndParticipantId(
+        deploymentId: UUID,
+        participantId: UUID,
+    ): ConsentDocument
+
     fun delete(consentId: Int)
 
     fun create(

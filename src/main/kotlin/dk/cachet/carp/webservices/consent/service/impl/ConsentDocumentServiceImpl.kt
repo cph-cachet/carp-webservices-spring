@@ -57,6 +57,23 @@ class ConsentDocumentServiceImpl(
         return optionalConsent.get()
     }
 
+    override fun getOneByDeploymentIdAndParticipantId(deploymentId: UUID, participantId: UUID): ConsentDocument {
+        val deploymentIdString = deploymentId.stringRepresentation
+        val participantIdString = participantId.stringRepresentation
+        val consent = consentDocumentRepository.findByDeploymentIdAndParticipantId(deploymentIdString, participantIdString)
+        if (consent == null) {
+            LOGGER.info("Consent document is not found, deploymentId: $deploymentId, participantId: $participantId")
+            throw ResourceNotFoundException(
+                validationMessages.get(
+                    "consent.document.deployment_id.participant_id.not_found",
+                    deploymentId,
+                    participantId,
+                ),
+            )
+        }
+        return consent
+    }
+
     override fun delete(consentId: Int) {
         val consent = getOne(consentId)
         consentDocumentRepository.delete(consent)
@@ -72,6 +89,7 @@ class ConsentDocumentServiceImpl(
                 ConsentDocument(
                     deploymentId = deploymentId.stringRepresentation,
                     data = data,
+
                 ),
             )
         LOGGER.info("Consent document created, id: ${saved.id}")
