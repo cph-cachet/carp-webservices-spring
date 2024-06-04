@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 
 @Repository
-interface DataStreamSequenceRepository : JpaRepository<DataStreamSequence, Int> {
+interface DataStreamSequenceRepository : JpaRepository<DataStreamSequence<Any?>, Int> {
     @Query(
         nativeQuery = true,
         value =
@@ -23,7 +23,7 @@ interface DataStreamSequenceRepository : JpaRepository<DataStreamSequence, Int> 
         @Param("dataStreamId") dataStreamId: Int,
         @Param("from") from: Int,
         @Param("to") to: Int,
-    ): List<DataStreamSequence>
+    ): List<DataStreamSequence<Any?>>
 
     @Query(
         nativeQuery = true,
@@ -36,7 +36,7 @@ interface DataStreamSequenceRepository : JpaRepository<DataStreamSequence, Int> 
     )
     fun findAllByDeploymentIds(
         @Param("deploymentIds") deploymentIds: List<String>,
-    ): List<DataStreamSequence>
+    ): List<DataStreamSequence<Any?>>
 
     @Modifying
     @Transactional
@@ -54,5 +54,5 @@ interface DataStreamSequenceRepository : JpaRepository<DataStreamSequence, Int> 
     )
     fun findAllByDataStreamId(
         @Param("dataStreamId") dataStreamId: Int,
-    ): List<DataStreamSequence>
+    ): List<DataStreamSequence<Any?>>
 }

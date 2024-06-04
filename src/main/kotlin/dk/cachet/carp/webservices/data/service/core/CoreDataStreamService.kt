@@ -38,10 +38,7 @@ class CoreDataStreamService(
      *  - [batch] contains a sequence with [DataStreamId] which wasn't configured for [studyDeploymentId]
      * @throws IllegalStateException when data streams for [studyDeploymentId] have been closed.
      */
-    override suspend fun appendToDataStreams(
-        studyDeploymentId: UUID,
-        batch: DataStreamBatch,
-    ) {
+    override suspend fun appendToDataStreams(studyDeploymentId: UUID, batch: DataStreamBatch) {
         // the `studyDeploymentId` of one or more sequences in [batch] does not match [studyDeploymentId]
         require(
             batch.sequences.all {
@@ -65,6 +62,7 @@ class CoreDataStreamService(
             },
         ) { "The batch contains a sequence with a data stream which wasn't configured for this study deployment." }
 
+        // need to use onw implementation with function append() which doesnt check for "checks"
         val dataStreams = CawsMutableDataStreamBatch()
 
         // appending sequences to batch
@@ -85,7 +83,7 @@ class CoreDataStreamService(
                 val snapshot = DataStreamSnapshot(it.measurements, it.triggerIds, it.syncPoint)
 
                 // to ws save_to_db type
-                DataStreamSequence(
+                DataStreamSequence<Any?>(
                     dataStreamId = dataStreamId.id,
                     firstSequenceId = it.firstSequenceId,
                     lastSequenceId = it.range.last,
@@ -95,6 +93,7 @@ class CoreDataStreamService(
 
         dataStreamSequenceRepository.saveAll(dataStreamSequence.asIterable())
     }
+
 
     /**
      * Stop accepting incoming data for all data streams for each of the [studyDeploymentIds].
