@@ -11,7 +11,7 @@ import java.io.Serializable
 
 @Entity(name = "data_stream_sequence")
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
-data class DataStreamSequence(
+data class DataStreamSequence<T>(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int = 0,
