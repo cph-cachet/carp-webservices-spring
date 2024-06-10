@@ -3,6 +3,7 @@ package dk.cachet.carp.webservices.security.config
 import com.c4_soft.springaddons.security.oidc.spring.SpringAddonsMethodSecurityExpressionHandler
 import com.c4_soft.springaddons.security.oidc.spring.SpringAddonsMethodSecurityExpressionRoot
 import dk.cachet.carp.common.application.UUID
+import dk.cachet.carp.data.infrastructure.DataStreamServiceRequest
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
 import dk.cachet.carp.webservices.security.authorization.Claim
 import dk.cachet.carp.webservices.security.authorization.Role
@@ -50,6 +51,16 @@ class ProxiesMethodSecurityExpressionRoot(
 ) : SpringAddonsMethodSecurityExpressionRoot() {
     fun canManageStudy(studyId: UUID?): Boolean =
         studyId != null && auth.getClaims().contains(Claim.ManageStudy(studyId)) || isAdmin()
+
+    fun isDataTypeOwner(dataTypeId: UUID?): Boolean {
+        if (dataTypeId == null) return false
+
+        val dataTypeClaim = Claim.DataType(dataTypeId)
+        if (!auth.getClaims().contains(dataTypeClaim)) return false
+
+        // Check if the DataType value is "dk.cachet.carp.data.infrastructure.DataStreamServiceRequest.AppendToDataStreams"
+        return dataTypeClaim.value == DataStreamServiceRequest.AppendToDataStreams::class.qualifiedName || isAdmin()
+    }
 
     fun isProtocolOwner(protocolId: UUID?): Boolean =
         protocolId != null && auth.getClaims().contains(Claim.ProtocolOwner(protocolId)) || isAdmin()

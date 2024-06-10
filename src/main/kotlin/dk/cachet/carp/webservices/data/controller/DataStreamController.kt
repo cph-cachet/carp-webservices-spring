@@ -1,11 +1,12 @@
 package dk.cachet.carp.webservices.data.controller
 
-import dk.cachet.carp.data.infrastructure.DataStreamServiceRequest
+import dk.cachet.carp.webservices.data.domain.DataStreamServiceRequestDTO
 import dk.cachet.carp.webservices.data.service.DataStreamService
 import io.swagger.v3.oas.annotations.Operation
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
@@ -22,11 +23,13 @@ class DataStreamController(
     }
 
     @PostMapping(value = [DATA_STREAM_SERVICE])
+    @PreAuthorize("canManageStudy((#request.studyDeploymentId))")
     @Operation(tags = ["dataStream/getDataStream.json"])
     suspend fun invoke(
-        @RequestBody request: DataStreamServiceRequest<*>,
+        @RequestBody request: DataStreamServiceRequestDTO,
     ): ResponseEntity<Any> {
         LOGGER.info("Start POST: $DATA_STREAM_SERVICE -> ${ request::class.simpleName }")
-        return dataStreamService.core.invoke(request).let { ResponseEntity.ok(it) }
+        val serviceRequest = request.toDataStreamServiceRequest()
+        return dataStreamService.core.invoke(serviceRequest).let { ResponseEntity.ok(it) }
     }
 }

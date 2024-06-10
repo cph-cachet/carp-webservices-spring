@@ -75,6 +75,9 @@ sealed class Claim {
     data class FileOwner(val fileId: Int) : Claim() {
         override val value = fileId.toString()
     }
+    data class DataType(val dataTypeId: UUID) : Claim() {
+        override val value = dataTypeId.toString()
+    }
 
     /**
      * A virtual claim is a claim which is not directly present as a user attribute,
