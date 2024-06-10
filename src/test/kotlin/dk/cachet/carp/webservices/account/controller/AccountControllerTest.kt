@@ -44,7 +44,8 @@ class AccountControllerTest {
             mockMvc.perform(
                 post(endpoint)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(accountRequest)))
+                    .content(objectMapper.writeValueAsString(accountRequest))
+            )
                 .andExpect(status().isBadRequest)
         }
 
@@ -52,7 +53,8 @@ class AccountControllerTest {
         fun `should return 400 if the request body is missing`() = runTest {
             mockMvc.perform(
                 post(endpoint)
-                    .contentType(MediaType.APPLICATION_JSON))
+                    .contentType(MediaType.APPLICATION_JSON)
+            )
                 .andExpect(status().isBadRequest)
         }
 
@@ -64,7 +66,8 @@ class AccountControllerTest {
             mockMvc.perform(
                 post(endpoint)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(accountRequest)))
+                    .content(objectMapper.writeValueAsString(accountRequest))
+            )
                 .andExpect(status().isCreated)
         }
     }
@@ -74,42 +77,38 @@ class AccountControllerTest {
         private val endpoint = "/api/accounts/role/"
 
         @Test
-        fun `should return 400 if email is invalid`() =
-            runTest {
-                val accountRequest = AccountRequest("invalid", AccountRole.PARTICIPANT)
+        fun `should return 400 if email is invalid`() = runTest {
+            val accountRequest = AccountRequest("invalid", AccountRole.PARTICIPANT)
 
-                mockMvc.perform(
-                    post(endpoint)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(accountRequest)),
-                )
-                    .andExpect(status().isBadRequest)
-            }
-
-        @Test
-        fun `should return 400 if the request body is missing`() =
-            runTest {
-                mockMvc.perform(
-                    post(endpoint)
-                        .contentType(MediaType.APPLICATION_JSON),
-                )
-                    .andExpect(status().isBadRequest)
-            }
+            mockMvc.perform(
+                post(endpoint)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(accountRequest))
+            )
+                .andExpect(status().isBadRequest)
+        }
 
         @Test
-        fun `should relay task to account service`() =
-            runTest {
-                coEvery { accountService.hasRoleByEmail(any(), any()) } returns mockk()
-                val accountRequest = AccountRequest("address@domain.org", AccountRole.PARTICIPANT)
+        fun `should return 400 if the request body is missing`() = runTest {
+            mockMvc.perform(
+                post(endpoint)
+                    .contentType(MediaType.APPLICATION_JSON)
+            )
+                .andExpect(status().isBadRequest)
+        }
 
-                mockMvc.perform(
-                    post(endpoint)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(accountRequest)),
-                )
-                    .andExpect(status().isOk)
-            }
-    }
+        @Test
+        fun `should relay task to account service`() = runTest {
+            coEvery { accountService.hasRoleByEmail(any(), any()) } returns mockk()
+            val accountRequest = AccountRequest("address@domain.org", AccountRole.PARTICIPANT)
+
+            mockMvc.perform(
+                post(endpoint)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(accountRequest))
+            )
+                .andExpect(status().isOk)
+        }
 
     @Nested
     inner class Info {
@@ -126,5 +125,6 @@ class AccountControllerTest {
                 )
                     .andExpect(status().isOk)
             }
+        }
     }
 }

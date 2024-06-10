@@ -5,7 +5,8 @@ import dk.cachet.carp.data.application.*
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 
-/** TODO create a function that checks sequence IDs before appending + usable if we can get back last preceding upload of a sequence so the client know what to send
+/** TODO create a function that checks sequence IDs before appending
+ * + usable if we can get back last preceding upload of a sequence so the client know what to send
  *
  * */
 
@@ -14,6 +15,7 @@ import org.apache.logging.log4j.Logger
  * all the sequence IDs in the append method. This is a temporary solution until we find a better way to handle this.
  */
 class CawsMutableDataStreamBatch : Sequence<DataStreamPoint<*>>, DataStreamBatch
+
 {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
@@ -49,7 +51,9 @@ class CawsMutableDataStreamBatch : Sequence<DataStreamPoint<*>>, DataStreamBatch
     /**
      * Append a sequence to a non-existing or previously appended data stream in this batch.
      *
-     * no catch to throw "IllegalArgumentException" when the start of any sequences contained in [batch] -> This is a temporary solution
+     * no catch to throw "IllegalArgumentException" when the start of any sequences
+     * contained in [batch] -> This is a temporary solution
+     *
      * - the start of the [sequence] range precedes the end of a previously appended sequence to the same data stream
      * - the sync point of [sequence] is older than that of previous sequences in this batch
      */
