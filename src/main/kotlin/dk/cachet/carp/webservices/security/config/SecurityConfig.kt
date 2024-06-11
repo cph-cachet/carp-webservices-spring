@@ -58,8 +58,10 @@ class ProxiesMethodSecurityExpressionRoot(
         val dataTypeClaim = Claim.DataType(dataTypeId)
         if (!auth.getClaims().contains(dataTypeClaim)) return false
 
-        // Check if the DataType value is "dk.cachet.carp.data.infrastructure.DataStreamServiceRequest.AppendToDataStreams"
-        return dataTypeClaim.value == DataStreamServiceRequest.AppendToDataStreams::class.qualifiedName || isAdmin()
+        // Check if the DataType value is
+        // "dk.cachet.carp.data.infrastructure.DataStreamServiceRequest.AppendToDataStreams"
+        return dataTypeClaim.value ==
+                DataStreamServiceRequest.AppendToDataStreams::class.qualifiedName || isAdmin()
     }
 
     fun isProtocolOwner(protocolId: UUID?): Boolean =

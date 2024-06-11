@@ -5,7 +5,8 @@ import dk.cachet.carp.common.application.services.ApiVersion
 import dk.cachet.carp.data.application.DataStreamBatch
 import dk.cachet.carp.data.infrastructure.DataStreamServiceRequest
 
-data class DataStreamServiceRequestDTO(
+data class DataStreamServiceRequestDTO (
+
     val apiVersion: ApiVersion,
     val requestType: String,
     val studyDeploymentId: UUID? = null,
@@ -17,9 +18,8 @@ data class DataStreamServiceRequestDTO(
 ) {
     fun toDataStreamServiceRequest(): DataStreamServiceRequest<*> {
         return when (requestType) {
-/*            "OpenDataStreams" -> DataStreamServiceRequest.OpenDataStreams(DataStreamsConfiguration(*//* configuration parameters *//*))*/
-            "AppendToDataStreams" -> DataStreamServiceRequest.AppendToDataStreams(studyDeploymentId!!, batch!!)
-            // Add other cases for other request types
+            "AppendToDataStreams" ->
+                DataStreamServiceRequest.AppendToDataStreams(studyDeploymentId!!, batch!!)
             else -> throw IllegalArgumentException("Unsupported request type: $requestType")
         }
     }
