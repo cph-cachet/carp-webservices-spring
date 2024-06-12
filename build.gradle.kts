@@ -75,7 +75,7 @@ dependencies {
     // JACKSON
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:${property("jacksonVersion")}")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${property("jacksonVersion")}")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.14.3")
+    implementation("com.fasterxml.jackson.core:jackson-databind:${property("jacksonVersion")}")
 
     // CARP CORE
     implementation("dk.cachet.carp.common:carp.common-jvm:${property("carpCoreVersion")}")
