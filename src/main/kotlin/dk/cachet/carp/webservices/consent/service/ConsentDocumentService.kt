@@ -12,17 +12,15 @@ interface ConsentDocumentService {
 
     fun getAllByDeploymentIds(deploymentIds: Set<UUID>): List<ConsentDocument>
 
-    fun getOne(consentId: Int): ConsentDocument
+    fun getAllByDeploymentIds(deploymentIds: Set<UUID>, participantId: UUID): List<ConsentDocument>
 
-    fun getOneByDeploymentIdAndParticipantId(
-        deploymentId: UUID,
-        participantId: UUID,
-    ): ConsentDocument
+    fun getOne(consentId: Int): ConsentDocument
 
     fun delete(consentId: Int)
 
     fun create(
         deploymentId: UUID,
+        participantId: UUID,
         data: JsonNode?,
     ): ConsentDocument
 }

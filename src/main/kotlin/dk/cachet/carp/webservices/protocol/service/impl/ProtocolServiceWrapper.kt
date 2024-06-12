@@ -46,6 +46,13 @@ class ProtocolServiceWrapper(
                 }
         }
 
+    override suspend fun deleteProtocolById(protocolId: String): Boolean {
+        withContext(Dispatchers.IO) {
+            protocolRepository.findAllById(protocolId).forEach { protocolRepository.delete(it) }
+        }
+        return true
+    }
+
     /**
      * Get the [ProtocolOverview] from a sorted list of all the versions of a protocol.
      *

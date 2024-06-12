@@ -1,7 +1,6 @@
 package dk.cachet.carp.webservices.consent.repository
 
 import dk.cachet.carp.webservices.consent.domain.ConsentDocument
-import dk.cachet.carp.webservices.study.domain.Recruitment
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
@@ -18,10 +17,14 @@ interface ConsentDocumentRepository : JpaRepository<ConsentDocument, Int> {
         @Param("deploymentIds") deploymentIds: Collection<String>,
     ): List<ConsentDocument>
 
-
-    @Query(value = "SELECT * FROM consent_documents WHERE deployment_id = ?1 AND data->>'participantId' = ?1", nativeQuery = true)
-    fun findByDeploymentIdAndParticipantId(deploymentId: String, participantId: String): ConsentDocument?
-
+    @Query(
+        value = "SELECT * FROM consent_documents cd WHERE cd.deploymentId IN :deployumentIds AND data->>'participantId' = ?1",
+        nativeQuery = true,
+    )
+    fun findAllByDeploymentIdsAndParticipantId(
+        @Param("deploymentIds") deploymentIds: Collection<String>,
+        @Param("participantId")participantId: String,
+    ): List<ConsentDocument>
 
     @Modifying
     @Transactional

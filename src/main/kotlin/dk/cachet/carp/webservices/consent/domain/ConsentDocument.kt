@@ -31,4 +31,7 @@ data class ConsentDocument(
     @Column(columnDefinition = "jsonb")
     @Type(JsonBinaryType::class)
     var data: JsonNode? = null,
+    /** The [participantId] of the consent document. */
+//    @serializedName("participant_id")
+    val participantId: String? = null,
 ) : Auditable(), Serializable

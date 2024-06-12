@@ -10,4 +10,7 @@ interface ProtocolService {
     suspend fun getSingleProtocolOverview(protocolId: String): ProtocolOverview?
 
     suspend fun getProtocolsOverview(accountId: UUID): List<ProtocolOverview>
+
+    suspend fun deleteProtocolById(protocolId: String): Boolean
 }
+

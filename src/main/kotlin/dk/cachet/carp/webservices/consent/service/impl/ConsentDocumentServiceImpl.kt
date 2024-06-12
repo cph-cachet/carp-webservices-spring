@@ -48,6 +48,10 @@ class ConsentDocumentServiceImpl(
     override fun getAllByDeploymentIds(deploymentIds: Set<UUID>): List<ConsentDocument> =
         consentDocumentRepository.findAllByDeploymentIds(deploymentIds.map { it.toString() })
 
+    override fun getAllByDeploymentIds(deploymentIds: Set<UUID>, participantId: UUID): List<ConsentDocument> {
+        return consentDocumentRepository.findAllByDeploymentIdsAndParticipantId(deploymentIds.map { it.toString() }, participantId.stringRepresentation)
+    }
+
     override fun getOne(consentId: Int): ConsentDocument {
         val optionalConsent = consentDocumentRepository.findById(consentId)
         if (!optionalConsent.isPresent) {
@@ -55,23 +59,6 @@ class ConsentDocumentServiceImpl(
             throw ResourceNotFoundException(validationMessages.get("consent.document.id.not_found", consentId))
         }
         return optionalConsent.get()
-    }
-
-    override fun getOneByDeploymentIdAndParticipantId(deploymentId: UUID, participantId: UUID): ConsentDocument {
-        val deploymentIdString = deploymentId.stringRepresentation
-        val participantIdString = participantId.stringRepresentation
-        val consent = consentDocumentRepository.findByDeploymentIdAndParticipantId(deploymentIdString, participantIdString)
-        if (consent == null) {
-            LOGGER.info("Consent document is not found, deploymentId: $deploymentId, participantId: $participantId")
-            throw ResourceNotFoundException(
-                validationMessages.get(
-                    "consent.document.deployment_id.participant_id.not_found",
-                    deploymentId,
-                    participantId,
-                ),
-            )
-        }
-        return consent
     }
 
     override fun delete(consentId: Int) {
@@ -82,14 +69,15 @@ class ConsentDocumentServiceImpl(
 
     override fun create(
         deploymentId: UUID,
+        participantId: UUID,
         data: JsonNode?,
     ): ConsentDocument {
         val saved =
             consentDocumentRepository.save(
                 ConsentDocument(
                     deploymentId = deploymentId.stringRepresentation,
+                    participantId = participantId.stringRepresentation,
                     data = data,
-
                 ),
             )
         LOGGER.info("Consent document created, id: ${saved.id}")

@@ -1,0 +1,1 @@
+ALTER TABLE consent_documents ADD COLUMN participant_id character varying(255);

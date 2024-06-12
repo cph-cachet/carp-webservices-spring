@@ -29,6 +29,7 @@ class ProtocolController(
         const val PROTOCOL_FACTORY_SERVICE = "/api/protocol-factory-service"
         const val GET_PROTOCOL_OVERVIEW = "/api/protocols/{${PathVariableName.PROTOCOL_ID}}/latest"
         const val GET_PROTOCOLS_OVERVIEW = "/api/protocols-overview"
+        const val DEL_PROTOCOL = "/api/protocols/{${PathVariableName.PROTOCOL_ID}}"
     }
 
     @PostMapping(value = [PROTOCOL_SERVICE])
@@ -65,5 +66,16 @@ class ProtocolController(
     suspend fun getProtocolsOverview(): List<ProtocolOverview> {
         LOGGER.info("Start GET: /api/protocols")
         return protocolService.getProtocolsOverview(authenticationService.getId())
+    }
+
+    @DeleteMapping(value = [DEL_PROTOCOL])
+    @PreAuthorize("hasRole('RESEARCHER')")
+    @Operation(tags = ["protocol/deleteProtocolbyId.json"])
+    suspend fun deleteProtocol(
+        @PathVariable(PathVariableName.PROTOCOL_ID) protocolId: String,
+    ): ResponseEntity<Any> {
+        LOGGER.info("Start DELETE: /api/protocols/$protocolId")
+        protocolService.deleteProtocolById( protocolId)
+        return ResponseEntity.ok().build()
     }
 }

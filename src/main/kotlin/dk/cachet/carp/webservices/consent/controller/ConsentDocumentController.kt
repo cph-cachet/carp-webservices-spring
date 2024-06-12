@@ -8,6 +8,7 @@ import dk.cachet.carp.webservices.consent.service.ConsentDocumentService
 import io.swagger.v3.oas.annotations.Operation
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
+import org.springframework.data.repository.query.Param
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
@@ -33,8 +34,13 @@ class ConsentDocumentController(
     fun getAll(
         @PathVariable(PathVariableName.DEPLOYMENT_ID, required = false) deploymentId: UUID?,
         @PathVariable(PathVariableName.STUDY_ID, required = false) studyId: UUID?,
+        @RequestParam(PathVariableName.PARTICIPANT_ID, required = false) participantId: UUID?,
     ): List<ConsentDocument> {
-        if (deploymentId != null) {
+        if (participantId != null && deploymentId != null) {
+            LOGGER.info("Start GET: /api/studies/$participantId/consent-documents")
+            return consentDocumentService.getAllByDeploymentIds(setOf(deploymentId), participantId)
+        }
+        else if (deploymentId != null) {
             LOGGER.info("Start GET: /api/deployments/$deploymentId/consent-documents")
             return consentDocumentService.getAllByDeploymentIds(setOf(deploymentId))
         } else if (studyId != null) {
@@ -62,10 +68,11 @@ class ConsentDocumentController(
     @Operation(tags = ["consentDocument/create.json"])
     fun create(
         @PathVariable(PathVariableName.DEPLOYMENT_ID) deploymentId: UUID,
+        @RequestParam(PathVariableName.PARTICIPANT_ID) participantId: UUID,
         @RequestBody data: JsonNode?,
     ): ConsentDocument {
         LOGGER.info("Start POST: /api/deployments/$deploymentId/consent-documents")
-        return consentDocumentService.create(deploymentId, data)
+        return consentDocumentService.create(deploymentId, participantId, data)
     }
 
     @DeleteMapping(CONSENT_BY_DEPLOYMENT_ID + CONSENT_BY_ID)
