@@ -12,4 +12,5 @@ object RequestParamName {
     const val EMAIL = "email"
     const val OFFSET = "offset"
     const val LIMIT = "limit"
+    const val LAST_UPDATE = "last_update"
 }

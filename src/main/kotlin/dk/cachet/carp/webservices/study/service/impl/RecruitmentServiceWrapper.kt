@@ -15,9 +15,15 @@ import dk.cachet.carp.webservices.study.domain.ParticipantGroupInfo
 import dk.cachet.carp.webservices.study.domain.ParticipantGroupsStatus
 import dk.cachet.carp.webservices.study.service.RecruitmentService
 import kotlinx.coroutines.*
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.Instant
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
+import kotlin.time.Duration.Companion.hours
+
 
 @Service
 class RecruitmentServiceWrapper(
@@ -86,6 +92,17 @@ class RecruitmentServiceWrapper(
             }
             accounts
         }
+
+    override suspend fun getInactiveParticipants(studyId: UUID, lastUpdate: Int): List<ParticipantAccount> {
+        val timeNow: Instant = Clock.System.now()
+
+        val inactiveParticipants = getParticipantGroupsStatus(studyId)
+            .groups
+            .flatMap { it.participants }
+            .filter { if (it.dateOfLastDataUpload == null) false else (it.dateOfLastDataUpload!! > timeNow.minus(lastUpdate.hours))}
+
+        return inactiveParticipants
+    }
 
     override fun isParticipant(
         studyId: UUID,

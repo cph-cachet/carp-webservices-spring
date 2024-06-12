@@ -10,6 +10,7 @@ import dk.cachet.carp.webservices.common.constants.RequestParamName
 import dk.cachet.carp.webservices.security.authentication.domain.Account
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
 import dk.cachet.carp.webservices.security.authorization.Claim
+import dk.cachet.carp.webservices.study.domain.ParticipantAccount
 import dk.cachet.carp.webservices.study.domain.ParticipantGroupsStatus
 import dk.cachet.carp.webservices.study.domain.StudyOverview
 import dk.cachet.carp.webservices.study.dto.AddParticipantsRequestDto
@@ -44,6 +45,9 @@ class StudyController(
         const val GET_PARTICIPANTS_ACCOUNTS = "/api/studies/{${PathVariableName.STUDY_ID}}/participants/accounts"
         const val GET_PARTICIPANT_GROUP_STATUS = "/api/studies/{${PathVariableName.STUDY_ID}}/participantGroup/status"
         const val ADD_PARTICIPANTS = "/api/studies/{${PathVariableName.STUDY_ID}}/participants/add"
+        const val GET_INACTIVE_PARTICIPANTS = "/api/studies/{${PathVariableName.STUDY_ID}}/participants/inactive"
+        const val GET_DEPLOYMENTS = "/api/studies/{${PathVariableName.STUDY_ID}}/deployments"
+        const val GET_DATA_OVERVIEW = "/api/studies/{${PathVariableName.STUDY_ID}}/data-overview"
     }
 
     @PostMapping(value = [ADD_RESEARCHER])
@@ -143,4 +147,28 @@ class StudyController(
         LOGGER.info("Start POST: /api/studies/$studyId/participants/add")
         request.emails.forEach { e -> recruitmentService.core.addParticipant(studyId, EmailAddress(e)) }
     }
+
+    @GetMapping(value = [GET_INACTIVE_PARTICIPANTS])
+    @PreAuthorize("canManageStudy(#studyId)")
+    @Operation(tags = ["study/getInactiveParticipants.json"])
+    suspend fun getInactiveParticipants(
+        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
+        @RequestParam(name = RequestParamName.OFFSET, required = false, defaultValue = "0") offset: Int,
+        @RequestParam(name = RequestParamName.LIMIT, required = false, defaultValue = "-1") limit: Int,
+        @RequestParam(name = RequestParamName.LAST_UPDATE, required = true) lastUpdate: Int,
+    ): List<ParticipantAccount> {
+        LOGGER.info("Start GET: /api/studies/$studyId/participants/inactive")
+        return runBlocking {recruitmentService.getInactiveParticipants(studyId, lastUpdate)}
+    }
+
+    @GetMapping(value = [GET_DEPLOYMENTS])
+    @PreAuthorize("canManageStudy(#studyId)")
+    @Operation(tags = ["study/getDeployments.json"])
+    suspend fun getDeployments(
+        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
+    ): List<ParticipantAccount> {
+        LOGGER.info("Start GET: /api/studies/$studyId/deployments")
+        return recruitmentService.getDeployments(studyId)
+    }
+
 }
