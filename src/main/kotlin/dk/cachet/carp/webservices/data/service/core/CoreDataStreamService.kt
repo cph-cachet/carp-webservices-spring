@@ -13,6 +13,8 @@ import dk.cachet.carp.webservices.data.repository.DataStreamConfigurationReposit
 import dk.cachet.carp.webservices.data.repository.DataStreamIdRepository
 import dk.cachet.carp.webservices.data.repository.DataStreamSequenceRepository
 import dk.cachet.carp.webservices.data.service.CawsMutableDataStreamBatch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.stereotype.Component
@@ -38,7 +40,10 @@ class CoreDataStreamService(
      *  - [batch] contains a sequence with [DataStreamId] which wasn't configured for [studyDeploymentId]
      * @throws IllegalStateException when data streams for [studyDeploymentId] have been closed.
      */
-    override suspend fun appendToDataStreams(studyDeploymentId: UUID, batch: DataStreamBatch) {
+    override suspend fun appendToDataStreams(
+        studyDeploymentId: UUID,
+        batch: DataStreamBatch,
+    ) {
         // the `studyDeploymentId` of one or more sequences in [batch] does not match [studyDeploymentId]
         require(
             batch.sequences.all {
@@ -47,7 +52,10 @@ class CoreDataStreamService(
         ) { "The study deployment ID of one or more sequences in `batch` doesn't match `studyDeploymentId`." }
 
         // whether there is a config present in the database
-        val configOptional = configRepository.findById(studyDeploymentId.stringRepresentation)
+        val configOptional =
+            withContext(Dispatchers.IO) {
+                configRepository.findById(studyDeploymentId.stringRepresentation)
+            }
 
         require(configOptional.isPresent) {
             "No configuration was found for studyDeploymentId ${studyDeploymentId.stringRepresentation}."
@@ -94,7 +102,6 @@ class CoreDataStreamService(
         dataStreamSequenceRepository.saveAll(dataStreamSequence.asIterable())
     }
 
-
     /**
      * Stop accepting incoming data for all data streams for each of the [studyDeploymentIds].
      *
@@ -121,37 +128,56 @@ class CoreDataStreamService(
      *  - [dataStream] has never been opened
      *  - [fromSequenceId] is negative or [toSequenceIdInclusive] is smaller than [fromSequenceId]
      */
+    private suspend fun validateDataStream(
+        dataStream: DataStreamId,
+        fromSequenceId: Long,
+        toSequenceIdInclusive: Long?,
+    ) {
+        when {
+            fromSequenceId < 0 -> throw IllegalArgumentException(
+                "[fromSequenceId] is negative for requested dataStream " +
+                    "with studyDeploymentId ${dataStream.studyDeploymentId.stringRepresentation}",
+            )
+
+            toSequenceIdInclusive != null && fromSequenceId > toSequenceIdInclusive ->
+                throw IllegalArgumentException(
+                    "[toSequenceIdInclusive] is smaller than [fromSequenceId] for requested dataStream " +
+                        "with studyDeploymentId ${dataStream.studyDeploymentId.stringRepresentation}",
+                )
+        }
+    }
+
+    private suspend fun getConfig(dataStream: DataStreamId): DataStreamsConfiguration {
+        val configOptional =
+            withContext(Dispatchers.IO) {
+                configRepository.findById(dataStream.studyDeploymentId.stringRepresentation)
+            }
+
+        require(configOptional.isPresent) {
+            "No configuration was found " +
+                "for studyDeploymentId ${dataStream.studyDeploymentId.stringRepresentation} or study is closed"
+        }
+
+        return mapToCoreConfig(configOptional.get().config!!)
+    }
+
+    private fun checkDataStreamInConfig(
+        dataStream: DataStreamId,
+        config: DataStreamsConfiguration,
+    ) {
+        require(
+            dataStream in config.expectedDataStreamIds,
+        ) { "Data stream wasn't configured for this study deployment." }
+    }
+
     override suspend fun getDataStream(
         dataStream: DataStreamId,
         fromSequenceId: Long,
         toSequenceIdInclusive: Long?,
     ): DataStreamBatch {
-        when {
-            fromSequenceId < 0 -> throw IllegalArgumentException(
-                "[fromSequenceId] is negative for requested dataStream " +
-                        "with studyDeploymentId ${dataStream.studyDeploymentId.stringRepresentation}",
-            )
-
-            toSequenceIdInclusive != null && fromSequenceId > toSequenceIdInclusive -> throw IllegalArgumentException(
-                "[toSequenceIdInclusive] is smaller than [fromSequenceId] for requested dataStream " +
-                        "with studyDeploymentId ${dataStream.studyDeploymentId.stringRepresentation}",
-            )
-        }
-
-        // whether there is a config present in the database
-        val configOptional = configRepository.findById(dataStream.studyDeploymentId.stringRepresentation)
-
-        require(configOptional.isPresent) {
-            "No configuration was found " +
-                    "for studyDeploymentId ${dataStream.studyDeploymentId.stringRepresentation} or study is closed"
-        }
-
-        val config = mapToCoreConfig(configOptional.get().config!!)
-
-        // checks if dataStream is configured for studyDeploymentId
-        require(
-            dataStream in config.expectedDataStreamIds,
-        ) { "Data stream wasn't configured for this study deployment." }
+        validateDataStream(dataStream, fromSequenceId, toSequenceIdInclusive)
+        val config = getConfig(dataStream)
+        checkDataStreamInConfig(dataStream, config)
 
         val dataStreamId =
             dataStreamIdRepository.findByStudyDeploymentIdAndDeviceRoleNameAndNameAndNameSpace(
@@ -179,14 +205,24 @@ class CoreDataStreamService(
                     null
                 } else {
                     val snapshot = mapToDataStreamSnapshot(it.snapshot!!)
-                    MutableDataStreamSequence<Data>(dataStream, subRange.first, snapshot.triggerIds, snapshot.syncPoint)
+                    MutableDataStreamSequence<Data>(
+                        dataStream,
+                        subRange.first,
+                        snapshot.triggerIds,
+                        snapshot.syncPoint,
+                    )
                         .apply {
                             val startOffset = subRange.first - range.first
                             val exclusiveEnd = startOffset + subRange.last - subRange.first + 1
                             check(
                                 startOffset <= Int.MAX_VALUE && exclusiveEnd <= Int.MAX_VALUE,
                             ) { "Exceeded capacity of measurements which can be held in memory." }
-                            appendMeasurements(snapshot.measurements.subList(startOffset.toInt(), exclusiveEnd.toInt()))
+                            appendMeasurements(
+                                snapshot.measurements.subList(
+                                    startOffset.toInt(),
+                                    exclusiveEnd.toInt(),
+                                ),
+                            )
                         }
                 }
             }
@@ -236,13 +272,13 @@ class CoreDataStreamService(
 
         val deploymentIds = HashSet<UUID>()
 
-        studyDeploymentIds.map {
-            val configOptional = configRepository.findById(it.stringRepresentation)
+        studyDeploymentIds.map { deploymentId ->
+            val configOptional = configRepository.findById(deploymentId.stringRepresentation)
             if (configOptional.isPresent) {
                 val config = mapToCoreConfig(configOptional.get().config!!)
 
                 val ids =
-                    config.expectedDataStreamIds.map { dataStream ->
+                    config.expectedDataStreamIds.map { dataStream: DataStreamId ->
                         dataStreamIdRepository.findByStudyDeploymentIdAndDeviceRoleNameAndNameAndNameSpace(
                             studyDeploymentId = dataStream.studyDeploymentId.stringRepresentation,
                             deviceRoleName = dataStream.deviceRoleName,
@@ -253,7 +289,7 @@ class CoreDataStreamService(
                 // delete data streams
                 dataStreamSequenceRepository.deleteAllByDataStreamIds(ids)
                 dataStreamIdRepository.deleteAllByDataStreamIds(ids)
-                deploymentIds.add(it)
+                deploymentIds.add(deploymentId)
             }
         }
         return deploymentIds

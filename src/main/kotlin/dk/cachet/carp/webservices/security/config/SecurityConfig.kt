@@ -61,7 +61,7 @@ class ProxiesMethodSecurityExpressionRoot(
         // Check if the DataType value is
         // "dk.cachet.carp.data.infrastructure.DataStreamServiceRequest.AppendToDataStreams"
         return dataTypeClaim.value ==
-                DataStreamServiceRequest.AppendToDataStreams::class.qualifiedName || isAdmin()
+            DataStreamServiceRequest.AppendToDataStreams::class.qualifiedName || isAdmin()
     }
 
     fun isProtocolOwner(protocolId: UUID?): Boolean =

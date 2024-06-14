@@ -37,6 +37,7 @@ import dk.cachet.carp.webservices.account.serdes.AccountIdentitySerializer
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.serialisers.serdes.UUIDDeserializer
 import dk.cachet.carp.webservices.common.serialisers.serdes.UUIDSerializer
+import dk.cachet.carp.webservices.data.domain.DataStreamServiceRequestDTO
 import dk.cachet.carp.webservices.data.serdes.*
 import dk.cachet.carp.webservices.deployment.serdes.*
 import dk.cachet.carp.webservices.protocol.serdes.*
@@ -160,6 +161,15 @@ class ObjectMapperConfig(validationMessages: MessageBase) : SimpleModule() {
             DataStreamServiceRequest::class.java,
             DataStreamServiceRequestDeserializer(validationMessages),
         )
+        // DataStreamRequestDTO
+        this.addSerializer(
+            (DataStreamServiceRequestDTO::class.java),
+            DataStreamServiceRequestDTOSerializer(validationMessages),
+        )
+        this.addDeserializer(
+            (DataStreamServiceRequestDTO::class.java),
+            DataStreamServiceRequestDTODeserializer(validationMessages),
+        )
         // SyncPoint
         this.addSerializer(SyncPoint::class.java, SyncPointSerializer(validationMessages))
         this.addDeserializer(SyncPoint::class.java, SyncPointDeserializer(validationMessages))
@@ -196,6 +206,10 @@ class ObjectMapperConfig(validationMessages: MessageBase) : SimpleModule() {
 
         objectMapper.registerModule(JavaTimeModule())
         objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+/*
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+*/
+        // Ignore unknown properties
 
         return objectMapper
     }

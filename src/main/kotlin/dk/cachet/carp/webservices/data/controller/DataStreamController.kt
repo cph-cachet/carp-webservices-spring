@@ -1,5 +1,6 @@
 package dk.cachet.carp.webservices.data.controller
 
+import dk.cachet.carp.common.infrastructure.services.ApplicationServiceRequest
 import dk.cachet.carp.webservices.data.domain.DataStreamServiceRequestDTO
 import dk.cachet.carp.webservices.data.service.DataStreamService
 import io.swagger.v3.oas.annotations.Operation
@@ -23,13 +24,18 @@ class DataStreamController(
     }
 
     @PostMapping(value = [DATA_STREAM_SERVICE])
-    @PreAuthorize("canManageStudy((#request.studyDeploymentId))")
+    @PreAuthorize("isInDeployment((#request.studyDeploymentId))")
     @Operation(tags = ["dataStream/getDataStream.json"])
     suspend fun invoke(
         @RequestBody request: DataStreamServiceRequestDTO,
     ): ResponseEntity<Any> {
         LOGGER.info("Start POST: $DATA_STREAM_SERVICE -> ${ request::class.simpleName }")
         val serviceRequest = request.toDataStreamServiceRequest()
-        return dataStreamService.core.invoke(serviceRequest).let { ResponseEntity.ok(it) }
+
+        @Suppress("UNCHECKED_CAST")
+        val applicationServiceRequest =
+            serviceRequest as ApplicationServiceRequest<dk.cachet.carp.data.application.DataStreamService, *>?
+                ?: throw IllegalArgumentException("Unsupported request type: ${ request.apiVersion }")
+        return dataStreamService.core.invoke(applicationServiceRequest).let { ResponseEntity.ok(it) }
     }
 }

@@ -6,9 +6,12 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
+import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
 
+@Serializable
 @Entity(name = "data_stream_configurations")
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
 data class DataStreamConfiguration(
@@ -16,6 +19,6 @@ data class DataStreamConfiguration(
     var studyDeploymentId: String? = "",
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
-    var config: JsonNode? = null,
+    @Contextual var config: JsonNode? = null,
     var closed: Boolean = false,
 )
