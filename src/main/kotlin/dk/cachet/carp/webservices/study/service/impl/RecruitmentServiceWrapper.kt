@@ -10,25 +10,25 @@ import dk.cachet.carp.webservices.security.authentication.domain.Account
 import dk.cachet.carp.webservices.security.authorization.Claim
 import dk.cachet.carp.webservices.security.authorization.Role
 import dk.cachet.carp.webservices.security.config.SecurityCoroutineContext
+import dk.cachet.carp.webservices.study.domain.InactiveDeploymentInfo
 import dk.cachet.carp.webservices.study.domain.ParticipantAccount
 import dk.cachet.carp.webservices.study.domain.ParticipantGroupInfo
 import dk.cachet.carp.webservices.study.domain.ParticipantGroupsStatus
+import dk.cachet.carp.webservices.study.repository.CoreParticipantRepository
 import dk.cachet.carp.webservices.study.service.RecruitmentService
 import kotlinx.coroutines.*
 import kotlinx.datetime.Clock
-import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.Instant
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
 import kotlin.time.Duration.Companion.hours
-
 
 @Service
 class RecruitmentServiceWrapper(
     private val accountService: AccountService,
     private val dataStreamService: DataStreamService,
+    private val coreParticipantRepo: CoreParticipantRepository,
     services: CoreServiceContainer,
 ) : RecruitmentService {
     final override val core = services.recruitmentService
@@ -93,15 +93,34 @@ class RecruitmentServiceWrapper(
             accounts
         }
 
-    override suspend fun getInactiveParticipants(studyId: UUID, lastUpdate: Int): List<ParticipantAccount> {
+    override suspend fun getInactiveDeployments(
+        studyId: UUID,
+        lastUpdate: Int,
+        offset: Int,
+        limit: Int,
+    ): List<InactiveDeploymentInfo> {
         val timeNow: Instant = Clock.System.now()
 
-        val inactiveParticipants = getParticipantGroupsStatus(studyId)
-            .groups
-            .flatMap { it.participants }
-            .filter { if (it.dateOfLastDataUpload == null) false else (it.dateOfLastDataUpload!! > timeNow.minus(lastUpdate.hours))}
+        val participantGroupStatusList =
+            core.getParticipantGroupStatusList(studyId)
+                .filterIsInstance<ParticipantGroupStatus.InDeployment>()
 
-        return inactiveParticipants
+        val inactiveDeploymentInfoList =
+            participantGroupStatusList
+                .map {
+                    val lastDataUpload =
+                        dataStreamService.getLatestUpdatedAt(
+                            it.studyDeploymentStatus.studyDeploymentId,
+                        )
+                    InactiveDeploymentInfo(it.id, lastDataUpload)
+                }
+                .filter { it.dateOfLastDataUpload != null && it.dateOfLastDataUpload!! < timeNow.minus(lastUpdate.hours) }
+
+        if (offset >= 0 && limit > 0) {
+            return inactiveDeploymentInfoList.drop(offset * limit).take(limit)
+        }
+
+        return inactiveDeploymentInfoList
     }
 
     override fun isParticipant(
