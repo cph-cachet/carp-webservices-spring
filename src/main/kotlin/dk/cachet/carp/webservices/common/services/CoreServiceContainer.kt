@@ -23,7 +23,7 @@ import dk.cachet.carp.studies.infrastructure.StudyServiceDecorator
 import dk.cachet.carp.webservices.common.authorization.ApplicationServiceRequestAuthorizer
 import dk.cachet.carp.webservices.common.eventbus.CoreEventBus
 import dk.cachet.carp.webservices.data.authorization.DataStreamServiceAuthorizer
-import dk.cachet.carp.webservices.data.service.core.CawsDataStreamService
+import dk.cachet.carp.webservices.data.service.core.CoreDataStreamService
 import dk.cachet.carp.webservices.deployment.authorization.DeploymentServiceAuthorizer
 import dk.cachet.carp.webservices.deployment.authorization.ParticipationServiceAuthorizer
 import dk.cachet.carp.webservices.deployment.repository.CoreDeploymentRepository
@@ -52,7 +52,7 @@ class CoreServiceContainer(
     protocolRepository: CoreProtocolRepository,
     studyRepository: CoreStudyRepository,
     // services
-    cawsDataStreamService: CawsDataStreamService,
+    cawsDataStreamService: CoreDataStreamService,
     accountService: AccountService,
     // authorizers
     dataStreamServiceAuthorizer: DataStreamServiceAuthorizer,

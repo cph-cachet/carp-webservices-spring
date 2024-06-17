@@ -17,7 +17,7 @@ import org.apache.logging.log4j.Logger
 import org.springframework.stereotype.Component
 
 @Component
-class CawsDataStreamService(
+class CoreDataStreamService(
     private val configRepository: DataStreamConfigurationRepository,
     private val dataStreamIdRepository: DataStreamIdRepository,
     private val dataStreamSequenceRepository: DataStreamSequenceRepository,

@@ -4,7 +4,7 @@ import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.common.infrastructure.test.StubDataPoint
 import dk.cachet.carp.data.application.MutableDataStreamBatch
 import dk.cachet.carp.webservices.data.repository.DataStreamConfigurationRepository
-import dk.cachet.carp.webservices.data.service.core.CawsDataStreamService
+import dk.cachet.carp.webservices.data.service.core.CoreDataStreamService
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -15,7 +15,7 @@ import org.junit.jupiter.api.assertThrows
 import java.util.*
 import kotlin.test.assertFailsWith
 
-class CawsDataStreamServiceTest {
+class CoreDataStreamServiceTest {
     @Nested
     inner class AppendToDataStreams {
         @Test
@@ -29,7 +29,7 @@ class CawsDataStreamServiceTest {
                 batch.appendSequence(createStubSequence(incorrectId, 0, StubDataPoint()))
 
                 val sut =
-                    CawsDataStreamService(
+                    CoreDataStreamService(
                         mockk(),
                         mockk(),
                         mockk(),
@@ -55,7 +55,7 @@ class CawsDataStreamServiceTest {
                 } returns Optional.empty()
 
                 val sut =
-                    CawsDataStreamService(
+                    CoreDataStreamService(
                         dataStreamConfigurationRepository,
                         mockk(),
                         mockk(),
