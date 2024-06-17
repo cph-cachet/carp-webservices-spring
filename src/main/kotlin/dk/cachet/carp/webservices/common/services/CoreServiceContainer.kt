@@ -23,7 +23,7 @@ import dk.cachet.carp.studies.infrastructure.StudyServiceDecorator
 import dk.cachet.carp.webservices.common.authorization.ApplicationServiceRequestAuthorizer
 import dk.cachet.carp.webservices.common.eventbus.CoreEventBus
 import dk.cachet.carp.webservices.data.authorization.DataStreamServiceAuthorizer
-import dk.cachet.carp.webservices.data.service.core.CoreDataStreamService
+import dk.cachet.carp.webservices.data.service.core.CawsDataStreamService
 import dk.cachet.carp.webservices.deployment.authorization.DeploymentServiceAuthorizer
 import dk.cachet.carp.webservices.deployment.authorization.ParticipationServiceAuthorizer
 import dk.cachet.carp.webservices.deployment.repository.CoreDeploymentRepository
@@ -52,7 +52,7 @@ class CoreServiceContainer(
     protocolRepository: CoreProtocolRepository,
     studyRepository: CoreStudyRepository,
     // services
-    coreDataStreamService: CoreDataStreamService,
+    cawsDataStreamService: CawsDataStreamService,
     accountService: AccountService,
     // authorizers
     dataStreamServiceAuthorizer: DataStreamServiceAuthorizer,
@@ -65,13 +65,13 @@ class CoreServiceContainer(
 ) {
     final val dataStreamService =
         DataStreamServiceDecorator(
-            coreDataStreamService,
+            cawsDataStreamService,
         ) { command -> ApplicationServiceRequestAuthorizer(dataStreamServiceAuthorizer, command) }
 
     private val _deploymentService =
         DeploymentServiceHost(
             deploymentRepository,
-            coreDataStreamService,
+            cawsDataStreamService,
             coreEventBus.createApplicationServiceAdapter(DeploymentService::class),
         )
     final val deploymentService =
