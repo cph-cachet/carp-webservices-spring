@@ -1,5 +1,6 @@
 package dk.cachet.carp.webservices.data.service.core
 
+import com.fasterxml.jackson.core.TreeNode
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import dk.cachet.carp.common.application.UUID
@@ -260,7 +261,15 @@ class CoreDataStreamService(
         return deploymentIds
     }
 
-    private fun mapToCoreConfig(node: JsonNode) = objectMapper.treeToValue(node, DataStreamsConfiguration::class.java)
+    private fun mapToCoreConfig(node: JsonNode) =
+        objectMapper.treeToValue(
+            node as TreeNode,
+            DataStreamsConfiguration::class.java,
+        )
 
-    private fun mapToDataStreamSnapshot(node: JsonNode) = objectMapper.treeToValue(node, DataStreamSnapshot::class.java)
+    private fun mapToDataStreamSnapshot(node: JsonNode) =
+        objectMapper.treeToValue(
+            node as TreeNode,
+            DataStreamSnapshot::class.java,
+        )
 }
