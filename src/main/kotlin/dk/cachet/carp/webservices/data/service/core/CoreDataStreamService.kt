@@ -6,6 +6,7 @@ import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.common.application.data.Data
 import dk.cachet.carp.common.application.intersect
 import dk.cachet.carp.data.application.*
+import dk.cachet.carp.webservices.data.domain.CawsMutableDataStreamBatch
 import dk.cachet.carp.webservices.data.domain.DataStreamConfiguration
 import dk.cachet.carp.webservices.data.domain.DataStreamSequence
 import dk.cachet.carp.webservices.data.domain.DataStreamSnapshot
@@ -64,7 +65,7 @@ class CoreDataStreamService(
             },
         ) { "The batch contains a sequence with a data stream which wasn't configured for this study deployment." }
 
-        val dataStreams = MutableDataStreamBatch()
+        val dataStreams = CawsMutableDataStreamBatch()
 
         // appending sequences to batch
         dataStreams.appendBatch(batch)
