@@ -24,7 +24,7 @@ class DataStreamController(
     }
 
     @PostMapping(value = [DATA_STREAM_SERVICE])
-    @PreAuthorize("isInDeployment((#request.studyDeploymentId))")
+    @PreAuthorize("canManageStudy((#request.studyDeploymentId))")
     @Operation(tags = ["dataStream/getDataStream.json"])
     suspend fun invoke(
         @RequestBody request: DataStreamServiceRequestDTO,

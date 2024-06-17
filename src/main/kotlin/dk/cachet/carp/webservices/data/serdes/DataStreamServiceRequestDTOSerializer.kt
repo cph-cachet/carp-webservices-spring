@@ -32,7 +32,7 @@ class DataStreamServiceRequestDTOSerializer(
 
         val serialized: String
         try {
-            serialized = JSON.encodeToString(DataStreamServiceRequestDTO.serializer(), dataStreamServiceRequestDTO)
+            serialized = JSON.encodeToString(DataStreamServiceRequestDTO.serializer(), DataStreamServiceRequestDTO())
         } catch (ex: Exception) {
             LOGGER.error("The DataStreamServiceRequestDTO serializer is not valid. Exception: ${ex.message}")
             throw SerializationException(
