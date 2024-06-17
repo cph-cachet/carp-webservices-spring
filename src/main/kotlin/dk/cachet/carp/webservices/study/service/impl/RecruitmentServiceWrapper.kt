@@ -14,7 +14,6 @@ import dk.cachet.carp.webservices.study.domain.InactiveDeploymentInfo
 import dk.cachet.carp.webservices.study.domain.ParticipantAccount
 import dk.cachet.carp.webservices.study.domain.ParticipantGroupInfo
 import dk.cachet.carp.webservices.study.domain.ParticipantGroupsStatus
-import dk.cachet.carp.webservices.study.repository.CoreParticipantRepository
 import dk.cachet.carp.webservices.study.service.RecruitmentService
 import kotlinx.coroutines.*
 import kotlinx.datetime.Clock
@@ -28,7 +27,6 @@ import kotlin.time.Duration.Companion.hours
 class RecruitmentServiceWrapper(
     private val accountService: AccountService,
     private val dataStreamService: DataStreamService,
-    private val coreParticipantRepo: CoreParticipantRepository,
     services: CoreServiceContainer,
 ) : RecruitmentService {
     final override val core = services.recruitmentService
@@ -114,7 +112,7 @@ class RecruitmentServiceWrapper(
                         )
                     InactiveDeploymentInfo(it.id, lastDataUpload)
                 }
-                .filter { it.dateOfLastDataUpload != null && it.dateOfLastDataUpload!! < timeNow.minus(lastUpdate.hours) }
+                .filter { it.dateOfLastDataUpload != null && it.dateOfLastDataUpload < timeNow.minus(lastUpdate.hours) }
 
         if (offset >= 0 && limit > 0) {
             return inactiveDeploymentInfoList.drop(offset * limit).take(limit)
