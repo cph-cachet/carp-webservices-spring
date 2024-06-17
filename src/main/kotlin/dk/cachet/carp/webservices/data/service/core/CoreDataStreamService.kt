@@ -243,7 +243,7 @@ class CoreDataStreamService(
                 val config = mapToCoreConfig(configOptional.get().config!!)
 
                 val ids =
-                    config.expectedDataStreamIds.map { dataStream ->
+                    config.expectedDataStreamIds.map { dataStream: DataStreamId ->
                         dataStreamIdRepository.findByStudyDeploymentIdAndDeviceRoleNameAndNameAndNameSpace(
                             studyDeploymentId = dataStream.studyDeploymentId.stringRepresentation,
                             deviceRoleName = dataStream.deviceRoleName,
