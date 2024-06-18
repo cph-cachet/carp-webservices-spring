@@ -28,7 +28,7 @@ abstract class ExportCommand(
     open val entry: Export,
     open val logger: ExportLog = ExportLog(),
 ) {
-    abstract fun canExecute(): Boolean
+    abstract fun canExecute(): Pair<Boolean, String>
 
     abstract suspend fun execute()
 }
@@ -61,7 +61,7 @@ class ExportCommandFactory(
             if (deploymentIds.isNullOrEmpty()) {
                 ExportType.STUDY_DATA
             } else {
-                ExportType.PARTICIPANT_GROUP_DATA
+                ExportType.DEPLOYMENT_DATA
             }
 
         val entry =
