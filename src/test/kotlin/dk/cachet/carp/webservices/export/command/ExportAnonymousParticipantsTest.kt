@@ -57,7 +57,7 @@ class ExportAnonymousParticipantsTest {
                 )
             val canExecute = command.canExecute()
 
-            assertFalse(canExecute)
+            assertFalse(canExecute.first)
         }
 
         @Test
@@ -84,7 +84,7 @@ class ExportAnonymousParticipantsTest {
                 )
             val canExecute = command.canExecute()
 
-            assertFalse(canExecute)
+            assertFalse(canExecute.first)
         }
 
         @Test
@@ -116,7 +116,7 @@ class ExportAnonymousParticipantsTest {
                 )
             val canExecute = command.canExecute()
 
-            assertFalse(canExecute)
+            assertFalse(canExecute.first)
         }
     }
 }

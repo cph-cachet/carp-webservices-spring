@@ -18,7 +18,7 @@ class ExportCommandInvokerTest {
         fun `should require command to be executable`() {
             val notExecutableCommand =
                 mockk<ExportCommand> {
-                    every { canExecute() } returns false
+                    every { canExecute().first } returns false
                 }
 
             val sut = ExportCommandInvokerImpl(repository)
@@ -35,7 +35,7 @@ class ExportCommandInvokerTest {
 
                 val command =
                     mockk<ExportCommand> {
-                        every { canExecute() } returns true
+                        every { canExecute().first } returns true
                         coEvery { execute() } answers { nothing }
                         every { entry } returns
                             mockk {
