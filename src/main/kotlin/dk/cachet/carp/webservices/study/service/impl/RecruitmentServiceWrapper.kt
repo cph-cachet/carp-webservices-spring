@@ -17,11 +17,12 @@ import dk.cachet.carp.webservices.study.domain.ParticipantGroupsStatus
 import dk.cachet.carp.webservices.study.service.RecruitmentService
 import kotlinx.coroutines.*
 import kotlinx.datetime.Clock
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.Instant
+import kotlinx.datetime.plus
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.stereotype.Service
-import kotlin.time.Duration.Companion.hours
 
 @Service
 class RecruitmentServiceWrapper(
@@ -112,13 +113,13 @@ class RecruitmentServiceWrapper(
                         )
                     InactiveDeploymentInfo(it.id, lastDataUpload)
                 }
-                .filter { it.dateOfLastDataUpload != null && it.dateOfLastDataUpload < timeNow.minus(lastUpdate.hours) }
+                .filter { it.dateOfLastDataUpload != null && it.dateOfLastDataUpload.plus(lastUpdate, DateTimeUnit.HOUR) < timeNow }
 
         if (offset >= 0 && limit > 0) {
-            return inactiveDeploymentInfoList.drop(offset * limit).take(limit)
+            return inactiveDeploymentInfoList.drop(offset * limit).take(limit).sortedBy { it.dateOfLastDataUpload }
         }
 
-        return inactiveDeploymentInfoList
+        return inactiveDeploymentInfoList.sortedBy { it.dateOfLastDataUpload }
     }
 
     override fun isParticipant(
