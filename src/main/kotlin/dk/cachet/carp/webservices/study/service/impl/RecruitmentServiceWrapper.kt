@@ -113,7 +113,10 @@ class RecruitmentServiceWrapper(
                         )
                     InactiveDeploymentInfo(it.id, lastDataUpload)
                 }
-                .filter { it.dateOfLastDataUpload != null && it.dateOfLastDataUpload.plus(lastUpdate, DateTimeUnit.HOUR) < timeNow }
+                .filter {
+                    it.dateOfLastDataUpload != null &&
+                        it.dateOfLastDataUpload.plus(lastUpdate, DateTimeUnit.HOUR) < timeNow
+                }
 
         if (offset >= 0 && limit > 0) {
             return inactiveDeploymentInfoList.drop(offset * limit).take(limit).sortedBy { it.dateOfLastDataUpload }
