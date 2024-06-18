@@ -70,11 +70,9 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:${property("kotlinDatetimeVersion")}")
 
     // JACKSON
-    implementation("com.fasterxml.jackson.core:jackson-core:${property("jacksonVersion")}")
     implementation("com.fasterxml.jackson.core:jackson-databind:${property("jacksonVersion")}")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:${property("jacksonVersion")}")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${property("jacksonVersion")}")
-
 
     // CARP CORE
     implementation("dk.cachet.carp.common:carp.common-jvm:${property("carpCoreVersion")}")

@@ -52,7 +52,7 @@ class CoreServiceContainer(
     protocolRepository: CoreProtocolRepository,
     studyRepository: CoreStudyRepository,
     // services
-    cawsDataStreamService: CoreDataStreamService,
+    coreDataStreamService: CoreDataStreamService,
     accountService: AccountService,
     // authorizers
     dataStreamServiceAuthorizer: DataStreamServiceAuthorizer,
@@ -65,13 +65,13 @@ class CoreServiceContainer(
 ) {
     final val dataStreamService =
         DataStreamServiceDecorator(
-            cawsDataStreamService,
+            coreDataStreamService,
         ) { command -> ApplicationServiceRequestAuthorizer(dataStreamServiceAuthorizer, command) }
 
     private val _deploymentService =
         DeploymentServiceHost(
             deploymentRepository,
-            cawsDataStreamService,
+            coreDataStreamService,
             coreEventBus.createApplicationServiceAdapter(DeploymentService::class),
         )
     final val deploymentService =
