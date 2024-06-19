@@ -47,10 +47,26 @@ class ExportAnonymousParticipants(
             }
 
         return when {
-            protocol == null -> Pair(false, "Study $studyId has not set protocol.")
-            !isLive -> Pair(false, "Study $studyId is not live.")
+            protocol == null ->
+                Pair(
+                    false,
+                    "Study $studyId does not have a protocol",
+                )
+            protocol.participantRoles.any { it.role != payload.participantRoleName } ->
+                Pair(
+                    false,
+                    "Participant role ${payload.participantRoleName} does not exist",
+                )
+            !isLive ->
+                Pair(
+                    false,
+                    "Study $studyId is not live",
+                )
             payload.amountOfAccounts !in 1..MAX_AMOUNT ->
-                Pair(false, "Amount of accounts must be between 1 and $MAX_AMOUNT.")
+                Pair(
+                    false,
+                    "Amount of accounts must be between 1 and $MAX_AMOUNT",
+                )
             else -> Pair(true, "")
         }
     }
