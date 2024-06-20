@@ -1,18 +1,17 @@
-package dk.cachet.carp.webservices.data.domain
+package dk.cachet.carp.webservices.data.service.impl
 
 import dk.cachet.carp.common.application.data.Data
 import dk.cachet.carp.data.application.*
-import dk.cachet.carp.data.application.DataStreamId
-import dk.cachet.carp.data.application.DataStreamSequence
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 
-/** CHECK create a function that checks sequence IDs before appending
+/** UNDER CONSTRUCTION --> CHECK create a function that checks sequence IDs before appending
  * + usable if we can get back last preceding upload of a sequence so the client know what to send
  * This a "trick" to make the class `DataStreamBatch` open for allowing appendDataStream without checking
  * all the sequence IDs in the append method. This is a temporary solution until we find a better way to handle this.
  */
-class CawsMutableDataStreamBatch : Sequence<DataStreamPoint<*>>, DataStreamBatch {
+@Suppress("UNUSED_EXPRESSION")
+class CawsMutableDataStreamBatchWrapper : Sequence<DataStreamPoint<*>>, DataStreamBatch {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
@@ -20,14 +19,14 @@ class CawsMutableDataStreamBatch : Sequence<DataStreamPoint<*>>, DataStreamBatch
     private val sequenceMap: MutableMap<DataStreamId, MutableList<MutableDataStreamSequence<*>>> = mutableMapOf()
 
     /**
-     * A list of sequences covering all sequences so far appended to [CawsMutableDataStreamBatch].
+     * A list of sequences covering all sequences so far appended to [CawsMutableDataStreamBatchWrapper].
      * This may return less sequences than originally appended in case appended sequences were merged with prior ones.
      */
     override val sequences: Sequence<DataStreamSequence<*>>
-        get() = sequenceMap.asSequence().flatMap { it.value }.map { it as DataStreamSequence<*> }
+        get() = sequenceMap.asSequence().flatMap { it.value }.map { it }
 
     @Suppress("UNCHECKED_CAST")
-    private fun <TData : Data> appendSequenceInternal(sequence: DataStreamSequence<TData>) {
+    private fun appendSequence(sequence: DataStreamSequence<*>) {
         val mutableSequence = sequence.toMutableDataStreamSequence()
         val sequenceList = sequenceMap[sequence.dataStream]
 
@@ -36,14 +35,14 @@ class CawsMutableDataStreamBatch : Sequence<DataStreamPoint<*>>, DataStreamBatch
             return
         }
 
-        val last = sequenceList.last() as MutableDataStreamSequence<TData>
+        val last = sequenceList.last() as MutableDataStreamSequence<Data>
 
         if (last.isImmediatelyFollowedBy(sequence)) {
-            last.appendSequence(mutableSequence)
+            last.appendSequence(mutableSequence as MutableDataStreamSequence<Data>)
         } else {
             sequenceList.add(mutableSequence)
         }
-    }
+     }
 
     /**
      * Append a sequence to a non-existing or previously appended data stream in this batch.
@@ -55,17 +54,13 @@ class CawsMutableDataStreamBatch : Sequence<DataStreamPoint<*>>, DataStreamBatch
      * - the sync point of [sequence] is older than that of previous sequences in this batch
      */
 
-    @Suppress("UNCHECKED_CAST")
-    fun appendSequence(sequence: DataStreamSequence<*>) {
-        LOGGER.info("Appending sequence: ${sequence.dataStream}")
-        when (sequence) {
-            is DataStreamSequence<*> -> {
-                appendSequenceInternal(sequence as DataStreamSequence<*>)
-                LOGGER.info("Sequence appended successfully.")
-            }
+    fun sequenceTypeCheck(sequence: DataStreamSequence<*>): Boolean {
+        LOGGER.info("Appending sequence: ${sequence.dataStream}...")
+        return when (sequence) {
             else -> {
-                LOGGER.error("Unsupported sequence type.")
-                throw IllegalArgumentException("Unsupported sequence type")
+                appendSequence(sequence)
+                LOGGER.info("Sequence appended successfully.")
+                true
             }
         }
     }
@@ -79,7 +74,11 @@ class CawsMutableDataStreamBatch : Sequence<DataStreamPoint<*>>, DataStreamBatch
 
     fun appendBatch(batch: DataStreamBatch) {
         batch.sequences.forEach { sequence ->
-            appendSequence(sequence)
+            LOGGER.info("Attempting to append sequence: ${sequence.dataStream}")
+            require(sequenceTypeCheck(sequence)) {
+                LOGGER.error("Failed to append sequence: ${sequence.dataStream}")
+            }
+            LOGGER.info("Sequence appended successfully: ${sequence.dataStream}")
         }
     }
 

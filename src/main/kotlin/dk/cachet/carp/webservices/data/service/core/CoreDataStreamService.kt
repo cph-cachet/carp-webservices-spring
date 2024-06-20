@@ -6,13 +6,13 @@ import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.common.application.data.Data
 import dk.cachet.carp.common.application.intersect
 import dk.cachet.carp.data.application.*
-import dk.cachet.carp.webservices.data.domain.CawsMutableDataStreamBatch
 import dk.cachet.carp.webservices.data.domain.DataStreamConfiguration
 import dk.cachet.carp.webservices.data.domain.DataStreamSequence
 import dk.cachet.carp.webservices.data.domain.DataStreamSnapshot
 import dk.cachet.carp.webservices.data.repository.DataStreamConfigurationRepository
 import dk.cachet.carp.webservices.data.repository.DataStreamIdRepository
 import dk.cachet.carp.webservices.data.repository.DataStreamSequenceRepository
+import dk.cachet.carp.webservices.data.service.impl.CawsMutableDataStreamBatchWrapper
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.stereotype.Component
@@ -65,7 +65,7 @@ class CoreDataStreamService(
             },
         ) { "The batch contains a sequence with a data stream which wasn't configured for this study deployment." }
 
-        val dataStreams = CawsMutableDataStreamBatch()
+        val dataStreams = CawsMutableDataStreamBatchWrapper()
 
         // appending sequences to batch
         dataStreams.appendBatch(batch)
@@ -191,8 +191,8 @@ class CoreDataStreamService(
                         }
                 }
             }
-            .fold(CawsMutableDataStreamBatch()) { batch, sequence ->
-                batch.apply { appendSequence(sequence) }
+            .fold(CawsMutableDataStreamBatchWrapper()) { batch, sequence ->
+                batch.apply { sequenceTypeCheck(sequence) }
             }
     }
 

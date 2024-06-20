@@ -2,9 +2,9 @@ package dk.cachet.carp.webservices.data.service
 
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.common.infrastructure.test.StubDataPoint
-import dk.cachet.carp.webservices.data.domain.CawsMutableDataStreamBatch
 import dk.cachet.carp.webservices.data.repository.DataStreamConfigurationRepository
 import dk.cachet.carp.webservices.data.service.core.CoreDataStreamService
+import dk.cachet.carp.webservices.data.service.impl.CawsMutableDataStreamBatchWrapper
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -24,9 +24,9 @@ class CoreDataStreamServiceTest {
                 val incorrectId = UUID.randomUUID()
                 val correctId = UUID.randomUUID()
 
-                val batch = CawsMutableDataStreamBatch()
-                batch.appendSequence(createStubSequence(correctId, 0, StubDataPoint()))
-                batch.appendSequence(createStubSequence(incorrectId, 0, StubDataPoint()))
+                val batch = CawsMutableDataStreamBatchWrapper()
+                batch.sequenceTypeCheck(createStubSequence(correctId, 0, StubDataPoint()))
+                batch.sequenceTypeCheck(createStubSequence(incorrectId, 0, StubDataPoint()))
 
                 val sut =
                     CoreDataStreamService(
@@ -47,8 +47,8 @@ class CoreDataStreamServiceTest {
                 val dataStreamConfigurationRepository = mockk<DataStreamConfigurationRepository>()
                 val studyDeploymentId = UUID.randomUUID()
 
-                val batch = CawsMutableDataStreamBatch()
-                batch.appendSequence(createStubSequence(studyDeploymentId, 0, StubDataPoint()))
+                val batch = CawsMutableDataStreamBatchWrapper()
+                batch.sequenceTypeCheck(createStubSequence(studyDeploymentId, 0, StubDataPoint()))
 
                 coEvery {
                     dataStreamConfigurationRepository.findById(studyDeploymentId.stringRepresentation)
