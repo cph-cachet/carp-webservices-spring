@@ -51,9 +51,6 @@ class CawsMutableDataStreamBatchWrapper : Sequence<DataStreamPoint<*>>, DataStre
      *
      * no catch to throw "IllegalArgumentException" when the start of any sequences
      * contained in [batch] -> This is a temporary solution
-     *
-     * - the start of the [sequence] range precedes the end of a previously appended sequence to the same data stream
-     * - the sync point of [sequence] is older than that of previous sequences in this batch
      */
 
     fun sequenceTypeCheck(sequence: DataStreamSequence<*>): Boolean {
