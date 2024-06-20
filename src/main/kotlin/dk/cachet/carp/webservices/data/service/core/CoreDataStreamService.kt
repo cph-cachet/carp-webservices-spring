@@ -192,7 +192,7 @@ class CoreDataStreamService(
                 }
             }
             .fold(CawsMutableDataStreamBatchWrapper()) { batch, sequence ->
-                batch.apply { sequenceTypeCheck(sequence) }
+                batch.apply { appendSequence(sequence) }
             }
     }
 

@@ -25,8 +25,8 @@ class CoreDataStreamServiceTest {
                 val correctId = UUID.randomUUID()
 
                 val batch = CawsMutableDataStreamBatchWrapper()
-                batch.sequenceTypeCheck(createStubSequence(correctId, 0, StubDataPoint()))
-                batch.sequenceTypeCheck(createStubSequence(incorrectId, 0, StubDataPoint()))
+                batch.appendSequence(createStubSequence(correctId, 0, StubDataPoint()))
+                batch.appendSequence(createStubSequence(incorrectId, 0, StubDataPoint()))
 
                 val sut =
                     CoreDataStreamService(
@@ -48,7 +48,7 @@ class CoreDataStreamServiceTest {
                 val studyDeploymentId = UUID.randomUUID()
 
                 val batch = CawsMutableDataStreamBatchWrapper()
-                batch.sequenceTypeCheck(createStubSequence(studyDeploymentId, 0, StubDataPoint()))
+                batch.appendSequence(createStubSequence(studyDeploymentId, 0, StubDataPoint()))
 
                 coEvery {
                     dataStreamConfigurationRepository.findById(studyDeploymentId.stringRepresentation)

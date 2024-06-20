@@ -10,7 +10,6 @@ import org.apache.logging.log4j.Logger
  * This a "trick" to make the class `DataStreamBatch` open for allowing appendDataStream without checking
  * all the sequence IDs in the append method. This is a temporary solution until we find a better way to handle this.
  */
-@Suppress("UNUSED_EXPRESSION")
 class CawsMutableDataStreamBatchWrapper : Sequence<DataStreamPoint<*>>, DataStreamBatch {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
@@ -29,7 +28,7 @@ class CawsMutableDataStreamBatchWrapper : Sequence<DataStreamPoint<*>>, DataStre
      * Consider val for sequence.toMutableDataStreamSequence(), but not nece
      */
     @Suppress("UNCHECKED_CAST")
-    private fun appendSequence(sequence: DataStreamSequence<*>) {
+    fun appendSequence(sequence: DataStreamSequence<*>) {
         val sequenceList = sequenceMap[sequence.dataStream]
 
         if (sequenceList == null) {
@@ -44,24 +43,6 @@ class CawsMutableDataStreamBatchWrapper : Sequence<DataStreamPoint<*>>, DataStre
         } else {
             sequenceList.add(sequence.toMutableDataStreamSequence())
         }
-     }
-
-    /**
-     * Append a sequence to a non-existing or previously appended data stream in this batch.
-     *
-     * no catch to throw "IllegalArgumentException" when the start of any sequences
-     * contained in [batch] -> This is a temporary solution
-     */
-
-    fun sequenceTypeCheck(sequence: DataStreamSequence<*>): Boolean {
-        LOGGER.info("Appending sequence: ${sequence.dataStream}...")
-        return when (sequence) {
-            else -> {
-                appendSequence(sequence)
-                LOGGER.info("Sequence appended successfully.")
-                true
-            }
-        }
     }
 
     /**
@@ -73,11 +54,7 @@ class CawsMutableDataStreamBatchWrapper : Sequence<DataStreamPoint<*>>, DataStre
 
     fun appendBatch(batch: DataStreamBatch) {
         batch.sequences.forEach { sequence ->
-            LOGGER.info("Attempting to append sequence: ${sequence.dataStream}")
-            require(sequenceTypeCheck(sequence)) {
-                LOGGER.error("Failed to append sequence: ${sequence.dataStream}")
-            }
-            LOGGER.info("Sequence appended successfully: ${sequence.dataStream}")
+            appendSequence(sequence)
         }
     }
 
