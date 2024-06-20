@@ -25,22 +25,24 @@ class CawsMutableDataStreamBatchWrapper : Sequence<DataStreamPoint<*>>, DataStre
     override val sequences: Sequence<DataStreamSequence<*>>
         get() = sequenceMap.asSequence().flatMap { it.value }.map { it }
 
+    /**
+     * Consider val for sequence.toMutableDataStreamSequence(), but not nece
+     */
     @Suppress("UNCHECKED_CAST")
     private fun appendSequence(sequence: DataStreamSequence<*>) {
-        val mutableSequence = sequence.toMutableDataStreamSequence()
         val sequenceList = sequenceMap[sequence.dataStream]
 
         if (sequenceList == null) {
-            sequenceMap[sequence.dataStream] = mutableListOf(mutableSequence)
+            sequenceMap[sequence.dataStream] = mutableListOf(sequence.toMutableDataStreamSequence())
             return
         }
 
         val last = sequenceList.last() as MutableDataStreamSequence<Data>
 
         if (last.isImmediatelyFollowedBy(sequence)) {
-            last.appendSequence(mutableSequence as MutableDataStreamSequence<Data>)
+            last.appendSequence(sequence as MutableDataStreamSequence<Data>)
         } else {
-            sequenceList.add(mutableSequence)
+            sequenceList.add(sequence.toMutableDataStreamSequence())
         }
      }
 
