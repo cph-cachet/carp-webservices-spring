@@ -49,7 +49,7 @@ class DataStreamServiceWrapper(
         return sortedDataPoint.updatedAt?.toKotlinInstant()
     }
 
-    fun extractFilesFromZip(zipFile: ByteArray): DataStreamServiceRequest<*>? {
+    suspend fun extractFilesFromZip(zipFile: ByteArray): DataStreamServiceRequest<*>? {
         val objectMapper = ObjectMapper()
         var sequenceId = 1L
         val dataStreamServiceRequest: DataStreamServiceRequest<*>? = null
@@ -87,16 +87,21 @@ class DataStreamServiceWrapper(
 
     override suspend fun processZipToInvoke(zipFile: MultipartFile): Any {
         val zipFileBytes = zipFile.bytes
-        // Process the ByteArray and create a sequence of DataStreamSequence
+
+        // Extract the DataStreamServiceRequest from the zip file
         val dataStreamServiceRequest = extractFilesFromZip(zipFileBytes)
+            ?: throw IllegalArgumentException("Invalid zip file content")
 
         // Check if the dataStreamServiceRequest is of the correct type
-        return if (dataStreamServiceRequest is DataStreamServiceRequest.AppendToDataStreams) {
-            // Invoke the existing service method
-            core.invoke(dataStreamServiceRequest)
-        } else {
-            // Handle the case where the dataStreamServiceRequest is not of the correct type
-            throw IllegalArgumentException("Invalid request type")
+        return when (dataStreamServiceRequest) {
+            is DataStreamServiceRequest.AppendToDataStreams -> {
+                // Invoke the existing service method
+                core.invoke(dataStreamServiceRequest)
+            }
+            else -> {
+                // Handle the case where the dataStreamServiceRequest is not of the correct type
+                throw IllegalArgumentException("Invalid request type")
+            }
         }
     }
 
