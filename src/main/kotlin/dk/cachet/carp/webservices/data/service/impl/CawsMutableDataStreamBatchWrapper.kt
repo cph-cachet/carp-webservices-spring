@@ -2,8 +2,6 @@ package dk.cachet.carp.webservices.data.service.impl
 
 import dk.cachet.carp.common.application.data.Data
 import dk.cachet.carp.data.application.*
-import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.Logger
 
 /** UNDER CONSTRUCTION --> CHECK create a function that checks sequence IDs before appending
  * + usable if we can get back last preceding upload of a sequence so the client know what to send
@@ -11,10 +9,6 @@ import org.apache.logging.log4j.Logger
  * all the sequence IDs in the append method. This is a temporary solution until we find a better way to handle this.
  */
 class CawsMutableDataStreamBatchWrapper : Sequence<DataStreamPoint<*>>, DataStreamBatch {
-    companion object {
-        private val LOGGER: Logger = LogManager.getLogger()
-    }
-
     private val sequenceMap: MutableMap<DataStreamId, MutableList<MutableDataStreamSequence<*>>> = mutableMapOf()
 
     /**
@@ -47,7 +41,8 @@ class CawsMutableDataStreamBatchWrapper : Sequence<DataStreamPoint<*>>, DataStre
 
     /**
      * Append all data stream sequences contained in [batch] to this batch.
-     * rid of premature optimization and sequential checks. <-- let fly in anything and check later. --> This is a temporary solution
+     * rid of premature optimization and sequential checks. <-- let fly in anything and check later.
+     * --> This is a temporary solution
      */
 
     fun appendBatch(batch: DataStreamBatch) {
