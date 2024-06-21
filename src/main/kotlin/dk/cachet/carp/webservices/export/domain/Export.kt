@@ -32,6 +32,6 @@ enum class ExportStatus {
 enum class ExportType {
     UNKNOWN,
     STUDY_DATA,
-    PARTICIPANT_GROUP_DATA,
+    DEPLOYMENT_DATA,
     ANONYMOUS_PARTICIPANTS,
 }

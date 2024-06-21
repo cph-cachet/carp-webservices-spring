@@ -21,7 +21,7 @@ class ExportSummary(
         private val LOGGER = LogManager.getLogger()
     }
 
-    override fun canExecute(): Boolean = true
+    override fun canExecute(): Pair<Boolean, String> = Pair(true, "")
 
     @OptIn(ExperimentalPathApi::class)
     override suspend fun execute() {

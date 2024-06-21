@@ -35,15 +35,40 @@ class ExportAnonymousParticipants(
         const val CSV_HEADER = "username,study_deployment_id,access_link,expiry_date"
     }
 
-    override fun canExecute(): Boolean {
+    override fun canExecute(): Pair<Boolean, String> {
         val protocol =
             runBlocking(Dispatchers.IO + SecurityCoroutineContext()) {
                 services.studyService.getStudyDetails(studyId).protocolSnapshot
             }
 
-        return protocol != null &&
-            protocol.participantRoles.any { it.role == payload.participantRoleName } &&
-            payload.amountOfAccounts in 1..MAX_AMOUNT
+        val isLive =
+            runBlocking(Dispatchers.IO + SecurityCoroutineContext()) {
+                services.studyService.getStudyStatus(studyId).canDeployToParticipants
+            }
+
+        return when {
+            protocol == null ->
+                Pair(
+                    false,
+                    "Study $studyId does not have a protocol",
+                )
+            protocol.participantRoles.any { it.role != payload.participantRoleName } ->
+                Pair(
+                    false,
+                    "Participant role ${payload.participantRoleName} does not exist",
+                )
+            !isLive ->
+                Pair(
+                    false,
+                    "Study $studyId is not live",
+                )
+            payload.amountOfAccounts !in 1..MAX_AMOUNT ->
+                Pair(
+                    false,
+                    "Amount of accounts must be between 1 and $MAX_AMOUNT",
+                )
+            else -> Pair(true, "")
+        }
     }
 
     override suspend fun execute() {

@@ -17,7 +17,8 @@ class ExportCommandInvokerImpl(
     private val exportRepository: ExportRepository,
 ) : ExportCommandInvoker {
     override fun invoke(command: ExportCommand) {
-        require(command.canExecute()) { "Export cannot be started." }
+        val constrainCheck = command.canExecute()
+        require(constrainCheck.first) { constrainCheck.second }
 
         CoroutineScope(Dispatchers.IO + SecurityCoroutineContext()).launch {
             try {

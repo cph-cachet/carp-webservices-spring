@@ -1,6 +1,7 @@
 package dk.cachet.carp.webservices.export.command
 
 import dk.cachet.carp.common.application.UUID
+import dk.cachet.carp.studies.application.StudyStatus
 import dk.cachet.carp.webservices.account.service.AccountService
 import dk.cachet.carp.webservices.common.services.CoreServiceContainer
 import dk.cachet.carp.webservices.export.command.impl.ExportAnonymousParticipants
@@ -44,6 +45,10 @@ class ExportAnonymousParticipantsTest {
                         mockk {
                             every { protocolSnapshot } returns null
                         }
+                    coEvery { getStudyStatus(any()) } returns
+                        mockk {
+                            StudyStatus.Live
+                        }
                 }
 
             val command =
@@ -55,7 +60,7 @@ class ExportAnonymousParticipantsTest {
                     resourceExporter,
                     fileUtil,
                 )
-            val canExecute = command.canExecute()
+            val canExecute = command.canExecute().first
 
             assertFalse(canExecute)
         }
@@ -71,6 +76,10 @@ class ExportAnonymousParticipantsTest {
                                     every { participantRoles } returns emptySet()
                                 }
                         }
+                    coEvery { getStudyStatus(any()) } returns
+                        mockk {
+                            StudyStatus.Live
+                        }
                 }
 
             val command =
@@ -82,7 +91,7 @@ class ExportAnonymousParticipantsTest {
                     resourceExporter,
                     fileUtil,
                 )
-            val canExecute = command.canExecute()
+            val canExecute = command.canExecute().first
 
             assertFalse(canExecute)
         }
@@ -103,6 +112,10 @@ class ExportAnonymousParticipantsTest {
                                         )
                                 }
                         }
+                    coEvery { getStudyStatus(any()) } returns
+                        mockk {
+                            StudyStatus.Live
+                        }
                 }
 
             val command =
@@ -114,7 +127,43 @@ class ExportAnonymousParticipantsTest {
                     resourceExporter,
                     fileUtil,
                 )
-            val canExecute = command.canExecute()
+            val canExecute = command.canExecute().first
+
+            assertFalse(canExecute)
+        }
+
+        @Test
+        fun `should return false if the study is not live`() {
+            every { services.studyService } returns
+                mockk {
+                    coEvery { getStudyDetails(any()) } returns
+                        mockk {
+                            every { protocolSnapshot } returns
+                                mockk {
+                                    every { participantRoles } returns
+                                        setOf(
+                                            mockk {
+                                                every { role } returns payload.participantRoleName
+                                            },
+                                        )
+                                }
+                        }
+                    coEvery { getStudyStatus(any()) } returns
+                        mockk {
+                            StudyStatus.Configuring
+                        }
+                }
+
+            val command =
+                ExportAnonymousParticipants(
+                    entry,
+                    payload,
+                    services,
+                    accountService,
+                    resourceExporter,
+                    fileUtil,
+                )
+            val canExecute = command.canExecute().first
 
             assertFalse(canExecute)
         }
