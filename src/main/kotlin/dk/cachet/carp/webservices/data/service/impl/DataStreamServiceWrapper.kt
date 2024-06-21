@@ -49,7 +49,7 @@ class DataStreamServiceWrapper(
         return sortedDataPoint.updatedAt?.toKotlinInstant()
     }
 
-    suspend fun extractFilesFromZip(zipFile: ByteArray): DataStreamServiceRequest<*>? {
+    suspend fun extractFilesFromZip(zipFile: ByteArray): DataStreamServiceRequest<*>? = withContext(Dispatchers.IO) {
         val objectMapper = ObjectMapper()
         var sequenceId = 1L
         val dataStreamServiceRequest: DataStreamServiceRequest<*>? = null
@@ -82,7 +82,7 @@ class DataStreamServiceWrapper(
             // Handle the exception appropriately
         }
 
-        return dataStreamServiceRequest
+        return@withContext dataStreamServiceRequest
     }
 
     override suspend fun processZipToInvoke(zipFile: MultipartFile): Any {
