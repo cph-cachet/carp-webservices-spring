@@ -36,7 +36,7 @@ class DataStreamController(
     }
 
     // New endpoint specifically for AppendToDataStreams with zip file
-    @PostMapping(value = ["/dataStreamService/open"], consumes = ["multipart/form-data"])
+    @PostMapping(value = [DATA_STREAM_SERVICE_OPEN], consumes = ["multipart/form-data"])
     @Operation(tags = ["dataStream/getDataStream.json"])
     fun appendToDataStreamWithZip(
         @RequestParam zipFile: MultipartFile,
