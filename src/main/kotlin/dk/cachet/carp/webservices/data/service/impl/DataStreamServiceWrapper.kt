@@ -53,8 +53,7 @@ class DataStreamServiceWrapper(
     suspend fun extractFilesFromZip(zipFile: ByteArray): DataStreamServiceRequest<*>? =
         withContext(Dispatchers.IO) {
             val objectMapper = ObjectMapper()
-            var sequenceId = 1L
-            val dataStreamServiceRequest: DataStreamServiceRequest<*>? = null
+            var dataStreamServiceRequest: DataStreamServiceRequest<*>? = null
 
             try {
                 ZipInputStream(ByteArrayInputStream(zipFile)).use { zipInputStream ->
@@ -71,9 +70,8 @@ class DataStreamServiceWrapper(
                                 val content = byteArrayOutputStream.toByteArray()
                                 val snapshot: JsonNode = objectMapper.readTree(content)
 
-                                JSON.decodeFromString(DataStreamServiceRequest.Serializer, snapshot.toString())
+                                dataStreamServiceRequest = JSON.decodeFromString(DataStreamServiceRequest.Serializer, snapshot.toString())
 
-                                sequenceId++
                             }
                         }
                         entry = zipInputStream.nextEntry
