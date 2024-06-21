@@ -1,9 +1,9 @@
-package dk.cachet.carp.webservices.data.service
+package dk.cachet.carp.webservices.data.service.core
 
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.common.infrastructure.test.StubDataPoint
 import dk.cachet.carp.webservices.data.repository.DataStreamConfigurationRepository
-import dk.cachet.carp.webservices.data.service.core.CoreDataStreamService
+import dk.cachet.carp.webservices.data.service.createStubSequence
 import dk.cachet.carp.webservices.data.service.impl.CawsMutableDataStreamBatchWrapper
 import io.mockk.coEvery
 import io.mockk.coVerify

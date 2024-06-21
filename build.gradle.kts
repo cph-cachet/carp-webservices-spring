@@ -151,6 +151,9 @@ dependencies {
     // GSON Library
     implementation("com.google.code.gson:gson:2.10.1")
 
+    // Apache Commons Compress
+    implementation("org.apache.commons:commons-compress:${property("commonsCompressVersion")}")
+
     // Unit Test
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-junit5"))
