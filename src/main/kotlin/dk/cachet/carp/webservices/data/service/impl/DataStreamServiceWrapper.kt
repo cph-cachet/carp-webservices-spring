@@ -35,6 +35,7 @@ class DataStreamServiceWrapper(
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
+
     final override val core = services.dataStreamService
 
     override fun getLatestUpdatedAt(deploymentId: UUID): Instant? {
@@ -49,48 +50,50 @@ class DataStreamServiceWrapper(
         return sortedDataPoint.updatedAt?.toKotlinInstant()
     }
 
-    suspend fun extractFilesFromZip(zipFile: ByteArray): DataStreamServiceRequest<*>? = withContext(Dispatchers.IO) {
-        val objectMapper = ObjectMapper()
-        var sequenceId = 1L
-        val dataStreamServiceRequest: DataStreamServiceRequest<*>? = null
+    suspend fun extractFilesFromZip(zipFile: ByteArray): DataStreamServiceRequest<*>? =
+        withContext(Dispatchers.IO) {
+            val objectMapper = ObjectMapper()
+            var sequenceId = 1L
+            val dataStreamServiceRequest: DataStreamServiceRequest<*>? = null
 
-        try {
-            ZipInputStream(ByteArrayInputStream(zipFile)).use { zipInputStream ->
-                var entry: ZipEntry? = zipInputStream.nextEntry
+            try {
+                ZipInputStream(ByteArrayInputStream(zipFile)).use { zipInputStream ->
+                    var entry: ZipEntry? = zipInputStream.nextEntry
 
-                while (entry != null) {
-                    if (!entry.isDirectory) {
-                        ByteArrayOutputStream().use { byteArrayOutputStream ->
-                            val buffer = ByteArray(1024)
-                            var len: Int
-                            while (zipInputStream.read(buffer).also { len = it } > 0) {
-                                byteArrayOutputStream.write(buffer, 0, len)
+                    while (entry != null) {
+                        if (!entry.isDirectory) {
+                            ByteArrayOutputStream().use { byteArrayOutputStream ->
+                                val buffer = ByteArray(1024)
+                                var len: Int
+                                while (zipInputStream.read(buffer).also { len = it } > 0) {
+                                    byteArrayOutputStream.write(buffer, 0, len)
+                                }
+                                val content = byteArrayOutputStream.toByteArray()
+                                val snapshot: JsonNode = objectMapper.readTree(content)
+
+                                JSON.decodeFromString(DataStreamServiceRequest.Serializer, snapshot.toString())
+
+                                sequenceId++
                             }
-                            val content = byteArrayOutputStream.toByteArray()
-                            val snapshot: JsonNode = objectMapper.readTree(content)
-
-                            JSON.decodeFromString(DataStreamServiceRequest.Serializer, snapshot.toString())
-
-                            sequenceId++
                         }
+                        entry = zipInputStream.nextEntry
                     }
-                    entry = zipInputStream.nextEntry
                 }
+            } catch (e: IOException) {
+                LOGGER.error("Error extracting files from zip", e)
+                throw e
             }
-        } catch (e: IOException) {
-            LOGGER.error("Error extracting files from zip", e)
-            // Handle the exception appropriately
-        }
 
-        return@withContext dataStreamServiceRequest
-    }
+            return@withContext dataStreamServiceRequest
+        }
 
     override suspend fun processZipToInvoke(zipFile: MultipartFile): Any {
         val zipFileBytes = zipFile.bytes
 
         // Extract the DataStreamServiceRequest from the zip file
-        val dataStreamServiceRequest = extractFilesFromZip(zipFileBytes)
-            ?: throw IllegalArgumentException("Invalid zip file content")
+        val dataStreamServiceRequest =
+            extractFilesFromZip(zipFileBytes)
+                ?: throw IllegalArgumentException("Invalid zip file content")
 
         // Check if the dataStreamServiceRequest is of the correct type
         return when (dataStreamServiceRequest) {
@@ -117,4 +120,3 @@ class DataStreamServiceWrapper(
         )
     }
 }
-

@@ -36,7 +36,7 @@ class DataStreamController(
     @PostMapping(value = [DATA_STREAM_SERVICE_ZIP], consumes = ["multipart/form-data"])
     @Operation(tags = ["dataStream/getDataStream.json"])
     suspend fun invoke(
-        @RequestBody zipFile: MultipartFile
+        @RequestBody zipFile: MultipartFile,
     ): ResponseEntity<Any> {
         LOGGER.info("Start POST: $DATA_STREAM_SERVICE_ZIP")
         return dataStreamService.processZipToInvoke(zipFile).let { ResponseEntity.ok(it) }
