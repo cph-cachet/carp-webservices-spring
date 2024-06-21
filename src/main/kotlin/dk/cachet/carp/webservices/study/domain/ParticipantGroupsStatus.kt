@@ -42,3 +42,8 @@ data class ParticipantAccount(
         (role ?: account.role).also { role = it.toString() }
     }
 }
+
+data class InactiveDeploymentInfo(
+    val deploymentId: UUID,
+    val dateOfLastDataUpload: Instant?,
+)

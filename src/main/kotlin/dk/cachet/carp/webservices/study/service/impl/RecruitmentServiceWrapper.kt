@@ -10,11 +10,16 @@ import dk.cachet.carp.webservices.security.authentication.domain.Account
 import dk.cachet.carp.webservices.security.authorization.Claim
 import dk.cachet.carp.webservices.security.authorization.Role
 import dk.cachet.carp.webservices.security.config.SecurityCoroutineContext
+import dk.cachet.carp.webservices.study.domain.InactiveDeploymentInfo
 import dk.cachet.carp.webservices.study.domain.ParticipantAccount
 import dk.cachet.carp.webservices.study.domain.ParticipantGroupInfo
 import dk.cachet.carp.webservices.study.domain.ParticipantGroupsStatus
 import dk.cachet.carp.webservices.study.service.RecruitmentService
 import kotlinx.coroutines.*
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.Instant
+import kotlinx.datetime.plus
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.stereotype.Service
@@ -86,6 +91,39 @@ class RecruitmentServiceWrapper(
             }
             accounts
         }
+
+    override suspend fun getInactiveDeployments(
+        studyId: UUID,
+        lastUpdate: Int,
+        offset: Int,
+        limit: Int,
+    ): List<InactiveDeploymentInfo> {
+        val timeNow: Instant = Clock.System.now()
+
+        val participantGroupStatusList =
+            core.getParticipantGroupStatusList(studyId)
+                .filterIsInstance<ParticipantGroupStatus.InDeployment>()
+
+        val inactiveDeploymentInfoList =
+            participantGroupStatusList
+                .map {
+                    val lastDataUpload =
+                        dataStreamService.getLatestUpdatedAt(
+                            it.studyDeploymentStatus.studyDeploymentId,
+                        )
+                    InactiveDeploymentInfo(it.id, lastDataUpload)
+                }
+                .filter {
+                    it.dateOfLastDataUpload != null &&
+                        it.dateOfLastDataUpload.plus(lastUpdate, DateTimeUnit.HOUR) < timeNow
+                }
+
+        if (offset >= 0 && limit > 0) {
+            return inactiveDeploymentInfoList.drop(offset * limit).take(limit).sortedBy { it.dateOfLastDataUpload }
+        }
+
+        return inactiveDeploymentInfoList.sortedBy { it.dateOfLastDataUpload }
+    }
 
     override fun isParticipant(
         studyId: UUID,

@@ -3,6 +3,7 @@ package dk.cachet.carp.webservices.study.service
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.studies.infrastructure.RecruitmentServiceDecorator
 import dk.cachet.carp.webservices.security.authentication.domain.Account
+import dk.cachet.carp.webservices.study.domain.InactiveDeploymentInfo
 import dk.cachet.carp.webservices.study.domain.ParticipantGroupsStatus
 
 interface RecruitmentService {
@@ -23,6 +24,13 @@ interface RecruitmentService {
         offset: Int = 0,
         limit: Int = -1,
     ): List<Account>
+
+    suspend fun getInactiveDeployments(
+        studyId: UUID,
+        lastUpdate: Int,
+        offset: Int = 0,
+        limit: Int = -1,
+    ): List<InactiveDeploymentInfo>
 
     fun isParticipant(
         studyId: UUID,
