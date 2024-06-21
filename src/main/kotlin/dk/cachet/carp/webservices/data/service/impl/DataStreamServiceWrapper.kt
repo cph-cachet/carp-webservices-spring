@@ -18,6 +18,7 @@ import kotlinx.datetime.toKotlinInstant
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.stereotype.Service
+import org.springframework.web.multipart.MultipartFile
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -48,12 +49,9 @@ class DataStreamServiceWrapper(
         return sortedDataPoint.updatedAt?.toKotlinInstant()
     }
 
-    override fun extractFilesFromZip(zipFile: ByteArray): DataStreamServiceRequest<*>? {
+    fun extractFilesFromZip(zipFile: ByteArray): DataStreamServiceRequest<*>? {
         val objectMapper = ObjectMapper()
         var sequenceId = 1L
-/*
-        val batch = CawsMutableDataStreamBatchWrapper()
-*/
         val dataStreamServiceRequest: DataStreamServiceRequest<*>? = null
 
         try {
@@ -85,6 +83,21 @@ class DataStreamServiceWrapper(
         }
 
         return dataStreamServiceRequest
+    }
+
+    override suspend fun processZipToInvoke(zipFile: MultipartFile): Any {
+        val zipFileBytes = zipFile.bytes
+        // Process the ByteArray and create a sequence of DataStreamSequence
+        val dataStreamServiceRequest = extractFilesFromZip(zipFileBytes)
+
+        // Check if the dataStreamServiceRequest is of the correct type
+        return if (dataStreamServiceRequest is DataStreamServiceRequest.AppendToDataStreams) {
+            // Invoke the existing service method
+            core.invoke(dataStreamServiceRequest)
+        } else {
+            // Handle the case where the dataStreamServiceRequest is not of the correct type
+            throw IllegalArgumentException("Invalid request type")
+        }
     }
 
     override val dataFileName = "data-streams.json"
