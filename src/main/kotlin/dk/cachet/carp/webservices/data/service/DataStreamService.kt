@@ -11,5 +11,4 @@ interface DataStreamService {
     fun getLatestUpdatedAt(deploymentId: UUID): Instant?
 
     fun extractFilesFromZip(zipFile: ByteArray): DataStreamServiceRequest<*>?
-
 }
