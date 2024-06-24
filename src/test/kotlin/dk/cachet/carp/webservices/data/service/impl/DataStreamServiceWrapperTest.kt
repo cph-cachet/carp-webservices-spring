@@ -7,6 +7,7 @@ import dk.cachet.carp.webservices.data.service.core.CoreDataStreamService
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
+import okio.IOException
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.web.multipart.MultipartFile
@@ -44,10 +45,24 @@ class DataStreamServiceWrapperTest {
         fun `should throw error for invalid zip`() =
             runTest {
                 // Arrange
-                val zipFile = mockk<MultipartFile>()
+                val mockFile = mockk<MultipartFile>()
+                every { mockFile.originalFilename } returns "test.txt"
+                every { mockFile.contentType } returns "text/plain"
+                every { mockFile.size } returns 100L
+                every { mockFile.isEmpty } returns false
+                every { mockFile.bytes } returns "test content".toByteArray()
+
                 val services = mockk<CoreServiceContainer>()
                 val coreDataStreamService = mockk<CoreDataStreamService>()
                 every { services.dataStreamService } returns DataStreamServiceDecorator(coreDataStreamService, mockk())
+
+                /*
+                every { coreDataStreamService.appendToDataStreams(any(), any()) } returns Unit
+*/
+
+
+/*                val dataStreamServiceRequest = DataStreamServiceDecorator(coreDataStreamService, mockk())
+                every { services.dataStreamService } returns dataStreamServiceRequest*/
 
                 // Mock the behavior of zipFile here
                 val sut =
@@ -58,13 +73,8 @@ class DataStreamServiceWrapperTest {
                     )
 
                 // Act & Assert
-
-/*                  assertThrows<Exception> {
-                    sut.extractFilesFromZip(zipFile.bytes)
-                }*/
-
-                assertFailsWith<IllegalArgumentException> {
-                    sut.extractFilesFromZip(zipFile.bytes)
+                assertFailsWith<IOException> {
+                    sut.extractFilesFromZip(mockFile.bytes)
                 }
             }
 
