@@ -249,6 +249,8 @@ teams:
     heartbeat: "${TEAMS_HEARTBEAT_WEBHOOK_URL}"
     dev: "${TEAMS_DEV_WEBHOOK_URL}"
 
+firebase:
+
 storage:
   directory: /home/carp/storage/${spring.profiles.active}/
   exports:

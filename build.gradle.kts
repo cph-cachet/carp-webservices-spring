@@ -60,6 +60,10 @@ java {
 }
 
 dependencies {
+    // BOM
+    implementation(platform("org.springframework.boot:spring-boot-dependencies:${property("springBootVersion")}"))
+    implementation(platform("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}"))
+
     // KOTLIN
     implementation("org.jetbrains.kotlin:kotlin-stdlib:${property("kotlinVersion")}")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${property("serializationJSONVersion")}")
@@ -97,6 +101,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-configuration-processor")
     implementation("org.springframework.boot:spring-boot-devtools")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
+//    implementation("org.springframework.boot:spring-boot-starter-scheduling")
 
     // SECURITY
     implementation("org.springframework.boot:spring-boot-starter-security")
@@ -144,6 +149,7 @@ dependencies {
 
     // GOOGLE Core Libraries
     implementation("com.google.guava:guava:${property("guavaVersion")}")
+    implementation("com.google.firebase:firebase-admin:9.0.0")
 
     // Webflux
     implementation("org.springframework.boot:spring-boot-starter-webflux")
@@ -168,12 +174,6 @@ dependencies {
     }
 
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
-}
-
-dependencyManagement {
-    imports {
-        mavenBom("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}")
-    }
 }
 
 detekt {

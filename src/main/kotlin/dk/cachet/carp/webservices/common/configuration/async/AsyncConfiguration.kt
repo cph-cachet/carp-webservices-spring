@@ -55,6 +55,6 @@ class AsyncConfiguration : AsyncConfigurer {
 
     @Bean
     fun taskScheduler(): TaskScheduler {
-        return ConcurrentTaskScheduler()
+        return ConcurrentTaskScheduler(null)
     }
 }
