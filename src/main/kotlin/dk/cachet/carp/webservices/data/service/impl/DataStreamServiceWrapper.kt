@@ -15,16 +15,18 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
 import kotlinx.datetime.toKotlinInstant
+import okio.FileSystem
+import okio.Path.Companion.toPath
+import okio.buffer
+import okio.openZip
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
 import java.io.IOException
+import java.nio.file.Files
 import java.nio.file.Path
-import java.util.zip.ZipEntry
-import java.util.zip.ZipInputStream
+import java.nio.file.StandardOpenOption
 
 @Service
 class DataStreamServiceWrapper(
@@ -56,27 +58,25 @@ class DataStreamServiceWrapper(
             var dataStreamServiceRequest: DataStreamServiceRequest<*>? = null
 
             try {
-                ZipInputStream(ByteArrayInputStream(zipFile)).use { zipInputStream ->
-                    var entry: ZipEntry? = zipInputStream.nextEntry
+                // Write the ByteArray to a temporary file
+                val tempFile = Files.createTempFile(null, null)
+                Files.write(tempFile, zipFile, StandardOpenOption.WRITE)
 
-                    while (entry != null) {
-                        if (!entry.isDirectory) {
-                            ByteArrayOutputStream().use { byteArrayOutputStream ->
-                                val buffer = ByteArray(1024)
-                                var len: Int
-                                while (zipInputStream.read(buffer).also { len = it } > 0) {
-                                    byteArrayOutputStream.write(buffer, 0, len)
-                                }
-                                val content = byteArrayOutputStream.toByteArray()
-                                val snapshot: JsonNode = objectMapper.readTree(content)
+                val fileSystem = FileSystem.SYSTEM
+                val zipPath = tempFile.toAbsolutePath().toString().toPath()
 
-                                dataStreamServiceRequest = JSON.decodeFromString(DataStreamServiceRequest.Serializer, snapshot.toString())
+                val zipFileSystem = fileSystem.openZip(zipPath)
+                zipFileSystem.list("/".toPath()).forEach { pathInZip ->
+                    zipFileSystem.source(pathInZip).use { source ->
+                        val content = source.buffer().readByteArray()
+                        val snapshot: JsonNode = objectMapper.readTree(content)
 
-                            }
-                        }
-                        entry = zipInputStream.nextEntry
+                        dataStreamServiceRequest = JSON.decodeFromString(DataStreamServiceRequest.Serializer, snapshot.toString())
                     }
                 }
+
+                // Delete the temporary file
+                Files.deleteIfExists(tempFile)
             } catch (e: IOException) {
                 LOGGER.error("Error extracting files from zip", e)
                 throw e
