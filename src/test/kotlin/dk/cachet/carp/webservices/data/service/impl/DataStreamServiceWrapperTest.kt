@@ -1,8 +1,13 @@
 package dk.cachet.carp.webservices.data.service.impl
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import dk.cachet.carp.common.application.UUID
+import dk.cachet.carp.common.application.services.ApiVersion
 import dk.cachet.carp.data.infrastructure.DataStreamServiceDecorator
 import dk.cachet.carp.data.infrastructure.DataStreamServiceRequest
+import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.services.CoreServiceContainer
+import dk.cachet.carp.webservices.data.serdes.DataStreamServiceRequestSerializer
 import dk.cachet.carp.webservices.data.service.core.CoreDataStreamService
 import io.mockk.every
 import io.mockk.mockk
@@ -10,8 +15,11 @@ import kotlinx.coroutines.test.runTest
 import okio.IOException
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.springframework.web.multipart.MultipartFile
-import kotlin.test.assertEquals
+import java.io.ByteArrayOutputStream
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
 
@@ -22,23 +30,52 @@ class DataStreamServiceWrapperTest {
         fun `should extract files from valid zip`() =
             runTest {
                 // Arrange
-                val zipFile = mockk<MultipartFile>().bytes
-                // Mock the behavior of zipFile here
-                val dataStreamServiceRequest = mockk<DataStreamServiceRequest<*>>()
+                // Mock the DataStreamServiceRequest
+                val dataStreamServiceRequest = DataStreamServiceRequest.AppendToDataStreams(
+                    studyDeploymentId = UUID.randomUUID(),
+                    batch = CawsMutableDataStreamBatchWrapper()
+                )
 
+                every { dataStreamServiceRequest.apiVersion } returns ApiVersion(1, 0)
+
+                // Convert the mock to a byte array
+                val objectMapper = ObjectMapper()
+
+                val messageBase = mockk<MessageBase>()
+                every { messageBase.get(any(), any()) } returns "Serializer fails somewhere"
+
+                val serializer = DataStreamServiceRequestSerializer(messageBase)
+                val requestAsJson = objectMapper.writeValueAsString(serializer.serialize(dataStreamServiceRequest, mockk(), mockk()))
+                val requestBytes = requestAsJson.toByteArray()
+
+                // Zip the byte array
+                val byteArrayOutputStream = ByteArrayOutputStream()
+                val zipOutputStream = ZipOutputStream(byteArrayOutputStream)
+
+                zipOutputStream.putNextEntry(ZipEntry("request.json"))
+                zipOutputStream.write(requestBytes)
+                zipOutputStream.closeEntry()
+                zipOutputStream.close()
+
+                // Get the zipped byte array
+                val zippedRequestBytes = byteArrayOutputStream.toByteArray()
+
+                val services = mockk<CoreServiceContainer>()
+                val coreDataStreamService = mockk<CoreDataStreamService>()
+                every { services.dataStreamService } returns DataStreamServiceDecorator(coreDataStreamService, mockk())
+
+                // Mock the behavior of zipFile here
                 val sut =
                     DataStreamServiceWrapper(
                         mockk(),
                         mockk(),
-                        mockk(),
+                        services,
                     )
 
-                // Act
-                val result = sut.extractFilesFromZip(zipFile)
-
-                // Assert
-                // Add your assertions here
-                assertEquals(dataStreamServiceRequest, result)
+                // Act & Assert
+                assertDoesNotThrow {
+                    sut.extractFilesFromZip(zippedRequestBytes)
+                }
             }
 
         @Test
@@ -55,14 +92,6 @@ class DataStreamServiceWrapperTest {
                 val services = mockk<CoreServiceContainer>()
                 val coreDataStreamService = mockk<CoreDataStreamService>()
                 every { services.dataStreamService } returns DataStreamServiceDecorator(coreDataStreamService, mockk())
-
-                /*
-                every { coreDataStreamService.appendToDataStreams(any(), any()) } returns Unit
-*/
-
-
-/*                val dataStreamServiceRequest = DataStreamServiceDecorator(coreDataStreamService, mockk())
-                every { services.dataStreamService } returns dataStreamServiceRequest*/
 
                 // Mock the behavior of zipFile here
                 val sut =
