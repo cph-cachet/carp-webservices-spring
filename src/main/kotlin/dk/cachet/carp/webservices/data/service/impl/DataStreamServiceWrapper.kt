@@ -51,10 +51,11 @@ class DataStreamServiceWrapper(
 
         return sortedDataPoint.updatedAt?.toKotlinInstant()
     }
-                // IO dispatcher needed for file operations to optimize
-                // input/output operations and offloading blocking operations
-                // Function takes zipped file unzip it and extract
-                // the data from it into DataStreamServiceRequest ( CORE )
+
+    // IO dispatcher needed for file operations to optimize
+    // input/output operations and offloading blocking operations
+    // Function takes zipped file unzip it and extract
+    // the data from it into DataStreamServiceRequest ( CORE )
     suspend fun extractFilesFromZip(zipFile: ByteArray): DataStreamServiceRequest<*>? =
         withContext(Dispatchers.IO) {
             val objectMapper = ObjectMapper()
@@ -74,8 +75,10 @@ class DataStreamServiceWrapper(
                         val content = source.buffer().readByteArray()
                         val snapshot: JsonNode = objectMapper.readTree(content)
 
-                        dataStreamServiceRequest = JSON.decodeFromString(
-                            DataStreamServiceRequest.Serializer, snapshot.toString())
+                        dataStreamServiceRequest =
+                            JSON.decodeFromString(
+                                DataStreamServiceRequest.Serializer, snapshot.toString(),
+                            )
                     }
                 }
 
@@ -89,8 +92,8 @@ class DataStreamServiceWrapper(
             return@withContext dataStreamServiceRequest
         }
 
-        // function calls the core service method with the extracted data from the zip file
-        // and subsequently invokes the core service method
+    // function calls the core service method with the extracted data from the zip file
+    // and subsequently invokes the core service method
     override suspend fun processZipToInvoke(zipFile: MultipartFile): Any {
         val zipFileBytes = zipFile.bytes
 
