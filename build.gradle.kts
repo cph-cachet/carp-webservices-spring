@@ -15,6 +15,8 @@ plugins {
     id("org.jetbrains.kotlin.plugin.allopen")
     id("io.gitlab.arturbosch.detekt")
     id("org.jlleitschuh.gradle.ktlint")
+
+//    id("jvm-test-suite")
 }
 
 repositories {
@@ -101,7 +103,6 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-configuration-processor")
     implementation("org.springframework.boot:spring-boot-devtools")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
-//    implementation("org.springframework.boot:spring-boot-starter-scheduling")
 
     // SECURITY
     implementation("org.springframework.boot:spring-boot-starter-security")
@@ -136,7 +137,8 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql")
 
     // FLYWAY
-    implementation("org.flywaydb:flyway-core")
+    implementation("org.flywaydb:flyway-core:${property("flywayVersion")}")
+    implementation("org.flywaydb:flyway-database-postgresql:${property("flywayVersion")}")
 
     // S3
     implementation("com.amazonaws:aws-java-sdk-s3:${property("awsSDKVersion")}")
@@ -149,7 +151,6 @@ dependencies {
 
     // GOOGLE Core Libraries
     implementation("com.google.guava:guava:${property("guavaVersion")}")
-    implementation("com.google.firebase:firebase-admin:9.0.0")
 
     // Webflux
     implementation("org.springframework.boot:spring-boot-starter-webflux")

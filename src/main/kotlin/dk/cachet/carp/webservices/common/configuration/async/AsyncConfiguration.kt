@@ -11,6 +11,7 @@ import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import java.util.concurrent.Executor
+import java.util.concurrent.Executors
 import java.util.concurrent.ThreadPoolExecutor
 
 @Configuration
@@ -55,6 +56,6 @@ class AsyncConfiguration : AsyncConfigurer {
 
     @Bean
     fun taskScheduler(): TaskScheduler {
-        return ConcurrentTaskScheduler(null)
+        return ConcurrentTaskScheduler(Executors.newSingleThreadScheduledExecutor())
     }
 }
