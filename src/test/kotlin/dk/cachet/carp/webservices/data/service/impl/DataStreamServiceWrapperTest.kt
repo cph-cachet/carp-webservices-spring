@@ -36,7 +36,7 @@ class DataStreamServiceWrapperTest {
                     batch = CawsMutableDataStreamBatchWrapper()
                 )
 
-                every { dataStreamServiceRequest.apiVersion } returns ApiVersion(1, 0)
+                every { dataStreamServiceRequest.apiVersion } returns ApiVersion(1, 2)
 
                 // Convert the mock to a byte array
                 val objectMapper = ObjectMapper()
