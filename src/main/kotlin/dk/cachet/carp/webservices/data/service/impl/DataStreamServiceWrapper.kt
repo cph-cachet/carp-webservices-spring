@@ -82,7 +82,7 @@ class DataStreamServiceWrapper(
         }
     }
 
-    /**
+    /**NIO
      * This function is responsible for extracting a `DataStreamServiceRequest` from a zipped file.
      * It operates in the IO dispatcher context to optimize input/output operations and offload blocking operations.
      *
