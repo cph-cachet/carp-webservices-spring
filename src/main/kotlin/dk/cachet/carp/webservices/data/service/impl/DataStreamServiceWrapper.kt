@@ -52,10 +52,49 @@ class DataStreamServiceWrapper(
         return sortedDataPoint.updatedAt?.toKotlinInstant()
     }
 
-    // IO dispatcher needed for file operations to optimize
-    // input/output operations and offloading blocking operations
-    // Function takes zipped file unzip it and extract
-    // the data from it into DataStreamServiceRequest ( CORE )
+    /**
+     * This function processes a zip file and invokes the appropriate service method based on the extracted data.
+     * It follows these steps:
+     * 1. Converts the zip file to a byte array.
+     * 2. Extracts a `DataStreamServiceRequest` from the byte array.
+     * 3. If the extraction is successful, it processes the request.
+     * 4. If the extraction fails, it throws an `IllegalArgumentException`.
+     *
+     * @param zipFile The zip file to be processed.
+     * @return The result of invoking the service method with the extracted request.
+     * @throws IllegalArgumentException If the zip file content is invalid.
+     */
+
+    override suspend fun processZipToInvoke(zipFile: MultipartFile): Any {
+        val zipFileBytes = zipFile.bytes
+
+        val dataStreamServiceRequest =
+            extractFilesFromZip(zipFileBytes)
+                ?: throw IllegalArgumentException("Invalid zip file content")
+
+        return processRequest(dataStreamServiceRequest)
+    }
+
+    /**
+     * This function is responsible for extracting a `DataStreamServiceRequest` from a zipped file.
+     * It operates in the IO dispatcher context to optimize input/output operations and offload blocking operations.
+     *
+     * The function follows these steps:
+     * 1. Writes the input ByteArray (representing a zipped file) to a temporary file.
+     * 2. Opens the temporary zip file and iterates over each entry.
+     * 3. Reads the content of each entry into a ByteArray and parses it into a `JsonNode`.
+     * 4. Decodes the `JsonNode` into a `DataStreamServiceRequest`.
+     * 5. Deletes the temporary file.
+     *
+     * IO dispatcher needed for file operations to optimize input/output operations and offloading blocking operations.
+     *
+     * If any error occurs during these operations, it logs the error and rethrows the exception.
+     *
+     * @param zipFile The ByteArray representing the zipped file.
+     * @return The `DataStreamServiceRequest` extracted from the zipped file, or null if no request could be extracted.
+     * @throws IOException If an error occurs during file operations.
+     */
+
     suspend fun extractFilesFromZip(zipFile: ByteArray): DataStreamServiceRequest<*>? =
         withContext(Dispatchers.IO) {
             val objectMapper = ObjectMapper()
@@ -92,24 +131,25 @@ class DataStreamServiceWrapper(
             return@withContext dataStreamServiceRequest
         }
 
-    // function calls the core service method with the extracted data from the zip file
-    // and subsequently invokes the core service method
-    override suspend fun processZipToInvoke(zipFile: MultipartFile): Any {
-        val zipFileBytes = zipFile.bytes
-
-        // Extract the DataStreamServiceRequest from the zip file
-        val dataStreamServiceRequest =
-            extractFilesFromZip(zipFileBytes)
-                ?: throw IllegalArgumentException("Invalid zip file content")
-
-        // Check if the dataStreamServiceRequest is of the correct type
+    /**
+     * This function is responsible for processing a `DataStreamServiceRequest`.
+     * It checks the type of the request and, based on its type, calls the appropriate core service method.
+     *
+     * The function follows these steps:
+     * 1. Checks if the `DataStreamServiceRequest` is of type `AppendToDataStreams`.
+     * 2. If it is, it invokes the core service method with the request.
+     * 3. If the request is not of the correct type, it throws an `IllegalArgumentException`.
+     *
+     * @param dataStreamServiceRequest The `DataStreamServiceRequest` to be processed.
+     * @return The result of invoking the core service method with the request.
+     * @throws IllegalArgumentException If the request is not of the correct type.
+     */
+    suspend fun processRequest(dataStreamServiceRequest: DataStreamServiceRequest<*>): Any {
         return when (dataStreamServiceRequest) {
             is DataStreamServiceRequest.AppendToDataStreams -> {
-                // Invoke the existing service method
                 core.invoke(dataStreamServiceRequest)
             }
             else -> {
-                // Handle the case where the dataStreamServiceRequest is not of the correct type
                 throw IllegalArgumentException("Invalid request type")
             }
         }

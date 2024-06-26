@@ -28,17 +28,15 @@ import kotlin.test.assertFailsWith
 class DataStreamServiceWrapperTest {
     @Nested
     inner class ExtractFilesFromZip {
+
         @BeforeEach
         fun setup() {
-            System.setProperty("kotlinx.coroutines.debug", "off")
+            System.setProperty("kotlinx.coroutines.debug", "on")
         }
 
         @Test
         fun `should extract files from valid zip`() =
             runTest {
-                // Need for actual initiaziation inside a test so the .zip
-                // file can be created
-
                 // Arrange
                 val studyDeploymentId = UUID.randomUUID()
                 val dataStreamBatch = CawsMutableDataStreamBatchWrapper() // replace with actual data
