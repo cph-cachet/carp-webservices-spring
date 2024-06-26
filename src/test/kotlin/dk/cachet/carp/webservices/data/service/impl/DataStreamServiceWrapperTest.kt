@@ -28,7 +28,6 @@ import kotlin.test.assertFailsWith
 class DataStreamServiceWrapperTest {
     @Nested
     inner class ExtractFilesFromZip {
-
         @BeforeEach
         fun setup() {
             System.setProperty("kotlinx.coroutines.debug", "on")

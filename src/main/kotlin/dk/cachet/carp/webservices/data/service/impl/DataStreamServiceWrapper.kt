@@ -57,12 +57,12 @@ class DataStreamServiceWrapper(
      * It follows these steps:
      * 1. Converts the zip file to a byte array.
      * 2. Extracts a `DataStreamServiceRequest` from the byte array.
-     * 3. If the extraction is successful, it processes the request.
-     * 4. If the extraction fails, it throws an `IllegalArgumentException`.
+     * 3. If the extraction is successful, it checks if the request is of type `AppendToDataStreams` and invokes the core service method with the request.
+     * 4. If the extraction fails or the request is not of the correct type, it throws an `IllegalArgumentException`.
      *
      * @param zipFile The zip file to be processed.
      * @return The result of invoking the service method with the extracted request.
-     * @throws IllegalArgumentException If the zip file content is invalid.
+     * @throws IllegalArgumentException If the zip file content is invalid or the request is not of the correct type.
      */
 
     override suspend fun processZipToInvoke(zipFile: MultipartFile): Any {
@@ -72,7 +72,14 @@ class DataStreamServiceWrapper(
             extractFilesFromZip(zipFileBytes)
                 ?: throw IllegalArgumentException("Invalid zip file content")
 
-        return processRequest(dataStreamServiceRequest)
+        return when (dataStreamServiceRequest) {
+            is DataStreamServiceRequest.AppendToDataStreams -> {
+                core.invoke(dataStreamServiceRequest)
+            }
+            else -> {
+                throw IllegalArgumentException("Invalid request type")
+            }
+        }
     }
 
     /**
@@ -130,30 +137,6 @@ class DataStreamServiceWrapper(
 
             return@withContext dataStreamServiceRequest
         }
-
-    /**
-     * This function is responsible for processing a `DataStreamServiceRequest`.
-     * It checks the type of the request and, based on its type, calls the appropriate core service method.
-     *
-     * The function follows these steps:
-     * 1. Checks if the `DataStreamServiceRequest` is of type `AppendToDataStreams`.
-     * 2. If it is, it invokes the core service method with the request.
-     * 3. If the request is not of the correct type, it throws an `IllegalArgumentException`.
-     *
-     * @param dataStreamServiceRequest The `DataStreamServiceRequest` to be processed.
-     * @return The result of invoking the core service method with the request.
-     * @throws IllegalArgumentException If the request is not of the correct type.
-     */
-    suspend fun processRequest(dataStreamServiceRequest: DataStreamServiceRequest<*>): Any {
-        return when (dataStreamServiceRequest) {
-            is DataStreamServiceRequest.AppendToDataStreams -> {
-                core.invoke(dataStreamServiceRequest)
-            }
-            else -> {
-                throw IllegalArgumentException("Invalid request type")
-            }
-        }
-    }
 
     override val dataFileName = "data-streams.json"
 
