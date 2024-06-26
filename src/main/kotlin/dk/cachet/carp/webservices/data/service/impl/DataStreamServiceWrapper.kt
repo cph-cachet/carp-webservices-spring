@@ -53,16 +53,13 @@ class DataStreamServiceWrapper(
     }
 
     /**
-     * This function processes a zip file and invokes the appropriate service method based on the extracted data.
-     * It follows these steps:
-     * 1. Converts the zip file to a byte array.
-     * 2. Extracts a `DataStreamServiceRequest` from the byte array.
-     * 3. If the extraction is successful, it checks if the request is of type `AppendToDataStreams` and invokes the core service method with the request.
-     * 4. If the extraction fails or the request is not of the correct type, it throws an `IllegalArgumentException`.
+     * Processes a zip file and invokes the appropriate service method.
+     * Converts the zip file to a byte array, extracts a `DataStreamServiceRequest`, and processes the request.
+     * Throws an `IllegalArgumentException` if the extraction fails.
      *
      * @param zipFile The zip file to be processed.
-     * @return The result of invoking the service method with the extracted request.
-     * @throws IllegalArgumentException If the zip file content is invalid or the request is not of the correct type.
+     * @return The result of invoking the service method.
+     * @throws IllegalArgumentException If the zip file content is invalid.
      */
 
     override suspend fun processZipToInvoke(zipFile: MultipartFile): Any {
@@ -82,20 +79,11 @@ class DataStreamServiceWrapper(
         }
     }
 
-    /**NIO
-     * This function is responsible for extracting a `DataStreamServiceRequest` from a zipped file.
-     * It operates in the IO dispatcher context to optimize input/output operations and offload blocking operations.
-     *
-     * The function follows these steps:
-     * 1. Writes the input ByteArray (representing a zipped file) to a temporary file.
-     * 2. Opens the temporary zip file and iterates over each entry.
-     * 3. Reads the content of each entry into a ByteArray and parses it into a `JsonNode`.
-     * 4. Decodes the `JsonNode` into a `DataStreamServiceRequest`.
-     * 5. Deletes the temporary file.
-     *
-     * IO dispatcher needed for file operations to optimize input/output operations and offloading blocking operations.
-     *
-     * If any error occurs during these operations, it logs the error and rethrows the exception.
+    /**
+     * Extracts a `DataStreamServiceRequest` from a zipped file.
+     * Writes the input ByteArray to a temporary file, opens the zip file, reads the content, and decodes it into a `DataStreamServiceRequest`.
+     * Deletes the temporary file after extraction.
+     * Operates in the IO dispatcher context for optimized I/O operations.
      *
      * @param zipFile The ByteArray representing the zipped file.
      * @return The `DataStreamServiceRequest` extracted from the zipped file, or null if no request could be extracted.

@@ -36,13 +36,11 @@ class DataStreamServiceWrapperTest {
         @Test
         fun `should extract files from valid zip`() =
             runTest {
-                // Arrange
                 val studyDeploymentId = UUID.randomUUID()
                 val dataStreamBatch = CawsMutableDataStreamBatchWrapper() // replace with actual data
                 val dataStreamServiceRequest =
                     DataStreamServiceRequest.AppendToDataStreams(studyDeploymentId, dataStreamBatch)
 
-                // Convert the mock to a byte array
                 val objectMapper = ObjectMapper()
 
                 val messageBase = mockk<MessageBase>()
@@ -60,7 +58,6 @@ class DataStreamServiceWrapperTest {
 
                 val requestBytes = requestAsJson.toByteArray()
 
-                // Zip the byte array
                 val byteArrayOutputStream = ByteArrayOutputStream()
                 val zipOutputStream = ZipOutputStream(byteArrayOutputStream)
 
@@ -69,14 +66,12 @@ class DataStreamServiceWrapperTest {
                 zipOutputStream.closeEntry()
                 zipOutputStream.close()
 
-                // Get the zipped byte array
                 val zippedRequestBytes = byteArrayOutputStream.toByteArray()
 
                 val services = mockk<CoreServiceContainer>()
                 val coreDataStreamService = mockk<CoreDataStreamService>()
                 every { services.dataStreamService } returns DataStreamServiceDecorator(coreDataStreamService, mockk())
 
-                // Mock the behavior of zipFile here
                 val sut =
                     DataStreamServiceWrapper(
                         mockk(),
@@ -84,7 +79,6 @@ class DataStreamServiceWrapperTest {
                         services,
                     )
 
-                // Act & Assert
                 assertDoesNotThrow {
                     withContext(Dispatchers.IO) {
                         sut.extractFilesFromZip(zippedRequestBytes)
@@ -95,7 +89,6 @@ class DataStreamServiceWrapperTest {
         @Test
         fun `should throw error for invalid zip`() =
             runTest {
-                // Arrange
                 val mockFile = mockk<MultipartFile>()
                 every { mockFile.originalFilename } returns "test.txt"
                 every { mockFile.contentType } returns "text/plain"
@@ -110,8 +103,6 @@ class DataStreamServiceWrapperTest {
                         coreDataStreamService,
                         mockk(),
                     )
-
-                // Mock the behavior of zipFile here
                 val sut =
                     DataStreamServiceWrapper(
                         mockk(),
@@ -119,7 +110,6 @@ class DataStreamServiceWrapperTest {
                         services,
                     )
 
-                // Act & Assert
                 assertFailsWith<IOException> {
                     sut.extractFilesFromZip(mockFile.bytes)
                 }
