@@ -158,7 +158,10 @@ class DataStreamServiceWrapperTest {
             val jsonGenerator = objectMapper.createGenerator(writer)
 
             jsonGenerator.writeStartObject()
-            jsonGenerator.writeStringField("__type", "dk.cachet.carp.data.infrastructure.DataStreamServiceRequest.AppendToDataStreams")
+            jsonGenerator.writeStringField(
+                "__type",
+                "dk.cachet.carp.data.infrastructure.DataStreamServiceRequest.AppendToDataStreams",
+            )
             jsonGenerator.writeStringField("apiVersion", "1.1")
             jsonGenerator.writeStringField("studyDeploymentId", UUID.randomUUID().toString())
 
