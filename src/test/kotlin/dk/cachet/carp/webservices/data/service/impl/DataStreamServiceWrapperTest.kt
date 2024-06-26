@@ -23,6 +23,7 @@ import java.io.ByteArrayOutputStream
 import java.io.StringWriter
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
+import kotlin.random.Random
 import kotlin.test.assertFailsWith
 
 class DataStreamServiceWrapperTest {
@@ -34,7 +35,42 @@ class DataStreamServiceWrapperTest {
         }
 
         @Test
-        fun `should extract files from valid zip`() =
+        fun `should extract files from valid zip from generateRandomDataStreamServiceRequest()`() =
+            runTest {
+                val requestAsJson = generateRandomDataStreamServiceRequest()
+
+                val requestBytes = requestAsJson.toByteArray()
+
+                val byteArrayOutputStream = ByteArrayOutputStream()
+                val zipOutputStream = ZipOutputStream(byteArrayOutputStream)
+
+                zipOutputStream.putNextEntry(ZipEntry("data-streams.json"))
+                zipOutputStream.write(requestBytes)
+                zipOutputStream.closeEntry()
+                zipOutputStream.close()
+
+                val zippedRequestBytes = byteArrayOutputStream.toByteArray()
+
+                val services = mockk<CoreServiceContainer>()
+                val coreDataStreamService = mockk<CoreDataStreamService>()
+                every { services.dataStreamService } returns DataStreamServiceDecorator(coreDataStreamService, mockk())
+
+                val sut =
+                    DataStreamServiceWrapper(
+                        mockk(),
+                        mockk(),
+                        services,
+                    )
+
+                assertDoesNotThrow {
+                    withContext(Dispatchers.IO) {
+                        sut.extractFilesFromZip(zippedRequestBytes)
+                    }
+                }
+            }
+
+        @Test
+        fun `should extract files from valid zip with initialization of DataStreamRequest`() =
             runTest {
                 val studyDeploymentId = UUID.randomUUID()
                 val dataStreamBatch = CawsMutableDataStreamBatchWrapper() // replace with actual data
@@ -114,5 +150,55 @@ class DataStreamServiceWrapperTest {
                     sut.extractFilesFromZip(mockFile.bytes)
                 }
             }
+
+        private fun generateRandomDataStreamServiceRequest(): String {
+            val objectMapper = ObjectMapper()
+
+            val writer = StringWriter()
+            val jsonGenerator = objectMapper.createGenerator(writer)
+
+            jsonGenerator.writeStartObject()
+            jsonGenerator.writeStringField("__type", "dk.cachet.carp.data.infrastructure.DataStreamServiceRequest.AppendToDataStreams")
+            jsonGenerator.writeStringField("apiVersion", "1.1")
+            jsonGenerator.writeStringField("studyDeploymentId", UUID.randomUUID().toString())
+
+            jsonGenerator.writeArrayFieldStart("batch")
+            for (i in 1..Random.nextInt(1, 5)) { // Generate 1 to 5 batch objects
+                jsonGenerator.writeStartObject()
+
+                jsonGenerator.writeObjectFieldStart("dataStream")
+                jsonGenerator.writeStringField("studyDeploymentId", UUID.randomUUID().toString())
+                jsonGenerator.writeStringField("deviceRoleName", "Primary Phone")
+                jsonGenerator.writeStringField("dataType", "dk.cachet.carp.heartbeat")
+                jsonGenerator.writeEndObject()
+
+                jsonGenerator.writeNumberField("firstSequenceId", Random.nextInt(Int.MAX_VALUE))
+
+                jsonGenerator.writeArrayFieldStart("measurements")
+                jsonGenerator.writeStartObject()
+                jsonGenerator.writeNumberField("sensorStartTime", Random.nextLong())
+                jsonGenerator.writeObjectFieldStart("data")
+                jsonGenerator.writeStringField("__type", "dk.cachet.carp.heartbeat")
+                jsonGenerator.writeNumberField("period", Random.nextInt())
+                jsonGenerator.writeStringField("deviceType", "dk.cachet.carp.common.application.devices.Smartphone")
+                jsonGenerator.writeStringField("deviceRoleName", "Primary Phone")
+                jsonGenerator.writeEndObject()
+                jsonGenerator.writeEndObject()
+                jsonGenerator.writeEndArray()
+
+                jsonGenerator.writeArrayFieldStart("triggerIds")
+                jsonGenerator.writeNumber(Random.nextInt())
+                jsonGenerator.writeEndArray()
+
+                jsonGenerator.writeEndObject()
+            }
+            jsonGenerator.writeEndArray()
+
+            jsonGenerator.writeEndObject()
+
+            jsonGenerator.flush()
+
+            return writer.toString()
+        }
     }
 }
