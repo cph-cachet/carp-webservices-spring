@@ -15,8 +15,6 @@ plugins {
     id("org.jetbrains.kotlin.plugin.allopen")
     id("io.gitlab.arturbosch.detekt")
     id("org.jlleitschuh.gradle.ktlint")
-
-//    id("jvm-test-suite")
 }
 
 repositories {
@@ -145,9 +143,6 @@ dependencies {
 
     // MICROMETER
     runtimeOnly("io.micrometer:micrometer-registry-prometheus")
-
-    // PASSAY - for password validation
-    implementation("org.passay:passay:${property("passayVersion")}")
 
     // GOOGLE Core Libraries
     implementation("com.google.guava:guava:${property("guavaVersion")}")
