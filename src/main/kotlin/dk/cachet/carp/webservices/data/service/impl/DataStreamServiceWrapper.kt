@@ -15,19 +15,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
 import kotlinx.datetime.toKotlinInstant
-import okio.FileSystem
-import okio.IOException
-import okio.Path.Companion.toPath
-import okio.buffer
-import okio.openZip
+import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
+import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
-import java.util.zip.ZipInputStream
 
 @Service
 class DataStreamServiceWrapper(
@@ -88,39 +84,6 @@ class DataStreamServiceWrapper(
         }
     }
 
-    suspend fun extractFilesFromZip(zipFile: ByteArray): DataStreamServiceRequest<*>? =
-        withContext(Dispatchers.IO) {
-            val objectMapper = ObjectMapper()
-            var dataStreamServiceRequest: DataStreamServiceRequest<*>? = null
-
-            try {
-                val tempFile = Files.createTempFile(null, null)
-                Files.write(tempFile, zipFile, StandardOpenOption.WRITE)
-
-                ZipInputStream(Files.newInputStream(tempFile)).use { zipInputStream ->
-                    var zipEntry = zipInputStream.nextEntry
-                    while (zipEntry != null) {
-                        val content = zipInputStream.readBytes()
-                        val snapshot: JsonNode = objectMapper.readTree(content)
-
-                        dataStreamServiceRequest =
-                            JSON.decodeFromString(
-                                DataStreamServiceRequest.Serializer, snapshot.toString(),
-                            )
-
-                        zipEntry = zipInputStream.nextEntry
-                    }
-                }
-
-                Files.deleteIfExists(tempFile)
-            } catch (e: IOException) {
-                LOGGER.error("Error extracting files from zip", e)
-                throw e
-            }
-
-            return@withContext dataStreamServiceRequest
-        }
-
     /**
      * Extracts a `DataStreamServiceRequest` from a zipped file.
      * Writes the input ByteArray to a temporary file, opens the
@@ -134,7 +97,7 @@ class DataStreamServiceWrapper(
      * @throws IOException If an error occurs during file operations.
      */
 
-    suspend fun extractFilesFromZipOKIO(zipFile: ByteArray): DataStreamServiceRequest<*>? =
+    suspend fun extractFilesFromZip(zipFile: ByteArray): DataStreamServiceRequest<*>? =
         withContext(Dispatchers.IO) {
             val objectMapper = ObjectMapper()
             var dataStreamServiceRequest: DataStreamServiceRequest<*>? = null
@@ -143,27 +106,27 @@ class DataStreamServiceWrapper(
                 val tempFile = Files.createTempFile(null, null)
                 Files.write(tempFile, zipFile, StandardOpenOption.WRITE)
 
-                val fileSystem = FileSystem.SYSTEM
-                val zipPath = tempFile.toAbsolutePath().toString().toPath()
+                Files.newInputStream(tempFile).use { inputStream ->
+                    ZipArchiveInputStream(inputStream).use { zipInputStream ->
+                        var zipEntry = zipInputStream.nextEntry
+                        while (zipEntry != null) {
+                            val content = zipInputStream.readBytes()
+                            val snapshot: JsonNode = objectMapper.readTree(content)
 
-                // tries to open zip file but gets string
-                val zipFileSystem = fileSystem.openZip(zipPath)
-                zipFileSystem.list("/".toPath()).forEach { pathInZip ->
-                    zipFileSystem.source(pathInZip).use { source ->
-                        val content = source.buffer().readByteArray()
-                        val snapshot: JsonNode = objectMapper.readTree(content)
+                            dataStreamServiceRequest =
+                                JSON.decodeFromString(
+                                    DataStreamServiceRequest.Serializer, snapshot.toString(),
+                                )
 
-                        dataStreamServiceRequest =
-                            JSON.decodeFromString(
-                                DataStreamServiceRequest.Serializer, snapshot.toString(),
-                            )
+                            zipEntry = zipInputStream.nextEntry
+                        }
                     }
                 }
 
                 Files.deleteIfExists(tempFile)
             } catch (e: IOException) {
                 LOGGER.error("Error extracting files from zip", e)
-                throw e
+                throw IOException("Invalid zip file content", e)
             }
 
             return@withContext dataStreamServiceRequest

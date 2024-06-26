@@ -151,8 +151,8 @@ dependencies {
     // GSON Library
     implementation("com.google.code.gson:gson:2.10.1")
 
-    // Okio
-    implementation("com.squareup.okio:okio:3.4.0")
+    // Apache Commons Compress
+    implementation("org.apache.commons:commons-compress:1.26.2")
 
     // Unit Test
     testImplementation(kotlin("test"))

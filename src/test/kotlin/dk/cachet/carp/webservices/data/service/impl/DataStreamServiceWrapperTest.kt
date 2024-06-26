@@ -13,15 +13,20 @@ import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
+import org.springframework.web.multipart.MultipartFile
 import java.io.ByteArrayOutputStream
+import java.io.IOException
 import java.io.StringWriter
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import kotlin.random.Random
+import kotlin.test.assertFailsWith
 
 class DataStreamServiceWrapperTest {
     @Nested
@@ -38,11 +43,12 @@ class DataStreamServiceWrapperTest {
                 val requestBytes = requestAsJson.toByteArray()
 
                 val byteArrayOutputStream = ByteArrayOutputStream()
-                val zipOutputStream = ZipOutputStream(byteArrayOutputStream)
+                val zipOutputStream = ZipArchiveOutputStream(byteArrayOutputStream)
 
-                zipOutputStream.putNextEntry(ZipEntry("request.json"))
+                val entry = ZipArchiveEntry("request.json")
+                zipOutputStream.putArchiveEntry(entry)
                 zipOutputStream.write(requestBytes)
-                zipOutputStream.closeEntry()
+                zipOutputStream.closeArchiveEntry()
                 zipOutputStream.close()
 
                 val zippedRequestBytes = byteArrayOutputStream.toByteArray()
@@ -69,7 +75,7 @@ class DataStreamServiceWrapperTest {
         fun `should extract files from valid zip with initialization of DataStreamRequest`() =
             runTest {
                 val studyDeploymentId = UUID.randomUUID()
-                val dataStreamBatch = CawsMutableDataStreamBatchWrapper() // replace with actual data
+                val dataStreamBatch = CawsMutableDataStreamBatchWrapper()
                 val dataStreamServiceRequest =
                     DataStreamServiceRequest.AppendToDataStreams(studyDeploymentId, dataStreamBatch)
 
@@ -118,15 +124,17 @@ class DataStreamServiceWrapperTest {
                 }
             }
 
-/*        @Test
+        @Test
         fun `should throw error for invalid zip`() =
             runTest {
+                val invalidJsonZip = createInvalidZip()
+
                 val mockFile = mockk<MultipartFile>()
-                every { mockFile.originalFilename } returns "test.txt"
-                every { mockFile.contentType } returns "text/plain"
-                every { mockFile.size } returns 100L
+                every { mockFile.originalFilename } returns "invalid.zip"
+                every { mockFile.contentType } returns "application/zip"
+                every { mockFile.size } returns invalidJsonZip.size.toLong()
                 every { mockFile.isEmpty } returns false
-                every { mockFile.bytes } returns "test content".toByteArray()
+                every { mockFile.bytes } returns invalidJsonZip
 
                 val services = mockk<CoreServiceContainer>()
                 val coreDataStreamService = mockk<CoreDataStreamService>()
@@ -143,9 +151,24 @@ class DataStreamServiceWrapperTest {
                     )
 
                 assertFailsWith<IOException> {
-                    sut.extractFilesFromZip(mockFile.bytes)
+                    withContext(Dispatchers.IO) {
+                        sut.extractFilesFromZip(mockFile.bytes)
+                    }
                 }
-            }*/
+            }
+
+        private fun createInvalidZip(): ByteArray {
+            val byteArrayOutputStream = ByteArrayOutputStream()
+            val zipOutputStream = ZipOutputStream(byteArrayOutputStream)
+
+            zipOutputStream.putNextEntry(ZipEntry("invalid.json"))
+            zipOutputStream.write("invalid json content".toByteArray())
+            zipOutputStream.closeEntry()
+
+            zipOutputStream.close()
+
+            return byteArrayOutputStream.toByteArray()
+        }
 
         private fun generateRandomDataStreamServiceRequest(): String {
             val objectMapper = ObjectMapper()
