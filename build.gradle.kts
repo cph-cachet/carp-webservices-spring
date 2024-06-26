@@ -152,7 +152,7 @@ dependencies {
     implementation("com.google.code.gson:gson:2.10.1")
 
     // Apache Commons Compress
-    implementation("org.apache.commons:commons-compress:1.26.2")
+    implementation("org.apache.commons:commons-compress:${property("commonsCompress")}")
 
     // Unit Test
     testImplementation(kotlin("test"))
