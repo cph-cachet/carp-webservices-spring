@@ -27,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
+import java.util.zip.ZipInputStream
 
 @Service
 class DataStreamServiceWrapper(
@@ -44,7 +45,8 @@ class DataStreamServiceWrapper(
      * Retrieves the latest update timestamp for a given deployment.
      *
      * @param deploymentId The ID of the deployment for which to retrieve the latest update timestamp.
-     * @return The latest update timestamp as an `Instant`, or null if no data stream inputs are found for the given deployment ID.
+     * @return The latest update timestamp as an `Instant`,
+     * or null if no data stream inputs are found for the given deployment ID.
      */
 
     override fun getLatestUpdatedAt(deploymentId: UUID): Instant? {
@@ -86,18 +88,53 @@ class DataStreamServiceWrapper(
         }
     }
 
+    suspend fun extractFilesFromZip(zipFile: ByteArray): DataStreamServiceRequest<*>? =
+        withContext(Dispatchers.IO) {
+            val objectMapper = ObjectMapper()
+            var dataStreamServiceRequest: DataStreamServiceRequest<*>? = null
+
+            try {
+                val tempFile = Files.createTempFile(null, null)
+                Files.write(tempFile, zipFile, StandardOpenOption.WRITE)
+
+                ZipInputStream(Files.newInputStream(tempFile)).use { zipInputStream ->
+                    var zipEntry = zipInputStream.nextEntry
+                    while (zipEntry != null) {
+                        val content = zipInputStream.readBytes()
+                        val snapshot: JsonNode = objectMapper.readTree(content)
+
+                        dataStreamServiceRequest =
+                            JSON.decodeFromString(
+                                DataStreamServiceRequest.Serializer, snapshot.toString(),
+                            )
+
+                        zipEntry = zipInputStream.nextEntry
+                    }
+                }
+
+                Files.deleteIfExists(tempFile)
+            } catch (e: IOException) {
+                LOGGER.error("Error extracting files from zip", e)
+                throw e
+            }
+
+            return@withContext dataStreamServiceRequest
+        }
+
     /**
      * Extracts a `DataStreamServiceRequest` from a zipped file.
-     * Writes the input ByteArray to a temporary file, opens the zip file, reads the content, and decodes it into a `DataStreamServiceRequest`.
+     * Writes the input ByteArray to a temporary file, opens the
+     * zip file, reads the content, and decodes it into a `DataStreamServiceRequest`.
      * Deletes the temporary file after extraction.
      * Operates in the IO dispatcher context for optimized I/O operations.
      *
      * @param zipFile The ByteArray representing the zipped file.
-     * @return The `DataStreamServiceRequest` extracted from the zipped file, or null if no request could be extracted.
+     * @return The `DataStreamServiceRequest` extracted from the
+     * zipped file, or null if no request could be extracted.
      * @throws IOException If an error occurs during file operations.
      */
 
-    suspend fun extractFilesFromZip(zipFile: ByteArray): DataStreamServiceRequest<*>? =
+    suspend fun extractFilesFromZipOKIO(zipFile: ByteArray): DataStreamServiceRequest<*>? =
         withContext(Dispatchers.IO) {
             val objectMapper = ObjectMapper()
             var dataStreamServiceRequest: DataStreamServiceRequest<*>? = null
@@ -109,6 +146,7 @@ class DataStreamServiceWrapper(
                 val fileSystem = FileSystem.SYSTEM
                 val zipPath = tempFile.toAbsolutePath().toString().toPath()
 
+                // tries to open zip file but gets string
                 val zipFileSystem = fileSystem.openZip(zipPath)
                 zipFileSystem.list("/".toPath()).forEach { pathInZip ->
                     zipFileSystem.source(pathInZip).use { source ->

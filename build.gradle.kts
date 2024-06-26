@@ -152,7 +152,7 @@ dependencies {
     implementation("com.google.code.gson:gson:2.10.1")
 
     // Okio
-    implementation("com.squareup.okio:okio:3.0.0")
+    implementation("com.squareup.okio:okio:3.4.0")
 
     // Unit Test
     testImplementation(kotlin("test"))
