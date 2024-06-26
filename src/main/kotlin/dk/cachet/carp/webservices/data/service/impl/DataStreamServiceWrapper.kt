@@ -40,6 +40,13 @@ class DataStreamServiceWrapper(
 
     final override val core = services.dataStreamService
 
+    /**
+     * Retrieves the latest update timestamp for a given deployment.
+     *
+     * @param deploymentId The ID of the deployment for which to retrieve the latest update timestamp.
+     * @return The latest update timestamp as an `Instant`, or null if no data stream inputs are found for the given deployment ID.
+     */
+
     override fun getLatestUpdatedAt(deploymentId: UUID): Instant? {
         val dataStreamInputs =
             dataStreamIdRepository.getAllByDeploymentId(
@@ -96,7 +103,6 @@ class DataStreamServiceWrapper(
             var dataStreamServiceRequest: DataStreamServiceRequest<*>? = null
 
             try {
-                // Write the ByteArray to a temporary file
                 val tempFile = Files.createTempFile(null, null)
                 Files.write(tempFile, zipFile, StandardOpenOption.WRITE)
 
@@ -116,7 +122,6 @@ class DataStreamServiceWrapper(
                     }
                 }
 
-                // Delete the temporary file
                 Files.deleteIfExists(tempFile)
             } catch (e: IOException) {
                 LOGGER.error("Error extracting files from zip", e)
