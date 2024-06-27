@@ -32,10 +32,9 @@ class DataStreamController(
         return dataStreamService.core.invoke(request).let { ResponseEntity.ok(it) }
     }
 
-    // New endpoint specifically for AppendToDataStreams with zip file
     @PostMapping(value = [DATA_STREAM_SERVICE_ZIP], consumes = ["multipart/form-data"])
-    @Operation(tags = ["dataStream/getDataStream.json"])
-    suspend fun invoke(
+    @Operation(tags = ["dataStream/getDataStream.zip"])
+    suspend fun processToInvoke(
         @RequestBody zipFile: MultipartFile,
     ): ResponseEntity<Any> {
         LOGGER.info("Start POST: $DATA_STREAM_SERVICE_ZIP")
