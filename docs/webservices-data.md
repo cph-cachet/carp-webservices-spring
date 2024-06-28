@@ -24,7 +24,7 @@ This class represents a snapshot of a data stream. It includes properties for me
 
 ### `CoreDataStreamService`
 
-The `CoreDataStreamService` is a core component of the CARP Web Services data package. It is responsible for managing data streams within the application. This class is annotated with `@Component`, indicating that it is a Spring Bean and is automatically instantiated by the Spring framework.
+The `CoreDataStreamService` is a core component of the CARP Web Services data package. It is responsible for managing data streams within the application.
 
 The `CoreDataStreamService` class implements the `DataStreamService` interface, which defines the contract for managing data streams. This includes methods for appending data to data streams, closing data streams, retrieving data from data streams, and processing of zip file before appending to data streams.
 
@@ -48,11 +48,13 @@ Preconditions and sequential checks for the core object `MutableDataStreamBatch`
 
 ![Subsystem decomposition](https://imgur.com/4wJ82Ib.png)
 
-### `Couroutine processing & data stream`
+### `Coroutine processing & data stream`
 
-The `CawsDataStreamService` interface is designed to functionally implement CawsDataStreamService. The `CawsDataStreamService` class handles the core logic for managing data streams by invocation and call of services within the application.
+The `CawsDataStreamService` service is responsible for running suspend coroutines for processing data streams. It includes method for creating tempFile within the process of unzipping files by line, reading serializing to and `DataStreamServiceRequest` and invoking Core. This services works as coroutine producer of data for the `DataStreamController`.
 
-### `Zip file processing`
+### `CawsDataStreamService`
+
+#### `Zip file processing`
 
 The `processToZip` function is responsible for processing zip files before appending the data to data streams. It includes methods for extracting data from zip files, validating the data, and converting it into the appropriate format for storage in the database.
 At this point in time, the `processToZip` is fully implemented and been tested by initialization of `DataStreamBatch` and `DataStreamSequence` objects and functionally tested by `generateRandomDataStreamServiceRequest`.
