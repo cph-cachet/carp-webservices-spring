@@ -28,7 +28,7 @@ import java.util.zip.ZipOutputStream
 import kotlin.random.Random
 import kotlin.test.assertFailsWith
 
-class DataStreamServiceWrapperTest {
+class CawsDataStreamServiceTest {
     @Nested
     inner class ExtractFilesFromZip {
         @BeforeEach
@@ -58,7 +58,7 @@ class DataStreamServiceWrapperTest {
                 every { services.dataStreamService } returns DataStreamServiceDecorator(coreDataStreamService, mockk())
 
                 val sut =
-                    DataStreamServiceWrapper(
+                    CawsDataStreamService(
                         mockk(),
                         mockk(),
                         services,
@@ -111,7 +111,7 @@ class DataStreamServiceWrapperTest {
                 every { services.dataStreamService } returns DataStreamServiceDecorator(coreDataStreamService, mockk())
 
                 val sut =
-                    DataStreamServiceWrapper(
+                    CawsDataStreamService(
                         mockk(),
                         mockk(),
                         services,
@@ -144,7 +144,7 @@ class DataStreamServiceWrapperTest {
                         mockk(),
                     )
                 val sut =
-                    DataStreamServiceWrapper(
+                    CawsDataStreamService(
                         mockk(),
                         mockk(),
                         services,

@@ -5,7 +5,7 @@ import dk.cachet.carp.data.infrastructure.DataStreamServiceDecorator
 import kotlinx.datetime.Instant
 import org.springframework.web.multipart.MultipartFile
 
-interface DataStreamService {
+interface CawsDataStreamService {
     val core: DataStreamServiceDecorator
 
     fun getLatestUpdatedAt(deploymentId: UUID): Instant?
