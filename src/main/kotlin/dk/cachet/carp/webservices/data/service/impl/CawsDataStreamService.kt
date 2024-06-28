@@ -9,7 +9,7 @@ import dk.cachet.carp.webservices.common.services.CoreServiceContainer
 import dk.cachet.carp.webservices.data.domain.DataStreamSequence
 import dk.cachet.carp.webservices.data.repository.DataStreamIdRepository
 import dk.cachet.carp.webservices.data.repository.DataStreamSequenceRepository
-import dk.cachet.carp.webservices.data.service.DataStreamService
+import dk.cachet.carp.webservices.data.service.CawsDataStreamService
 import dk.cachet.carp.webservices.export.service.ResourceExporter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -26,11 +26,11 @@ import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 
 @Service
-class DataStreamServiceWrapper(
+class CawsDataStreamService(
     private val dataStreamIdRepository: DataStreamIdRepository,
     private val dataStreamSequenceRepository: DataStreamSequenceRepository,
     services: CoreServiceContainer,
-) : DataStreamService, ResourceExporter<DataStreamSequence> {
+) : CawsDataStreamService, ResourceExporter<DataStreamSequence> {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }

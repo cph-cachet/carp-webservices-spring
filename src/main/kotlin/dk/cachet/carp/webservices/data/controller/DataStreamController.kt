@@ -1,7 +1,7 @@
 package dk.cachet.carp.webservices.data.controller
 
 import dk.cachet.carp.data.infrastructure.DataStreamServiceRequest
-import dk.cachet.carp.webservices.data.service.DataStreamService
+import dk.cachet.carp.webservices.data.service.CawsDataStreamService
 import io.swagger.v3.oas.annotations.Operation
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -13,7 +13,7 @@ import org.springframework.web.multipart.MultipartFile
 
 @RestController
 class DataStreamController(
-    private val dataStreamService: DataStreamService,
+    private val cawsDataStreamService: CawsDataStreamService,
 ) {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
@@ -29,7 +29,7 @@ class DataStreamController(
         @RequestBody request: DataStreamServiceRequest<*>,
     ): ResponseEntity<Any> {
         LOGGER.info("Start POST: $DATA_STREAM_SERVICE -> ${ request::class.simpleName }")
-        return dataStreamService.core.invoke(request).let { ResponseEntity.ok(it) }
+        return cawsDataStreamService.core.invoke(request).let { ResponseEntity.ok(it) }
     }
 
     @PostMapping(value = [DATA_STREAM_SERVICE_ZIP], consumes = ["multipart/form-data"])
@@ -38,6 +38,6 @@ class DataStreamController(
         @RequestBody zipFile: MultipartFile,
     ): ResponseEntity<Any> {
         LOGGER.info("Start POST: $DATA_STREAM_SERVICE_ZIP")
-        return dataStreamService.processZipToInvoke(zipFile).let { ResponseEntity.ok(it) }
+        return cawsDataStreamService.processZipToInvoke(zipFile).let { ResponseEntity.ok(it) }
     }
 }
