@@ -2,12 +2,14 @@ package dk.cachet.carp.webservices.data.service.impl
 
 import dk.cachet.carp.common.application.data.Data
 import dk.cachet.carp.data.application.*
+import org.springframework.stereotype.Service
 
 /** UNDER CONSTRUCTION --> CHECK create a function that checks sequence IDs before appending
  * + usable if we can get back last preceding upload of a sequence so the client know what to send
  * This a "trick" to make the class `DataStreamBatch` open for allowing appendDataStream without checking
  * all the sequence IDs in the append method. This is a temporary solution until we find a better way to handle this.
  */
+@Service
 class CawsMutableDataStreamBatchWrapper : Sequence<DataStreamPoint<*>>, DataStreamBatch {
     private val sequenceMap: MutableMap<DataStreamId, MutableList<MutableDataStreamSequence<*>>> = mutableMapOf()
 
