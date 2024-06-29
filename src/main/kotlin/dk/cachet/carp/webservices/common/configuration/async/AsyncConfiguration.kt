@@ -35,7 +35,7 @@ class AsyncConfiguration : AsyncConfigurer {
         threadPoolTaskExecutor.maxPoolSize = cores * MAX_POOL_SIZE
 
         // Queue is using when all core pool are filled.
-        threadPoolTaskExecutor.setQueueCapacity(cores * QUEUE_CAPACITY)
+        threadPoolTaskExecutor.queueCapacity = cores * QUEUE_CAPACITY
 
         // The thread invokes itself on rejected pool (increasing queue capacity).
         threadPoolTaskExecutor.setRejectedExecutionHandler(ThreadPoolExecutor.CallerRunsPolicy())
