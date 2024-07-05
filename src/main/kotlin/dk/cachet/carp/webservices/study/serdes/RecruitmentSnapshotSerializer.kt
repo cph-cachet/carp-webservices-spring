@@ -15,10 +15,11 @@ import org.apache.logging.log4j.Logger
 /**
  * The [RecruitmentSnapshotSerializer] implements the serialization logic for [Recruitment].
  */
-class RecruitmentSnapshotSerializer(private val validationMessages: MessageBase): JsonSerializer<RecruitmentSnapshot>()
-{
-    companion object
-    {
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
+class RecruitmentSnapshotSerializer(
+    private val validationMessages: MessageBase,
+) : JsonSerializer<RecruitmentSnapshot>() {
+    companion object {
         /** The [LOGGER]. */
         private val LOGGER: Logger = LogManager.getLogger()
     }
@@ -28,21 +29,20 @@ class RecruitmentSnapshotSerializer(private val validationMessages: MessageBase)
      * @param value The [Recruitment] object to be serialized.
      * @throws SerializationException If something goes wrong while serializing the [value].
      */
-    override fun serialize(value: RecruitmentSnapshot?, gen: JsonGenerator?, serializers: SerializerProvider?)
-    {
-        if (value == null)
-        {
+    override fun serialize(
+        value: RecruitmentSnapshot?,
+        gen: JsonGenerator?,
+        serializers: SerializerProvider?,
+    ) {
+        if (value == null) {
             LOGGER.error("The RecruitmentSnapshot is null.")
             throw SerializationException(validationMessages.get("study.details.serialization.empty"))
         }
 
         val serialized: String
-        try
-        {
+        try {
             serialized = JSON.encodeToString(value)
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The RecruitmentSnapshot is not valid. Exception: $ex")
             throw SerializationException(validationMessages.get("study.details.serialization.error"))
         }

@@ -19,11 +19,12 @@ interface ProtocolRepository : JpaRepository<Protocol, String> {
      * @return A list of [Protocol]s associated with the given [ownerId].
      */
     @Query(
-        value = "SELECT DISTINCT ON (snapshot->>'id') snapshot->>'id', * " +
+        value =
+            "SELECT DISTINCT ON (snapshot->>'id') snapshot->>'id', * " +
                 "FROM protocols " +
                 "where snapshot->>'ownerId'= ?1 " +
                 "ORDER BY (snapshot->>'id'), created_at DESC ",
-        nativeQuery = true
+        nativeQuery = true,
     )
     fun findAllByOwnerId(ownerId: String): List<Protocol>
 
@@ -36,25 +37,35 @@ interface ProtocolRepository : JpaRepository<Protocol, String> {
      * @return A list of [Protocol] for the given parameters.
      */
     @Query(
-        value = "SELECT * FROM protocols WHERE snapshot->>'id' = ?1" +
+        value =
+            "SELECT * FROM protocols WHERE snapshot->>'id' = ?1" +
                 " AND (?2 IS NULL OR version_tag = cast(?2 as varchar))" +
                 " ORDER BY created_at DESC",
-        nativeQuery = true
+        nativeQuery = true,
     )
-    fun findByParams(id: String, versionTag: String?): List<Protocol>
+    fun findByParams(
+        id: String,
+        versionTag: String?,
+    ): List<Protocol>
 
     @Query(
         value = "SELECT * FROM protocols WHERE snapshot->>'id' = :id",
-        nativeQuery = true
+        nativeQuery = true,
     )
-    fun findAllById(@Param("id") id: String): List<Protocol>
+    fun findAllById(
+        @Param("id") id: String,
+    ): List<Protocol>
 
     @Query(
-        value = "SELECT * FROM protocols WHERE snapshot->>'id' = :id" +
+        value =
+            "SELECT * FROM protocols WHERE snapshot->>'id' = :id" +
                 " ORDER BY :desc" +
                 ", CASE WHEN :desc THEN created_at END DESC" +
                 ", CASE WHEN NOT :desc THEN created_at END",
-        nativeQuery = true
+        nativeQuery = true,
     )
-    fun findAllByIdSortByCreatedAt(@Param("id") id: String, @Param("desc") desc: Boolean = false): List<Protocol>
+    fun findAllByIdSortByCreatedAt(
+        @Param("id") id: String,
+        @Param("desc") desc: Boolean = false,
+    ): List<Protocol>
 }

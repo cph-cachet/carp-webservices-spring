@@ -15,10 +15,9 @@ import org.apache.logging.log4j.Logger
  * The Class [StudySnapshotSerializer].
  * The [StudySnapshotSerializer] implements the serialization logic for [StudySnapshot].
  */
-class StudySnapshotSerializer(private val validationMessages: MessageBase): JsonSerializer<StudySnapshot>()
-{
-    companion object
-    {
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
+class StudySnapshotSerializer(private val validationMessages: MessageBase) : JsonSerializer<StudySnapshot>() {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
@@ -30,23 +29,24 @@ class StudySnapshotSerializer(private val validationMessages: MessageBase): Json
      * Also, if the [StudySnapshot] contains invalid format.
      * @return The serialization of [StudySnapshot] object.
      */
-    override fun serialize(studySnapshot: StudySnapshot?, jsonGenerator: JsonGenerator?, serializers: SerializerProvider?)
-    {
-        if (studySnapshot == null)
-        {
+    override fun serialize(
+        studySnapshot: StudySnapshot?,
+        jsonGenerator: JsonGenerator?,
+        serializers: SerializerProvider?,
+    ) {
+        if (studySnapshot == null) {
             LOGGER.error("The StudySnapshot is null.")
             throw SerializationException(validationMessages.get("study.snapshot.serialization.empty"))
         }
 
         val serialized: String
-        try
-        {
+        try {
             serialized = JSON.encodeToString(studySnapshot)
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The StudySnapshot is not valid. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("study.snapshot.serialization.error", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("study.snapshot.serialization.error", ex.message.toString()),
+            )
         }
 
         jsonGenerator!!.writeRawValue(serialized)

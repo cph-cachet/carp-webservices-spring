@@ -9,8 +9,7 @@ import java.util.regex.Pattern
  * The [EmailValidatorUtil] provides the email validation functionality.
  */
 @Component
-class EmailValidatorUtil
-{
+class EmailValidatorUtil {
     /**
      * The [emailPattern] instantiates the email [Pattern].
      */
@@ -21,11 +20,12 @@ class EmailValidatorUtil
      */
     private lateinit var matcher: Matcher
 
-    companion object
-    {
+    companion object {
         private const val EMAIL_PATTERN =
-                ("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
-                        + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$")
+            (
+                "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@" +
+                    "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$"
+            )
     }
 
     /**
@@ -34,8 +34,7 @@ class EmailValidatorUtil
      * @param [email] The [email] as hex for validation.
      * @return [Boolean] `true` if the email is valid, `false` otherwise.
      */
-    fun isValid(email: String?): Boolean
-    {
+    fun isValid(email: String?): Boolean {
         if (email == null) return false
         matcher = emailPattern.matcher(email)
         return matcher.matches()

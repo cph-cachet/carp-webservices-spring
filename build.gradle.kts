@@ -1,5 +1,6 @@
+import io.gitlab.arturbosch.detekt.Detekt
+import org.jlleitschuh.gradle.ktlint.KtlintExtension
 import org.springframework.boot.gradle.tasks.bundling.BootJar
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     idea
@@ -12,6 +13,8 @@ plugins {
     id("io.spring.dependency-management")
     id("org.flywaydb.flyway")
     id("org.jetbrains.kotlin.plugin.allopen")
+    id("io.gitlab.arturbosch.detekt")
+    id("org.jlleitschuh.gradle.ktlint")
 }
 
 repositories {
@@ -36,13 +39,6 @@ tasks.withType<BootJar> {
     archiveFileName.set("carp-platform.jar")
 }
 
-tasks.withType<KotlinCompile>().configureEach {
-    kotlinOptions {
-        freeCompilerArgs = listOf("-Xjsr305=strict")
-        jvmTarget = "17"
-    }
-}
-
 configurations {
     compileOnly {
         extendsFrom(configurations.annotationProcessor.get())
@@ -54,12 +50,20 @@ allprojects {
     version = "1.2.0"
 }
 
+kotlin {
+    jvmToolchain(17)
+}
+
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
 }
 
 dependencies {
+    // BOM
+    implementation(platform("org.springframework.boot:spring-boot-dependencies:${property("springBootVersion")}"))
+    implementation(platform("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}"))
+
     // KOTLIN
     implementation("org.jetbrains.kotlin:kotlin-stdlib:${property("kotlinVersion")}")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${property("serializationJSONVersion")}")
@@ -85,7 +89,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-amqp")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa") {
-        exclude(module="org.apache.tomcat:tomcat-jdbc")
+        exclude(module = "org.apache.tomcat:tomcat-jdbc")
     }
     implementation("org.springframework.boot:spring-boot-starter-data-rest")
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -131,16 +135,14 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql")
 
     // FLYWAY
-    implementation("org.flywaydb:flyway-core")
+    implementation("org.flywaydb:flyway-core:${property("flywayVersion")}")
+    implementation("org.flywaydb:flyway-database-postgresql:${property("flywayVersion")}")
 
     // S3
     implementation("com.amazonaws:aws-java-sdk-s3:${property("awsSDKVersion")}")
 
     // MICROMETER
     runtimeOnly("io.micrometer:micrometer-registry-prometheus")
-
-    // PASSAY - for password validation
-    implementation("org.passay:passay:${property("passayVersion")}")
 
     // GOOGLE Core Libraries
     implementation("com.google.guava:guava:${property("guavaVersion")}")
@@ -150,6 +152,9 @@ dependencies {
 
     // GSON Library
     implementation("com.google.code.gson:gson:2.10.1")
+
+    // Apache Commons Compress
+    implementation("org.apache.commons:commons-compress:${property("commonsCompressVersion")}")
 
     // Unit Test
     testImplementation(kotlin("test"))
@@ -170,8 +175,27 @@ dependencies {
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 }
 
-dependencyManagement {
-    imports {
-        mavenBom("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}")
+detekt {
+    autoCorrect = true
+    allRules = false
+    dependencies {
+        detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:${property("detektVersion")}")
     }
+}
+
+tasks.withType<Detekt>().configureEach {
+    jvmTarget = "17"
+    config.from(files("$rootDir/detekt.yml"))
+    ignoreFailures = false
+    buildUponDefaultConfig = true
+}
+
+configure<KtlintExtension> {
+    ignoreFailures.set(true)
+    additionalEditorconfig.set(
+        mapOf(
+            "ktlint_standard_no-wildcard-imports" to "disabled",
+            "max_line_length" to "120",
+        ),
+    )
 }

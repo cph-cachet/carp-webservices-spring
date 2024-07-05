@@ -12,6 +12,7 @@ import dk.cachet.carp.webservices.data.domain.DataStreamSnapshot
 import dk.cachet.carp.webservices.data.repository.DataStreamConfigurationRepository
 import dk.cachet.carp.webservices.data.repository.DataStreamIdRepository
 import dk.cachet.carp.webservices.data.repository.DataStreamSequenceRepository
+import dk.cachet.carp.webservices.data.service.impl.CawsMutableDataStreamBatchWrapper
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.stereotype.Component
@@ -22,10 +23,8 @@ class CoreDataStreamService(
     private val dataStreamIdRepository: DataStreamIdRepository,
     private val dataStreamSequenceRepository: DataStreamSequenceRepository,
     private val objectMapper: ObjectMapper,
-) : DataStreamService
-{
-    companion object
-    {
+) : DataStreamService {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
@@ -39,51 +38,62 @@ class CoreDataStreamService(
      *  - [batch] contains a sequence with [DataStreamId] which wasn't configured for [studyDeploymentId]
      * @throws IllegalStateException when data streams for [studyDeploymentId] have been closed.
      */
-    override suspend fun appendToDataStreams(studyDeploymentId: UUID, batch: DataStreamBatch)
-    {
+    override suspend fun appendToDataStreams(
+        studyDeploymentId: UUID,
+        batch: DataStreamBatch,
+    ) {
         // the `studyDeploymentId` of one or more sequences in [batch] does not match [studyDeploymentId]
-        require( batch.sequences.all { it.dataStream.studyDeploymentId == studyDeploymentId } )
-            { "The study deployment ID of one or more sequences in `batch` doesn't match `studyDeploymentId`." }
+        require(
+            batch.sequences.all {
+                it.dataStream.studyDeploymentId == studyDeploymentId
+            },
+        ) { "The study deployment ID of one or more sequences in `batch` doesn't match `studyDeploymentId`." }
 
         // whether there is a config present in the database
         val configOptional = configRepository.findById(studyDeploymentId.stringRepresentation)
-        if (!configOptional.isPresent)
-        {
-            throw IllegalArgumentException("No configuration was found for studyDeploymentId ${studyDeploymentId.stringRepresentation} or study is closed")
+
+        require(configOptional.isPresent) {
+            "No configuration was found for studyDeploymentId ${studyDeploymentId.stringRepresentation}."
         }
+
         val config = mapToCoreConfig(configOptional.get().config!!)
 
         // checks whether any of the streams wasn't configured for studyDeploymentId
-        require( batch.sequences.all { it.dataStream in config.expectedDataStreamIds} )
-            { "The batch contains a sequence with a data stream which wasn't configured for this study deployment." }
+        require(
+            batch.sequences.all {
+                it.dataStream in config.expectedDataStreamIds
+            },
+        ) { "The batch contains a sequence with a data stream which wasn't configured for this study deployment." }
 
-        val dataStreams = MutableDataStreamBatch()
+        val dataStreams = CawsMutableDataStreamBatchWrapper()
 
-        //appending sequences to batch
-       dataStreams.appendBatch(batch)
+        // appending sequences to batch
+        dataStreams.appendBatch(batch)
 
-        //save the sequences
-        val dataStreamSequence = dataStreams.sequences.map {
-            val dataStream = it.dataStream
-            val dataStreamId = dataStreamIdRepository.findByStudyDeploymentIdAndDeviceRoleNameAndNameAndNameSpace(
-                studyDeploymentId = dataStream.studyDeploymentId.stringRepresentation,
-                deviceRoleName = dataStream.deviceRoleName,
-                name = dataStream.dataType.name,
-                nameSpace = dataStream.dataType.namespace
-            ).get()
+        // save the sequences
+        val dataStreamSequence =
+            dataStreams.sequences.map {
+                val dataStream = it.dataStream
+                val dataStreamId =
+                    dataStreamIdRepository.findByStudyDeploymentIdAndDeviceRoleNameAndNameAndNameSpace(
+                        studyDeploymentId = dataStream.studyDeploymentId.stringRepresentation,
+                        deviceRoleName = dataStream.deviceRoleName,
+                        name = dataStream.dataType.name,
+                        nameSpace = dataStream.dataType.namespace,
+                    ).get()
 
-            val snapshot = DataStreamSnapshot(it.measurements, it.triggerIds, it.syncPoint)
+                val snapshot = DataStreamSnapshot(it.measurements, it.triggerIds, it.syncPoint)
 
-            //to ws save_to_db type
-            DataStreamSequence(
-                dataStreamId = dataStreamId.id,
-                firstSequenceId = it.firstSequenceId,
-                lastSequenceId = it.range.last,
-                snapshot = objectMapper.valueToTree(snapshot)
-        ) }
+                // to ws save_to_db type
+                DataStreamSequence(
+                    dataStreamId = dataStreamId.id,
+                    firstSequenceId = it.firstSequenceId,
+                    lastSequenceId = it.range.last,
+                    snapshot = objectMapper.valueToTree(snapshot),
+                )
+            }
 
         dataStreamSequenceRepository.saveAll(dataStreamSequence.asIterable())
-
     }
 
     /**
@@ -91,17 +101,14 @@ class CoreDataStreamService(
      *
      * @throws IllegalArgumentException when no data streams were ever opened for any of the [studyDeploymentIds].
      */
-    override suspend fun closeDataStreams(studyDeploymentIds: Set<UUID>)
-    {
+    override suspend fun closeDataStreams(studyDeploymentIds: Set<UUID>) {
         val configs = configRepository.getConfigurationsForIds(studyDeploymentIds.map { it.stringRepresentation })
-        if (configs.size != studyDeploymentIds.size)
-        {
-            throw IllegalArgumentException("One of the configurations passed is not valid.")
-        }
+
+        require(configs.size == studyDeploymentIds.size) { "One of the configurations passed is not valid." }
+
         configs.forEach { it.closed = true }
         configRepository.saveAll(configs)
     }
-
 
     /**
      * Retrieve all data points in [dataStream] that fall within the inclusive range
@@ -118,58 +125,74 @@ class CoreDataStreamService(
     override suspend fun getDataStream(
         dataStream: DataStreamId,
         fromSequenceId: Long,
-        toSequenceIdInclusive: Long?
-    ): DataStreamBatch
-    {
+        toSequenceIdInclusive: Long?,
+    ): DataStreamBatch {
         when {
-            fromSequenceId < 0 -> throw IllegalArgumentException("[fromSequenceId] is negative for requested dataStream with studyDeploymentId ${dataStream.studyDeploymentId.stringRepresentation}")
-            toSequenceIdInclusive != null && fromSequenceId > toSequenceIdInclusive -> throw IllegalArgumentException("[toSequenceIdInclusive] is smaller than [fromSequenceId] for requested dataStream with studyDeploymentId ${dataStream.studyDeploymentId.stringRepresentation}")
+            fromSequenceId < 0 -> throw IllegalArgumentException(
+                "[fromSequenceId] is negative for requested dataStream " +
+                    "with studyDeploymentId ${dataStream.studyDeploymentId.stringRepresentation}",
+            )
+
+            toSequenceIdInclusive != null && fromSequenceId > toSequenceIdInclusive -> throw IllegalArgumentException(
+                "[toSequenceIdInclusive] is smaller than [fromSequenceId] for requested dataStream " +
+                    "with studyDeploymentId ${dataStream.studyDeploymentId.stringRepresentation}",
+            )
         }
 
         // whether there is a config present in the database
         val configOptional = configRepository.findById(dataStream.studyDeploymentId.stringRepresentation)
-        if (!configOptional.isPresent)
-        {
-            throw IllegalArgumentException("No configuration was found for studyDeploymentId ${dataStream.studyDeploymentId.stringRepresentation} or study is closed")
+
+        require(configOptional.isPresent) {
+            "No configuration was found " +
+                "for studyDeploymentId ${dataStream.studyDeploymentId.stringRepresentation} or study is closed"
         }
 
         val config = mapToCoreConfig(configOptional.get().config!!)
 
         // checks if dataStream is configured for studyDeploymentId
-        require(dataStream in config.expectedDataStreamIds )
-        { "Data stream wasn't configured for this study deployment." }
+        require(
+            dataStream in config.expectedDataStreamIds,
+        ) { "Data stream wasn't configured for this study deployment." }
 
-        val dataStreamId = dataStreamIdRepository.findByStudyDeploymentIdAndDeviceRoleNameAndNameAndNameSpace(
-            studyDeploymentId = dataStream.studyDeploymentId.stringRepresentation,
-            deviceRoleName = dataStream.deviceRoleName,
-            name = dataStream.dataType.name,
-            nameSpace = dataStream.dataType.namespace
-        ).get()
+        val dataStreamId =
+            dataStreamIdRepository.findByStudyDeploymentIdAndDeviceRoleNameAndNameAndNameSpace(
+                studyDeploymentId = dataStream.studyDeploymentId.stringRepresentation,
+                deviceRoleName = dataStream.deviceRoleName,
+                name = dataStream.dataType.name,
+                nameSpace = dataStream.dataType.namespace,
+            ).get()
 
         val toSequenceId = toSequenceIdInclusive?.toInt() ?: Int.MAX_VALUE
 
-        val dataStreamSequences =  dataStreamSequenceRepository.findAllBySequenceIdRange(dataStreamId.id, fromSequenceId.toInt(), toSequenceId)
+        val dataStreamSequences =
+            dataStreamSequenceRepository.findAllBySequenceIdRange(
+                dataStreamId.id,
+                fromSequenceId.toInt(),
+                toSequenceId,
+            )
 
         return dataStreamSequences
             .mapNotNull {
                 val queryRange = fromSequenceId.rangeTo(toSequenceId)
                 val range = (it.firstSequenceId!!)..(it.lastSequenceId!!)
                 val subRange = range.intersect(queryRange)
-                if (subRange.isEmpty()) null
-                else {
+                if (subRange.isEmpty()) {
+                    null
+                } else {
                     val snapshot = mapToDataStreamSnapshot(it.snapshot!!)
                     MutableDataStreamSequence<Data>(dataStream, subRange.first, snapshot.triggerIds, snapshot.syncPoint)
                         .apply {
                             val startOffset = subRange.first - range.first
                             val exclusiveEnd = startOffset + subRange.last - subRange.first + 1
-                            check(startOffset <= Int.MAX_VALUE && exclusiveEnd <= Int.MAX_VALUE)
-                            { "Exceeded capacity of measurements which can be held in memory." }
+                            check(
+                                startOffset <= Int.MAX_VALUE && exclusiveEnd <= Int.MAX_VALUE,
+                            ) { "Exceeded capacity of measurements which can be held in memory." }
                             appendMeasurements(snapshot.measurements.subList(startOffset.toInt(), exclusiveEnd.toInt()))
                         }
                 }
             }
-            .fold( MutableDataStreamBatch() ) { batch, sequence ->
-                batch.apply { appendSequence( sequence ) }
+            .fold(CawsMutableDataStreamBatchWrapper()) { batch, sequence ->
+                batch.apply { appendSequence(sequence) }
             }
     }
 
@@ -178,28 +201,28 @@ class CoreDataStreamService(
      *
      * @throws IllegalStateException when data streams for the specified study deployment have already been configured.
      */
-    override suspend fun openDataStreams(configuration: DataStreamsConfiguration)
-    {
+    override suspend fun openDataStreams(configuration: DataStreamsConfiguration) {
         val id = configuration.studyDeploymentId.stringRepresentation
-        if (configRepository.existsById(id))
-        {
-            throw IllegalStateException("Data streams for deployment with \"$id\" have already been configured.")
+
+        check(!configRepository.existsById(id)) {
+            "Data streams for deployment with \\\"$id\\\" have already been configured."
         }
+
         val node = objectMapper.valueToTree<JsonNode>(configuration)
         configRepository.save(DataStreamConfiguration(id, node))
         LOGGER.info("New data stream configuration is saved for deployment with id $id.")
 
-        val ids = configuration.expectedDataStreamIds.map {
-            dk.cachet.carp.webservices.data.domain.DataStreamId(
-                studyDeploymentId = it.studyDeploymentId.stringRepresentation,
-                deviceRoleName = it.deviceRoleName,
-                name = it.dataType.name,
-                nameSpace = it.dataType.namespace
-            )
-        }
+        val ids =
+            configuration.expectedDataStreamIds.map {
+                dk.cachet.carp.webservices.data.domain.DataStreamId(
+                    studyDeploymentId = it.studyDeploymentId.stringRepresentation,
+                    deviceRoleName = it.deviceRoleName,
+                    name = it.dataType.name,
+                    nameSpace = it.dataType.namespace,
+                )
+            }
         dataStreamIdRepository.saveAll(ids)
         LOGGER.info("New data stream id(s) is saved for deployment with id $id.")
-
     }
 
     /**
@@ -208,9 +231,8 @@ class CoreDataStreamService(
      * @return The IDs of the study deployments for which data streams were configured.
      * IDs for which no study deployment exists are ignored.
      */
-    override suspend fun removeDataStreams(studyDeploymentIds: Set<UUID>): Set<UUID>
-    {
-        //close study deployments
+    override suspend fun removeDataStreams(studyDeploymentIds: Set<UUID>): Set<UUID> {
+        // close study deployments
         closeDataStreams(studyDeploymentIds)
 
         val deploymentIds = HashSet<UUID>()
@@ -220,15 +242,16 @@ class CoreDataStreamService(
             if (configOptional.isPresent) {
                 val config = mapToCoreConfig(configOptional.get().config!!)
 
-                val ids = config.expectedDataStreamIds.map { dataStream ->
-                    dataStreamIdRepository.findByStudyDeploymentIdAndDeviceRoleNameAndNameAndNameSpace(
-                        studyDeploymentId = dataStream.studyDeploymentId.stringRepresentation,
-                        deviceRoleName = dataStream.deviceRoleName,
-                        name = dataStream.dataType.name,
-                        nameSpace = dataStream.dataType.namespace
-                    ).get().id
-                }
-                //delete data streams
+                val ids =
+                    config.expectedDataStreamIds.map { dataStream: DataStreamId ->
+                        dataStreamIdRepository.findByStudyDeploymentIdAndDeviceRoleNameAndNameAndNameSpace(
+                            studyDeploymentId = dataStream.studyDeploymentId.stringRepresentation,
+                            deviceRoleName = dataStream.deviceRoleName,
+                            name = dataStream.dataType.name,
+                            nameSpace = dataStream.dataType.namespace,
+                        ).get().id
+                    }
+                // delete data streams
                 dataStreamSequenceRepository.deleteAllByDataStreamIds(ids)
                 dataStreamIdRepository.deleteAllByDataStreamIds(ids)
                 deploymentIds.add(it)
@@ -240,5 +263,4 @@ class CoreDataStreamService(
     private fun mapToCoreConfig(node: JsonNode) = objectMapper.treeToValue(node, DataStreamsConfiguration::class.java)
 
     private fun mapToDataStreamSnapshot(node: JsonNode) = objectMapper.treeToValue(node, DataStreamSnapshot::class.java)
-
 }

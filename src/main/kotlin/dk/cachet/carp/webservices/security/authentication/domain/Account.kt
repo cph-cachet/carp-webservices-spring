@@ -18,24 +18,26 @@ data class Account(
     val fullName: String? get() = "$firstName $lastName".takeIf { it.isNotBlank() }
 
     companion object Factory {
-        fun fromAccountIdentity(identity: AccountIdentity): Account = when (identity) {
-            is EmailAccountIdentity -> {
-                Account( email = identity.emailAddress.address )
-            }
+        fun fromAccountIdentity(identity: AccountIdentity): Account =
+            when (identity) {
+                is EmailAccountIdentity -> {
+                    Account(email = identity.emailAddress.address)
+                }
 
-            is UsernameAccountIdentity -> {
-                Account( username = identity.username.name )
-            }
+                is UsernameAccountIdentity -> {
+                    Account(username = identity.username.name)
+                }
 
-            else -> {
-                throw IllegalArgumentException("Unsupported account identity type: ${identity::class.simpleName}")
+                else -> {
+                    throw IllegalArgumentException("Unsupported account identity type: ${identity::class.simpleName}")
+                }
             }
+    }
+
+    fun getIdentity(): AccountIdentity =
+        when {
+            !email.isNullOrBlank() -> EmailAccountIdentity(email!!)
+            !username.isNullOrBlank() -> UsernameAccountIdentity(username!!)
+            else -> throw IllegalArgumentException("Account should have an email or username.")
         }
-    }
-
-    fun getIdentity(): AccountIdentity = when {
-        !email.isNullOrBlank() -> EmailAccountIdentity(email!!)
-        !username.isNullOrBlank() -> UsernameAccountIdentity(username!!)
-        else -> throw IllegalArgumentException("Account should have an email or username.")
-    }
 }

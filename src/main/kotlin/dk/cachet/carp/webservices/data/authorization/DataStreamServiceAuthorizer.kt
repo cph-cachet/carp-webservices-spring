@@ -9,29 +9,29 @@ import org.springframework.stereotype.Service
 
 @Service
 class DataStreamServiceAuthorizer(
-   private val auth: AuthorizationService
-): ApplicationServiceAuthorizer<DataStreamService, DataStreamServiceRequest<*>>
-{
+    private val auth: AuthorizationService,
+) : ApplicationServiceAuthorizer<DataStreamService, DataStreamServiceRequest<*>> {
     override fun DataStreamServiceRequest<*>.authorize() =
-        when ( this ) {
+        when (this) {
             is DataStreamServiceRequest.OpenDataStreams ->
-                auth.require( Claim.InDeployment( configuration.studyDeploymentId ) )
+                auth.require(Claim.InDeployment(configuration.studyDeploymentId))
             is DataStreamServiceRequest.AppendToDataStreams ->
-                auth.require( Claim.InDeployment( studyDeploymentId ) )
+                auth.require(Claim.InDeployment(studyDeploymentId))
             is DataStreamServiceRequest.GetDataStream ->
-                auth.require( Claim.InDeployment( dataStream.studyDeploymentId ) )
+                auth.require(Claim.InDeployment(dataStream.studyDeploymentId))
             is DataStreamServiceRequest.CloseDataStreams ->
-                auth.require( studyDeploymentIds.map { Claim.ManageDeployment( it ) }.toSet() )
+                auth.require(studyDeploymentIds.map { Claim.ManageDeployment(it) }.toSet())
             is DataStreamServiceRequest.RemoveDataStreams ->
-                auth.require( studyDeploymentIds.map { Claim.ManageDeployment( it ) }.toSet() )
+                auth.require(studyDeploymentIds.map { Claim.ManageDeployment(it) }.toSet())
         }
 
-    override suspend fun DataStreamServiceRequest<*>.changeClaimsOnSuccess(result: Any? ) =
-        when ( this ) {
+    override suspend fun DataStreamServiceRequest<*>.changeClaimsOnSuccess(result: Any?) =
+        when (this) {
             is DataStreamServiceRequest.OpenDataStreams,
             is DataStreamServiceRequest.AppendToDataStreams,
             is DataStreamServiceRequest.GetDataStream,
             is DataStreamServiceRequest.CloseDataStreams,
-            is DataStreamServiceRequest.RemoveDataStreams -> Unit
+            is DataStreamServiceRequest.RemoveDataStreams,
+            -> Unit
         }
 }

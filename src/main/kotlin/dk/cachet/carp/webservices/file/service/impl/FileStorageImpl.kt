@@ -25,12 +25,10 @@ import java.nio.file.StandardCopyOption
  */
 @Service
 class FileStorageImpl(
-        private val fileUtil: FileUtil,
-        private val validationMessages: MessageBase
-): FileStorage
-{
-    companion object
-    {
+    private val fileUtil: FileUtil,
+    private val validationMessages: MessageBase,
+) : FileStorage {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
@@ -41,19 +39,15 @@ class FileStorageImpl(
      * @throws FileStorageException when the file cannot be stored/written into the storage.
      * @return A [file] stored in the storage.
      */
-    override fun store(file: MultipartFile): String
-    {
+    override fun store(file: MultipartFile): String {
         val fileName = generateFileName(file)
         val filePath = resolveFullPathForFilename(fileName)
-        try
-        {
+        try {
             file.inputStream.use { inputStream ->
                 Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING)
             }
             return fileName
-        }
-        catch (ex: IOException)
-        {
+        } catch (ex: IOException) {
             LOGGER.error("Failed to store the file ${file.originalFilename} into file storage. ", ex)
             throw FileStorageException(validationMessages.get("file.store.failed", file.originalFilename!!))
         }
@@ -66,23 +60,20 @@ class FileStorageImpl(
      * @throws FileStorageException when the file does not exist or is not readable.
      * @return The [Resource] of the file requested.
      */
-    override fun getFile(fileName: String): Resource
-    {
-        try
-        {
+    override fun getFile(fileName: String): Resource {
+        try {
             val file = resolveFullPathForFilename(fileName)
             val resource = UrlResource(file.toUri())
-            if (resource.exists() || resource.isReadable)
-            {
+            if (resource.exists() || resource.isReadable) {
                 return resource
             }
 
             throw ResourceNotFoundException(validationMessages.get("file.store.file.exists", fileName))
-        }
-        catch (ex: MalformedURLException)
-        {
+        } catch (ex: MalformedURLException) {
             LOGGER.error("Unable to resolve file location: $fileName", ex)
-            throw BadRequestException(validationMessages.get("file.store.file.resolve", fileName, ex.message.toString()))
+            throw BadRequestException(
+                validationMessages.get("file.store.file.resolve", fileName, ex.message.toString()),
+            )
         }
     }
 
@@ -92,11 +83,9 @@ class FileStorageImpl(
      * @param filename The [filename] to remove.
      * @return true if successful, false if not.
      */
-    override fun deleteFile(filename: String): Boolean
-    {
+    override fun deleteFile(filename: String): Boolean {
         val file = resolveFullPathForFilename(filename)
-        if (Files.exists(file))
-        {
+        if (Files.exists(file)) {
             Files.delete(file)
             return true
         }
@@ -110,14 +99,15 @@ class FileStorageImpl(
      * @throws FileStorageException when the file does not exist or is not readable.
      * @return The [Resource] of the file requested.
      */
-    override fun getResource(fileName: String): Resource
-    {
+    override fun getResource(fileName: String): Resource {
         try {
             val file = resolveFullPathForFilename(fileName)
             return UrlResource(file.toUri())
         } catch (ex: MalformedURLException) {
             LOGGER.error("Unable to resolve file location: $fileName", ex)
-            throw BadRequestException(validationMessages.get("file.store.file.resolve", fileName, ex.message.toString()))
+            throw BadRequestException(
+                validationMessages.get("file.store.file.resolve", fileName, ex.message.toString()),
+            )
         }
     }
 
@@ -127,14 +117,12 @@ class FileStorageImpl(
      * @param file The [file] uploaded as a multipart request.
      * @return The new file name generated.
      */
-    private fun generateFileName(file: MultipartFile): String
-    {
+    private fun generateFileName(file: MultipartFile): String {
         val extension = FilenameUtils.getExtension(file.originalFilename)
         var name = System.currentTimeMillis()
         var filename = "$name.$extension"
 
-        while (Files.exists(resolveFullPathForFilename(filename)))
-        {
+        while (Files.exists(resolveFullPathForFilename(filename))) {
             name = System.currentTimeMillis()
             filename = "$name.$extension"
         }
@@ -147,8 +135,7 @@ class FileStorageImpl(
      * @param fileName The [fileName] of the file.
      * @return The resolved path of the file requested.
      */
-    private fun resolveFullPathForFilename(fileName: String): Path
-    {
-         return fileUtil.resolveFileStorage(fileName)
+    private fun resolveFullPathForFilename(fileName: String): Path {
+        return fileUtil.resolveFileStorage(fileName)
     }
 }

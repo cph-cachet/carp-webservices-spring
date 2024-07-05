@@ -14,10 +14,11 @@ import org.apache.logging.log4j.Logger
  * The Class [StudyServiceRequestSerializer].
  * The [StudyServiceRequestSerializer] implements the serialization logic for [StudyServiceRequest].
  */
-class StudyServiceRequestSerializer(private val validationMessages: MessageBase): JsonSerializer<StudyServiceRequest<*>>()
-{
-    companion object
-    {
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
+class StudyServiceRequestSerializer(
+    private val validationMessages: MessageBase,
+) : JsonSerializer<StudyServiceRequest<*>>() {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
@@ -29,23 +30,24 @@ class StudyServiceRequestSerializer(private val validationMessages: MessageBase)
      * Also, if the [StudyServiceRequest] contains invalid format.
      * @return The serialization of [StudyServiceRequest] object.
      */
-    override fun serialize(studyServiceRequest: StudyServiceRequest<*>?, jsonGenerator: JsonGenerator?, serializers: SerializerProvider?)
-    {
-        if (studyServiceRequest == null)
-        {
+    override fun serialize(
+        studyServiceRequest: StudyServiceRequest<*>?,
+        jsonGenerator: JsonGenerator?,
+        serializers: SerializerProvider?,
+    ) {
+        if (studyServiceRequest == null) {
             LOGGER.error("The StudyServiceRequest is null.")
             throw SerializationException(validationMessages.get("study.service.serialization.empty"))
         }
 
         val serialized: String
-        try
-        {
+        try {
             serialized = JSON.encodeToString(StudyServiceRequest.Serializer, studyServiceRequest)
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The core study request is not valid. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("study.service.serialization.error", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("study.service.serialization.error", ex.message.toString()),
+            )
         }
 
         jsonGenerator!!.writeRawValue(serialized)

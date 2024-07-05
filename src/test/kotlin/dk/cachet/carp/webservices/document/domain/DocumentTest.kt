@@ -8,13 +8,10 @@ import org.springframework.test.util.ReflectionTestUtils
 import kotlin.test.Test
 
 class DocumentTest {
-
     @Nested
     inner class DocumentListenerTest {
-
         @Nested
         inner class DeleteImageResource {
-
             private val fileService: FileService = mockk()
 
             @Test

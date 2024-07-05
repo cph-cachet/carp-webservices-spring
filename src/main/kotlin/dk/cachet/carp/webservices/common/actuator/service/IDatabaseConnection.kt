@@ -5,8 +5,7 @@ import org.springframework.boot.actuate.health.Status
 /**
  * The Interface [IDatabaseConnection].
  */
-interface IDatabaseConnection
-{
+interface IDatabaseConnection {
     /** The [statusHealth] interface. */
     fun statusHealth(): Status
 
