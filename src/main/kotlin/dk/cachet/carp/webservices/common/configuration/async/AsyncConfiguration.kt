@@ -11,6 +11,7 @@ import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import java.util.concurrent.Executor
+import java.util.concurrent.Executors
 import java.util.concurrent.ThreadPoolExecutor
 
 @Configuration
@@ -34,7 +35,7 @@ class AsyncConfiguration : AsyncConfigurer {
         threadPoolTaskExecutor.maxPoolSize = cores * MAX_POOL_SIZE
 
         // Queue is using when all core pool are filled.
-        threadPoolTaskExecutor.setQueueCapacity(cores * QUEUE_CAPACITY)
+        threadPoolTaskExecutor.queueCapacity = cores * QUEUE_CAPACITY
 
         // The thread invokes itself on rejected pool (increasing queue capacity).
         threadPoolTaskExecutor.setRejectedExecutionHandler(ThreadPoolExecutor.CallerRunsPolicy())
@@ -55,6 +56,6 @@ class AsyncConfiguration : AsyncConfigurer {
 
     @Bean
     fun taskScheduler(): TaskScheduler {
-        return ConcurrentTaskScheduler()
+        return ConcurrentTaskScheduler(Executors.newSingleThreadScheduledExecutor())
     }
 }

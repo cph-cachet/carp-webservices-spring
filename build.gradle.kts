@@ -60,6 +60,10 @@ java {
 }
 
 dependencies {
+    // BOM
+    implementation(platform("org.springframework.boot:spring-boot-dependencies:${property("springBootVersion")}"))
+    implementation(platform("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}"))
+
     // KOTLIN
     implementation("org.jetbrains.kotlin:kotlin-stdlib:${property("kotlinVersion")}")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${property("serializationJSONVersion")}")
@@ -131,16 +135,14 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql")
 
     // FLYWAY
-    implementation("org.flywaydb:flyway-core")
+    implementation("org.flywaydb:flyway-core:${property("flywayVersion")}")
+    implementation("org.flywaydb:flyway-database-postgresql:${property("flywayVersion")}")
 
     // S3
     implementation("com.amazonaws:aws-java-sdk-s3:${property("awsSDKVersion")}")
 
     // MICROMETER
     runtimeOnly("io.micrometer:micrometer-registry-prometheus")
-
-    // PASSAY - for password validation
-    implementation("org.passay:passay:${property("passayVersion")}")
 
     // GOOGLE Core Libraries
     implementation("com.google.guava:guava:${property("guavaVersion")}")
@@ -171,12 +173,6 @@ dependencies {
     }
 
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
-}
-
-dependencyManagement {
-    imports {
-        mavenBom("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}")
-    }
 }
 
 detekt {
