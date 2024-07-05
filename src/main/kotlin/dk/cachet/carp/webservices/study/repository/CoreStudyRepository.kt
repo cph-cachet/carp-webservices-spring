@@ -1,10 +1,9 @@
 package dk.cachet.carp.webservices.study.repository
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
 import dk.cachet.carp.common.application.UUID
+import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.deployments.application.users.StudyInvitation
-import dk.cachet.carp.studies.domain.Study
+import dk.cachet.carp.studies.domain.Study as CoreStudy
 import dk.cachet.carp.studies.domain.StudyRepository
 import dk.cachet.carp.studies.domain.StudySnapshot
 import dk.cachet.carp.webservices.collection.repository.CollectionRepository
@@ -14,8 +13,10 @@ import dk.cachet.carp.webservices.dataPoint.repository.DataPointRepository
 import dk.cachet.carp.webservices.document.repository.DocumentRepository
 import dk.cachet.carp.webservices.export.repository.ExportRepository
 import dk.cachet.carp.webservices.file.repository.FileRepository
+import dk.cachet.carp.webservices.study.domain.Study
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.encodeToString
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.stereotype.Service
@@ -34,21 +35,20 @@ class CoreStudyRepository(
     private val documentRepository: DocumentRepository,
     private val exportRepository: ExportRepository,
     private val filesRepository: FileRepository,
-    private val objectMapper: ObjectMapper,
     private val validationMessages: MessageBase,
 ) : StudyRepository {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
-    override suspend fun add(study: Study) =
+    override suspend fun add(study: CoreStudy) =
         withContext(Dispatchers.IO) {
             check(studyRepository.getByStudyId(study.id.stringRepresentation) == null) {
                 LOGGER.warn("Study already exists, id: ${study.id.stringRepresentation}")
                 validationMessages.get("study.core.add.exists", study.id.stringRepresentation)
             }
 
-            val studyToSave = dk.cachet.carp.webservices.study.domain.Study()
+            val studyToSave = Study()
 
             study.invitation =
                 StudyInvitation(
@@ -57,13 +57,13 @@ class CoreStudyRepository(
                     study.id.stringRepresentation,
                 )
 
-            studyToSave.snapshot = objectMapper.valueToTree(study.getSnapshot())
+            studyToSave.snapshot = JSON.encodeToString<StudySnapshot>(study.getSnapshot())
             studyRepository.save(studyToSave)
 
             LOGGER.info("Study saved, id: ${study.id.stringRepresentation}")
         }
 
-    override suspend fun getById(studyId: UUID): Study? =
+    override suspend fun getById(studyId: UUID): CoreStudy? =
         withContext(Dispatchers.IO) {
             val study = studyRepository.getByStudyId(studyId.stringRepresentation)
 
@@ -75,7 +75,7 @@ class CoreStudyRepository(
             convertStudySnapshotNodeToStudy(study.snapshot!!)
         }
 
-    override suspend fun getForOwner(ownerId: UUID): List<Study> =
+    override suspend fun getForOwner(ownerId: UUID): List<CoreStudy> =
         withContext(Dispatchers.IO) {
             val studies = studyRepository.findAllByOwnerId(ownerId.stringRepresentation)
             studies.map { convertStudySnapshotNodeToStudy(it.snapshot!!) }.toList()
@@ -106,27 +106,22 @@ class CoreStudyRepository(
             true
         }
 
-    override suspend fun update(study: Study) =
+    override suspend fun update(study: CoreStudy) =
         withContext(Dispatchers.IO) {
-            val existingStudy = studyRepository.getByStudyId(study.id.stringRepresentation)
+            val existingStudy = getWSStudyById(study.id)
 
-            checkNotNull(existingStudy) {
-                LOGGER.warn("Study is not found, id: ${study.id.stringRepresentation}")
-                validationMessages.get("study.core.update.study.not_found", study.id.stringRepresentation)
-            }
-
-            existingStudy.snapshot = objectMapper.valueToTree(study.getSnapshot())
+            existingStudy.snapshot = JSON.encodeToString(study.getSnapshot())
             studyRepository.save(existingStudy)
 
             LOGGER.info("Study updated, id: ${study.id.stringRepresentation}")
         }
 
-    fun findAllByStudyIds(studyIds: List<UUID>): List<Study> =
+    fun findAllByStudyIds(studyIds: List<UUID>): List<CoreStudy> =
         studyRepository.findAllByStudyIds(studyIds.map { it.stringRepresentation })
             .map { convertStudySnapshotNodeToStudy(it.snapshot!!) }
             .toList()
 
-    suspend fun getWSStudyById(id: UUID): dk.cachet.carp.webservices.study.domain.Study =
+    suspend fun getWSStudyById(id: UUID): Study =
         withContext(Dispatchers.IO) {
             val study = studyRepository.getByStudyId(id.stringRepresentation)
 
@@ -145,11 +140,11 @@ class CoreStudyRepository(
 
     suspend fun getStudySnapshotById(id: UUID): StudySnapshot {
         val study = getWSStudyById(id)
-        return objectMapper.treeToValue(study.snapshot, StudySnapshot::class.java)
+        return JSON.decodeFromString(StudySnapshot.serializer(), study.snapshot.toString())
     }
 
-    fun convertStudySnapshotNodeToStudy(node: JsonNode): Study {
-        val snapshot = objectMapper.treeToValue(node, StudySnapshot::class.java)
-        return Study.fromSnapshot(snapshot)
+    fun convertStudySnapshotNodeToStudy(node: String): CoreStudy {
+        val snapshot = JSON.decodeFromString<StudySnapshot>(node)
+        return CoreStudy.fromSnapshot(snapshot)
     }
 }

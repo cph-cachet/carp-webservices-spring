@@ -1,6 +1,5 @@
 package dk.cachet.carp.webservices.consent.service.impl
 
-import com.fasterxml.jackson.databind.JsonNode
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.studies.application.users.ParticipantGroupStatus
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
@@ -65,7 +64,7 @@ class ConsentDocumentServiceImpl(
 
     override fun create(
         deploymentId: UUID,
-        data: JsonNode?,
+        data: String?,
     ): ConsentDocument {
         val saved =
             consentDocumentRepository.save(

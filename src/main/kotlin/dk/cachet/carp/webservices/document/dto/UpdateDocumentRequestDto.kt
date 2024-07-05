@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull
 
 /**
  * The Data Class [UpdateDocumentRequestDto].
- * The [UpdateDocumentRequestDto] represents an document request with the given [name] and [data].
+ * The [UpdateDocumentRequestDto] represents a document request with the given [name] and [data].
  */
 data class UpdateDocumentRequestDto(
     /** The [name] of the document. */

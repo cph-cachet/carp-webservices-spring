@@ -1,12 +1,12 @@
 package dk.cachet.carp.webservices.study.repository
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
 import dk.cachet.carp.common.application.UUID
+import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.studies.domain.users.ParticipantRepository
-import dk.cachet.carp.studies.domain.users.Recruitment
+import dk.cachet.carp.studies.domain.users.Recruitment as CoreRecruitment
 import dk.cachet.carp.studies.domain.users.RecruitmentSnapshot
 import dk.cachet.carp.webservices.common.exception.responses.ResourceNotFoundException
+import dk.cachet.carp.webservices.study.domain.Recruitment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.apache.logging.log4j.LogManager
@@ -17,30 +17,29 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 @Transactional
 class CoreParticipantRepository(
-    private val objectMapper: ObjectMapper,
     private val recruitmentRepository: RecruitmentRepository,
 ) : ParticipantRepository {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
-    override suspend fun addRecruitment(recruitment: Recruitment) =
+    override suspend fun addRecruitment(recruitment: CoreRecruitment) =
         withContext(Dispatchers.IO) {
             val studyId = recruitment.studyId.stringRepresentation
             val existingRecruitment = recruitmentRepository.findRecruitmentByStudyId(studyId)
 
             check(existingRecruitment == null) { "A recruitment already exists for the study with id $studyId." }
 
-            val snapshotJsonNode = objectMapper.valueToTree<JsonNode>(recruitment.getSnapshot())
+            val snapshotJsonNode = JSON.encodeToString(RecruitmentSnapshot.serializer(), recruitment.getSnapshot())
             val newRecruitment =
-                dk.cachet.carp.webservices.study.domain.Recruitment().apply {
+                Recruitment().apply {
                     snapshot = snapshotJsonNode
                 }
             val saved = recruitmentRepository.save(newRecruitment)
             LOGGER.info("New recruitment with id ${saved.id} is saved for study with id $studyId.")
         }
 
-    override suspend fun getRecruitment(studyId: UUID): Recruitment? =
+    override suspend fun getRecruitment(studyId: UUID): CoreRecruitment? =
         withContext(Dispatchers.IO) {
             val existingRecruitment = recruitmentRepository.findRecruitmentByStudyId(studyId.stringRepresentation)
 
@@ -60,21 +59,21 @@ class CoreParticipantRepository(
             true
         }
 
-    override suspend fun updateRecruitment(recruitment: Recruitment) =
+    override suspend fun updateRecruitment(recruitment: CoreRecruitment) =
         withContext(Dispatchers.IO) {
             val studyId = recruitment.studyId.stringRepresentation
             val recruitmentFound =
                 recruitmentRepository.findRecruitmentByStudyId(studyId)
                     ?: throw ResourceNotFoundException("Recruitment with studyId $studyId is not found.")
 
-            val newSnapshotNode = objectMapper.valueToTree<JsonNode>(recruitment.getSnapshot())
+            val newSnapshotNode = JSON.encodeToString(RecruitmentSnapshot.serializer(), recruitment.getSnapshot())
             recruitmentFound.snapshot = newSnapshotNode
             recruitmentRepository.save(recruitmentFound)
             LOGGER.info("Recruitment with studyId $studyId is updated.")
         }
 
-    private fun mapWSRecruitmentToCore(recruitment: dk.cachet.carp.webservices.study.domain.Recruitment): Recruitment {
-        val snapshot = objectMapper.treeToValue(recruitment.snapshot!!, RecruitmentSnapshot::class.java)
-        return Recruitment.fromSnapshot(snapshot)
+    private fun mapWSRecruitmentToCore(recruitment: Recruitment): CoreRecruitment {
+        val snapshot = JSON.decodeFromString(RecruitmentSnapshot.serializer(), recruitment.snapshot!!)
+        return CoreRecruitment.fromSnapshot(snapshot)
     }
 }

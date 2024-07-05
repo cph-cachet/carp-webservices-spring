@@ -56,8 +56,8 @@ class ObjectMapperConfig(validationMessages: MessageBase) : SimpleModule() {
     init
     {
         // Study
-        this.addSerializer(StudyServiceRequest::class.java, StudyServiceRequestSerializer(validationMessages))
-        this.addDeserializer(StudyServiceRequest::class.java, StudyServiceRequestDeserializer(validationMessages))
+//        this.addSerializer(StudyServiceRequest::class.java, StudyServiceRequestSerializer(validationMessages))
+//        this.addDeserializer(StudyServiceRequest::class.java, StudyServiceRequestDeserializer(validationMessages))
         // Protocol
         this.addSerializer(ProtocolServiceRequest::class.java, ProtocolServiceRequestSerializer(validationMessages))
         this.addDeserializer(ProtocolServiceRequest::class.java, ProtocolServiceRequestDeserializer(validationMessages))
@@ -92,20 +92,20 @@ class ObjectMapperConfig(validationMessages: MessageBase) : SimpleModule() {
         this.addSerializer(AccountIdentity::class.java, AccountIdentitySerializer(validationMessages))
         this.addDeserializer(AccountIdentity::class.java, AccountIdentityDeserializer(validationMessages))
         // StudyStatus
-        this.addSerializer(StudyStatus::class.java, StudyStatusSerializer(validationMessages))
-        this.addDeserializer(StudyStatus::class.java, StudyStatusDeserializer(validationMessages))
+//        this.addSerializer(StudyStatus::class.java, StudyStatusSerializer(validationMessages))
+//        this.addDeserializer(StudyStatus::class.java, StudyStatusDeserializer(validationMessages))
         // StudySnapshot
-        this.addSerializer(StudySnapshot::class.java, StudySnapshotSerializer(validationMessages))
-        this.addDeserializer(StudySnapshot::class.java, StudySnapshotDeserializer(validationMessages))
+//        this.addSerializer(StudySnapshot::class.java, StudySnapshotSerializer(validationMessages))
+//        this.addDeserializer(StudySnapshot::class.java, StudySnapshotDeserializer(validationMessages))
         // UUID
-        this.addSerializer(UUID::class.java, UUIDSerializer(validationMessages))
-        this.addDeserializer(UUID::class.java, UUIDDeserializer(validationMessages))
+//        this.addSerializer(UUID::class.java, UUIDSerializer(validationMessages))
+//        this.addDeserializer(UUID::class.java, UUIDDeserializer(validationMessages))
         // StudyDetails
         this.addSerializer(StudyDetails::class.java, StudyDetailsSerializer(validationMessages))
         this.addDeserializer(StudyDetails::class.java, StudyDetailsDeserializer(validationMessages))
         // ParticipantGroupStatus
-        this.addSerializer(ParticipantGroupStatus::class.java, ParticipantGroupStatusSerializer(validationMessages))
-        this.addDeserializer(ParticipantGroupStatus::class.java, ParticipantGroupStatusDeserializer(validationMessages))
+//        this.addSerializer(ParticipantGroupStatus::class.java, ParticipantGroupStatusSerializer(validationMessages))
+//        this.addDeserializer(ParticipantGroupStatus::class.java, ParticipantGroupStatusDeserializer(validationMessages))
         // ProtocolFactoryServiceRequest
         this.addSerializer(
             ProtocolFactoryServiceRequest::class.java,

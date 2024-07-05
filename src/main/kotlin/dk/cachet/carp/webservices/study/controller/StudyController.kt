@@ -2,6 +2,7 @@ package dk.cachet.carp.webservices.study.controller
 
 import dk.cachet.carp.common.application.EmailAddress
 import dk.cachet.carp.common.application.UUID
+import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.studies.infrastructure.RecruitmentServiceRequest
 import dk.cachet.carp.studies.infrastructure.StudyServiceRequest
 import dk.cachet.carp.webservices.account.service.AccountService
@@ -107,8 +108,9 @@ class StudyController(
     @PostMapping(value = [STUDY_SERVICE])
     @Operation(tags = ["study/studies.json"])
     suspend fun studies(
-        @RequestBody request: StudyServiceRequest<*>,
+        @RequestBody httpMessage: String,
     ): ResponseEntity<*> {
+        val request = JSON.decodeFromString(StudyServiceRequest.Serializer, httpMessage)
         LOGGER.info("Start POST: $STUDY_SERVICE -> ${ request::class.simpleName }")
         return studyService.core.invoke(request).let { ResponseEntity.ok(it) }
     }

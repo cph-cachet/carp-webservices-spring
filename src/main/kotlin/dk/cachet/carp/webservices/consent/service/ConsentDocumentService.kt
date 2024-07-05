@@ -1,6 +1,5 @@
 package dk.cachet.carp.webservices.consent.service
 
-import com.fasterxml.jackson.databind.JsonNode
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.webservices.consent.domain.ConsentDocument
 
@@ -18,6 +17,6 @@ interface ConsentDocumentService {
 
     fun create(
         deploymentId: UUID,
-        data: JsonNode?,
+        data: String?,
     ): ConsentDocument
 }

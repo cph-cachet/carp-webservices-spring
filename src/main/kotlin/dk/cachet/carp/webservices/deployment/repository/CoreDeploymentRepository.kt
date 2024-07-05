@@ -1,7 +1,7 @@
 package dk.cachet.carp.webservices.deployment.repository
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import dk.cachet.carp.common.application.UUID
+import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.deployments.domain.DeploymentRepository
 import dk.cachet.carp.deployments.domain.StudyDeploymentSnapshot
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
@@ -18,7 +18,6 @@ import dk.cachet.carp.deployments.domain.StudyDeployment as CoreStudyDeployment
 @Transactional
 class CoreDeploymentRepository(
     private val studyDeploymentRepository: StudyDeploymentRepository,
-    private val objectMapper: ObjectMapper,
     private val validationMessages: MessageBase,
 ) : DeploymentRepository {
     companion object {
@@ -40,7 +39,7 @@ class CoreDeploymentRepository(
             val studyDeploymentToSave = StudyDeployment()
 
             val snapshot = StudyDeploymentSnapshot.fromDeployment(studyDeployment, VERSION)
-            studyDeploymentToSave.snapshot = objectMapper.valueToTree(snapshot)
+            studyDeploymentToSave.snapshot = JSON.encodeToString(StudyDeploymentSnapshot.serializer(), snapshot)
 
             studyDeploymentRepository.save(studyDeploymentToSave)
             LOGGER.info("Deployment saved, id: ${studyDeployment.id.stringRepresentation}")
@@ -49,7 +48,7 @@ class CoreDeploymentRepository(
     override suspend fun getStudyDeploymentBy(id: UUID) =
         withContext(Dispatchers.IO) {
             val result = getWSDeploymentById(id) ?: return@withContext null
-            val snapshot = objectMapper.treeToValue(result.snapshot, StudyDeploymentSnapshot::class.java)
+            val snapshot = JSON.decodeFromString<StudyDeploymentSnapshot>(result.snapshot!!)
             CoreStudyDeployment.fromSnapshot(snapshot)
         }
 
@@ -84,7 +83,7 @@ class CoreDeploymentRepository(
             }
 
             val snapshot = StudyDeploymentSnapshot.fromDeployment(studyDeployment, VERSION)
-            stored.snapshot = objectMapper.valueToTree(snapshot)
+            stored.snapshot = JSON.encodeToString(StudyDeploymentSnapshot.serializer(), snapshot)
 
             studyDeploymentRepository.save(stored)
             LOGGER.info("Deployment updated, id: ${studyDeployment.id.stringRepresentation}")
@@ -100,7 +99,7 @@ class CoreDeploymentRepository(
     }
 
     private fun mapWSDeploymentToCore(deployment: StudyDeployment): CoreStudyDeployment {
-        val snapshot = objectMapper.treeToValue(deployment.snapshot, StudyDeploymentSnapshot::class.java)
+        val snapshot = JSON.decodeFromString<StudyDeploymentSnapshot>(deployment.snapshot!!)
         return CoreStudyDeployment.fromSnapshot(snapshot)
     }
 }
