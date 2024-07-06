@@ -3,7 +3,6 @@ package dk.cachet.carp.webservices.study.repository
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.deployments.application.users.StudyInvitation
-import dk.cachet.carp.studies.domain.Study as CoreStudy
 import dk.cachet.carp.studies.domain.StudyRepository
 import dk.cachet.carp.studies.domain.StudySnapshot
 import dk.cachet.carp.webservices.collection.repository.CollectionRepository
@@ -21,6 +20,7 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import dk.cachet.carp.studies.domain.Study as CoreStudy
 
 @Service
 @Transactional

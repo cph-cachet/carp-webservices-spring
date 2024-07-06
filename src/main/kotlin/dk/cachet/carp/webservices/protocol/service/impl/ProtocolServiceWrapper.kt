@@ -1,7 +1,7 @@
 package dk.cachet.carp.webservices.protocol.service.impl
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import dk.cachet.carp.common.application.UUID
+import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.protocols.application.StudyProtocolSnapshot
 import dk.cachet.carp.webservices.account.service.AccountService
 import dk.cachet.carp.webservices.common.services.CoreServiceContainer
@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service
 class ProtocolServiceWrapper(
     private val accountService: AccountService,
     private val protocolRepository: ProtocolRepository,
-    private val objectMapper: ObjectMapper,
     services: CoreServiceContainer,
 ) : ProtocolService {
     final override val core = services.protocolService
@@ -39,7 +38,12 @@ class ProtocolServiceWrapper(
 
             protocolRepository.findAllByOwnerId(account.id!!)
                 .filter { it.snapshot != null }
-                .groupBy { it.snapshot?.get("id").toString() }
+                .groupBy {
+                    JSON.decodeFromString(
+                        StudyProtocolSnapshot.serializer(),
+                        it.snapshot!!.toString(),
+                    ).id.toString()
+                }
                 .map { (_, versions) ->
                     val sorted = versions.sortedBy { it.createdAt }
                     createProtocolOverview(sorted, account)
@@ -56,8 +60,7 @@ class ProtocolServiceWrapper(
         versions: List<Protocol>,
         account: Account? = null,
     ): ProtocolOverview {
-        val snapshot = objectMapper.treeToValue(versions.last().snapshot, StudyProtocolSnapshot::class.java)
-
+        val snapshot = decodeSnapshot(versions.last().snapshot!!)
         val owner = account ?: accountService.findByUUID(snapshot.ownerId)
 
         return ProtocolOverview(
@@ -67,5 +70,9 @@ class ProtocolServiceWrapper(
             versions.last().versionTag,
             snapshot,
         )
+    }
+
+    public fun decodeSnapshot(snapshot: String): StudyProtocolSnapshot {
+        return JSON.decodeFromString(StudyProtocolSnapshot.serializer(), snapshot)
     }
 }

@@ -1,8 +1,8 @@
 package dk.cachet.carp.webservices.protocol.repository
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
 import dk.cachet.carp.common.application.UUID
+import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.protocols.application.ProtocolVersion
 import dk.cachet.carp.protocols.application.StudyProtocolSnapshot
 import dk.cachet.carp.protocols.domain.*
@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service
 @Service
 class CoreProtocolRepository(
     private val protocolRepository: ProtocolRepository,
-    private val objectMapper: ObjectMapper,
     private val validationMessages: MessageBase,
 ) : StudyProtocolRepository {
     companion object {
@@ -116,9 +115,9 @@ class CoreProtocolRepository(
         }
 
     /**
-     * Returns all stored versions for the [StudyProtocol] with the specified [protocol].
+     * Returns all stored versions for the [StudyProtocol] with the specified [Protocol].
      *
-     * @throws IllegalArgumentException when a protocol with the specified [protocol] does not exist.
+     * @throws IllegalArgumentException when a protocol with the specified [Protocol] does not exist.
      */
     override suspend fun getVersionHistoryFor(id: UUID): List<ProtocolVersion> =
         withContext(Dispatchers.IO) {
@@ -213,11 +212,11 @@ class CoreProtocolRepository(
     /**
      * The [convertJsonNodeToStudyProtocol] function converts a [JsonNode] to a [StudyProtocol].
      *
-     * @param jsonNode The [jsonNode] to convert to a study protocol.
+     * @param node The [String] to convert to a study protocol.
      * @return A [StudyProtocol] object containing the protocol.
      */
-    private fun convertJsonNodeToStudyProtocol(jsonNode: JsonNode): StudyProtocol {
-        val snapshot = objectMapper.treeToValue(jsonNode, StudyProtocolSnapshot::class.java)
+    private fun convertJsonNodeToStudyProtocol(node: String): StudyProtocol {
+        val snapshot = JSON.decodeFromString(StudyProtocolSnapshot.serializer(), node)
         return StudyProtocol.fromSnapshot(snapshot)
     }
 
@@ -237,7 +236,7 @@ class CoreProtocolRepository(
         wsProtocol.versionTag = version.tag
 
         val snapshot = StudyProtocolSnapshot.fromProtocol(protocol, VERSION)
-        wsProtocol.snapshot = objectMapper.valueToTree(snapshot)
+        wsProtocol.snapshot = JSON.encodeToString(StudyProtocolSnapshot.serializer(), snapshot)
 
         return wsProtocol
     }

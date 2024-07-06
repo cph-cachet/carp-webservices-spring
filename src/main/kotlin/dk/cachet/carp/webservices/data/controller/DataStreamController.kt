@@ -1,5 +1,6 @@
 package dk.cachet.carp.webservices.data.controller
 
+import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.data.infrastructure.DataStreamServiceRequest
 import dk.cachet.carp.webservices.data.service.DataStreamService
 import io.swagger.v3.oas.annotations.Operation
@@ -26,8 +27,9 @@ class DataStreamController(
     @PostMapping(value = [DATA_STREAM_SERVICE])
     @Operation(tags = ["dataStream/getDataStream.json"])
     suspend fun invoke(
-        @RequestBody request: DataStreamServiceRequest<*>,
+        @RequestBody httpMessage: String,
     ): ResponseEntity<Any> {
+        val request = JSON.decodeFromString(DataStreamServiceRequest.Serializer, httpMessage)
         LOGGER.info("Start POST: $DATA_STREAM_SERVICE -> ${ request::class.simpleName }")
         return dataStreamService.core.invoke(request).let { ResponseEntity.ok(it) }
     }

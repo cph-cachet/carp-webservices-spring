@@ -35,12 +35,13 @@ class CoreParticipationRepository(
         withContext(Dispatchers.IO) {
             val group =
                 participantGroupRepository.findByStudyDeploymentId(
-                    studyDeploymentId.stringRepresentation
+                    studyDeploymentId.stringRepresentation,
                 )
 
             checkNotNull(group) {
                 LOGGER.warn(
-                    "Participant group was not found for deployment with id: ${studyDeploymentId.stringRepresentation}")
+                    "Participant group was not found for deployment with id: ${studyDeploymentId.stringRepresentation}",
+                )
                 validationMessage.get("participantGroup.notFound", studyDeploymentId.stringRepresentation)
                 return@withContext null
             }
@@ -87,7 +88,7 @@ class CoreParticipationRepository(
                 val savedGroup = participantGroupRepository.save(newParticipantGroup)
                 LOGGER.info(
                     "New participant group with id: ${savedGroup.id} " +
-                            "saved for deployment with id: ${group.studyDeploymentId.stringRepresentation}",
+                        "saved for deployment with id: ${group.studyDeploymentId.stringRepresentation}",
                 )
                 return@withContext null
             }

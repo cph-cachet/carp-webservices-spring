@@ -1,13 +1,19 @@
 package dk.cachet.carp.webservices.common.serialisers
 
+import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.datatype.jsr310.deser.InstantDeserializer
+import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.common.application.devices.DeviceRegistration
 import dk.cachet.carp.common.application.users.AccountIdentity
+import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.data.application.DataStreamBatch
 import dk.cachet.carp.data.application.DataStreamsConfiguration
 import dk.cachet.carp.data.application.Measurement
@@ -26,12 +32,8 @@ import dk.cachet.carp.protocols.application.StudyProtocolSnapshot
 import dk.cachet.carp.protocols.infrastructure.ProtocolFactoryServiceRequest
 import dk.cachet.carp.protocols.infrastructure.ProtocolServiceRequest
 import dk.cachet.carp.studies.application.StudyDetails
-import dk.cachet.carp.studies.application.StudyStatus
-import dk.cachet.carp.studies.application.users.ParticipantGroupStatus
-import dk.cachet.carp.studies.domain.StudySnapshot
 import dk.cachet.carp.studies.domain.users.RecruitmentSnapshot
 import dk.cachet.carp.studies.infrastructure.RecruitmentServiceRequest
-import dk.cachet.carp.studies.infrastructure.StudyServiceRequest
 import dk.cachet.carp.webservices.account.serdes.AccountIdentityDeserializer
 import dk.cachet.carp.webservices.account.serdes.AccountIdentitySerializer
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
@@ -41,6 +43,9 @@ import dk.cachet.carp.webservices.data.serdes.*
 import dk.cachet.carp.webservices.deployment.serdes.*
 import dk.cachet.carp.webservices.protocol.serdes.*
 import dk.cachet.carp.webservices.study.serdes.*
+import kotlinx.datetime.Instant
+import kotlinx.datetime.toKotlinInstant
+import kotlinx.serialization.encodeToString
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
@@ -98,14 +103,15 @@ class ObjectMapperConfig(validationMessages: MessageBase) : SimpleModule() {
 //        this.addSerializer(StudySnapshot::class.java, StudySnapshotSerializer(validationMessages))
 //        this.addDeserializer(StudySnapshot::class.java, StudySnapshotDeserializer(validationMessages))
         // UUID
-//        this.addSerializer(UUID::class.java, UUIDSerializer(validationMessages))
-//        this.addDeserializer(UUID::class.java, UUIDDeserializer(validationMessages))
+        this.addSerializer(UUID::class.java, UUIDSerializer(validationMessages))
+        this.addDeserializer(UUID::class.java, UUIDDeserializer(validationMessages))
         // StudyDetails
         this.addSerializer(StudyDetails::class.java, StudyDetailsSerializer(validationMessages))
         this.addDeserializer(StudyDetails::class.java, StudyDetailsDeserializer(validationMessages))
         // ParticipantGroupStatus
 //        this.addSerializer(ParticipantGroupStatus::class.java, ParticipantGroupStatusSerializer(validationMessages))
-//        this.addDeserializer(ParticipantGroupStatus::class.java, ParticipantGroupStatusDeserializer(validationMessages))
+//        this.addDeserializer(ParticipantGroupStatus::class.java,
+//        ParticipantGroupStatusDeserializer(validationMessages))
         // ProtocolFactoryServiceRequest
         this.addSerializer(
             ProtocolFactoryServiceRequest::class.java,
@@ -178,6 +184,18 @@ class ObjectMapperConfig(validationMessages: MessageBase) : SimpleModule() {
         // DataStreamBatch
         this.addSerializer(DataStreamBatch::class.java, DataStreamBatchSerializer(validationMessages))
         this.addDeserializer(DataStreamBatch::class.java, DataStreamBatchDeserializer(validationMessages))
+
+
+        this.addSerializer(java.time.Instant::class.java, InstantSerializer.INSTANCE)
+        this.addDeserializer(java.time.Instant::class.java, InstantDeserializer.INSTANT)
+    }
+
+    class TimeSeriliazer : JsonSerializer<java.time.Instant>() {
+
+        override fun serialize(p0: java.time.Instant?, p1: JsonGenerator?, p2: SerializerProvider?) {
+            val pk = p0?.toKotlinInstant()
+            val ret = JSON.encodeToString<Instant>(pk!!)
+        }
     }
 
     /**
@@ -194,7 +212,7 @@ class ObjectMapperConfig(validationMessages: MessageBase) : SimpleModule() {
 
         objectMapper.registerModule(this)
 
-        objectMapper.registerModule(JavaTimeModule())
+//        objectMapper.registerModule(JavaTimeModule())
         objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
 
         return objectMapper

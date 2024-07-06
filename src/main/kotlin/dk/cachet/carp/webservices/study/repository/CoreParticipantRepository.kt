@@ -3,7 +3,6 @@ package dk.cachet.carp.webservices.study.repository
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.studies.domain.users.ParticipantRepository
-import dk.cachet.carp.studies.domain.users.Recruitment as CoreRecruitment
 import dk.cachet.carp.studies.domain.users.RecruitmentSnapshot
 import dk.cachet.carp.webservices.common.exception.responses.ResourceNotFoundException
 import dk.cachet.carp.webservices.study.domain.Recruitment
@@ -13,6 +12,7 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import dk.cachet.carp.studies.domain.users.Recruitment as CoreRecruitment
 
 @Service
 @Transactional
