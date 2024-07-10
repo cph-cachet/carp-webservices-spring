@@ -1,19 +1,14 @@
 package dk.cachet.carp.webservices.common.serialisers
 
-import com.fasterxml.jackson.core.JsonGenerator
-import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.module.SimpleModule
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.datatype.jsr310.deser.InstantDeserializer
 import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.common.application.devices.DeviceRegistration
 import dk.cachet.carp.common.application.users.AccountIdentity
-import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.data.application.DataStreamBatch
 import dk.cachet.carp.data.application.DataStreamsConfiguration
 import dk.cachet.carp.data.application.Measurement
@@ -44,8 +39,6 @@ import dk.cachet.carp.webservices.deployment.serdes.*
 import dk.cachet.carp.webservices.protocol.serdes.*
 import dk.cachet.carp.webservices.study.serdes.*
 import kotlinx.datetime.Instant
-import kotlinx.datetime.toKotlinInstant
-import kotlinx.serialization.encodeToString
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
@@ -185,17 +178,8 @@ class ObjectMapperConfig(validationMessages: MessageBase) : SimpleModule() {
         this.addSerializer(DataStreamBatch::class.java, DataStreamBatchSerializer(validationMessages))
         this.addDeserializer(DataStreamBatch::class.java, DataStreamBatchDeserializer(validationMessages))
 
-
         this.addSerializer(java.time.Instant::class.java, InstantSerializer.INSTANCE)
         this.addDeserializer(java.time.Instant::class.java, InstantDeserializer.INSTANT)
-    }
-
-    class TimeSeriliazer : JsonSerializer<java.time.Instant>() {
-
-        override fun serialize(p0: java.time.Instant?, p1: JsonGenerator?, p2: SerializerProvider?) {
-            val pk = p0?.toKotlinInstant()
-            val ret = JSON.encodeToString<Instant>(pk!!)
-        }
     }
 
     /**
