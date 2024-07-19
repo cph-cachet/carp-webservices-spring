@@ -57,7 +57,7 @@ class ExportCommandFactory(
                 Clock.System.now().toJavaInstant().truncatedTo(ChronoUnit.SECONDS).toString(),
             )
 
-    val exportType =
+        val exportType =
             if (deploymentIds.isNullOrEmpty()) {
                 ExportType.STUDY_DATA
             } else {
