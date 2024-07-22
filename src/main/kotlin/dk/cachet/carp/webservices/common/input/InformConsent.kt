@@ -7,7 +7,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-@SerialName("InformedConsent")
+@SerialName(WSInputDataTypes.IC_TYPE_NAME)
 data class InformConsent(
     // / The time this informed consent was signed.
     val signedTimestamp: Instant = Clock.System.now(),
