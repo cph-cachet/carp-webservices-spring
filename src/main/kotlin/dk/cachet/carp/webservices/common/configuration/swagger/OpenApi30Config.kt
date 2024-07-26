@@ -9,7 +9,7 @@ import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.security.SecurityRequirement
 import io.swagger.v3.oas.models.security.SecurityScheme
 import io.swagger.v3.oas.models.servers.Server
-import org.springdoc.core.customizers.OpenApiCustomiser
+import org.springdoc.core.customizers.OpenApiCustomizer
 import org.springframework.beans.BeanUtils
 import org.springframework.beans.BeanWrapper
 import org.springframework.beans.BeanWrapperImpl
@@ -71,8 +71,8 @@ class OpenApi30Config(
     }
 
     @Bean
-    fun openApiCustomiser(loadedOperations: Map<String, Operation>): OpenApiCustomiser? {
-        return OpenApiCustomiser { openAPI: OpenAPI ->
+    fun openApiCustomizer(loadedOperations: Map<String, Operation>): OpenApiCustomizer? {
+        return OpenApiCustomizer { openAPI: OpenAPI ->
             for (path in openAPI.paths.values.stream()) {
                 val operations = arrayListOf(path.post, path.get, path.put, path.delete)
                 for (operation in operations) {

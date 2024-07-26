@@ -150,12 +150,6 @@ com:
             - path: $.collection_owner
               prefix: collection_owner_
 
-springdoc:
-  swagger-ui:
-    disable-swagger-default-url: true
-    url: /${environment.subfolder}/v3/api-docs
-    config-url: /${environment.subfolder}/v3/api-docs/swagger-config
-
 rabbit:
   data-point:
     processing:

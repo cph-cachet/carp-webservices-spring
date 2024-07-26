@@ -115,11 +115,7 @@ dependencies {
     implementation("org.springframework.cloud:spring-cloud-starter-bootstrap:${property("springCloudStarterVersion")}")
 
     // SPRINGDOC
-    implementation("org.springdoc:springdoc-openapi:${property("springdocVersion")}")
-    implementation("org.springdoc:springdoc-openapi-kotlin:${property("springdocVersion")}")
-    implementation("org.springdoc:springdoc-openapi-ui:${property("springdocVersion")}")
-    implementation("org.springdoc:springdoc-openapi-security:${property("springdocVersion")}")
-    implementation("io.swagger.core.v3:swagger-annotations:${property("swaggerCoreVersion")}")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
 
     // RSQL
     implementation("cz.jirutka.rsql:rsql-parser:${property("rsqlParserVersion")}")
