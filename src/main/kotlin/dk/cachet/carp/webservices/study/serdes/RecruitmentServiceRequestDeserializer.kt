@@ -4,10 +4,10 @@ import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.TreeNode
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
-import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.studies.infrastructure.RecruitmentServiceRequest
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.exception.serialization.SerializationException
+import dk.cachet.carp.webservices.common.input.WSInputDataTypes.WS_JSON
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.util.StringUtils
@@ -57,7 +57,7 @@ class RecruitmentServiceRequestDeserializer(
 
         val parsed: RecruitmentServiceRequest<*>
         try {
-            parsed = JSON.decodeFromString(RecruitmentServiceRequest.Serializer, recruitmentServiceRequest)
+            parsed = WS_JSON.decodeFromString(RecruitmentServiceRequest.Serializer, recruitmentServiceRequest)
         } catch (ex: Exception) {
             LOGGER.error("The core RecruitmentServiceRequest serializer is not valid. Exception: ${ex.message}")
             throw SerializationException(

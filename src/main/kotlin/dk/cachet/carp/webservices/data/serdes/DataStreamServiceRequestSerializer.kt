@@ -3,10 +3,10 @@ package dk.cachet.carp.webservices.data.serdes
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.SerializerProvider
-import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.data.infrastructure.DataStreamServiceRequest
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.exception.serialization.SerializationException
+import dk.cachet.carp.webservices.common.input.WSInputDataTypes.WS_JSON
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 
@@ -44,7 +44,7 @@ class DataStreamServiceRequestSerializer(
 
         val serialized: String
         try {
-            serialized = JSON.encodeToString(DataStreamServiceRequest.Serializer, dataStreamServiceRequest)
+            serialized = WS_JSON.encodeToString(DataStreamServiceRequest.Serializer, dataStreamServiceRequest)
         } catch (ex: Exception) {
             LOGGER.error("The DataStreamServiceRequest serializer is not valid. Exception: ${ex.message}")
             throw SerializationException(

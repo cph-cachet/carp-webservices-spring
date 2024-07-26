@@ -3,10 +3,10 @@ package dk.cachet.carp.webservices.data.serdes
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.SerializerProvider
-import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.data.application.SyncPoint
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.exception.serialization.SerializationException
+import dk.cachet.carp.webservices.common.input.WSInputDataTypes.WS_JSON
 import kotlinx.serialization.encodeToString
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -29,7 +29,7 @@ class SyncPointSerializer(private val validationMessages: MessageBase) : JsonSer
 
         val serialized: String
         try {
-            serialized = JSON.encodeToString(value)
+            serialized = WS_JSON.encodeToString(value)
         } catch (ex: Exception) {
             LOGGER.error("The syncPoint request is not valid. Exception: ${ex.message}")
             throw SerializationException(
