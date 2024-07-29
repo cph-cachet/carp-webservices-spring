@@ -150,6 +150,12 @@ com:
             - path: $.collection_owner
               prefix: collection_owner_
 
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui
+
 rabbit:
   data-point:
     processing:
