@@ -151,10 +151,10 @@ com:
               prefix: collection_owner_
 
 springdoc:
+  api-docs:
+    path: /v3/api-docs
   swagger-ui:
-    disable-swagger-default-url: true
-    url: /${environment.subfolder}/v3/api-docs
-    config-url: /${environment.subfolder}/v3/api-docs/swagger-config
+    path: /swagger-ui
 
 rabbit:
   data-point:
