@@ -1,6 +1,7 @@
-package dk.cachet.carp.webservices.common.input
+package dk.cachet.carp.webservices.common.input.domain
 
 import dk.cachet.carp.common.application.data.Data
+import dk.cachet.carp.webservices.common.input.WSInputDataTypes
 import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

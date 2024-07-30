@@ -5,6 +5,7 @@ import dk.cachet.carp.common.application.data.input.InputDataTypeList
 import dk.cachet.carp.common.application.data.input.Sex
 import dk.cachet.carp.common.application.data.input.elements.SelectOne
 import dk.cachet.carp.common.application.data.input.elements.Text
+import dk.cachet.carp.webservices.common.input.domain.*
 
 object WSInputDataTypes : InputDataTypeList() {
     /**
@@ -22,7 +23,7 @@ object WSInputDataTypes : InputDataTypeList() {
     val SEX =
         add(
             inputDataType = InputDataType.fromString(SEX_TYPE_NAME),
-            inputElement = SelectOne("Sex", Sex.values().map { it.toString() }.toSet()),
+            inputElement = SelectOne("Sex", Sex.entries.map { it.toString() }.toSet()),
             dataClass = Sex::class,
             inputToData = { Sex.valueOf(it) },
             dataToInput = { it.name },

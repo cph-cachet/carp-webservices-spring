@@ -2,6 +2,7 @@ package dk.cachet.carp.webservices.common.input
 
 import dk.cachet.carp.common.application.data.Data
 import dk.cachet.carp.common.infrastructure.serialization.createDefaultJSON
+import dk.cachet.carp.webservices.common.input.domain.*
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
