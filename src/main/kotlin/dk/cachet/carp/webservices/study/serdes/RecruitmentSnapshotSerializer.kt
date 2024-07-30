@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.SerializerProvider
 import dk.cachet.carp.studies.domain.users.RecruitmentSnapshot
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.exception.serialization.SerializationException
-import dk.cachet.carp.webservices.common.input.WSInputDataTypes.WS_JSON
+import dk.cachet.carp.webservices.common.input.WS_JSON
 import dk.cachet.carp.webservices.study.domain.Recruitment
 import kotlinx.serialization.encodeToString
 import org.apache.logging.log4j.LogManager

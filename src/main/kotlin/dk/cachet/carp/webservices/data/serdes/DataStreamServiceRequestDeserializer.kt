@@ -8,7 +8,7 @@ import dk.cachet.carp.data.infrastructure.DataStreamServiceRequest
 import dk.cachet.carp.deployments.infrastructure.DeploymentServiceRequest
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.exception.serialization.SerializationException
-import dk.cachet.carp.webservices.common.input.WSInputDataTypes.WS_JSON
+import dk.cachet.carp.webservices.common.input.WS_JSON
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.util.StringUtils

@@ -7,8 +7,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer
 import dk.cachet.carp.studies.domain.users.RecruitmentSnapshot
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.exception.serialization.SerializationException
-import dk.cachet.carp.webservices.common.input.WSInputDataTypes.WS_JSON
-import kotlinx.serialization.decodeFromString
+import dk.cachet.carp.webservices.common.input.WS_JSON
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.util.StringUtils
@@ -28,7 +27,7 @@ class RecruitmentSnapshotDeserializer(
     /**
      * The [deserialize] function is used to deserialize the parsed object.
      *
-     * @param jsonParser The [jsonParser] object containing the json object parsed.
+     * @param p The [JsonParser] object containing the json object parsed.
      * @throws SerializationException If the [RecruitmentSnapshot] is blank or empty.
      * Also, if the [RecruitmentSnapshot] contains invalid format.
      * @return The deserialized [RecruitmentSnapshot] object.

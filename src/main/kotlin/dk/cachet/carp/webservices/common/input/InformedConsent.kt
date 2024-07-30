@@ -6,21 +6,35 @@ import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+/**
+ * The informed consent from a participant.
+ */
 @Serializable
-@SerialName(WSInputDataTypes.IC_TYPE_NAME)
+@SerialName(WSInputDataTypes.CONSENT_TYPE_NAME)
 data class InformedConsent(
-    // / The time this informed consent was signed.
+    /**
+     * The time this informed consent was signed.
+     */
     val signedTimestamp: Instant = Clock.System.now(),
-    // / The location where this informed consent was signed.
+    /**
+     * The location where this informed consent was signed.
+     */
     val signedLocation: String? = null,
-    // / The ID of the participant who signed this consent.
+    /**
+     * The user ID of the participant who signed this consent.
+     */
     val userId: String?,
-    // / The full name of the participant who signed this consent.
+    /**
+     * The name of the participant who signed this consent.
+     */
     val name: String,
-    // / The content of the signed consent.
-    // /
-    // / This may be plain text or JSON.
+    /**
+     * The content of the signed consent.
+     * This may be plain text or JSON.
+     */
     val consent: String?,
-    // / The image of the provided signature in png format as bytes.
+    /**
+     * The image of the provided signature in png format as bytes.
+     */
     val signatureImage: String?,
 ) : Data
