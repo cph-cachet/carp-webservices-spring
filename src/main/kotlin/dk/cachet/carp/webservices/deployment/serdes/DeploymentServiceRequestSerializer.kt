@@ -3,10 +3,10 @@ package dk.cachet.carp.webservices.deployment.serdes
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.SerializerProvider
-import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.deployments.infrastructure.DeploymentServiceRequest
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.exception.serialization.SerializationException
+import dk.cachet.carp.webservices.common.input.WS_JSON
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 
@@ -44,7 +44,7 @@ class DeploymentServiceRequestSerializer(
 
         val serialized: String
         try {
-            serialized = JSON.encodeToString(DeploymentServiceRequest.Serializer, deploymentServiceRequest)
+            serialized = WS_JSON.encodeToString(DeploymentServiceRequest.Serializer, deploymentServiceRequest)
         } catch (ex: Exception) {
             LOGGER.error("The DeploymentServiceRequest is not valid. Exception: ${ex.message}")
             throw SerializationException(

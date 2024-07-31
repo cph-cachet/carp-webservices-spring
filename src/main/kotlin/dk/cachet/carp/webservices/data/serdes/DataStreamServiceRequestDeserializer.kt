@@ -4,11 +4,11 @@ import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.TreeNode
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
-import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.data.infrastructure.DataStreamServiceRequest
 import dk.cachet.carp.deployments.infrastructure.DeploymentServiceRequest
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.exception.serialization.SerializationException
+import dk.cachet.carp.webservices.common.input.WS_JSON
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.util.StringUtils
@@ -55,7 +55,7 @@ class DataStreamServiceRequestDeserializer(
 
         val parsed: DataStreamServiceRequest<*>
         try {
-            parsed = JSON.decodeFromString(DataStreamServiceRequest.Serializer, dataStreamServiceRequest)
+            parsed = WS_JSON.decodeFromString(DataStreamServiceRequest.Serializer, dataStreamServiceRequest)
         } catch (ex: Exception) {
             LOGGER.error("The DataStreamServiceRequest deserializer is not valid. Exception: ${ex.message}")
             throw SerializationException(

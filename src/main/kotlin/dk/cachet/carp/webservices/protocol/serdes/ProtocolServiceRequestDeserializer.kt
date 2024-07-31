@@ -4,10 +4,10 @@ import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.TreeNode
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
-import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.protocols.infrastructure.ProtocolServiceRequest
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.exception.serialization.SerializationException
+import dk.cachet.carp.webservices.common.input.WS_JSON
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.util.StringUtils
@@ -53,7 +53,7 @@ class ProtocolServiceRequestDeserializer(
 
         val parsed: ProtocolServiceRequest<*>
         try {
-            parsed = JSON.decodeFromString(ProtocolServiceRequest.Serializer, protocolServiceRequest)
+            parsed = WS_JSON.decodeFromString(ProtocolServiceRequest.Serializer, protocolServiceRequest)
         } catch (ex: Exception) {
             LOGGER.error("The core ProtocolServiceRequest serializer is not valid. Exception: ${ex.message}")
             throw SerializationException(

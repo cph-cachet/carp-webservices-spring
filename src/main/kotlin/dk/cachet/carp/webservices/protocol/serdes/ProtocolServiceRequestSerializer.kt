@@ -3,10 +3,10 @@ package dk.cachet.carp.webservices.protocol.serdes
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.SerializerProvider
-import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.protocols.infrastructure.ProtocolServiceRequest
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.exception.serialization.SerializationException
+import dk.cachet.carp.webservices.common.input.WS_JSON
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 
@@ -34,7 +34,7 @@ class ProtocolServiceRequestSerializer(
 
         val serialized: String
         try {
-            serialized = JSON.encodeToString(ProtocolServiceRequest.Serializer, protocolServiceRequest)
+            serialized = WS_JSON.encodeToString(ProtocolServiceRequest.Serializer, protocolServiceRequest)
         } catch (ex: Exception) {
             LOGGER.error("The core ProtocolServiceRequest is not valid. Exception: $ex")
             throw SerializationException(validationMessages.get("protocol.service.serialization.error"))
