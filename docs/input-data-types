@@ -1,0 +1,34 @@
+# Address
+
+Represents an address with various fields.
+
+## Serialized Name
+
+The `Address` class is annotated with `@SerialName(WSInputDataTypes.ADDRESS_TYPE_NAME)`.
+
+## Fields
+
+- `address1: String?` - The first line of the address. This field is optional and can be `null`.
+- `address2: String?` - The second line of the address. This field is optional and can be `null`.
+- `street: String?` - The street of the address. This field is optional and can be `null`.
+- `city: String?` - The city of the address. This field is optional and can be `null`.
+- `postalCode: String?` - The postal code of the address. This field is optional and can be `null`.
+- `country: String?` - The country of the address. This field is optional and can be `null`.
+
+## Inheritance
+
+The `Address` class inherits from `Data`.
+
+## Example
+
+Here is an example of how to create an instance of the `Address` class:
+
+```kotlin
+val address = Address(
+    address1 = "123 Main St",
+    address2 = "Apt 4B",
+    street = "Main St",
+    city = "Springfield",
+    postalCode = "12345",
+    country = "USA"
+)
