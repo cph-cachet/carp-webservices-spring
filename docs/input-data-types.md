@@ -14,14 +14,87 @@
 
 ## Protocol Example
 The `expectedParticipantData` section of the study protocol is used to define type information for the study. Any data type utilized must be defined here.
+
+consider a study protocol with the following Roles
+
 ```json
+
+"participantRoles":[
+    {
+        "role":"Participant",
+        "isOptional":false
+    },
+    {
+        "role":"Guardian",
+        "isOptional":true
+    }
+],
+```
+The `expectedParticipantData` can be set as
+- when no `assignedTo` used, the data is shared and can be set by any participant
+- data can be assigned to multiple roles
+
+
+```json
+
+"expectedParticipantData":[
+    {
+        "attribute":{
+            "__type":"dk.cachet.carp.common.application.users.ParticipantAttribute.DefaultParticipantAttribute",
+            "inputDataType":"dk.carp.webservices.input.address"
+        }
+    },
+    {
+        "attribute":{
+            "__type":"dk.cachet.carp.common.application.users.ParticipantAttribute.DefaultParticipantAttribute",
+            "inputDataType":"dk.carp.webservices.input.phone_number"
+        },
+        "assignedTo":{
+            "__type":"dk.cachet.carp.common.application.users.AssignedTo.Roles",
+            "roleNames":[
+                "Participant"
+            ]
+        }
+    },
+    {
+        "attribute":{
+            "__type":"dk.cachet.carp.common.application.users.ParticipantAttribute.DefaultParticipantAttribute",
+            "inputDataType":"dk.cachet.carp.input.sex"
+        },
+        "assignedTo":{
+            "__type":"dk.cachet.carp.common.application.users.AssignedTo.Roles",
+            "roleNames":[
+                "Participant",
+                "Guardian"
+            ]
+        }
+    }
+]
 
 ```
 
 ## Endpoint Example
 The `setParticipantData` and `getParticipantData` service requests from the `participation-service` endpoint are used to set and retrieve participation data.
-```json
 
+for common data, any role can set the data
+Example setting participant data
+```json
+{
+    "__type": "dk.cachet.carp.deployments.infrastructure.ParticipationServiceRequest.SetParticipantData",
+    "apiVersion": "1.2",
+    "studyDeploymentId": "36bb3081-44e6-4c32-b162-37ac27656174",
+    "data": {
+     "dk.carp.webservices.input.informed_consent": {
+            "name": "John Smith",
+            "__type": "dk.carp.webservices.input.informed_consent",
+            "userId": "12345",
+            "consent": "you know..",
+            "signatureImage": "parsed signature image",
+            "signedTimestamp": "2024-07-26T08:59:52.311225Z"
+        }
+    },
+    "inputByParticipantRole": "Participant"
+}
 ```
 
 ## Address
@@ -71,7 +144,6 @@ Represents a medical diagnosis with various fields.
 - `icd11Code: String` - The [ICD-11](https://www.who.int/standards/classifications/classification-of-diseases) code of the diagnosis. This field is required.
 - `conclusion: String?` - Any conclusion or notes from the physician. This field is optional and can be `null`.
 
-
 ### Example
 
 Here is an example of how to create an instance of the `Diagnosis` class:
@@ -98,10 +170,6 @@ Represents a full name of a participant.
 - `firstName: String?` - The first name of the participant. This field is optional and can be `null`.
 - `middleName: String?` - The middle name of the participant. This field is optional and can be `null`.
 - `lastName: String?` - The last name of the participant. This field is optional and can be `null`.
-
-### Inheritance
-
-The `FullName` class inherits from `Data`.
 
 ### Example
 
@@ -131,10 +199,6 @@ Represents an informed consent form signed by a participant.
 - `consent: String?` - The content of the signed consent. This may be plain text or JSON. This field is optional and can be `null`.
 - `signatureImage: String?` - The image of the provided signature in PNG format as bytes. This field is optional and can be `null`.
 
-### Inheritance
-
-The `InformedConsent` class inherits from `Data`.
-
 ### Example
 
 Here is an example of how to create an instance of the `InformedConsent` class:
@@ -149,6 +213,7 @@ val informedConsent = InformedConsent(
     signatureImage = "iVBORw0KGgoAAAANSUhEUgAA..."
 )
 ```
+
 ## PhoneNumber
 
 Represents a phone number with country code and ICO 3166 code.
@@ -187,10 +252,6 @@ Represents a social security number (SSN) with associated country information.
 - `socialSecurityNumber: String` - The social security number (SSN).
 - `country: String` - The country in which this `socialSecurityNumber` was issued.
 
-### Inheritance
-
-The `SocialSecurityNumber` class inherits from `Data`.
-
 ### Example
 
 Here is an example of how to create an instance of the `SocialSecurityNumber` class:
@@ -201,3 +262,24 @@ val ssn = SocialSecurityNumber(
     country = "USA"
 )
 ```
+
+## Sex
+
+An enumeration representing the sex of a participant.
+
+### Data Type Name
+
+'dk.cachet.carp.input.sex`
+
+### Enum Values
+
+- `Male` - Represents a male participant.
+- `Female` - Represents a female participant.
+- `Intersex` - Represents an intersex participant.
+
+### Example
+
+Here is an example of how to use the `Sex` enum:
+
+```kotlin
+val participantSex: Sex = Sex.Male
