@@ -1,13 +1,17 @@
 package dk.cachet.carp.webservices.data.controller
 
 import dk.cachet.carp.data.infrastructure.DataStreamServiceRequest
+import dk.cachet.carp.webservices.common.input.WS_JSON
 import dk.cachet.carp.webservices.data.service.CawsDataStreamService
+import dk.cachet.carp.webservices.data.service.impl.decompressGzip
 import io.swagger.v3.oas.annotations.Operation
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 
@@ -39,5 +43,15 @@ class DataStreamController(
     ): ResponseEntity<Any> {
         LOGGER.info("Start POST: $DATA_STREAM_SERVICE_ZIP")
         return cawsDataStreamService.processZipToInvoke(zipFile).let { ResponseEntity.ok(it) }
+    }
+
+    @PostMapping(value = ["/api/data/zip"])
+    @ResponseStatus(HttpStatus.OK)
+    suspend fun handleCompressedData(
+        @RequestBody data: ByteArray,
+    ): ResponseEntity<Any> {
+        val decompressedData = decompressGzip(data)
+        val request = WS_JSON.decodeFromString(DataStreamServiceRequest.Serializer, decompressedData)
+        return cawsDataStreamService.core.invoke(request).let { ResponseEntity.ok(it) }
     }
 }
