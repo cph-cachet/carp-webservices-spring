@@ -127,6 +127,7 @@ com:
           - /actuator/**
           - /swagger-ui/**
           - /v3/api-docs/**
+          - /doc/**
           cors:
           - path: /**
             allowed-origins: "*"
@@ -152,9 +153,9 @@ com:
 
 springdoc:
   api-docs:
-    path: /v3/api-docs
+    path: /doc/v3/api-docs
   swagger-ui:
-    path: /swagger-ui
+    path: /doc/
 
 rabbit:
   data-point:

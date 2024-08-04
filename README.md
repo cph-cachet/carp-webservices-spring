@@ -74,7 +74,7 @@ The project-specific services are the rest, plus additional ones, such as securi
 
 ## API Documentation
 
-For API documentation we use [Swagger](https://cans.cachet.dk/dev/swagger-ui/index.html). 
+For API documentation we use [Swagger](https://dev.carp.dk/doc/). 
 
 > **Note:** The documentation is currently only available in the development environment.
 
