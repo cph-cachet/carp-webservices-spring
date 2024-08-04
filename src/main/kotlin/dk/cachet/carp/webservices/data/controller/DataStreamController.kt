@@ -46,6 +46,7 @@ class DataStreamController(
     }
 
     @PostMapping(value = ["/api/data/zip"])
+    @Operation(tags = ["dataStream/zipRequest.json"])
     @ResponseStatus(HttpStatus.OK)
     suspend fun handleCompressedData(
         @RequestBody data: ByteArray,
