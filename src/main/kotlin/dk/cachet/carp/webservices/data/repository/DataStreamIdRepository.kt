@@ -48,9 +48,15 @@ interface DataStreamIdRepository : JpaRepository<DataStreamId, Int> {
 
     @Query(
         nativeQuery = true,
-        value = "SELECT * FROM data_stream_ids WHERE study_deployment_id = :deploymentId ",
+        value = """
+            SELECT *
+            FROM data_stream_ids
+            WHERE study_deployment_id = :deploymentId
+            ORDER BY updated_at
+            DESC
+            LIMIT 1 """,
     )
     fun getAllByDeploymentId(
         @Param("deploymentId") id: String,
-    ): List<DataStreamId>
+    ): DataStreamId?
 }

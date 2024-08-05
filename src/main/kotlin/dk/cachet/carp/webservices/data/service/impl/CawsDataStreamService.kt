@@ -50,11 +50,11 @@ class CawsDataStreamService(
             dataStreamIdRepository.getAllByDeploymentId(
                 deploymentId.toString(),
             )
-        val sortedDataPoint =
-            dataStreamInputs.sortedByDescending { it.updatedAt }.firstOrNull()
-                ?: return null
+//        val sortedDataPoint =
+//            dataStreamInputs.sortedByDescending { it.updatedAt }.firstOrNull()
+//                ?: return null
 
-        return sortedDataPoint.updatedAt?.toKotlinInstant()
+        return dataStreamInputs?.updatedAt?.toKotlinInstant()
     }
 
     /**
