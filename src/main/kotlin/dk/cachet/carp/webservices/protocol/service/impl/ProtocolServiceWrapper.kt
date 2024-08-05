@@ -1,6 +1,5 @@
 package dk.cachet.carp.webservices.protocol.service.impl
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.common.infrastructure.serialization.JSON
@@ -41,12 +40,7 @@ class ProtocolServiceWrapper(
 
             protocolRepository.findAllByOwnerId(account.id!!)
                 .filter { it.snapshot != null }
-                .groupBy {
-                    JSON.decodeFromString(
-                        StudyProtocolSnapshot.serializer(),
-                        it.snapshot!!.toString(),
-                    ).id.toString()
-                }
+                .groupBy { it.snapshot?.get("id").toString() }
                 .map { (_, versions) ->
                     val sorted = versions.sortedBy { it.createdAt }
                     createProtocolOverview(sorted, account)
@@ -63,7 +57,7 @@ class ProtocolServiceWrapper(
         versions: List<Protocol>,
         account: Account? = null,
     ): ProtocolOverview {
-        val snapshot = decodeSnapshot(versions.last().snapshot!!.toString())
+        val snapshot = objectMapper.treeToValue(versions.last().snapshot, StudyProtocolSnapshot::class.java)
         val owner = account ?: accountService.findByUUID(snapshot.ownerId)
 
         return ProtocolOverview(

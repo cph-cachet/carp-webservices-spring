@@ -17,10 +17,8 @@ import dk.cachet.carp.webservices.file.repository.FileRepository
 import dk.cachet.carp.webservices.study.domain.Study
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.encodeToString
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import dk.cachet.carp.studies.domain.Study as CoreStudy
