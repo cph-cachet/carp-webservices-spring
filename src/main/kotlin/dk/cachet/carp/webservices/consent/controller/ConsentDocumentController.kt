@@ -1,5 +1,6 @@
 package dk.cachet.carp.webservices.consent.controller
 
+import com.fasterxml.jackson.databind.JsonNode
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.webservices.common.constants.PathVariableName
 import dk.cachet.carp.webservices.consent.domain.ConsentDocument
@@ -61,7 +62,7 @@ class ConsentDocumentController(
     @Operation(tags = ["consentDocument/create.json"])
     fun create(
         @PathVariable(PathVariableName.DEPLOYMENT_ID) deploymentId: UUID,
-        @RequestBody data: String?,
+        @RequestBody data: JsonNode?,
     ): ConsentDocument {
         LOGGER.info("Start POST: /api/deployments/$deploymentId/consent-documents")
         return consentDocumentService.create(deploymentId, data)

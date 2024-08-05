@@ -1,5 +1,6 @@
 package dk.cachet.carp.webservices.study.domain
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.databind.annotation.JsonNaming
 import dk.cachet.carp.webservices.common.audit.Auditable
@@ -24,5 +25,5 @@ data class Recruitment(
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     @Type(JsonBinaryType::class)
-    var snapshot: String? = null,
+    var snapshot: JsonNode? = null,
 ) : Auditable()

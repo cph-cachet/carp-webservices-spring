@@ -28,6 +28,6 @@ class DeploymentServiceWrapper(
     ) = withContext(Dispatchers.IO) {
         repository
             .findAllByStudyDeploymentIds(deploymentIds.map { it.stringRepresentation })
-            .map { JSON.decodeFromString(StudyDeploymentSnapshot.serializer(), it.snapshot!!) }
+            .map { JSON.decodeFromString(StudyDeploymentSnapshot.serializer(), it.snapshot!!.toString()) }
     }
 }

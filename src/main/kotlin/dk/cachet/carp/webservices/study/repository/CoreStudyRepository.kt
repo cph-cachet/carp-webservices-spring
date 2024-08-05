@@ -1,5 +1,7 @@
 package dk.cachet.carp.webservices.study.repository
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.deployments.application.users.StudyInvitation
@@ -18,6 +20,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import dk.cachet.carp.studies.domain.Study as CoreStudy
@@ -35,6 +38,7 @@ class CoreStudyRepository(
     private val documentRepository: DocumentRepository,
     private val exportRepository: ExportRepository,
     private val filesRepository: FileRepository,
+    private val objectMapper: ObjectMapper,
     private val validationMessages: MessageBase,
 ) : StudyRepository {
     companion object {
@@ -57,7 +61,7 @@ class CoreStudyRepository(
                     study.id.stringRepresentation,
                 )
 
-            studyToSave.snapshot = JSON.encodeToString<StudySnapshot>(study.getSnapshot())
+            studyToSave.snapshot = objectMapper.valueToTree(study.getSnapshot())
             studyRepository.save(studyToSave)
 
             LOGGER.info("Study saved, id: ${study.id.stringRepresentation}")
@@ -110,7 +114,7 @@ class CoreStudyRepository(
         withContext(Dispatchers.IO) {
             val existingStudy = getWSStudyById(study.id)
 
-            existingStudy.snapshot = JSON.encodeToString(study.getSnapshot())
+            existingStudy.snapshot = objectMapper.valueToTree(study.getSnapshot())
             studyRepository.save(existingStudy)
 
             LOGGER.info("Study updated, id: ${study.id.stringRepresentation}")
@@ -143,8 +147,8 @@ class CoreStudyRepository(
         return JSON.decodeFromString(StudySnapshot.serializer(), study.snapshot.toString())
     }
 
-    fun convertStudySnapshotNodeToStudy(node: String): CoreStudy {
-        val snapshot = JSON.decodeFromString<StudySnapshot>(node)
+    fun convertStudySnapshotNodeToStudy(node: JsonNode): CoreStudy {
+        val snapshot = JSON.decodeFromString<StudySnapshot>(node.toString())
         return CoreStudy.fromSnapshot(snapshot)
     }
 }

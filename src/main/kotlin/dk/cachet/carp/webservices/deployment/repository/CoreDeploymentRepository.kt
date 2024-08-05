@@ -1,5 +1,6 @@
 package dk.cachet.carp.webservices.deployment.repository
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.deployments.domain.DeploymentRepository
@@ -18,6 +19,7 @@ import dk.cachet.carp.deployments.domain.StudyDeployment as CoreStudyDeployment
 @Transactional
 class CoreDeploymentRepository(
     private val studyDeploymentRepository: StudyDeploymentRepository,
+    private val objectMapper: ObjectMapper,
     private val validationMessages: MessageBase,
 ) : DeploymentRepository {
     companion object {
@@ -39,7 +41,7 @@ class CoreDeploymentRepository(
             val studyDeploymentToSave = StudyDeployment()
 
             val snapshot = StudyDeploymentSnapshot.fromDeployment(studyDeployment, VERSION)
-            studyDeploymentToSave.snapshot = JSON.encodeToString(StudyDeploymentSnapshot.serializer(), snapshot)
+            studyDeploymentToSave.snapshot = objectMapper.valueToTree(snapshot)
 
             studyDeploymentRepository.save(studyDeploymentToSave)
             LOGGER.info("Deployment saved, id: ${studyDeployment.id.stringRepresentation}")
@@ -48,7 +50,7 @@ class CoreDeploymentRepository(
     override suspend fun getStudyDeploymentBy(id: UUID) =
         withContext(Dispatchers.IO) {
             val result = getWSDeploymentById(id) ?: return@withContext null
-            val snapshot = JSON.decodeFromString<StudyDeploymentSnapshot>(result.snapshot!!)
+            val snapshot = JSON.decodeFromString<StudyDeploymentSnapshot>(result.snapshot!!.toString())
             CoreStudyDeployment.fromSnapshot(snapshot)
         }
 
@@ -83,7 +85,7 @@ class CoreDeploymentRepository(
             }
 
             val snapshot = StudyDeploymentSnapshot.fromDeployment(studyDeployment, VERSION)
-            stored.snapshot = JSON.encodeToString(StudyDeploymentSnapshot.serializer(), snapshot)
+            stored.snapshot = objectMapper.valueToTree(snapshot)
 
             studyDeploymentRepository.save(stored)
             LOGGER.info("Deployment updated, id: ${studyDeployment.id.stringRepresentation}")
@@ -99,7 +101,7 @@ class CoreDeploymentRepository(
     }
 
     private fun mapWSDeploymentToCore(deployment: StudyDeployment): CoreStudyDeployment {
-        val snapshot = JSON.decodeFromString<StudyDeploymentSnapshot>(deployment.snapshot!!)
+        val snapshot = JSON.decodeFromString<StudyDeploymentSnapshot>(deployment.snapshot!!.toString())
         return CoreStudyDeployment.fromSnapshot(snapshot)
     }
 }

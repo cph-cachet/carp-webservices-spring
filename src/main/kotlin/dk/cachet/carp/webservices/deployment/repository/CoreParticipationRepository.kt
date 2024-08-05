@@ -1,5 +1,7 @@
 package dk.cachet.carp.webservices.deployment.repository
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.deployments.domain.users.AccountParticipation
@@ -11,6 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -22,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional
 class CoreParticipationRepository(
     private val participantGroupRepository: ParticipantGroupRepository,
+    private val objectMapper: ObjectMapper,
     private val validationMessage: MessageBase,
 ) : ParticipationRepository {
     companion object {
@@ -84,7 +88,7 @@ class CoreParticipationRepository(
 
             if (optionalGroup == null) {
                 val newParticipantGroup = dk.cachet.carp.webservices.deployment.domain.ParticipantGroup()
-                newParticipantGroup.snapshot = snapshotToSave
+                newParticipantGroup.snapshot = objectMapper.valueToTree(snapshotToSave)
                 val savedGroup = participantGroupRepository.save(newParticipantGroup)
                 LOGGER.info(
                     "New participant group with id: ${savedGroup.id} " +
@@ -94,7 +98,7 @@ class CoreParticipationRepository(
             }
 
             val oldSnapshot = optionalGroup.snapshot!!
-            optionalGroup.snapshot = snapshotToSave
+            optionalGroup.snapshot = objectMapper.valueToTree(snapshotToSave)
             participantGroupRepository.save(optionalGroup)
             LOGGER.info("Participant Group with id: ${optionalGroup.id} is updated with a new snapshot.")
 
@@ -128,8 +132,8 @@ class CoreParticipationRepository(
      * @param node The [String] that needs deserialize.
      * @return [ParticipantGroup]
      */
-    private fun mapParticipantGroupSnapshotJsonNodeToParticipantGroup(node: String): ParticipantGroup {
-        val snapshot = JSON.decodeFromString(ParticipantGroupSnapshot.serializer(), node)
+    private fun mapParticipantGroupSnapshotJsonNodeToParticipantGroup(node: JsonNode): ParticipantGroup {
+        val snapshot = JSON.decodeFromString(ParticipantGroupSnapshot.serializer(), node.toString())
         return ParticipantGroup.fromSnapshot(snapshot)
     }
 }

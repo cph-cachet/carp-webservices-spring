@@ -1,6 +1,7 @@
 package dk.cachet.carp.webservices.protocol.repository
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.protocols.application.ProtocolVersion
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service
 class CoreProtocolRepository(
     private val protocolRepository: ProtocolRepository,
     private val validationMessages: MessageBase,
+    private val objectMapper: ObjectMapper,
 ) : StudyProtocolRepository {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
@@ -215,8 +217,8 @@ class CoreProtocolRepository(
      * @param node The [String] to convert to a study protocol.
      * @return A [StudyProtocol] object containing the protocol.
      */
-    private fun convertJsonNodeToStudyProtocol(node: String): StudyProtocol {
-        val snapshot = JSON.decodeFromString(StudyProtocolSnapshot.serializer(), node)
+    private fun convertJsonNodeToStudyProtocol(node: JsonNode): StudyProtocol {
+        val snapshot = JSON.decodeFromString(StudyProtocolSnapshot.serializer(), node.toString())
         return StudyProtocol.fromSnapshot(snapshot)
     }
 
@@ -236,7 +238,7 @@ class CoreProtocolRepository(
         wsProtocol.versionTag = version.tag
 
         val snapshot = StudyProtocolSnapshot.fromProtocol(protocol, VERSION)
-        wsProtocol.snapshot = JSON.encodeToString(StudyProtocolSnapshot.serializer(), snapshot)
+        wsProtocol.snapshot = objectMapper.valueToTree(snapshot)
 
         return wsProtocol
     }

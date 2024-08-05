@@ -35,5 +35,5 @@ data class Protocol(
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     @Type(JsonBinaryType::class)
-    var snapshot: String? = null,
+    var snapshot: JsonNode? = null,
 ) : Auditable()

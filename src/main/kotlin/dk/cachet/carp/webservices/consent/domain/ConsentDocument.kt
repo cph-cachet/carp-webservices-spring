@@ -1,5 +1,6 @@
 package dk.cachet.carp.webservices.consent.domain
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.databind.annotation.JsonNaming
 import com.google.gson.annotations.SerializedName
@@ -29,5 +30,5 @@ data class ConsentDocument(
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     @Type(JsonBinaryType::class)
-    var data: String? = null,
+    var data: JsonNode? = null,
 ) : Auditable(), Serializable

@@ -1,5 +1,7 @@
 package dk.cachet.carp.webservices.protocol.service.impl
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.protocols.application.StudyProtocolSnapshot
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service
 class ProtocolServiceWrapper(
     private val accountService: AccountService,
     private val protocolRepository: ProtocolRepository,
+    private val objectMapper: ObjectMapper,
     services: CoreServiceContainer,
 ) : ProtocolService {
     final override val core = services.protocolService
@@ -60,7 +63,7 @@ class ProtocolServiceWrapper(
         versions: List<Protocol>,
         account: Account? = null,
     ): ProtocolOverview {
-        val snapshot = decodeSnapshot(versions.last().snapshot!!)
+        val snapshot = decodeSnapshot(versions.last().snapshot!!.toString())
         val owner = account ?: accountService.findByUUID(snapshot.ownerId)
 
         return ProtocolOverview(
