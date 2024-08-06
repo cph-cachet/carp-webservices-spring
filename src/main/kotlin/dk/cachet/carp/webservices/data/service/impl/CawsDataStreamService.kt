@@ -52,7 +52,7 @@ class CawsDataStreamService(
             )
 
         val dataStreams =
-            dataStreamSequenceRepository.findAllByDataStreamId(
+            dataStreamSequenceRepository.findAllByDataStreamIds(
                 dataStreamIds.map { it.id },
             )
 
@@ -145,8 +145,13 @@ class CawsDataStreamService(
         deploymentIds: Set<UUID>,
         target: Path,
     ) = withContext(Dispatchers.IO) {
-        dataStreamSequenceRepository.findAllByDeploymentIds(
-            deploymentIds.map { it.toString() },
+        val dataStreamIds =
+            dataStreamIdRepository.getAllByDeploymentIds(
+                deploymentIds.map { it.toString() },
+            )
+
+        dataStreamSequenceRepository.findAllByDataStreamIds(
+            dataStreamIds,
         )
     }
 }

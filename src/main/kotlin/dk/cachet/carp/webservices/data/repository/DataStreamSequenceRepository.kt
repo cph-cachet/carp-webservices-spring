@@ -25,19 +25,6 @@ interface DataStreamSequenceRepository : JpaRepository<DataStreamSequence, Int> 
         @Param("to") to: Int,
     ): List<DataStreamSequence>
 
-    @Query(
-        nativeQuery = true,
-        value =
-            "SELECT dsi.id, ds.data_stream_id, ds.snapshot, ds.first_sequence_id, " +
-                "ds.last_sequence_id, ds.updated_at, ds.created_at, ds.created_by, ds.updated_by \n" +
-                "FROM data_stream_sequence ds\n" +
-                "LEFT JOIN data_stream_ids dsi ON ds.data_stream_id = dsi.id\n" +
-                "WHERE dsi.study_deployment_id IN (:deploymentIds)",
-    )
-    fun findAllByDeploymentIds(
-        @Param("deploymentIds") deploymentIds: List<String>,
-    ): List<DataStreamSequence>
-
     @Modifying
     @Transactional
     @Query(
@@ -52,7 +39,7 @@ interface DataStreamSequenceRepository : JpaRepository<DataStreamSequence, Int> 
         nativeQuery = true,
         value = "SELECT * FROM data_stream_sequence WHERE data_stream_id IN (:dataStreamIds)",
     )
-    fun findAllByDataStreamId(
+    fun findAllByDataStreamIds(
         @Param("dataStreamIds") dataStreamIds: Collection<Int>,
     ): List<DataStreamSequence>
 }
