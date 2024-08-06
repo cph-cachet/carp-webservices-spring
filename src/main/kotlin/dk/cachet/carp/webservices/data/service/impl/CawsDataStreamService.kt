@@ -46,15 +46,21 @@ class CawsDataStreamService(
      */
 
     override fun getLatestUpdatedAt(deploymentId: UUID): Instant? {
-        val dataStreamInputs =
+        val dataStreamIds =
             dataStreamIdRepository.getAllByDeploymentId(
                 deploymentId.toString(),
             )
-//        val sortedDataPoint =
-//            dataStreamInputs.sortedByDescending { it.updatedAt }.firstOrNull()
-//                ?: return null
 
-        return dataStreamInputs?.updatedAt?.toKotlinInstant()
+        val dataStreams =
+            dataStreamSequenceRepository.findAllByDataStreamId(
+                dataStreamIds.map { it.id },
+            )
+
+        val sortedDataPoint =
+            dataStreams.sortedByDescending { it.updatedAt }.firstOrNull()
+                ?: return null
+
+        return sortedDataPoint.updatedAt?.toKotlinInstant()
     }
 
     /**

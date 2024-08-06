@@ -50,9 +50,9 @@ interface DataStreamSequenceRepository : JpaRepository<DataStreamSequence, Int> 
 
     @Query(
         nativeQuery = true,
-        value = "SELECT * FROM data_stream_sequence WHERE data_stream_id = :dataStreamId",
+        value = "SELECT * FROM data_stream_sequence WHERE data_stream_id IN (:dataStreamIds)",
     )
     fun findAllByDataStreamId(
-        @Param("dataStreamId") dataStreamId: Int,
+        @Param("dataStreamIds") dataStreamIds: Collection<Int>,
     ): List<DataStreamSequence>
 }
