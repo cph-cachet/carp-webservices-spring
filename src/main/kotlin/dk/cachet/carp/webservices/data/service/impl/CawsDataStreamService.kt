@@ -73,6 +73,7 @@ class CawsDataStreamService(
      * @throws IllegalArgumentException If the zip file content is invalid.
      */
 
+    @Deprecated("Use decompressGzip")
     override suspend fun processZipToInvoke(zipFile: MultipartFile): Any {
         val zipFileBytes = zipFile.bytes
 
@@ -103,6 +104,7 @@ class CawsDataStreamService(
      * @throws IOException If an error occurs during file operations.
      */
 
+    @Deprecated("Use decompressGzip")
     suspend fun extractFilesFromZip(zipFile: ByteArray): DataStreamServiceRequest<*>? =
         withContext(Dispatchers.IO) {
             val objectMapper = ObjectMapper()

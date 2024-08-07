@@ -36,21 +36,22 @@ class DataStreamController(
         return cawsDataStreamService.core.invoke(request).let { ResponseEntity.ok(it) }
     }
 
-    @PostMapping(value = [DATA_STREAM_SERVICE_ZIP], consumes = ["multipart/form-data"])
+    @Deprecated("Use POST /api/data-stream-service-zip instead.")
+    @PostMapping(value = ["null"], consumes = ["multipart/form-data"])
     @Operation(tags = ["dataStream/getDataStream.zip"])
     suspend fun processToInvoke(
         @RequestBody zipFile: MultipartFile,
     ): ResponseEntity<Any> {
-        LOGGER.info("Start POST: $DATA_STREAM_SERVICE_ZIP")
         return cawsDataStreamService.processZipToInvoke(zipFile).let { ResponseEntity.ok(it) }
     }
 
-    @PostMapping(value = ["/api/data/zip"])
+    @PostMapping(value = [DATA_STREAM_SERVICE_ZIP])
     @Operation(tags = ["dataStream/zipRequest.json"])
     @ResponseStatus(HttpStatus.OK)
     suspend fun handleCompressedData(
         @RequestBody data: ByteArray,
     ): ResponseEntity<Any> {
+        LOGGER.info("Start POST: $DATA_STREAM_SERVICE_ZIP")
         val decompressedData = decompressGzip(data)
         val request = WS_JSON.decodeFromString(DataStreamServiceRequest.Serializer, decompressedData)
         return cawsDataStreamService.core.invoke(request).let { ResponseEntity.ok(it) }
