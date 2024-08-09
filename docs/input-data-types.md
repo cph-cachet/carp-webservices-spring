@@ -192,7 +192,7 @@ Represents an informed consent form signed by a participant.
 `dk.carp.webservices.input.informed_consent`
 ### Fields
 
-- `signedTimestamp: Instant` - The time this informed consent was signed. Defaults to the current time.
+- `signedTimestamp: Instant?` - The time this informed consent was signed. This field is optional and defaults to the current time.
 - `signedLocation: String?` - The location where this informed consent was signed. This field is optional and can be `null`.
 - `userId: String?` - The user ID of the participant who signed this consent. This field is optional and can be `null`.
 - `name: String` - The name of the participant who signed this consent. This field is required.
