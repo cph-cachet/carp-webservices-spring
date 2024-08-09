@@ -18,11 +18,11 @@ data class Diagnosis(
     /**
      * The date when the diagnosis was effective.
      */
-    val effectiveDate: Instant?,
+    val effectiveDate: Instant? = null,
     /**
      * A free text description of the diagnosis.
      */
-    val diagnosis: String?,
+    val diagnosis: String? = null,
     /**
      * The [ICD-11](https://www.who.int/standards/classifications/classification-of-diseases) code of the diagnosis.
      */
@@ -30,5 +30,5 @@ data class Diagnosis(
     /**
      * Any conclusion or notes from the physician.
      */
-    val conclusion: String?,
+    val conclusion: String? = null,
 ) : Data

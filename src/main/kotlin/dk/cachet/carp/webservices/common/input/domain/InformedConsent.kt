@@ -16,7 +16,7 @@ data class InformedConsent(
     /**
      * The time this informed consent was signed.
      */
-    val signedTimestamp: Instant = Clock.System.now(),
+    val signedTimestamp: Instant? = Clock.System.now(),
     /**
      * The location where this informed consent was signed.
      */
@@ -24,7 +24,7 @@ data class InformedConsent(
     /**
      * The user ID of the participant who signed this consent.
      */
-    val userId: String?,
+    val userId: String? = null,
     /**
      * The name of the participant who signed this consent.
      */
@@ -33,9 +33,9 @@ data class InformedConsent(
      * The content of the signed consent.
      * This may be plain text or JSON.
      */
-    val consent: String?,
+    val consent: String? = null,
     /**
      * The image of the provided signature in png format as bytes.
      */
-    val signatureImage: String?,
+    val signatureImage: String? = null,
 ) : Data
