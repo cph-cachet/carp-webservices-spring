@@ -5,10 +5,10 @@ import com.fasterxml.jackson.core.TreeNode
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
 import dk.cachet.carp.common.application.data.Data
-import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.data.application.Measurement
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.exception.serialization.SerializationException
+import dk.cachet.carp.webservices.common.input.WS_JSON
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.util.StringUtils
@@ -40,7 +40,7 @@ class MeasurementDeserializer(private val validationMessages: MessageBase) : Jso
 
         val parsed: Measurement<Data>
         try {
-            parsed = JSON.decodeFromString(dk.cachet.carp.data.application.MeasurementSerializer, syncPoint)
+            parsed = WS_JSON.decodeFromString(dk.cachet.carp.data.application.MeasurementSerializer, syncPoint)
         } catch (ex: Exception) {
             LOGGER.error(
                 "The dataStreamServiceRequest.measurement deserializer is not valid. Exception: $ex",

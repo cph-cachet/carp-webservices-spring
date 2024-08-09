@@ -91,7 +91,6 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa") {
         exclude(module = "org.apache.tomcat:tomcat-jdbc")
     }
-    implementation("org.springframework.boot:spring-boot-starter-data-rest")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
@@ -115,11 +114,7 @@ dependencies {
     implementation("org.springframework.cloud:spring-cloud-starter-bootstrap:${property("springCloudStarterVersion")}")
 
     // SPRINGDOC
-    implementation("org.springdoc:springdoc-openapi:${property("springdocVersion")}")
-    implementation("org.springdoc:springdoc-openapi-kotlin:${property("springdocVersion")}")
-    implementation("org.springdoc:springdoc-openapi-ui:${property("springdocVersion")}")
-    implementation("org.springdoc:springdoc-openapi-security:${property("springdocVersion")}")
-    implementation("io.swagger.core.v3:swagger-annotations:${property("swaggerCoreVersion")}")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
 
     // RSQL
     implementation("cz.jirutka.rsql:rsql-parser:${property("rsqlParserVersion")}")

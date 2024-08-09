@@ -9,7 +9,7 @@ import dk.cachet.carp.webservices.common.services.CoreServiceContainer
 import dk.cachet.carp.webservices.data.domain.DataStreamSequence
 import dk.cachet.carp.webservices.data.repository.DataStreamIdRepository
 import dk.cachet.carp.webservices.data.repository.DataStreamSequenceRepository
-import dk.cachet.carp.webservices.data.service.DataStreamService
+import dk.cachet.carp.webservices.data.service.CawsDataStreamService
 import dk.cachet.carp.webservices.export.service.ResourceExporter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -26,11 +26,11 @@ import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 
 @Service
-class DataStreamServiceWrapper(
+class CawsDataStreamService(
     private val dataStreamIdRepository: DataStreamIdRepository,
     private val dataStreamSequenceRepository: DataStreamSequenceRepository,
     services: CoreServiceContainer,
-) : DataStreamService, ResourceExporter<DataStreamSequence> {
+) : CawsDataStreamService, ResourceExporter<DataStreamSequence> {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
@@ -46,12 +46,18 @@ class DataStreamServiceWrapper(
      */
 
     override fun getLatestUpdatedAt(deploymentId: UUID): Instant? {
-        val dataStreamInputs =
+        val dataStreamIds =
             dataStreamIdRepository.getAllByDeploymentId(
                 deploymentId.toString(),
             )
+
+        val dataStreams =
+            dataStreamSequenceRepository.findAllByDataStreamIds(
+                dataStreamIds.map { it.id },
+            )
+
         val sortedDataPoint =
-            dataStreamInputs.sortedByDescending { it.updatedAt }.firstOrNull()
+            dataStreams.sortedByDescending { it.updatedAt }.firstOrNull()
                 ?: return null
 
         return sortedDataPoint.updatedAt?.toKotlinInstant()
@@ -67,6 +73,7 @@ class DataStreamServiceWrapper(
      * @throws IllegalArgumentException If the zip file content is invalid.
      */
 
+    @Deprecated("Use decompressGzip")
     override suspend fun processZipToInvoke(zipFile: MultipartFile): Any {
         val zipFileBytes = zipFile.bytes
 
@@ -97,6 +104,7 @@ class DataStreamServiceWrapper(
      * @throws IOException If an error occurs during file operations.
      */
 
+    @Deprecated("Use decompressGzip")
     suspend fun extractFilesFromZip(zipFile: ByteArray): DataStreamServiceRequest<*>? =
         withContext(Dispatchers.IO) {
             val objectMapper = ObjectMapper()
@@ -139,8 +147,13 @@ class DataStreamServiceWrapper(
         deploymentIds: Set<UUID>,
         target: Path,
     ) = withContext(Dispatchers.IO) {
-        dataStreamSequenceRepository.findAllByDeploymentIds(
-            deploymentIds.map { it.toString() },
+        val dataStreamIds =
+            dataStreamIdRepository.getAllByDeploymentIds(
+                deploymentIds.map { it.toString() },
+            )
+
+        dataStreamSequenceRepository.findAllByDataStreamIds(
+            dataStreamIds,
         )
     }
 }

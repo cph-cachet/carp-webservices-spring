@@ -4,11 +4,10 @@ import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.TreeNode
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
-import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.studies.domain.users.RecruitmentSnapshot
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.exception.serialization.SerializationException
-import kotlinx.serialization.decodeFromString
+import dk.cachet.carp.webservices.common.input.WS_JSON
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.util.StringUtils
@@ -28,7 +27,7 @@ class RecruitmentSnapshotDeserializer(
     /**
      * The [deserialize] function is used to deserialize the parsed object.
      *
-     * @param jsonParser The [jsonParser] object containing the json object parsed.
+     * @param p The [JsonParser] object containing the json object parsed.
      * @throws SerializationException If the [RecruitmentSnapshot] is blank or empty.
      * Also, if the [RecruitmentSnapshot] contains invalid format.
      * @return The deserialized [RecruitmentSnapshot] object.
@@ -54,7 +53,7 @@ class RecruitmentSnapshotDeserializer(
 
         val parsed: RecruitmentSnapshot
         try {
-            parsed = JSON.decodeFromString(recruitmentSnapshot)
+            parsed = WS_JSON.decodeFromString(recruitmentSnapshot)
         } catch (ex: Exception) {
             LOGGER.error("The core RecruitmentSnapshot serializer is not valid. Exception: ${ex.message}")
             throw SerializationException(

@@ -54,7 +54,7 @@ class ExportCommandFactory(
             createHash(
                 studyId.stringRepresentation,
                 deploymentIds?.joinToString(separator = "") ?: "",
-                Clock.System.now().toJavaInstant().truncatedTo(ChronoUnit.HOURS).toString(),
+                Clock.System.now().toJavaInstant().truncatedTo(ChronoUnit.SECONDS).toString(),
             )
 
         val exportType =

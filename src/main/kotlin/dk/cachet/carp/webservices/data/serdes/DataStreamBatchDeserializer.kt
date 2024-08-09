@@ -4,11 +4,10 @@ import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.TreeNode
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
-import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.data.application.DataStreamBatch
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.exception.serialization.SerializationException
-import kotlinx.serialization.decodeFromString
+import dk.cachet.carp.webservices.common.input.WS_JSON
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.util.StringUtils
@@ -40,7 +39,7 @@ class DataStreamBatchDeserializer(private val validationMessages: MessageBase) :
 
         val parsed: DataStreamBatch
         try {
-            parsed = JSON.decodeFromString(dataStreamBatch)
+            parsed = WS_JSON.decodeFromString(dataStreamBatch)
         } catch (ex: Exception) {
             LOGGER.error("The core dataStreamBatch serializer is not valid. Exception: ${ex.message}")
             throw SerializationException(
