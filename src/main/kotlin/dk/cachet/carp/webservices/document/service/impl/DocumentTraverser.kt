@@ -74,7 +74,7 @@ class DocumentTraverser(
     ): String? {
         val pathList = requestToPathList(request, scopeToUserId)
 
-        var collectionWrapper: CollectionWrapper? = null
+        var lastCollectionWrapper: CollectionWrapper? = null
 
         if (pathList.collections.isEmpty()) {
             LOGGER.warn("Cannot create path from: ${requestToUrlPath(request)}")
@@ -83,68 +83,67 @@ class DocumentTraverser(
 
         pathList.collections.forEachIndexed { index, wrappedCollection ->
 
-            val collectionQuery =
+            val parentDocumentId = lastCollectionWrapper?.id
+
+            val collection =
                 collectionRepository.findByNameAndStudyIdAndDocumentId(
                     wrappedCollection.name,
                     studyId,
-                    collectionWrapper?.id,
-                )
+                    parentDocumentId,
+                ).orElseGet {
+                    // If there's no collection to store this document in, create it, referencing a parent document if required.
 
-            // If there's no collection to store this document in, create it, referencing a parent document if required.
-            val collection =
-                collectionQuery.orElseGet {
                     collectionRepository.save(
                         Collection(
                             name = wrappedCollection.name,
                             studyId = studyId,
-                            documentId = collectionWrapper?.id,
+                            documentId = lastCollectionWrapper?.id,
                         ),
                     )
                 }
 
             // If we're not creating a document, return the Collection object.
-            if (index >= pathList.documents.size) {
-                collectionWrapper =
+
+            lastCollectionWrapper =
+                if (index >= pathList.documents.size) {
                     CollectionWrapper(
                         collection.id,
                         collection.name,
                         CollectionWrapperType.Collection,
                         scopeToUserId,
                     )
-            } else {
-                val documentQuery =
-                    documentRepository.findByNameAndCollectionId(
-                        pathList.documents[index].name,
-                        collection.id,
-                    )
-
-                val data = if (pathList.collections.lastIndex == index) documentData else null
-
-                if (documentQuery.isPresent) {
-                    throw AlreadyExistsException(
-                        validationMessages.get(
-                            "document.already_exists",
-                            collection.id,
+                } else {
+                    val documentName = pathList.documents[index].name
+                    val documentQuery =
+                        documentRepository.findByNameAndCollectionId(
                             pathList.documents[index].name,
-                        ),
-                    )
-                }
+                            collection.id,
+                        )
 
-                val document =
-                    documentRepository.save(
-                        Document(
-                            name = pathList.documents[index].name,
-                            collectionId = collection.id,
-                            data = data,
-                        ),
-                    )
+                    if (documentQuery.isPresent) {
+                        throw AlreadyExistsException(
+                            validationMessages.get(
+                                "document.already_exists",
+                                collection.id,
+                                pathList.documents[index].name,
+                            ),
+                        )
+                    }
 
-                collectionWrapper =
+                    val document =
+                        documentRepository.save(
+                            Document(
+                                name = documentName,
+                                collectionId = collection.id,
+                                data = if (index == pathList.collections.lastIndex) documentData else null,
+                            ),
+                        )
+
                     CollectionWrapper(document.id, document.name, CollectionWrapperType.Document, scopeToUserId)
-            }
+                }
         }
 
-        return toJson(collectionWrapper)
+        return toJson(lastCollectionWrapper)
     }
 
     /**
@@ -164,7 +163,7 @@ class DocumentTraverser(
     ): String? {
         val pathList = requestToPathList(request, scopeToUserId)
 
-        var collectionWrapper: CollectionWrapper? = null
+        var lastCollectionWrapper: CollectionWrapper? = null
 
         pathList.collections.forEachIndexed { index, wrappedCollection ->
 
@@ -172,7 +171,7 @@ class DocumentTraverser(
                 collectionRepository.findByNameAndStudyIdAndDocumentId(
                     wrappedCollection.name,
                     studyId,
-                    collectionWrapper?.id,
+                    lastCollectionWrapper?.id,
                 )
                     .orElseThrow {
                         ResourceNotFoundException(
@@ -180,40 +179,43 @@ class DocumentTraverser(
                                 "document.get_with_all_params.not_found",
                                 studyId,
                                 wrappedCollection.name,
-                                collectionWrapper?.id!!,
+                                lastCollectionWrapper?.id!!,
                             ),
                         )
                     }
 
-            if (index >= pathList.documents.size) {
-                collectionWrapper =
+            lastCollectionWrapper =
+                if (index >= pathList.documents.size) {
                     CollectionWrapper(
                         collection.id,
                         collection.name,
                         CollectionWrapperType.Collection,
                         scopeToUserId,
                     )
-            } else {
-                val document =
-                    documentRepository.findByNameAndCollectionId(
-                        pathList.documents[index].name,
-                        collection.id,
-                    ).orElseThrow {
-                        ResourceNotFoundException(
-                            validationMessages.get(
-                                "document.get_params.not_found",
-                                pathList.documents[index].name,
-                                collection.id,
-                            ),
-                        )
-                    }
-
-                collectionWrapper =
-                    CollectionWrapper(document.id, document.name, CollectionWrapperType.Document, scopeToUserId)
-            }
+                } else {
+                    val document =
+                        documentRepository.findByNameAndCollectionId(
+                            pathList.documents[index].name,
+                            collection.id,
+                        ).orElseThrow {
+                            ResourceNotFoundException(
+                                validationMessages.get(
+                                    "document.get_params.not_found",
+                                    pathList.documents[index].name,
+                                    collection.id,
+                                ),
+                            )
+                        }
+                    CollectionWrapper(
+                        document.id,
+                        document.name,
+                        CollectionWrapperType.Document,
+                        scopeToUserId,
+                    )
+                }
         }
 
-        return toJson(collectionWrapper)
+        return toJson(lastCollectionWrapper)
     }
 
     /**
@@ -232,7 +234,12 @@ class DocumentTraverser(
     ): DocumentPath {
         val urlPath = requestToUrlPath(request)
 
-        val documentPath = "(?<=collections\\/)(.*)".toRegex().find(urlPath)?.value?.split("/")!!
+        val documentPath =
+            "(?<=collections\\/)(.*)".toRegex()
+                .find(urlPath)
+                ?.value
+                ?.split("/")
+                .orEmpty()
 
         val collections =
             documentPath
@@ -264,53 +271,60 @@ class DocumentTraverser(
     }
 
     private fun toJson(collectionWrapper: CollectionWrapper?): String? {
-        if (collectionWrapper === null) return null
+        if (collectionWrapper == null) return null
 
-        val mapper = ObjectMapper()
-
-        mapper.registerModule(JavaTimeModule())
-        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-
-        return if (collectionWrapper.type === CollectionWrapperType.Collection) {
-            val outerCollection = collectionRepository.findById(collectionWrapper.id!!)
-
-            mapper.writeValueAsString(
-                outerCollection
-                    .map { collection: Collection ->
-                        if (collectionWrapper.scopeToUserAccountId != null) {
-                            // Scope documents to the specified user.
-                            collection.documents =
-                                collection.documents?.filter { document ->
-                                    document.createdBy == collectionWrapper.scopeToUserAccountId
-                                }
-
-                            collection
-                        } else {
-                            collection
-                        }
-                    }.get(),
-            )
-        } else {
-            val document =
-                documentRepository
-                    .findById(collectionWrapper.id!!)
-                    .get()
-                    .takeIf { document ->
-                        if (collectionWrapper.scopeToUserAccountId != null) {
-                            // Scope document to the specified user.
-                            document.createdBy == collectionWrapper.scopeToUserAccountId
-                        } else {
-                            true
-                        }
-                    }
-
-            if (document != null) {
-                mapper.writeValueAsString(document)
-            } else {
-                // If the user's role doesn't grant them access to the document.
-                LOGGER.warn("Current account is not granted to access the document = $document.")
-                throw ResourceNotFoundException(validationMessages.get("document.access.not_granted", document?.name!!))
+        val mapper =
+            ObjectMapper().apply {
+                registerModule(JavaTimeModule())
+                configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
             }
+
+        return try {
+            when (collectionWrapper.type) {
+                CollectionWrapperType.Collection -> {
+                    val collection =
+                        collectionRepository.findById(collectionWrapper.id!!)
+                            .orElseThrow {
+                                ResourceNotFoundException(
+                                    "Collection not found with id ${collectionWrapper.id}",
+                                )
+                            }
+
+                    collection.documents = collectionWrapper.scopeToUserAccountId?.let { userId ->
+                        collection.documents?.filter { document ->
+                            document.createdBy == userId
+                        }
+                    } ?: collection.documents
+
+                    mapper.writeValueAsString(collection)
+                }
+
+                CollectionWrapperType.Document -> {
+                    val document =
+                        documentRepository.findById(collectionWrapper.id!!)
+                            .filter { document ->
+                                collectionWrapper.scopeToUserAccountId?.let { userId ->
+                                    document.createdBy == userId
+                                } ?: true
+                            }
+                            .orElseThrow {
+                                LOGGER.warn(
+                                    "Current account is not granted access to the document with id = ${collectionWrapper.id}.",
+                                )
+                                ResourceNotFoundException(
+                                    validationMessages.get(
+                                        "document.access.not_granted",
+                                        collectionWrapper.id.toString(),
+                                    ),
+                                )
+                            }
+
+                    mapper.writeValueAsString(document)
+                }
+            }
+        } catch (e: Exception) {
+            LOGGER.error("Error converting CollectionWrapper to JSON: ${e.message}", e)
+            throw e
         }
     }
 }
