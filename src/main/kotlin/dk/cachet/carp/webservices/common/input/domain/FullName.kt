@@ -11,7 +11,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 @SerialName(WSInputDataTypes.FULL_NAME_TYPE_NAME)
 data class FullName(
-    val firstName: String?,
-    val middleName: String?,
-    val lastName: String?,
+    val firstName: String? = null,
+    val middleName: String? = null,
+    val lastName: String? = null,
 ) : Data

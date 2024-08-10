@@ -11,10 +11,10 @@ import kotlinx.serialization.Serializable
 @Serializable
 @SerialName(WSInputDataTypes.ADDRESS_TYPE_NAME)
 data class Address(
-    val address1: String?,
-    val address2: String?,
-    val street: String?,
-    val city: String?,
-    val postalCode: String?,
-    val country: String?,
+    val address1: String? = null,
+    val address2: String? = null,
+    val street: String? = null,
+    val city: String? = null,
+    val postalCode: String? = null,
+    val country: String? = null,
 ) : Data
