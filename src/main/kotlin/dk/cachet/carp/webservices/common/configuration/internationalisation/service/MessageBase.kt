@@ -5,6 +5,7 @@ import org.springframework.context.MessageSource
 import org.springframework.context.annotation.Bean
 import org.springframework.context.support.MessageSourceAccessor
 import org.springframework.context.support.ResourceBundleMessageSource
+import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
 
 /**
@@ -13,11 +14,12 @@ import org.springframework.stereotype.Service
  * and internationalization of the messages.
  */
 @Service
-class MessageBase : AMessageBase() {
+@Component
+class MessageBase(private val messageSource: MessageSource) : AMessageBase() {
     init
     {
         // Initialize the [messageSource]
-        accessor = MessageSourceAccessor(messageSource())
+        accessor = MessageSourceAccessor(messageSource)
     }
 
     /**

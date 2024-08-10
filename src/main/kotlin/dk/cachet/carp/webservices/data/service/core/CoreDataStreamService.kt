@@ -13,6 +13,8 @@ import dk.cachet.carp.webservices.data.repository.DataStreamConfigurationReposit
 import dk.cachet.carp.webservices.data.repository.DataStreamIdRepository
 import dk.cachet.carp.webservices.data.repository.DataStreamSequenceRepository
 import dk.cachet.carp.webservices.data.service.impl.CawsMutableDataStreamBatchWrapper
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.stereotype.Component
@@ -50,7 +52,10 @@ class CoreDataStreamService(
         ) { "The study deployment ID of one or more sequences in `batch` doesn't match `studyDeploymentId`." }
 
         // whether there is a config present in the database
-        val configOptional = configRepository.findById(studyDeploymentId.stringRepresentation)
+        val configOptional =
+            withContext(Dispatchers.IO) {
+                configRepository.findById(studyDeploymentId.stringRepresentation)
+            }
 
         require(configOptional.isPresent) {
             "No configuration was found for studyDeploymentId ${studyDeploymentId.stringRepresentation}."
@@ -102,7 +107,10 @@ class CoreDataStreamService(
      * @throws IllegalArgumentException when no data streams were ever opened for any of the [studyDeploymentIds].
      */
     override suspend fun closeDataStreams(studyDeploymentIds: Set<UUID>) {
-        val configs = configRepository.getConfigurationsForIds(studyDeploymentIds.map { it.stringRepresentation })
+        val configs =
+            withContext(Dispatchers.IO) {
+                configRepository.getConfigurationsForIds(studyDeploymentIds.map { it.stringRepresentation })
+            }
 
         require(configs.size == studyDeploymentIds.size) { "One of the configurations passed is not valid." }
 
@@ -140,7 +148,10 @@ class CoreDataStreamService(
         }
 
         // whether there is a config present in the database
-        val configOptional = configRepository.findById(dataStream.studyDeploymentId.stringRepresentation)
+        val configOptional =
+            withContext(Dispatchers.IO) {
+                configRepository.findById(dataStream.studyDeploymentId.stringRepresentation)
+            }
 
         require(configOptional.isPresent) {
             "No configuration was found " +
@@ -155,21 +166,25 @@ class CoreDataStreamService(
         ) { "Data stream wasn't configured for this study deployment." }
 
         val dataStreamId =
-            dataStreamIdRepository.findByStudyDeploymentIdAndDeviceRoleNameAndNameAndNameSpace(
-                studyDeploymentId = dataStream.studyDeploymentId.stringRepresentation,
-                deviceRoleName = dataStream.deviceRoleName,
-                name = dataStream.dataType.name,
-                nameSpace = dataStream.dataType.namespace,
-            ).get()
+            withContext(Dispatchers.IO) {
+                dataStreamIdRepository.findByStudyDeploymentIdAndDeviceRoleNameAndNameAndNameSpace(
+                    studyDeploymentId = dataStream.studyDeploymentId.stringRepresentation,
+                    deviceRoleName = dataStream.deviceRoleName,
+                    name = dataStream.dataType.name,
+                    nameSpace = dataStream.dataType.namespace,
+                )
+            }.get()
 
         val toSequenceId = toSequenceIdInclusive?.toInt() ?: Int.MAX_VALUE
 
         val dataStreamSequences =
-            dataStreamSequenceRepository.findAllBySequenceIdRange(
-                dataStreamId.id,
-                fromSequenceId.toInt(),
-                toSequenceId,
-            )
+            withContext(Dispatchers.IO) {
+                dataStreamSequenceRepository.findAllBySequenceIdRange(
+                    dataStreamId.id,
+                    fromSequenceId.toInt(),
+                    toSequenceId,
+                )
+            }
 
         return dataStreamSequences
             .mapNotNull {
@@ -204,12 +219,18 @@ class CoreDataStreamService(
     override suspend fun openDataStreams(configuration: DataStreamsConfiguration) {
         val id = configuration.studyDeploymentId.stringRepresentation
 
-        check(!configRepository.existsById(id)) {
+        check(
+            !withContext(Dispatchers.IO) {
+                configRepository.existsById(id)
+            },
+        ) {
             "Data streams for deployment with \\\"$id\\\" have already been configured."
         }
 
         val node = objectMapper.valueToTree<JsonNode>(configuration)
-        configRepository.save(DataStreamConfiguration(id, node))
+        withContext(Dispatchers.IO) {
+            configRepository.save(DataStreamConfiguration(id, node))
+        }
         LOGGER.info("New data stream configuration is saved for deployment with id $id.")
 
         val ids =
