@@ -50,7 +50,12 @@ class NotificationServiceImpl(
         messageBuilder.append("Environment: ${environment.profile}")
         when (channelToSendTo) {
             TeamsChannel.CLIENT_ERRORS -> processException(messageBuilder.toString(), teamsClientChannel)
-            TeamsChannel.SERVER_ERRORS -> processException(messageBuilder.toString(), teamsServerChannel)
+            TeamsChannel.SERVER_ERRORS -> {
+                // TODO: This check in not needed here, should be handled in email notification service
+                if (environment.profile == EnvironmentProfile.PRODUCTION) {
+                    processException(messageBuilder.toString(), teamsServerChannel)
+                }
+            }
             TeamsChannel.HEARTBEAT -> processException(messageBuilder.toString(), teamsHeartbeatChannel)
         }
     }
