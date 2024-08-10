@@ -91,7 +91,8 @@ class DocumentTraverser(
                     studyId,
                     parentDocumentId,
                 ).orElseGet {
-                    // If there's no collection to store this document in, create it, referencing a parent document if required.
+                    // If there's no collection to store this document in, create it,
+                    // referencing a parent document if required.
 
                     collectionRepository.save(
                         Collection(
@@ -279,52 +280,47 @@ class DocumentTraverser(
                 configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
             }
 
-        return try {
-            when (collectionWrapper.type) {
-                CollectionWrapperType.Collection -> {
-                    val collection =
-                        collectionRepository.findById(collectionWrapper.id!!)
-                            .orElseThrow {
-                                ResourceNotFoundException(
-                                    "Collection not found with id ${collectionWrapper.id}",
-                                )
-                            }
-
-                    collection.documents = collectionWrapper.scopeToUserAccountId?.let { userId ->
-                        collection.documents?.filter { document ->
-                            document.createdBy == userId
+        return when (collectionWrapper.type) {
+            CollectionWrapperType.Collection -> {
+                val collection =
+                    collectionRepository.findById(collectionWrapper.id!!)
+                        .orElseThrow {
+                            ResourceNotFoundException(
+                                "Collection not found with id ${collectionWrapper.id}",
+                            )
                         }
-                    } ?: collection.documents
 
-                    mapper.writeValueAsString(collection)
-                }
+                collection.documents = collectionWrapper.scopeToUserAccountId?.let { userId ->
+                    collection.documents?.filter { document ->
+                        document.createdBy == userId
+                    }
+                } ?: collection.documents
 
-                CollectionWrapperType.Document -> {
-                    val document =
-                        documentRepository.findById(collectionWrapper.id!!)
-                            .filter { document ->
-                                collectionWrapper.scopeToUserAccountId?.let { userId ->
-                                    document.createdBy == userId
-                                } ?: true
-                            }
-                            .orElseThrow {
-                                LOGGER.warn(
-                                    "Current account is not granted access to the document with id = ${collectionWrapper.id}.",
-                                )
-                                ResourceNotFoundException(
-                                    validationMessages.get(
-                                        "document.access.not_granted",
-                                        collectionWrapper.id.toString(),
-                                    ),
-                                )
-                            }
-
-                    mapper.writeValueAsString(document)
-                }
+                mapper.writeValueAsString(collection)
             }
-        } catch (e: Exception) {
-            LOGGER.error("Error converting CollectionWrapper to JSON: ${e.message}", e)
-            throw e
+
+            CollectionWrapperType.Document -> {
+                val document =
+                    documentRepository.findById(collectionWrapper.id!!)
+                        .filter { document ->
+                            collectionWrapper.scopeToUserAccountId?.let { userId ->
+                                document.createdBy == userId
+                            } ?: true
+                        }
+                        .orElseThrow {
+                            LOGGER.warn(
+                                "Current account has no access to the document with id = ${collectionWrapper.id}.",
+                            )
+                            ResourceNotFoundException(
+                                validationMessages.get(
+                                    "document.access.not_granted",
+                                    collectionWrapper.id.toString(),
+                                ),
+                            )
+                        }
+
+                mapper.writeValueAsString(document)
+            }
         }
     }
 }
