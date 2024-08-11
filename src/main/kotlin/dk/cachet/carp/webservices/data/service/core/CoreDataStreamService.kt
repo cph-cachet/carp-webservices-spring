@@ -130,6 +130,7 @@ class CoreDataStreamService(
      *  - [dataStream] has never been opened
      *  - [fromSequenceId] is negative or [toSequenceIdInclusive] is smaller than [fromSequenceId]
      */
+    @Suppress("LongMethod")
     override suspend fun getDataStream(
         dataStream: DataStreamId,
         fromSequenceId: Long,
