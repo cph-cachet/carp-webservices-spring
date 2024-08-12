@@ -3,10 +3,10 @@ package dk.cachet.carp.webservices.study.serdes
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.SerializerProvider
-import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.studies.domain.StudySnapshot
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.exception.serialization.SerializationException
+import dk.cachet.carp.webservices.common.input.WS_JSON
 import kotlinx.serialization.encodeToString
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -15,10 +15,9 @@ import org.apache.logging.log4j.Logger
  * The Class [StudySnapshotSerializer].
  * The [StudySnapshotSerializer] implements the serialization logic for [StudySnapshot].
  */
-class StudySnapshotSerializer(private val validationMessages: MessageBase): JsonSerializer<StudySnapshot>()
-{
-    companion object
-    {
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
+class StudySnapshotSerializer(private val validationMessages: MessageBase) : JsonSerializer<StudySnapshot>() {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
@@ -30,23 +29,24 @@ class StudySnapshotSerializer(private val validationMessages: MessageBase): Json
      * Also, if the [StudySnapshot] contains invalid format.
      * @return The serialization of [StudySnapshot] object.
      */
-    override fun serialize(studySnapshot: StudySnapshot?, jsonGenerator: JsonGenerator?, serializers: SerializerProvider?)
-    {
-        if (studySnapshot == null)
-        {
+    override fun serialize(
+        studySnapshot: StudySnapshot?,
+        jsonGenerator: JsonGenerator?,
+        serializers: SerializerProvider?,
+    ) {
+        if (studySnapshot == null) {
             LOGGER.error("The StudySnapshot is null.")
             throw SerializationException(validationMessages.get("study.snapshot.serialization.empty"))
         }
 
         val serialized: String
-        try
-        {
-            serialized = JSON.encodeToString(studySnapshot)
-        }
-        catch (ex: Exception)
-        {
+        try {
+            serialized = WS_JSON.encodeToString(studySnapshot)
+        } catch (ex: Exception) {
             LOGGER.error("The StudySnapshot is not valid. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("study.snapshot.serialization.error", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("study.snapshot.serialization.error", ex.message.toString()),
+            )
         }
 
         jsonGenerator!!.writeRawValue(serialized)

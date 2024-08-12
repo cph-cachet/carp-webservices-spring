@@ -32,7 +32,6 @@ class CoreAccountService(
     private val deploymentRepository: CoreDeploymentRepository,
     private val emailInvitationService: EmailInvitationService,
 ) : AccountService {
-
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
         private const val REDIRECT_URL_KEY = "redirectURL"
@@ -53,13 +52,13 @@ class CoreAccountService(
         accountId: UUID,
         invitation: StudyInvitation,
         participation: Participation,
-        devices: List<AnyDeviceConfiguration>
+        devices: List<AnyDeviceConfiguration>,
     ) {
         val deployment = deploymentRepository.getStudyDeploymentBy(participation.studyDeploymentId)
         requireNotNull(deployment)
 
         val account = accountService.findByUUID(accountId)
-        if ( account == null ) {
+        if (account == null) {
             LOGGER.error("Account not found for id: $accountId")
             return
         }
@@ -71,7 +70,7 @@ class CoreAccountService(
         identity: AccountIdentity,
         invitation: StudyInvitation,
         participation: Participation,
-        devices: List<AnyDeviceConfiguration>
+        devices: List<AnyDeviceConfiguration>,
     ): CoreAccount {
         val deployment = deploymentRepository.getStudyDeploymentBy(participation.studyDeploymentId)
         requireNotNull(deployment)
@@ -85,7 +84,7 @@ class CoreAccountService(
         accountIdentity: AccountIdentity,
         invitation: StudyInvitation,
         participation: Participation,
-        deployment: StudyDeployment
+        deployment: StudyDeployment,
     ): Account {
         // only send out email invitations if the account's identity is an email address
         if (accountIdentity is EmailAccountIdentity) {
@@ -93,17 +92,18 @@ class CoreAccountService(
                 accountIdentity.emailAddress.address,
                 participation.studyDeploymentId,
                 invitation,
-                EmailType.INVITE_EXISTING_ACCOUNT
+                EmailType.INVITE_EXISTING_ACCOUNT,
             )
         }
 
-        val account = accountService.invite(
-            accountIdentity,
-            Role.PARTICIPANT,
-            getRedirectUrl(deployment.protocol)
-        )
+        val account =
+            accountService.invite(
+                accountIdentity,
+                Role.PARTICIPANT,
+                getRedirectUrl(deployment.protocol),
+            )
 
-        accountService.grant( accountIdentity, setOf( Claim.InDeployment( deployment.id ) ) )
+        accountService.grant(accountIdentity, setOf(Claim.InDeployment(deployment.id)))
 
         return account
     }
@@ -115,13 +115,15 @@ class CoreAccountService(
      */
     private fun getRedirectUrl(protocol: StudyProtocol): String? {
         // If it is a custom protocol study, try to extract the `redirectUrl` from the custom defined protocol.
-        val customProtocolDevice = protocol
-            .primaryDevices.singleOrNull() as? CustomProtocolDevice
+        val customProtocolDevice =
+            protocol
+                .primaryDevices.singleOrNull() as? CustomProtocolDevice
         val customProtocol = (protocol.tasks.singleOrNull() as? CustomProtocolTask)?.studyProtocol
         if (customProtocolDevice != null && customProtocol != null) {
             try {
-                val redirectUrl = (Json.parseToJsonElement(customProtocol) as? JsonObject)
-                    ?.get(REDIRECT_URL_KEY) as? JsonPrimitive
+                val redirectUrl =
+                    (Json.parseToJsonElement(customProtocol) as? JsonObject)
+                        ?.get(REDIRECT_URL_KEY) as? JsonPrimitive
                 return redirectUrl?.content
             } catch (_: SerializationException) {
                 // If the customProtocol is not JSON, it cannot contain `redirectUrl`, and it can thus be ignored.

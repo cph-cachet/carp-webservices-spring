@@ -127,6 +127,7 @@ com:
           - /actuator/**
           - /swagger-ui/**
           - /v3/api-docs/**
+          - /doc/**
           cors:
           - path: /**
             allowed-origins: "*"
@@ -151,10 +152,10 @@ com:
               prefix: collection_owner_
 
 springdoc:
+  api-docs:
+    path: /doc/v3/api-docs
   swagger-ui:
-    disable-swagger-default-url: true
-    url: /${environment.subfolder}/v3/api-docs
-    config-url: /${environment.subfolder}/v3/api-docs/swagger-config
+    path: /doc/
 
 rabbit:
   data-point:
@@ -251,6 +252,10 @@ teams:
 
 storage:
   directory: /home/carp/storage/${spring.profiles.active}/
+  exports:
+    expiration:
+      enabled: true
+      days: 90
 
 environment:
   url: "${CAWS_URL}"

@@ -5,10 +5,9 @@ import com.fasterxml.jackson.core.TreeNode
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
 import dk.cachet.carp.common.application.devices.DeviceRegistration
-import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.exception.serialization.SerializationException
-import kotlinx.serialization.decodeFromString
+import dk.cachet.carp.webservices.common.input.WS_JSON
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.util.StringUtils
@@ -17,10 +16,11 @@ import org.springframework.util.StringUtils
  * The Class [DeviceRegistrationDeserializer].
  * The [DeviceRegistrationDeserializer] implements the serialization logic for [DeviceRegistration].
  */
-class DeviceRegistrationDeserializer(private val validationMessages: MessageBase): JsonDeserializer<DeviceRegistration>()
-{
-    companion object
-    {
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
+class DeviceRegistrationDeserializer(
+    private val validationMessages: MessageBase,
+) : JsonDeserializer<DeviceRegistration>() {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
@@ -32,34 +32,33 @@ class DeviceRegistrationDeserializer(private val validationMessages: MessageBase
      * Also, if the [DeviceRegistration] contains invalid format.
      * @return The deserialized [DeviceRegistration] object.
      */
-    override fun deserialize(jsonParser: JsonParser?, deserializationContext: DeserializationContext?): DeviceRegistration
-    {
+    override fun deserialize(
+        jsonParser: JsonParser?,
+        deserializationContext: DeserializationContext?,
+    ): DeviceRegistration {
         val deviceRegistration: String
-        try
-        {
-            deviceRegistration =  jsonParser?.codec?.readTree<TreeNode>(jsonParser).toString()
+        try {
+            deviceRegistration = jsonParser?.codec?.readTree<TreeNode>(jsonParser).toString()
 
-            if (!StringUtils.hasLength(deviceRegistration))
-            {
+            if (!StringUtils.hasLength(deviceRegistration)) {
                 LOGGER.error("The core DeviceRegistration cannot be blank or empty.")
                 throw SerializationException(validationMessages.get("protocol.device_reg.deserialization.empty"))
             }
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The core DeviceRegistration contains bad format. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("protocol.device_reg.deserialization.bad_format", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("protocol.device_reg.deserialization.bad_format", ex.message.toString()),
+            )
         }
 
         val parsed: DeviceRegistration
-        try
-        {
-            parsed = JSON.decodeFromString(deviceRegistration)
-        }
-        catch (ex: Exception)
-        {
+        try {
+            parsed = WS_JSON.decodeFromString(deviceRegistration)
+        } catch (ex: Exception) {
             LOGGER.error("The core DeviceRegistration serializer is not valid. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("protocol.device_reg.deserialization.error", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("protocol.device_reg.deserialization.error", ex.message.toString()),
+            )
         }
 
         return parsed

@@ -9,30 +9,28 @@ import org.springframework.stereotype.Service
 
 @Service
 class ParticipationServiceAuthorizer(
-    private val auth: AuthorizationService
-) : ApplicationServiceAuthorizer<ParticipationService, ParticipationServiceRequest<*>>
-{
+    private val auth: AuthorizationService,
+) : ApplicationServiceAuthorizer<ParticipationService, ParticipationServiceRequest<*>> {
     override fun ParticipationServiceRequest<*>.authorize() {
-        when ( this )
-        {
+        when (this) {
             is ParticipationServiceRequest.GetActiveParticipationInvitations ->
-                auth.requireOwner( accountId )
+                auth.requireOwner(accountId)
             is ParticipationServiceRequest.GetParticipantData ->
-                auth.require( Claim.InDeployment( studyDeploymentId ))
+                auth.require(Claim.InDeployment(studyDeploymentId))
             is ParticipationServiceRequest.GetParticipantDataList ->
-                auth.require( studyDeploymentIds.map { Claim.InDeployment( it ) }.toSet() )
+                auth.require(studyDeploymentIds.map { Claim.InDeployment(it) }.toSet())
             is ParticipationServiceRequest.SetParticipantData ->
-                auth.require( Claim.InDeployment( studyDeploymentId ) )
+                auth.require(Claim.InDeployment(studyDeploymentId))
         }
     }
 
     override suspend fun ParticipationServiceRequest<*>.changeClaimsOnSuccess(result: Any?) {
-        when ( this )
-        {
+        when (this) {
             is ParticipationServiceRequest.GetActiveParticipationInvitations,
             is ParticipationServiceRequest.GetParticipantData,
             is ParticipationServiceRequest.GetParticipantDataList,
-            is ParticipationServiceRequest.SetParticipantData -> Unit
+            is ParticipationServiceRequest.SetParticipantData,
+            -> Unit
         }
     }
 }

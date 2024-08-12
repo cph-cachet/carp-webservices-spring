@@ -12,8 +12,7 @@ data class StudyOverview(
     val canSetInvitation: Boolean,
     val canSetStudyProtocol: Boolean,
     val canDeployToParticipants: Boolean,
-
     /** Additional Info */
     val description: String?,
-    val createdBy: String?
+    val createdBy: String?,
 )

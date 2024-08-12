@@ -12,19 +12,16 @@ import java.util.stream.Collectors
  * The Class [QueryBuilder].
  * The [QueryBuilder] implements the RSQL Query Specification functionality to build a nested query.
  */
-class QueryBuilder<T>
-{
-    private fun createSpecification(node: Node): Specification<T>?
-    {
-        if (node is LogicalNode)
-        {
+class QueryBuilder<T> {
+    private fun createSpecification(node: Node): Specification<T>? {
+        if (node is LogicalNode) {
             return createSpecification(node)
         }
-        return if (node is ComparisonNode)
-        {
+        return if (node is ComparisonNode) {
             createSpecification(node)
+        } else {
+            null
         }
-        else null
     }
 
     /**
@@ -33,9 +30,9 @@ class QueryBuilder<T>
      * @param logicalNode The [logicalNode] of the a specification.
      * @return The [Specification] object created.
      */
-    fun createSpecification(logicalNode: LogicalNode): Specification<T>
-    {
-        val specs = logicalNode.children
+    fun createSpecification(logicalNode: LogicalNode): Specification<T> {
+        val specs =
+            logicalNode.children
                 .stream()
                 .map { node -> createSpecification(node) }
                 .filter(({ Objects.nonNull(it) }))
@@ -43,17 +40,12 @@ class QueryBuilder<T>
 
         var result = specs.first()
 
-        if (logicalNode.operator == LogicalOperator.AND)
-        {
-            for (i in 1 until specs.size)
-            {
+        if (logicalNode.operator == LogicalOperator.AND) {
+            for (i in 1 until specs.size) {
                 result = Specification.where(result).and(specs[i])
             }
-        }
-        else if (logicalNode.operator == LogicalOperator.OR)
-        {
-            for (i in 1 until specs.size)
-            {
+        } else if (logicalNode.operator == LogicalOperator.OR) {
+            for (i in 1 until specs.size) {
                 result = Specification.where(result).or(specs[i])
             }
         }
@@ -67,8 +59,9 @@ class QueryBuilder<T>
      * @param comparisonNode The [comparisonNode] to create a specification.
      * @return The created [Specification] object.
      */
-    fun createSpecification(comparisonNode: ComparisonNode): Specification<T>?
-    {
-        return Specification.where(QuerySpecification<T>(comparisonNode.selector, comparisonNode.operator, comparisonNode.arguments))
+    fun createSpecification(comparisonNode: ComparisonNode): Specification<T>? {
+        return Specification.where(
+            QuerySpecification<T>(comparisonNode.selector, comparisonNode.operator, comparisonNode.arguments),
+        )
     }
 }

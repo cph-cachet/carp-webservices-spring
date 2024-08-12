@@ -4,15 +4,13 @@ import cz.jirutka.rsql.parser.ast.AndNode
 import cz.jirutka.rsql.parser.ast.ComparisonNode
 import cz.jirutka.rsql.parser.ast.OrNode
 import cz.jirutka.rsql.parser.ast.RSQLVisitor
-
 import org.springframework.data.jpa.domain.Specification
 
 /**
  * The Class [QueryVisitor].
  * The [QueryVisitor] implements the RSQL Specification visitor interface.
  */
-class QueryVisitor<T>: RSQLVisitor<Specification<T>, Void>
-{
+class QueryVisitor<T> : RSQLVisitor<Specification<T>, Void> {
     // The [QueryBuilder] to build the query builder.
     private val builder: QueryBuilder<T> = QueryBuilder()
 
@@ -23,8 +21,10 @@ class QueryVisitor<T>: RSQLVisitor<Specification<T>, Void>
      * @param param The [param] of the request.
      * @return The created [Specification] with the given parameter applied.
      */
-    override fun visit(andNode: AndNode, param: Void?): Specification<T>
-    {
+    override fun visit(
+        andNode: AndNode,
+        param: Void?,
+    ): Specification<T> {
         return builder.createSpecification(andNode)
     }
 
@@ -35,8 +35,10 @@ class QueryVisitor<T>: RSQLVisitor<Specification<T>, Void>
      * @param param The [param] of the request.
      * @return The created [Specification] with the given parameter applied.
      */
-    override fun visit(orNode: OrNode, param: Void?): Specification<T>
-    {
+    override fun visit(
+        orNode: OrNode,
+        param: Void?,
+    ): Specification<T> {
         return builder.createSpecification(orNode)
     }
 
@@ -47,8 +49,10 @@ class QueryVisitor<T>: RSQLVisitor<Specification<T>, Void>
      * @param params The [params] of the request.
      * @return The created [Specification] with the given parameter applied.
      */
-    override fun visit(comparisonNode: ComparisonNode, params: Void?): Specification<T>?
-    {
+    override fun visit(
+        comparisonNode: ComparisonNode,
+        params: Void?,
+    ): Specification<T>? {
         return builder.createSpecification(comparisonNode)
     }
 }

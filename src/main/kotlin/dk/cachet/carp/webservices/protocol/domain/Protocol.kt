@@ -17,26 +17,23 @@ import org.hibernate.type.SqlTypes
 @Entity
 @Table(name = "protocols")
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
-data class Protocol
-(
-        /**
-         * The protocol [id].
-         */
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        val id: Int = 0,
-
-        /**
-         * The protocol [versionTag].
-         */
-        @Column(name = "version_tag")
-        var versionTag: String = "",
-
-        /**
-         * The core [StudyProtocolSnapshot] class as a [JsonNode].
-         */
-        @JdbcTypeCode(SqlTypes.JSON)
-        @Column(columnDefinition = "jsonb")
-        @Type(JsonBinaryType::class)
-        var snapshot: JsonNode? = null
-): Auditable()
+data class Protocol(
+    /**
+     * The protocol [id].
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Int = 0,
+    /**
+     * The protocol [versionTag].
+     */
+    @Column(name = "version_tag")
+    var versionTag: String = "",
+    /**
+     * The core [StudyProtocolSnapshot] class as a [JsonNode].
+     */
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    @Type(JsonBinaryType::class)
+    var snapshot: JsonNode? = null,
+) : Auditable()

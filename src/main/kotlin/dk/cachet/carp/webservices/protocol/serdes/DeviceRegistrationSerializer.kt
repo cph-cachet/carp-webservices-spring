@@ -4,9 +4,9 @@ import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.SerializerProvider
 import dk.cachet.carp.common.application.devices.DeviceRegistration
-import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.exception.serialization.SerializationException
+import dk.cachet.carp.webservices.common.input.WS_JSON
 import kotlinx.serialization.encodeToString
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -15,10 +15,9 @@ import org.apache.logging.log4j.Logger
  * The Class [DeviceRegistrationSerializer].
  * The [DeviceRegistrationSerializer] implements the serialization logic for [DeviceRegistration].
  */
-class DeviceRegistrationSerializer(private val validationMessages: MessageBase): JsonSerializer<DeviceRegistration>()
-{
-    companion object
-    {
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
+class DeviceRegistrationSerializer(private val validationMessages: MessageBase) : JsonSerializer<DeviceRegistration>() {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
@@ -32,23 +31,24 @@ class DeviceRegistrationSerializer(private val validationMessages: MessageBase):
      * Also, if the [StudyProtocolSnapshot] contains invalid format.
      * @return The serialization [StudyProtocolSnapshot] object.
      */
-    override fun serialize(deviceRegistration: DeviceRegistration?, jsonGenerator: JsonGenerator?, serializers: SerializerProvider?)
-    {
-        if (deviceRegistration == null)
-        {
+    override fun serialize(
+        deviceRegistration: DeviceRegistration?,
+        jsonGenerator: JsonGenerator?,
+        serializers: SerializerProvider?,
+    ) {
+        if (deviceRegistration == null) {
             LOGGER.error("The core DeviceRegistration is null.")
             throw SerializationException(validationMessages.get("protocol.device_reg.serialization.empty"))
         }
 
         val serialized: String
-        try
-        {
-            serialized = JSON.encodeToString(deviceRegistration)
-        }
-        catch (ex: Exception)
-        {
+        try {
+            serialized = WS_JSON.encodeToString(deviceRegistration)
+        } catch (ex: Exception) {
             LOGGER.error("The core DeviceRegistration is not valid. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("protocol.device_reg.serialization.error", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("protocol.device_reg.serialization.error", ex.message.toString()),
+            )
         }
 
         jsonGenerator!!.writeRawValue(serialized)

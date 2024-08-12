@@ -25,20 +25,18 @@ import org.springframework.security.core.context.SecurityContextHolder
  */
 @Configuration
 @EnableMethodSecurity
-class SecurityConfig
-{
+class SecurityConfig {
     @Bean
     fun methodSecurityExpressionHandler(
         participantRepository: CoreParticipantRepository,
-        authenticationService: AuthenticationService
+        authenticationService: AuthenticationService,
     ): MethodSecurityExpressionHandler =
         SpringAddonsMethodSecurityExpressionHandler {
-            ProxiesMethodSecurityExpressionRoot( participantRepository, authenticationService )
+            ProxiesMethodSecurityExpressionRoot(participantRepository, authenticationService)
         }
 
     @PostConstruct
-    fun init() =
-        SecurityContextHolder.setStrategyName( SecurityContextHolder.MODE_INHERITABLETHREADLOCAL )
+    fun init() = SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL)
 }
 
 /**
@@ -48,48 +46,43 @@ class SecurityConfig
  */
 class ProxiesMethodSecurityExpressionRoot(
     private val participantRepository: CoreParticipantRepository,
-    private val auth: AuthenticationService
-): SpringAddonsMethodSecurityExpressionRoot()
-{
-    fun canManageStudy( studyId: UUID? ) : Boolean =
-        studyId != null && auth.getClaims().contains( Claim.ManageStudy( studyId ) ) || isAdmin()
+    private val auth: AuthenticationService,
+) : SpringAddonsMethodSecurityExpressionRoot() {
+    fun canManageStudy(studyId: UUID?): Boolean =
+        studyId != null && auth.getClaims().contains(Claim.ManageStudy(studyId)) || isAdmin()
 
-    fun isProtocolOwner( protocolId: UUID? ) : Boolean =
-        protocolId != null && auth.getClaims().contains( Claim.ProtocolOwner( protocolId ) ) || isAdmin()
+    fun isProtocolOwner(protocolId: UUID?): Boolean =
+        protocolId != null && auth.getClaims().contains(Claim.ProtocolOwner(protocolId)) || isAdmin()
 
-    fun isInDeployment( deploymentId: UUID? ) : Boolean =
-        deploymentId != null && auth.getClaims().contains( Claim.InDeployment( deploymentId ) ) || isAdmin()
+    fun isInDeployment(deploymentId: UUID?): Boolean =
+        deploymentId != null && auth.getClaims().contains(Claim.InDeployment(deploymentId)) || isAdmin()
 
-    fun canManageDeployment( deploymentId: UUID? ) : Boolean =
-        deploymentId != null && auth.getClaims().contains( Claim.ManageDeployment( deploymentId ) ) || isAdmin()
+    fun canManageDeployment(deploymentId: UUID?): Boolean =
+        deploymentId != null && auth.getClaims().contains(Claim.ManageDeployment(deploymentId)) || isAdmin()
 
-    fun isConsentOwner( consentId: Int? ) : Boolean =
-        consentId != null && auth.getClaims().contains( Claim.ConsentOwner( consentId ) ) || isAdmin()
+    fun isCollectionOwner(collectionId: Int?): Boolean =
+        collectionId != null && auth.getClaims().contains(Claim.CollectionOwner(collectionId)) || isAdmin()
 
-    fun isCollectionOwner( collectionId: Int? ) : Boolean =
-        collectionId != null && auth.getClaims().contains( Claim.CollectionOwner( collectionId ) ) || isAdmin()
-
-    fun isFileOwner( fileId: Int? ) : Boolean =
-        fileId != null && auth.getClaims().contains( Claim.FileOwner( fileId ) ) || isAdmin()
+    fun isFileOwner(fileId: Int?): Boolean =
+        fileId != null && auth.getClaims().contains(Claim.FileOwner(fileId)) || isAdmin()
 
     // HACK: it is not easy to assign a claim with a studyId when creating deployments,
     // so we inject `CoreParticipantRepository` here to check whether the user is in a deployment
     // which is part of this study.
     //
     // A potential workaround would be to redesign the endpoints for consent, documents, collections and files.
-    fun isInDeploymentOfStudy( studyId: UUID ) : Boolean =
-        runBlocking(Dispatchers.IO + SecurityCoroutineContext() )
-        {
-            if ( isAdmin() ) return@runBlocking true
+    fun isInDeploymentOfStudy(studyId: UUID): Boolean =
+        runBlocking(Dispatchers.IO + SecurityCoroutineContext()) {
+            if (isAdmin()) return@runBlocking true
 
             val id =
-                participantRepository.getRecruitment( studyId )?.participantGroups?.keys
+                participantRepository.getRecruitment(studyId)?.participantGroups?.keys
                     ?.firstOrNull {
-                        auth.getClaims().contains( Claim.InDeployment( it ))
+                        auth.getClaims().contains(Claim.InDeployment(it))
                     }
 
             id != null
         }
 
-    private fun isAdmin() : Boolean = hasRole( Role.SYSTEM_ADMIN.toString() )
+    private fun isAdmin(): Boolean = hasRole(Role.SYSTEM_ADMIN.toString())
 }

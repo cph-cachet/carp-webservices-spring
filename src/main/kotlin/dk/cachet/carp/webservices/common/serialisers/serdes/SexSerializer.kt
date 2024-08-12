@@ -15,30 +15,29 @@ import org.apache.logging.log4j.Logger
  * The Class [SexSerializer].
  * The [SexSerializer] implements the serialization mechanism for the [Sex] class.e
  */
-class SexSerializer(private val validationMessages: MessageBase): JsonSerializer<Sex>()
-{
-    companion object
-    {
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
+class SexSerializer(private val validationMessages: MessageBase) : JsonSerializer<Sex>() {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
     /**
      * The function [serialize] used to serialize the core [sex].
      * */
-    override fun serialize(sex: Sex?, jsonGenerator: JsonGenerator?, serializers: SerializerProvider?) {
-        if (sex == null)
-        {
+    override fun serialize(
+        sex: Sex?,
+        jsonGenerator: JsonGenerator?,
+        serializers: SerializerProvider?,
+    ) {
+        if (sex == null) {
             LOGGER.error("The core Sex is null.")
             throw SerializationException(validationMessages.get("serialization.sex.empty"))
         }
 
         val serialized: String
-        try
-        {
-            serialized = JSON.encodeToString(PolymorphicEnumSerializer( Sex.serializer() ), sex)
-        }
-        catch (ex: Exception)
-        {
+        try {
+            serialized = JSON.encodeToString(PolymorphicEnumSerializer(Sex.serializer()), sex)
+        } catch (ex: Exception) {
             LOGGER.error("The core Sex is not valid. Exception: $ex")
             throw SerializationException(validationMessages.get("serialization.sex.bad_format", ex.message.toString()))
         }

@@ -7,8 +7,7 @@ import org.springframework.web.multipart.MultipartFile
  * The Interface [FileStorage].
  * The [FileStorage] creates an interface for handling storage requests.
  */
-interface FileStorage
-{
+interface FileStorage {
     /** The [store] interface for storing files into the storage. */
     fun store(file: MultipartFile): String
 

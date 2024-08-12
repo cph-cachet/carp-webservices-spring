@@ -1,0 +1,13 @@
+{
+  "tags": [
+    "data-stream-controller"
+  ],
+  "description": "Same as data-stream-service, but take ByteArray instead of JSON string, the ByteArray should be a compressed DataStreamServiceRequest via Gzip.",
+  "requestBody": {
+    "content": {
+      "application/json": {
+        "example": "Binary data"
+      }
+    }
+  }
+}

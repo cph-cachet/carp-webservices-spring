@@ -4,11 +4,10 @@ import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.TreeNode
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
-import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.deployments.application.StudyDeploymentStatus
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.exception.serialization.SerializationException
-import kotlinx.serialization.decodeFromString
+import dk.cachet.carp.webservices.common.input.WS_JSON
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.util.StringUtils
@@ -17,10 +16,11 @@ import org.springframework.util.StringUtils
  * The Class [StudyDeploymentStatusDeserializer].
  * [StudyDeploymentStatusDeserializer] implements the deserialization logic for [StudyDeploymentStatus].
  */
-class StudyDeploymentStatusDeserializer(private val validationMessages: MessageBase): JsonDeserializer<StudyDeploymentStatus>()
-{
-    companion object
-    {
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
+class StudyDeploymentStatusDeserializer(
+    private val validationMessages: MessageBase,
+) : JsonDeserializer<StudyDeploymentStatus>() {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
@@ -33,34 +33,33 @@ class StudyDeploymentStatusDeserializer(private val validationMessages: MessageB
      * Also, if the [StudyDeploymentStatus] contains invalid format.
      * @return The deserialised study deployment status object.
      */
-    override fun deserialize(jsonParser: JsonParser?, deserializationContext: DeserializationContext?): StudyDeploymentStatus
-    {
+    override fun deserialize(
+        jsonParser: JsonParser?,
+        deserializationContext: DeserializationContext?,
+    ): StudyDeploymentStatus {
         val studyDeploymentStatus: String
-        try
-        {
+        try {
             studyDeploymentStatus = jsonParser?.codec?.readTree<TreeNode>(jsonParser).toString()
 
-            if (!StringUtils.hasLength(studyDeploymentStatus))
-            {
+            if (!StringUtils.hasLength(studyDeploymentStatus)) {
                 LOGGER.error("The core StudyDeploymentStatus cannot be blank or empty.")
                 throw SerializationException(validationMessages.get("deployment.status.deserialization.empty"))
             }
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The core StudyDeploymentStatus contains bad format. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("deployment.status.deserialization.bad_format", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("deployment.status.deserialization.bad_format", ex.message.toString()),
+            )
         }
 
         val parsed: StudyDeploymentStatus
-        try
-        {
-            parsed = JSON.decodeFromString(studyDeploymentStatus)
-        }
-        catch (ex: Exception)
-        {
+        try {
+            parsed = WS_JSON.decodeFromString(studyDeploymentStatus)
+        } catch (ex: Exception) {
             LOGGER.error("The core StudyDeploymentStatus serializer is not valid. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("deployment.status.deserialization.error", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("deployment.status.deserialization.error", ex.message.toString()),
+            )
         }
 
         return parsed

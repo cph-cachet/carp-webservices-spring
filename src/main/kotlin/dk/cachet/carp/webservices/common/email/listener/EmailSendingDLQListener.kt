@@ -13,25 +13,25 @@ import org.springframework.stereotype.Component
  * or redirects them to the Parking-Lot-Queue.
  */
 @Component
-class EmailSendingDLQListener(private val rabbitTemplate: RabbitTemplate, private val environment: Environment): DLQListener()
-{
+class EmailSendingDLQListener(
+    private val rabbitTemplate: RabbitTemplate,
+    private val environment: Environment,
+) : DLQListener() {
     @RabbitListener(queues = ["\${rabbit.email.sending.dlq}"])
-    fun receive(failedMessage: Message)
-    {
-        if (!assertAndIncrementRetriesHeader(failedMessage))
-        {
+    fun receive(failedMessage: Message) {
+        if (!assertAndIncrementRetriesHeader(failedMessage)) {
             rabbitTemplate.send(
-                    environment.getProperty("rabbit.email.sending.plx")!!,
-                    failedMessage.messageProperties.receivedRoutingKey,
-                    failedMessage
+                environment.getProperty("rabbit.email.sending.plx")!!,
+                failedMessage.messageProperties.receivedRoutingKey,
+                failedMessage,
             )
             return
         }
 
         rabbitTemplate.send(
-                environment.getProperty("rabbit.email.sending.direct-ex")!!,
-                failedMessage.messageProperties.receivedRoutingKey,
-                failedMessage
+            environment.getProperty("rabbit.email.sending.direct-ex")!!,
+            failedMessage.messageProperties.receivedRoutingKey,
+            failedMessage,
         )
     }
 }

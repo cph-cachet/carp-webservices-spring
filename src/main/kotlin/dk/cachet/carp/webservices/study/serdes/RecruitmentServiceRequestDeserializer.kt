@@ -4,21 +4,21 @@ import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.TreeNode
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
-import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.studies.infrastructure.RecruitmentServiceRequest
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.exception.serialization.SerializationException
+import dk.cachet.carp.webservices.common.input.WS_JSON
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.util.StringUtils
 
-
 /**
  * [RecruitmentServiceRequestDeserializer] implements the deserialization logic for [RecruitmentServiceRequest].
  */
-class RecruitmentServiceRequestDeserializer(private val validationMessages: MessageBase): JsonDeserializer<RecruitmentServiceRequest<*>>()
-{
-
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
+class RecruitmentServiceRequestDeserializer(
+    private val validationMessages: MessageBase,
+) : JsonDeserializer<RecruitmentServiceRequest<*>>() {
     companion object {
         /** The [LOGGER]. */
         private val LOGGER: Logger = LogManager.getLogger()
@@ -33,39 +33,41 @@ class RecruitmentServiceRequestDeserializer(private val validationMessages: Mess
      * @return The deserialized [RecruitmentServiceRequest] object.
      */
 
-    override fun deserialize(jsonParser: JsonParser?, ctxt: DeserializationContext?): RecruitmentServiceRequest<*>
-    {
-            val recruitmentServiceRequest: String
-            try {
-                recruitmentServiceRequest = jsonParser?.codec?.readTree<TreeNode>(jsonParser).toString()
+    override fun deserialize(
+        jsonParser: JsonParser?,
+        ctxt: DeserializationContext?,
+    ): RecruitmentServiceRequest<*> {
+        val recruitmentServiceRequest: String
+        try {
+            recruitmentServiceRequest = jsonParser?.codec?.readTree<TreeNode>(jsonParser).toString()
 
-                if (!StringUtils.hasLength(recruitmentServiceRequest)) {
-                    LOGGER.error("The RecruitmentServiceRequest cannot be blank or empty.")
-                    throw SerializationException(validationMessages.get("study.details.deserialization.empty"))
-                }
-            } catch (ex: Exception) {
-                LOGGER.error("The core RecruitmentServiceRequest request contains bad format. Exception: ${ex.message}")
-                throw SerializationException(
-                    validationMessages.get(
-                        "study.details.deserialization.bad_format",
-                        ex.message.toString()
-                    )
-                )
+            if (!StringUtils.hasLength(recruitmentServiceRequest)) {
+                LOGGER.error("The RecruitmentServiceRequest cannot be blank or empty.")
+                throw SerializationException(validationMessages.get("study.details.deserialization.empty"))
             }
-
-            val parsed: RecruitmentServiceRequest<*>
-            try {
-                parsed = JSON.decodeFromString(RecruitmentServiceRequest.Serializer, recruitmentServiceRequest)
-            } catch (ex: Exception) {
-                LOGGER.error("The core RecruitmentServiceRequest serializer is not valid. Exception: ${ex.message}")
-                throw SerializationException(
-                    validationMessages.get(
-                        "study.details.deserialization.error",
-                        ex.message.toString()
-                    )
-                )
-            }
-
-            return parsed
+        } catch (ex: Exception) {
+            LOGGER.error("The core RecruitmentServiceRequest request contains bad format. Exception: ${ex.message}")
+            throw SerializationException(
+                validationMessages.get(
+                    "study.details.deserialization.bad_format",
+                    ex.message.toString(),
+                ),
+            )
         }
+
+        val parsed: RecruitmentServiceRequest<*>
+        try {
+            parsed = WS_JSON.decodeFromString(RecruitmentServiceRequest.Serializer, recruitmentServiceRequest)
+        } catch (ex: Exception) {
+            LOGGER.error("The core RecruitmentServiceRequest serializer is not valid. Exception: ${ex.message}")
+            throw SerializationException(
+                validationMessages.get(
+                    "study.details.deserialization.error",
+                    ex.message.toString(),
+                ),
+            )
+        }
+
+        return parsed
+    }
 }

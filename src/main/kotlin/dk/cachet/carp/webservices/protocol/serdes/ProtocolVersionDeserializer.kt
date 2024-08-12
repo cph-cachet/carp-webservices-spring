@@ -4,20 +4,18 @@ import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.TreeNode
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
-import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.protocols.application.ProtocolVersion
 import dk.cachet.carp.protocols.application.StudyProtocolSnapshot
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.exception.serialization.SerializationException
-import kotlinx.serialization.decodeFromString
+import dk.cachet.carp.webservices.common.input.WS_JSON
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.util.StringUtils
 
-class ProtocolVersionDeserializer(private val validationMessages: MessageBase): JsonDeserializer<ProtocolVersion>()
-{
-    companion object
-    {
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
+class ProtocolVersionDeserializer(private val validationMessages: MessageBase) : JsonDeserializer<ProtocolVersion>() {
+    companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
@@ -29,34 +27,33 @@ class ProtocolVersionDeserializer(private val validationMessages: MessageBase): 
      * Also, if the [StudyProtocolSnapshot] contains invalid format.
      * @return The deserialized [StudyProtocolSnapshot] object.
      */
-    override fun deserialize(jsonParser: JsonParser?, deserializationContext: DeserializationContext?): ProtocolVersion
-    {
+    override fun deserialize(
+        jsonParser: JsonParser?,
+        deserializationContext: DeserializationContext?,
+    ): ProtocolVersion {
         val protocolVersion: String
-        try
-        {
-            protocolVersion =  jsonParser?.codec?.readTree<TreeNode>(jsonParser).toString()
+        try {
+            protocolVersion = jsonParser?.codec?.readTree<TreeNode>(jsonParser).toString()
 
-            if (!StringUtils.hasLength(protocolVersion))
-            {
+            if (!StringUtils.hasLength(protocolVersion)) {
                 LOGGER.error("The core StudyProtocolSnapshot cannot be blank or empty.")
                 throw SerializationException(validationMessages.get("protocol.snapshot.deserialization.empty"))
             }
-        }
-        catch (ex: Exception)
-        {
+        } catch (ex: Exception) {
             LOGGER.error("The core StudyProtocolSnapshot contains bad format. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("protocol.snapshot.deserialization.bad_format", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("protocol.snapshot.deserialization.bad_format", ex.message.toString()),
+            )
         }
 
         val parsed: ProtocolVersion
-        try
-        {
-            parsed = JSON.decodeFromString(protocolVersion)
-        }
-        catch (ex: Exception)
-        {
+        try {
+            parsed = WS_JSON.decodeFromString(protocolVersion)
+        } catch (ex: Exception) {
             LOGGER.error("The core StudyProtocolSnapshot serializer is not valid. Exception: ${ex.message}")
-            throw SerializationException(validationMessages.get("protocol.snapshot.deserialization.error", ex.message.toString()))
+            throw SerializationException(
+                validationMessages.get("protocol.snapshot.deserialization.error", ex.message.toString()),
+            )
         }
 
         return parsed

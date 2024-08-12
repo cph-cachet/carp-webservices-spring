@@ -22,8 +22,9 @@ import dk.cachet.carp.studies.infrastructure.RecruitmentServiceDecorator
 import dk.cachet.carp.studies.infrastructure.StudyServiceDecorator
 import dk.cachet.carp.webservices.common.authorization.ApplicationServiceRequestAuthorizer
 import dk.cachet.carp.webservices.common.eventbus.CoreEventBus
-import dk.cachet.carp.webservices.data.authorization.DataStreamServiceAuthorizer
-import dk.cachet.carp.webservices.data.service.core.CoreDataStreamService
+import dk.cachet.carp.webservices.common.input.WSInputDataTypes
+import dk.cachet.carp.webservices.datastream.authorization.DataStreamServiceAuthorizer
+import dk.cachet.carp.webservices.datastream.service.core.CoreDataStreamService
 import dk.cachet.carp.webservices.deployment.authorization.DeploymentServiceAuthorizer
 import dk.cachet.carp.webservices.deployment.authorization.ParticipationServiceAuthorizer
 import dk.cachet.carp.webservices.deployment.repository.CoreDeploymentRepository
@@ -35,7 +36,6 @@ import dk.cachet.carp.webservices.study.authorization.RecruitmentServiceAuthoriz
 import dk.cachet.carp.webservices.study.authorization.StudyServiceAuthorizer
 import dk.cachet.carp.webservices.study.repository.CoreParticipantRepository
 import dk.cachet.carp.webservices.study.repository.CoreStudyRepository
-import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
 
 /**
@@ -46,18 +46,15 @@ import org.springframework.stereotype.Service
 @Service
 class CoreServiceContainer(
     coreEventBus: CoreEventBus,
-
     // repositories
     participationRepository: CoreParticipationRepository,
     deploymentRepository: CoreDeploymentRepository,
     participantRepository: CoreParticipantRepository,
     protocolRepository: CoreProtocolRepository,
     studyRepository: CoreStudyRepository,
-
     // services
     coreDataStreamService: CoreDataStreamService,
     accountService: AccountService,
-
     // authorizers
     dataStreamServiceAuthorizer: DataStreamServiceAuthorizer,
     deploymentServiceAuthorizer: DeploymentServiceAuthorizer,
@@ -65,48 +62,66 @@ class CoreServiceContainer(
     protocolFactoryServiceAuthorizer: ProtocolFactoryServiceAuthorizer,
     protocolServiceAuthorizer: ProtocolServiceAuthorizer,
     recruitmentServiceAuthorizer: RecruitmentServiceAuthorizer,
-    studyServiceAuthorizer: StudyServiceAuthorizer
-)
-{
-    final val dataStreamService = DataStreamServiceDecorator( coreDataStreamService )
-    { command -> ApplicationServiceRequestAuthorizer( dataStreamServiceAuthorizer, command ) }
+    studyServiceAuthorizer: StudyServiceAuthorizer,
+) {
+    final val dataStreamService =
+        DataStreamServiceDecorator(
+            coreDataStreamService,
+        ) { command -> ApplicationServiceRequestAuthorizer(dataStreamServiceAuthorizer, command) }
 
-    private val _deploymentService = DeploymentServiceHost(
-        deploymentRepository,
-        coreDataStreamService,
-        coreEventBus.createApplicationServiceAdapter( DeploymentService::class )
-    )
-    final val deploymentService = DeploymentServiceDecorator( _deploymentService )
-    { command -> ApplicationServiceRequestAuthorizer( deploymentServiceAuthorizer, command ) }
+    private val _deploymentService =
+        DeploymentServiceHost(
+            deploymentRepository,
+            coreDataStreamService,
+            coreEventBus.createApplicationServiceAdapter(DeploymentService::class),
+        )
+    final val deploymentService =
+        DeploymentServiceDecorator(
+            _deploymentService,
+        ) { command -> ApplicationServiceRequestAuthorizer(deploymentServiceAuthorizer, command) }
 
-    private val _participationService = ParticipationServiceHost(
-        participationRepository,
-        ParticipantGroupService( accountService ),
-        coreEventBus.createApplicationServiceAdapter( ParticipationService::class )
-    )
-    final val participationService = ParticipationServiceDecorator( _participationService )
-    { command -> ApplicationServiceRequestAuthorizer( participationServiceAuthorizer, command ) }
+    private val _participationService =
+        ParticipationServiceHost(
+            participationRepository,
+            ParticipantGroupService(accountService),
+            coreEventBus.createApplicationServiceAdapter(ParticipationService::class),
+            WSInputDataTypes,
+        )
+    final val participationService =
+        ParticipationServiceDecorator(
+            _participationService,
+        ) { command -> ApplicationServiceRequestAuthorizer(participationServiceAuthorizer, command) }
 
     private val _protocolFactoryService = ProtocolFactoryServiceHost()
-    final val protocolFactoryService = ProtocolFactoryServiceDecorator( _protocolFactoryService )
-    { command -> ApplicationServiceRequestAuthorizer( protocolFactoryServiceAuthorizer, command ) }
+    final val protocolFactoryService =
+        ProtocolFactoryServiceDecorator(
+            _protocolFactoryService,
+        ) { command -> ApplicationServiceRequestAuthorizer(protocolFactoryServiceAuthorizer, command) }
 
-    private val _protocolService = ProtocolServiceHost( protocolRepository )
-    final val protocolService = ProtocolServiceDecorator( _protocolService )
-    { command -> ApplicationServiceRequestAuthorizer( protocolServiceAuthorizer, command ) }
+    private val _protocolService = ProtocolServiceHost(protocolRepository)
+    final val protocolService =
+        ProtocolServiceDecorator(
+            _protocolService,
+        ) { command -> ApplicationServiceRequestAuthorizer(protocolServiceAuthorizer, command) }
 
-    private val _recruitmentService = RecruitmentServiceHost(
-        participantRepository,
-        _deploymentService,
-        coreEventBus.createApplicationServiceAdapter( RecruitmentService::class )
-    )
-    final val recruitmentService = RecruitmentServiceDecorator( _recruitmentService )
-    { command -> ApplicationServiceRequestAuthorizer( recruitmentServiceAuthorizer, command ) }
+    private val _recruitmentService =
+        RecruitmentServiceHost(
+            participantRepository,
+            _deploymentService,
+            coreEventBus.createApplicationServiceAdapter(RecruitmentService::class),
+        )
+    final val recruitmentService =
+        RecruitmentServiceDecorator(
+            _recruitmentService,
+        ) { command -> ApplicationServiceRequestAuthorizer(recruitmentServiceAuthorizer, command) }
 
-    private val _studyService = StudyServiceHost(
-        studyRepository,
-        coreEventBus.createApplicationServiceAdapter( StudyService::class )
-    )
-    final val studyService = StudyServiceDecorator( _studyService )
-    { command -> ApplicationServiceRequestAuthorizer( studyServiceAuthorizer, command ) }
+    private val _studyService =
+        StudyServiceHost(
+            studyRepository,
+            coreEventBus.createApplicationServiceAdapter(StudyService::class),
+        )
+    final val studyService =
+        StudyServiceDecorator(
+            _studyService,
+        ) { command -> ApplicationServiceRequestAuthorizer(studyServiceAuthorizer, command) }
 }
