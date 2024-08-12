@@ -6,19 +6,19 @@ This document provides an overview of the `.data` package in the CARP Web Servic
 
 ### `DataStreamSequence`
 
-This class represents a sequence of data stream points. It includes properties for the data stream ID, first sequence ID, last sequence ID, and a snapshot of the data stream. For more details, refer to the source code [here](../src/main/kotlin/dk/cachet/carp/webservices/data/domain/DataStreamSequence.kt).
+This class represents a sequence of data stream points. It includes properties for the data stream ID, first sequence ID, last sequence ID, and a snapshot of the data stream. For more details, refer to the source code [here](../src/main/kotlin/dk/cachet/carp/webservices/datastream/domain/DataStreamSequence.kt).
 
 ### `CawsMutableDataStreamBatchWrapper`
 
-This class is a wrapper for the `DataStreamBatch` and implements the `Sequence<DataStreamPoint<*>>` and `DataStreamBatch` interfaces. It provides methods for appending sequences and batches to the `DataStreamBatch`. For more details, refer to the source code [here](../src/main/kotlin/dk/cachet/carp/webservices/data/service/impl/CawsMutableDataStreamBatchWrapper.kt).
+This class is a wrapper for the `DataStreamBatch` and implements the `Sequence<DataStreamPoint<*>>` and `DataStreamBatch` interfaces. It provides methods for appending sequences and batches to the `DataStreamBatch`. For more details, refer to the source code [here](../src/main/kotlin/dk/cachet/carp/webservices/datastream/service/impl/MutableDataStreamBatchDecorator.kt).
 
 ### `DataStreamId`
 
-This class represents a unique identifier for a data stream. It includes properties for the study deployment ID, device role name, name, and namespace. For more details, refer to the source code [here](../src/main/kotlin/dk/cachet/carp/webservices/data/domain/DataStreamId.kt).
+This class represents a unique identifier for a data stream. It includes properties for the study deployment ID, device role name, name, and namespace. For more details, refer to the source code [here](../src/main/kotlin/dk/cachet/carp/webservices/datastream/domain/DataStreamId.kt).
 
 ### `DataStreamSnapshot`
 
-This class represents a snapshot of a data stream. It includes properties for measurements, trigger IDs, and a sync point. For more details, refer to the source code [here](../src/main/kotlin/dk/cachet/carp/webservices/data/domain/DataStreamSnapshot.kt).
+This class represents a snapshot of a data stream. It includes properties for measurements, trigger IDs, and a sync point. For more details, refer to the source code [here](../src/main/kotlin/dk/cachet/carp/webservices/datastream/domain/DataStreamSnapshot.kt).
 
 ## Services
 
@@ -36,7 +36,7 @@ Another important method is `getDataStream()`, which retrieves all data points i
 
 The `CoreDataStreamService` class also provides methods for managing the lifecycle of data streams, such as `openDataStreams()` and `closeDataStreams()`. These methods are used to start accepting data for a study deployment and to stop accepting incoming data, respectively.
 
-For more details, refer to the source code [here](../src/main/kotlin/dk/cachet/carp/webservices/data/service/core/CoreDataStreamService.kt).
+For more details, refer to the source code [here](../src/main/kotlin/dk/cachet/carp/webservices/datastream/service/core/CoreDataStreamService.kt).
 
 ## Design
 

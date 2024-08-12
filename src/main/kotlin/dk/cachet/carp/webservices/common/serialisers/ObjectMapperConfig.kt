@@ -37,7 +37,7 @@ import dk.cachet.carp.webservices.account.serdes.AccountIdentitySerializer
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.serialisers.serdes.UUIDDeserializer
 import dk.cachet.carp.webservices.common.serialisers.serdes.UUIDSerializer
-import dk.cachet.carp.webservices.data.serdes.*
+import dk.cachet.carp.webservices.datastream.serdes.*
 import dk.cachet.carp.webservices.deployment.serdes.*
 import dk.cachet.carp.webservices.protocol.serdes.*
 import dk.cachet.carp.webservices.study.serdes.*
