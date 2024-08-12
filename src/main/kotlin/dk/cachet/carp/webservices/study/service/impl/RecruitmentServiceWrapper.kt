@@ -5,7 +5,7 @@ import dk.cachet.carp.common.application.users.AccountIdentity
 import dk.cachet.carp.studies.application.users.ParticipantGroupStatus
 import dk.cachet.carp.webservices.account.service.AccountService
 import dk.cachet.carp.webservices.common.services.CoreServiceContainer
-import dk.cachet.carp.webservices.data.service.CawsDataStreamService
+import dk.cachet.carp.webservices.datastream.service.DataStreamService
 import dk.cachet.carp.webservices.security.authentication.domain.Account
 import dk.cachet.carp.webservices.security.authorization.Claim
 import dk.cachet.carp.webservices.security.authorization.Role
@@ -27,7 +27,7 @@ import org.springframework.stereotype.Service
 @Service
 class RecruitmentServiceWrapper(
     private val accountService: AccountService,
-    private val cawsDataStreamService: CawsDataStreamService,
+    private val dataStreamService: DataStreamService,
     services: CoreServiceContainer,
 ) : RecruitmentService {
     final override val core = services.recruitmentService
@@ -108,7 +108,7 @@ class RecruitmentServiceWrapper(
             participantGroupStatusList
                 .map {
                     val lastDataUpload =
-                        cawsDataStreamService.getLatestUpdatedAt(
+                        dataStreamService.getLatestUpdatedAt(
                             it.studyDeploymentStatus.studyDeploymentId,
                         )
                     InactiveDeploymentInfo(it.id, lastDataUpload)
@@ -148,7 +148,7 @@ class RecruitmentServiceWrapper(
 
                                 if (account != null) {
                                     val lastDataUpload =
-                                        cawsDataStreamService.getLatestUpdatedAt(
+                                        dataStreamService.getLatestUpdatedAt(
                                             it.studyDeploymentStatus.studyDeploymentId,
                                         )
                                     participantAccount.lateInitFrom(account)
