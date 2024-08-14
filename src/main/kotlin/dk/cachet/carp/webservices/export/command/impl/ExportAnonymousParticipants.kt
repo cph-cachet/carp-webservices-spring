@@ -52,7 +52,7 @@ class ExportAnonymousParticipants(
                     false,
                     "Study $studyId does not have a protocol",
                 )
-            protocol.participantRoles.any { it.role != payload.participantRoleName } ->
+            !(protocol.participantRoles.any { it.role == payload.participantRoleName }) ->
                 Pair(
                     false,
                     "Participant role ${payload.participantRoleName} does not exist",

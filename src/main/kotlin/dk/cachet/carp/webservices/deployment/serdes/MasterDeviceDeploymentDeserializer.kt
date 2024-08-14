@@ -4,18 +4,17 @@ import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.TreeNode
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
-import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.deployments.application.PrimaryDeviceDeployment
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.exception.serialization.SerializationException
-import kotlinx.serialization.decodeFromString
+import dk.cachet.carp.webservices.common.input.WS_JSON
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.util.StringUtils
 
 /**
  * The Class [MasterDeviceDeploymentDeserializer].
- * The [MasterDeviceDeploymentDeserializer] implements the deserialization logic for [MasterDeviceDeployment].
+ * The [MasterDeviceDeploymentDeserializer] implements the deserialization logic for [PrimaryDeviceDeployment].
  */
 @Suppress("TooGenericExceptionCaught", "SwallowedException")
 class MasterDeviceDeploymentDeserializer(
@@ -55,7 +54,7 @@ class MasterDeviceDeploymentDeserializer(
 
         val parsed: PrimaryDeviceDeployment
         try {
-            parsed = JSON.decodeFromString(masterDeviceDeployment)
+            parsed = WS_JSON.decodeFromString(masterDeviceDeployment)
         } catch (ex: Exception) {
             LOGGER.error("The MasterDeviceDeployment is not valid. Exception: ${ex.message}")
             throw SerializationException(

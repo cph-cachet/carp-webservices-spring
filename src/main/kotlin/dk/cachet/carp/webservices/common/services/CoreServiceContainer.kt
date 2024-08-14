@@ -22,8 +22,9 @@ import dk.cachet.carp.studies.infrastructure.RecruitmentServiceDecorator
 import dk.cachet.carp.studies.infrastructure.StudyServiceDecorator
 import dk.cachet.carp.webservices.common.authorization.ApplicationServiceRequestAuthorizer
 import dk.cachet.carp.webservices.common.eventbus.CoreEventBus
-import dk.cachet.carp.webservices.data.authorization.DataStreamServiceAuthorizer
-import dk.cachet.carp.webservices.data.service.core.CoreDataStreamService
+import dk.cachet.carp.webservices.common.input.WSInputDataTypes
+import dk.cachet.carp.webservices.datastream.authorization.DataStreamServiceAuthorizer
+import dk.cachet.carp.webservices.datastream.service.core.CoreDataStreamService
 import dk.cachet.carp.webservices.deployment.authorization.DeploymentServiceAuthorizer
 import dk.cachet.carp.webservices.deployment.authorization.ParticipationServiceAuthorizer
 import dk.cachet.carp.webservices.deployment.repository.CoreDeploymentRepository
@@ -84,6 +85,7 @@ class CoreServiceContainer(
             participationRepository,
             ParticipantGroupService(accountService),
             coreEventBus.createApplicationServiceAdapter(ParticipationService::class),
+            WSInputDataTypes,
         )
     final val participationService =
         ParticipationServiceDecorator(

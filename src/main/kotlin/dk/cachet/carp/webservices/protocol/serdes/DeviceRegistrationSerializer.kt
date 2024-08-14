@@ -4,9 +4,9 @@ import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.SerializerProvider
 import dk.cachet.carp.common.application.devices.DeviceRegistration
-import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.exception.serialization.SerializationException
+import dk.cachet.carp.webservices.common.input.WS_JSON
 import kotlinx.serialization.encodeToString
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -43,7 +43,7 @@ class DeviceRegistrationSerializer(private val validationMessages: MessageBase) 
 
         val serialized: String
         try {
-            serialized = JSON.encodeToString(deviceRegistration)
+            serialized = WS_JSON.encodeToString(deviceRegistration)
         } catch (ex: Exception) {
             LOGGER.error("The core DeviceRegistration is not valid. Exception: ${ex.message}")
             throw SerializationException(

@@ -19,6 +19,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 
+@Deprecated("Data Point is deprecated, use DataStream instead.")
 @RestController
 @RequestMapping(value = [DATA_POINT_BASE])
 class DataPointController(private val dataPointService: DataPointService) {

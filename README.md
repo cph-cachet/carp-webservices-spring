@@ -58,7 +58,7 @@ The main services of the application are the following:
 * Studies
 * Protocols
 * Deployments.
-* Data
+* [Data](docs/webservices-data.md)
   
 All of them have a dedicated package with their own controller, service, and persistence layers, however, there are differences in their management.
 
@@ -74,7 +74,7 @@ The project-specific services are the rest, plus additional ones, such as securi
 
 ## API Documentation
 
-For API documentation we use [Swagger](https://cans.cachet.dk/dev/swagger-ui/index.html). 
+For API documentation we use [Swagger](https://dev.carp.dk/doc/). 
 
 > **Note:** The documentation is currently only available in the development environment.
 

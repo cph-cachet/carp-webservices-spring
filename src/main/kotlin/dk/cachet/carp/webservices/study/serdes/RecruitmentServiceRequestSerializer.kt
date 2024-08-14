@@ -3,10 +3,10 @@ package dk.cachet.carp.webservices.study.serdes
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.SerializerProvider
-import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.studies.infrastructure.RecruitmentServiceRequest
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.exception.serialization.SerializationException
+import dk.cachet.carp.webservices.common.input.WS_JSON
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 
@@ -42,7 +42,7 @@ class RecruitmentServiceRequestSerializer(
 
         val serialized: String
         try {
-            serialized = JSON.encodeToString(RecruitmentServiceRequest.Serializer, value)
+            serialized = WS_JSON.encodeToString(RecruitmentServiceRequest.Serializer, value)
         } catch (ex: Exception) {
             LOGGER.error("The RecruitmentServiceRequest is not valid. Exception: $ex")
             throw SerializationException(validationMessages.get("study.details.serialization.error"))
