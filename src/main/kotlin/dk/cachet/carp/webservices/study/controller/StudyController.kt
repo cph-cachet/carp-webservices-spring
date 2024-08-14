@@ -132,6 +132,12 @@ class StudyController(
         request.emails.forEach { e -> recruitmentService.core.addParticipant(studyId, EmailAddress(e)) }
     }
 
+
+    /**
+     * Get inactive participants.
+     * @param studyId The study id.
+     * @param lastUpdate The last updated time in HOURS.
+     */
     @GetMapping(value = [GET_INACTIVE_DEPLOYMENTS])
     @PreAuthorize("canManageStudy(#studyId)")
     @Operation(tags = ["study/getInactiveParticipants.json"])
