@@ -2,10 +2,10 @@ package dk.cachet.carp.webservices.deployment.repository
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import dk.cachet.carp.common.application.UUID
-import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.deployments.domain.DeploymentRepository
 import dk.cachet.carp.deployments.domain.StudyDeploymentSnapshot
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
+import dk.cachet.carp.webservices.common.input.WS_JSON
 import dk.cachet.carp.webservices.deployment.domain.StudyDeployment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -50,7 +50,7 @@ class CoreDeploymentRepository(
     override suspend fun getStudyDeploymentBy(id: UUID) =
         withContext(Dispatchers.IO) {
             val result = getWSDeploymentById(id) ?: return@withContext null
-            val snapshot = JSON.decodeFromString<StudyDeploymentSnapshot>(result.snapshot!!.toString())
+            val snapshot = WS_JSON.decodeFromString<StudyDeploymentSnapshot>(result.snapshot!!.toString())
             CoreStudyDeployment.fromSnapshot(snapshot)
         }
 
@@ -101,7 +101,7 @@ class CoreDeploymentRepository(
     }
 
     private fun mapWSDeploymentToCore(deployment: StudyDeployment): CoreStudyDeployment {
-        val snapshot = JSON.decodeFromString<StudyDeploymentSnapshot>(deployment.snapshot!!.toString())
+        val snapshot = WS_JSON.decodeFromString<StudyDeploymentSnapshot>(deployment.snapshot!!.toString())
         return CoreStudyDeployment.fromSnapshot(snapshot)
     }
 }

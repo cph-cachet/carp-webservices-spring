@@ -3,10 +3,10 @@ package dk.cachet.carp.webservices.study.repository
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import dk.cachet.carp.common.application.UUID
-import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.studies.domain.users.ParticipantRepository
 import dk.cachet.carp.studies.domain.users.RecruitmentSnapshot
 import dk.cachet.carp.webservices.common.exception.responses.ResourceNotFoundException
+import dk.cachet.carp.webservices.common.input.WS_JSON
 import dk.cachet.carp.webservices.study.domain.Recruitment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -69,14 +69,14 @@ class CoreParticipantRepository(
                 recruitmentRepository.findRecruitmentByStudyId(studyId)
                     ?: throw ResourceNotFoundException("Recruitment with studyId $studyId is not found.")
 
-            val newSnapshotNode = JSON.encodeToString(RecruitmentSnapshot.serializer(), recruitment.getSnapshot())
+            val newSnapshotNode = WS_JSON.encodeToString(RecruitmentSnapshot.serializer(), recruitment.getSnapshot())
             recruitmentFound.snapshot = objectMapper.valueToTree(newSnapshotNode)
             recruitmentRepository.save(recruitmentFound)
             LOGGER.info("Recruitment with studyId $studyId is updated.")
         }
 
     private fun mapWSRecruitmentToCore(recruitment: Recruitment): CoreRecruitment {
-        val snapshot = JSON.decodeFromString(RecruitmentSnapshot.serializer(), recruitment.snapshot!!.toString())
+        val snapshot = WS_JSON.decodeFromString(RecruitmentSnapshot.serializer(), recruitment.snapshot!!.toString())
         return CoreRecruitment.fromSnapshot(snapshot)
     }
 }

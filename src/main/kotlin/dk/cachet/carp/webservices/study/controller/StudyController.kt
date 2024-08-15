@@ -107,7 +107,7 @@ class StudyController(
     @PostMapping(value = [STUDY_SERVICE])
     @Operation(tags = ["study/studies.json"])
     suspend fun studies(
-        @RequestBody request: StudyServiceRequest<Any>,
+        @RequestBody request: StudyServiceRequest<*>,
     ): ResponseEntity<*> {
         LOGGER.info("Start POST: $STUDY_SERVICE -> ${ request::class.simpleName }")
         return studyService.core.invoke(request).let { ResponseEntity.ok(it) }

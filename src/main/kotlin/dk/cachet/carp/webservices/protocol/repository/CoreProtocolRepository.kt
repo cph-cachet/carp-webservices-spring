@@ -214,7 +214,7 @@ class CoreProtocolRepository(
     /**
      * The [convertJsonNodeToStudyProtocol] function converts a [JsonNode] to a [StudyProtocol].
      *
-     * @param node The [String] to convert to a study protocol.
+     * @param node The [JsonNode] to convert to a study protocol.
      * @return A [StudyProtocol] object containing the protocol.
      */
     private fun convertJsonNodeToStudyProtocol(node: JsonNode): StudyProtocol {
