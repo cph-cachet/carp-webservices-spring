@@ -42,7 +42,6 @@ import dk.cachet.carp.webservices.datastream.serdes.*
 import dk.cachet.carp.webservices.deployment.serdes.*
 import dk.cachet.carp.webservices.protocol.serdes.*
 import dk.cachet.carp.webservices.study.serdes.*
-import kotlinx.datetime.Instant
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
@@ -107,8 +106,10 @@ class ObjectMapperConfig(validationMessages: MessageBase) : SimpleModule() {
         this.addDeserializer(StudyDetails::class.java, StudyDetailsDeserializer(validationMessages))
         // ParticipantGroupStatus
         this.addSerializer(ParticipantGroupStatus::class.java, ParticipantGroupStatusSerializer(validationMessages))
-        this.addDeserializer(ParticipantGroupStatus::class.java,
-        ParticipantGroupStatusDeserializer(validationMessages))
+        this.addDeserializer(
+            ParticipantGroupStatus::class.java,
+            ParticipantGroupStatusDeserializer(validationMessages),
+        )
         // ProtocolFactoryServiceRequest
         this.addSerializer(
             ProtocolFactoryServiceRequest::class.java,

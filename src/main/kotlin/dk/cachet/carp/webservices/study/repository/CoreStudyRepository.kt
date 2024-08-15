@@ -3,7 +3,6 @@ package dk.cachet.carp.webservices.study.repository
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import dk.cachet.carp.common.application.UUID
-import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.deployments.application.users.StudyInvitation
 import dk.cachet.carp.studies.domain.StudyRepository
 import dk.cachet.carp.studies.domain.StudySnapshot
@@ -145,11 +144,11 @@ class CoreStudyRepository(
 
     suspend fun getStudySnapshotById(id: UUID): StudySnapshot {
         val study = getWSStudyById(id)
-        return JSON.decodeFromString(StudySnapshot.serializer(), study.snapshot.toString())
+        return WS_JSON.decodeFromString(StudySnapshot.serializer(), study.snapshot.toString())
     }
 
     fun convertStudySnapshotNodeToStudy(node: JsonNode): CoreStudy {
-        val snapshot = JSON.decodeFromString<StudySnapshot>(node.toString())
+        val snapshot = WS_JSON.decodeFromString<StudySnapshot>(node.toString())
         return CoreStudy.fromSnapshot(snapshot)
     }
 }

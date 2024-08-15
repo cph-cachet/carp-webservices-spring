@@ -2,7 +2,6 @@ package dk.cachet.carp.webservices.protocol.service.impl
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import dk.cachet.carp.common.application.UUID
-import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.protocols.application.StudyProtocolSnapshot
 import dk.cachet.carp.webservices.account.service.AccountService
 import dk.cachet.carp.webservices.common.services.CoreServiceContainer
@@ -67,9 +66,5 @@ class ProtocolServiceWrapper(
             versions.last().versionTag,
             snapshot,
         )
-    }
-
-    public fun decodeSnapshot(snapshot: String): StudyProtocolSnapshot {
-        return JSON.decodeFromString(StudyProtocolSnapshot.serializer(), snapshot)
     }
 }

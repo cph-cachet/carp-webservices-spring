@@ -107,7 +107,7 @@ class StudyController(
     @PostMapping(value = [STUDY_SERVICE])
     @Operation(tags = ["study/studies.json"])
     suspend fun studies(
-        @RequestBody request: StudyServiceRequest<*>,
+        @RequestBody request: StudyServiceRequest<Any>,
     ): ResponseEntity<*> {
         LOGGER.info("Start POST: $STUDY_SERVICE -> ${ request::class.simpleName }")
         return studyService.core.invoke(request).let { ResponseEntity.ok(it) }
@@ -131,7 +131,6 @@ class StudyController(
         LOGGER.info("Start POST: /api/studies/$studyId/participants/add")
         request.emails.forEach { e -> recruitmentService.core.addParticipant(studyId, EmailAddress(e)) }
     }
-
 
     /**
      * Get inactive participants.

@@ -3,12 +3,12 @@ package dk.cachet.carp.webservices.deployment.repository
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import dk.cachet.carp.common.application.UUID
-import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.deployments.domain.users.AccountParticipation
 import dk.cachet.carp.deployments.domain.users.ParticipantGroup
 import dk.cachet.carp.deployments.domain.users.ParticipantGroupSnapshot
 import dk.cachet.carp.deployments.domain.users.ParticipationRepository
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
+import dk.cachet.carp.webservices.common.input.WS_JSON
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.apache.logging.log4j.LogManager
@@ -83,7 +83,7 @@ class CoreParticipationRepository(
                 participantGroupRepository.findByStudyDeploymentId(
                     group.studyDeploymentId.stringRepresentation,
                 )
-            val snapshotToSave = JSON.encodeToString(ParticipantGroupSnapshot.serializer(), group.getSnapshot())
+            val snapshotToSave = WS_JSON.encodeToString(ParticipantGroupSnapshot.serializer(), group.getSnapshot())
 
             if (optionalGroup == null) {
                 val newParticipantGroup = dk.cachet.carp.webservices.deployment.domain.ParticipantGroup()
@@ -128,11 +128,11 @@ class CoreParticipationRepository(
     /**
      * Maps [ParticipantGroupSnapshot] as a JsonNode to [ParticipantGroup]
      *
-     * @param node The [String] that needs deserialize.
+     * @param node The [JsonNode] that needs deserialize.
      * @return [ParticipantGroup]
      */
     private fun mapParticipantGroupSnapshotJsonNodeToParticipantGroup(node: JsonNode): ParticipantGroup {
-        val snapshot = JSON.decodeFromString(ParticipantGroupSnapshot.serializer(), node.toString())
+        val snapshot = WS_JSON.decodeFromString(ParticipantGroupSnapshot.serializer(), node.toString())
         return ParticipantGroup.fromSnapshot(snapshot)
     }
 }
