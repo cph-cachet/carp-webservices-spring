@@ -29,7 +29,7 @@ class CoreDeploymentRepository(
 
     override suspend fun add(studyDeployment: CoreStudyDeployment) =
         withContext(Dispatchers.IO) {
-            if (studyDeploymentRepository.findByDeploymentId(studyDeployment.id.stringRepresentation).isPresent) {
+            if (studyDeploymentRepository.findByDeploymentId(studyDeployment.id.stringRepresentation) != null) {
                 LOGGER.warn("Deployment already exists, id: ${studyDeployment.id.stringRepresentation}")
                 throw IllegalArgumentException(
                     validationMessages.get(
@@ -93,11 +93,11 @@ class CoreDeploymentRepository(
 
     fun getWSDeploymentById(id: UUID): StudyDeployment? {
         val optionalResult = studyDeploymentRepository.findByDeploymentId(id.stringRepresentation)
-        if (!optionalResult.isPresent) {
+        if (optionalResult == null) {
             LOGGER.info("Deployment is not found, id: ${id.stringRepresentation}")
             return null
         }
-        return optionalResult.get()
+        return optionalResult
     }
 
     private fun mapWSDeploymentToCore(deployment: StudyDeployment): CoreStudyDeployment {

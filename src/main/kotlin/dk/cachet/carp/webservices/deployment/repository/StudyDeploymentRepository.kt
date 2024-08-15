@@ -6,12 +6,11 @@ import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
-import java.util.*
 
 @Repository
 interface StudyDeploymentRepository : JpaRepository<StudyDeployment, String> {
     @Query(value = "SELECT * FROM deployments WHERE snapshot->>'id' = ?1", nativeQuery = true)
-    fun findByDeploymentId(id: String): Optional<StudyDeployment>
+    fun findByDeploymentId(id: String): StudyDeployment?
 
     @Query(value = "SELECT * FROM deployments WHERE snapshot->>'id' in ?1", nativeQuery = true)
     fun findAllByStudyDeploymentIds(deploymentIds: Collection<String>): List<StudyDeployment>

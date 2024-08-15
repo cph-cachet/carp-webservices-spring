@@ -3,11 +3,11 @@ package dk.cachet.carp.webservices.protocol.repository
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import dk.cachet.carp.common.application.UUID
-import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.protocols.application.ProtocolVersion
 import dk.cachet.carp.protocols.application.StudyProtocolSnapshot
 import dk.cachet.carp.protocols.domain.*
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
+import dk.cachet.carp.webservices.common.input.WS_JSON
 import dk.cachet.carp.webservices.protocol.domain.Protocol
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -218,7 +218,7 @@ class CoreProtocolRepository(
      * @return A [StudyProtocol] object containing the protocol.
      */
     private fun convertJsonNodeToStudyProtocol(node: JsonNode): StudyProtocol {
-        val snapshot = JSON.decodeFromString(StudyProtocolSnapshot.serializer(), node.toString())
+        val snapshot = WS_JSON.decodeFromString(StudyProtocolSnapshot.serializer(), node.toString())
         return StudyProtocol.fromSnapshot(snapshot)
     }
 
