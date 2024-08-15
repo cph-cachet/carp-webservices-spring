@@ -1,6 +1,5 @@
 package dk.cachet.carp.webservices.protocol.controller
 
-import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.protocols.infrastructure.ProtocolFactoryServiceRequest
 import dk.cachet.carp.protocols.infrastructure.ProtocolServiceRequest
 import dk.cachet.carp.webservices.common.constants.PathVariableName
@@ -35,9 +34,8 @@ class ProtocolController(
     @PostMapping(value = [PROTOCOL_SERVICE])
     @Operation(tags = ["protocol/protocols.json"])
     suspend fun protocols(
-        @RequestBody httpMessage: String,
+        @RequestBody request: ProtocolServiceRequest<*>,
     ): ResponseEntity<Any> {
-        val request = JSON.decodeFromString(ProtocolServiceRequest.Serializer, httpMessage)
         LOGGER.info("Start POST: $PROTOCOL_SERVICE -> ${ request::class.simpleName }")
         return protocolService.core.invoke(request).let { ResponseEntity.ok(it) }
     }
@@ -45,9 +43,8 @@ class ProtocolController(
     @PostMapping(value = [PROTOCOL_FACTORY_SERVICE])
     @Operation(tags = ["protocol/protocolFactory.json"])
     suspend fun protocolFactory(
-        @RequestBody httpMessage: String,
+        @RequestBody request: ProtocolFactoryServiceRequest<*>,
     ): ResponseEntity<Any> {
-        val request = JSON.decodeFromString(ProtocolFactoryServiceRequest.Serializer, httpMessage)
         LOGGER.info("Start POST: $PROTOCOL_FACTORY_SERVICE -> ${ request::class.simpleName }")
         return services.protocolFactoryService.invoke(request).let { ResponseEntity.ok(it) }
     }

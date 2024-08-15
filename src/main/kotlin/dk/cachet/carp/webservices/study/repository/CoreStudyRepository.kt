@@ -9,6 +9,7 @@ import dk.cachet.carp.studies.domain.StudyRepository
 import dk.cachet.carp.studies.domain.StudySnapshot
 import dk.cachet.carp.webservices.collection.repository.CollectionRepository
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
+import dk.cachet.carp.webservices.common.input.WS_JSON
 import dk.cachet.carp.webservices.consent.repository.ConsentDocumentRepository
 import dk.cachet.carp.webservices.dataPoint.repository.DataPointRepository
 import dk.cachet.carp.webservices.document.repository.DocumentRepository
@@ -59,7 +60,9 @@ class CoreStudyRepository(
                     study.id.stringRepresentation,
                 )
 
-            studyToSave.snapshot = objectMapper.valueToTree(study.getSnapshot())
+//            studyToSave.snapshot = objectMapper.valueToTree(study.getSnapshot())
+            val snapshot = WS_JSON.encodeToString(StudySnapshot.serializer(), study.getSnapshot())
+            studyToSave.snapshot = objectMapper.readTree(snapshot)
             studyRepository.save(studyToSave)
 
             LOGGER.info("Study saved, id: ${study.id.stringRepresentation}")
