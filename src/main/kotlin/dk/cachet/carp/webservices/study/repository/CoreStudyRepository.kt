@@ -59,7 +59,6 @@ class CoreStudyRepository(
                     study.id.stringRepresentation,
                 )
 
-//            studyToSave.snapshot = objectMapper.valueToTree(study.getSnapshot())
             val snapshot = WS_JSON.encodeToString(StudySnapshot.serializer(), study.getSnapshot())
             studyToSave.snapshot = objectMapper.readTree(snapshot)
             studyRepository.save(studyToSave)

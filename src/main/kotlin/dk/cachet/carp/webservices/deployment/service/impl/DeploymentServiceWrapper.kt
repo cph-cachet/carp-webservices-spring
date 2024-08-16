@@ -1,8 +1,8 @@
 package dk.cachet.carp.webservices.deployment.service.impl
 
 import dk.cachet.carp.common.application.UUID
-import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.deployments.domain.StudyDeploymentSnapshot
+import dk.cachet.carp.webservices.common.input.WS_JSON
 import dk.cachet.carp.webservices.common.services.CoreServiceContainer
 import dk.cachet.carp.webservices.deployment.repository.StudyDeploymentRepository
 import dk.cachet.carp.webservices.deployment.service.DeploymentService
@@ -28,6 +28,6 @@ class DeploymentServiceWrapper(
     ) = withContext(Dispatchers.IO) {
         repository
             .findAllByStudyDeploymentIds(deploymentIds.map { it.stringRepresentation })
-            .map { JSON.decodeFromString(StudyDeploymentSnapshot.serializer(), it.snapshot!!.toString()) }
+            .map { WS_JSON.decodeFromString(StudyDeploymentSnapshot.serializer(), it.snapshot!!.toString()) }
     }
 }
