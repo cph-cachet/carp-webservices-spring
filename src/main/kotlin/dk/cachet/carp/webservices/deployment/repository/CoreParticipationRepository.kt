@@ -87,7 +87,7 @@ class CoreParticipationRepository(
 
             if (optionalGroup == null) {
                 val newParticipantGroup = dk.cachet.carp.webservices.deployment.domain.ParticipantGroup()
-                newParticipantGroup.snapshot = objectMapper.valueToTree(snapshotToSave)
+                newParticipantGroup.snapshot = objectMapper.readTree(snapshotToSave)
                 val savedGroup = participantGroupRepository.save(newParticipantGroup)
                 LOGGER.info(
                     "New participant group with id: ${savedGroup.id} " +
@@ -97,7 +97,7 @@ class CoreParticipationRepository(
             }
 
             val oldSnapshot = optionalGroup.snapshot!!
-            optionalGroup.snapshot = objectMapper.valueToTree(snapshotToSave)
+            optionalGroup.snapshot = objectMapper.readTree(snapshotToSave)
             participantGroupRepository.save(optionalGroup)
             LOGGER.info("Participant Group with id: ${optionalGroup.id} is updated with a new snapshot.")
 

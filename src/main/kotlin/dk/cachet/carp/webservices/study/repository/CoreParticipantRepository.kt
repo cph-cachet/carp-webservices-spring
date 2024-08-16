@@ -70,7 +70,7 @@ class CoreParticipantRepository(
                     ?: throw ResourceNotFoundException("Recruitment with studyId $studyId is not found.")
 
             val newSnapshotNode = WS_JSON.encodeToString(RecruitmentSnapshot.serializer(), recruitment.getSnapshot())
-            recruitmentFound.snapshot = objectMapper.valueToTree(newSnapshotNode)
+            recruitmentFound.snapshot = objectMapper.readTree(newSnapshotNode)
             recruitmentRepository.save(recruitmentFound)
             LOGGER.info("Recruitment with studyId $studyId is updated.")
         }

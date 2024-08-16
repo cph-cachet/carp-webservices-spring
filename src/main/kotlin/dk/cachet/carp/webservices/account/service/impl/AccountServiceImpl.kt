@@ -63,7 +63,6 @@ class AccountServiceImpl(
         if (result == null) {
             LOGGER.warn("Account not found for identity: $identity")
         }
-
         return result
     }
 
