@@ -49,7 +49,6 @@ spring:
         types:
           print:
             banner: false
-        dialect: org.hibernate.dialect.PostgreSQLDialect
         jdbc:
           lob:
             non_contextual_creation: true

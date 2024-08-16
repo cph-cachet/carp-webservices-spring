@@ -62,7 +62,7 @@ java {
 dependencies {
     // BOM
     implementation(platform("org.springframework.boot:spring-boot-dependencies:${property("springBootVersion")}"))
-    implementation(platform("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}"))
+//    implementation(platform("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}"))
 
     // KOTLIN
     implementation("org.jetbrains.kotlin:kotlin-stdlib:${property("kotlinVersion")}")
@@ -110,8 +110,8 @@ dependencies {
     implementation("com.c4-soft.springaddons:spring-addons-starter-oidc:${property("springAddonsVersion")}")
 
     // SPRING CLOUD
-    implementation("org.springframework.cloud:spring-cloud-starter-config")
-    implementation("org.springframework.cloud:spring-cloud-starter-bootstrap:${property("springCloudStarterVersion")}")
+//    implementation("org.springframework.cloud:spring-cloud-starter-config")
+//    implementation("org.springframework.cloud:spring-cloud-starter-bootstrap:${property("springCloudStarterVersion")}")
 
     // SPRINGDOC
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
