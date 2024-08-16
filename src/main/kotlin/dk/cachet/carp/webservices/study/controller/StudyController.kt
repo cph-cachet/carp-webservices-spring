@@ -132,7 +132,6 @@ class StudyController(
         request.emails.forEach { e -> recruitmentService.core.addParticipant(studyId, EmailAddress(e)) }
     }
 
-
     /**
      * Get inactive participants.
      * @param studyId The study id.

@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
-import java.util.*
 
 @Repository
 interface ParticipantGroupRepository : JpaRepository<ParticipantGroup, Int> {
@@ -14,7 +13,7 @@ interface ParticipantGroupRepository : JpaRepository<ParticipantGroup, Int> {
         nativeQuery = true,
         value = "SELECT * FROM participant_groups WHERE snapshot->>'studyDeploymentId' = ?1",
     )
-    fun findByStudyDeploymentId(studyDeploymentId: String): Optional<ParticipantGroup>
+    fun findByStudyDeploymentId(studyDeploymentId: String): ParticipantGroup?
 
     @Query(
         nativeQuery = true,

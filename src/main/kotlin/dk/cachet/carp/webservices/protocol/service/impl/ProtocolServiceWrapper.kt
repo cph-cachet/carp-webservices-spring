@@ -57,7 +57,6 @@ class ProtocolServiceWrapper(
         account: Account? = null,
     ): ProtocolOverview {
         val snapshot = objectMapper.treeToValue(versions.last().snapshot, StudyProtocolSnapshot::class.java)
-
         val owner = account ?: accountService.findByUUID(snapshot.ownerId)
 
         return ProtocolOverview(

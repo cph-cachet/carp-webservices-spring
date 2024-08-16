@@ -3,7 +3,8 @@ package dk.cachet.carp.webservices.common.serialisers
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.module.SimpleModule
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.datatype.jsr310.deser.InstantDeserializer
+import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.common.application.devices.DeviceRegistration
@@ -105,7 +106,10 @@ class ObjectMapperConfig(validationMessages: MessageBase) : SimpleModule() {
         this.addDeserializer(StudyDetails::class.java, StudyDetailsDeserializer(validationMessages))
         // ParticipantGroupStatus
         this.addSerializer(ParticipantGroupStatus::class.java, ParticipantGroupStatusSerializer(validationMessages))
-        this.addDeserializer(ParticipantGroupStatus::class.java, ParticipantGroupStatusDeserializer(validationMessages))
+        this.addDeserializer(
+            ParticipantGroupStatus::class.java,
+            ParticipantGroupStatusDeserializer(validationMessages),
+        )
         // ProtocolFactoryServiceRequest
         this.addSerializer(
             ProtocolFactoryServiceRequest::class.java,
@@ -178,6 +182,9 @@ class ObjectMapperConfig(validationMessages: MessageBase) : SimpleModule() {
         // DataStreamBatch
         this.addSerializer(DataStreamBatch::class.java, DataStreamBatchSerializer(validationMessages))
         this.addDeserializer(DataStreamBatch::class.java, DataStreamBatchDeserializer(validationMessages))
+
+        this.addSerializer(java.time.Instant::class.java, InstantSerializer.INSTANCE)
+        this.addDeserializer(java.time.Instant::class.java, InstantDeserializer.INSTANT)
     }
 
     /**
@@ -194,7 +201,7 @@ class ObjectMapperConfig(validationMessages: MessageBase) : SimpleModule() {
 
         objectMapper.registerModule(this)
 
-        objectMapper.registerModule(JavaTimeModule())
+//        objectMapper.registerModule(JavaTimeModule())
         objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
 
         return objectMapper

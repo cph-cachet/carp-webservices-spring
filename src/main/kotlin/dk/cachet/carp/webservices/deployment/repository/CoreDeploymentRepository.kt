@@ -5,6 +5,7 @@ import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.deployments.domain.DeploymentRepository
 import dk.cachet.carp.deployments.domain.StudyDeploymentSnapshot
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
+import dk.cachet.carp.webservices.common.input.WS_JSON
 import dk.cachet.carp.webservices.deployment.domain.StudyDeployment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -28,7 +29,7 @@ class CoreDeploymentRepository(
 
     override suspend fun add(studyDeployment: CoreStudyDeployment) =
         withContext(Dispatchers.IO) {
-            if (studyDeploymentRepository.findByDeploymentId(studyDeployment.id.stringRepresentation).isPresent) {
+            if (studyDeploymentRepository.findByDeploymentId(studyDeployment.id.stringRepresentation) != null) {
                 LOGGER.warn("Deployment already exists, id: ${studyDeployment.id.stringRepresentation}")
                 throw IllegalArgumentException(
                     validationMessages.get(
@@ -49,7 +50,7 @@ class CoreDeploymentRepository(
     override suspend fun getStudyDeploymentBy(id: UUID) =
         withContext(Dispatchers.IO) {
             val result = getWSDeploymentById(id) ?: return@withContext null
-            val snapshot = objectMapper.treeToValue(result.snapshot, StudyDeploymentSnapshot::class.java)
+            val snapshot = WS_JSON.decodeFromString<StudyDeploymentSnapshot>(result.snapshot!!.toString())
             CoreStudyDeployment.fromSnapshot(snapshot)
         }
 
@@ -92,15 +93,15 @@ class CoreDeploymentRepository(
 
     fun getWSDeploymentById(id: UUID): StudyDeployment? {
         val optionalResult = studyDeploymentRepository.findByDeploymentId(id.stringRepresentation)
-        if (!optionalResult.isPresent) {
+        if (optionalResult == null) {
             LOGGER.info("Deployment is not found, id: ${id.stringRepresentation}")
             return null
         }
-        return optionalResult.get()
+        return optionalResult
     }
 
     private fun mapWSDeploymentToCore(deployment: StudyDeployment): CoreStudyDeployment {
-        val snapshot = objectMapper.treeToValue(deployment.snapshot, StudyDeploymentSnapshot::class.java)
+        val snapshot = WS_JSON.decodeFromString<StudyDeploymentSnapshot>(deployment.snapshot!!.toString())
         return CoreStudyDeployment.fromSnapshot(snapshot)
     }
 }

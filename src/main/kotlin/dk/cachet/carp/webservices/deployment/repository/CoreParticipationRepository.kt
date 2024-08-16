@@ -7,6 +7,8 @@ import dk.cachet.carp.deployments.domain.users.AccountParticipation
 import dk.cachet.carp.deployments.domain.users.ParticipantGroup
 import dk.cachet.carp.deployments.domain.users.ParticipantGroupSnapshot
 import dk.cachet.carp.deployments.domain.users.ParticipationRepository
+import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
+import dk.cachet.carp.webservices.common.input.WS_JSON
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.apache.logging.log4j.LogManager
@@ -23,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional
 class CoreParticipationRepository(
     private val participantGroupRepository: ParticipantGroupRepository,
     private val objectMapper: ObjectMapper,
+    private val validationMessage: MessageBase,
 ) : ParticipationRepository {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
@@ -33,19 +36,18 @@ class CoreParticipationRepository(
      */
     override suspend fun getParticipantGroup(studyDeploymentId: UUID): ParticipantGroup? =
         withContext(Dispatchers.IO) {
-            val optionalGroup =
+            val group =
                 participantGroupRepository.findByStudyDeploymentId(
                     studyDeploymentId.stringRepresentation,
                 )
 
-            if (!optionalGroup.isPresent) {
+            checkNotNull(group) {
                 LOGGER.warn(
                     "Participant group was not found for deployment with id: ${studyDeploymentId.stringRepresentation}",
                 )
+                validationMessage.get("participantGroup.notFound", studyDeploymentId.stringRepresentation)
                 return@withContext null
             }
-
-            val group = optionalGroup.get()
             mapParticipantGroupSnapshotJsonNodeToParticipantGroup(group.snapshot!!)
         }
 
@@ -81,11 +83,11 @@ class CoreParticipationRepository(
                 participantGroupRepository.findByStudyDeploymentId(
                     group.studyDeploymentId.stringRepresentation,
                 )
-            val snapshotToSave = objectMapper.valueToTree<JsonNode>(group.getSnapshot())
+            val snapshotToSave = WS_JSON.encodeToString(ParticipantGroupSnapshot.serializer(), group.getSnapshot())
 
-            if (!optionalGroup.isPresent) {
+            if (optionalGroup == null) {
                 val newParticipantGroup = dk.cachet.carp.webservices.deployment.domain.ParticipantGroup()
-                newParticipantGroup.snapshot = snapshotToSave
+                newParticipantGroup.snapshot = objectMapper.valueToTree(snapshotToSave)
                 val savedGroup = participantGroupRepository.save(newParticipantGroup)
                 LOGGER.info(
                     "New participant group with id: ${savedGroup.id} " +
@@ -94,11 +96,10 @@ class CoreParticipationRepository(
                 return@withContext null
             }
 
-            val storedGroup = optionalGroup.get()
-            val oldSnapshot = storedGroup.snapshot!!
-            storedGroup.snapshot = snapshotToSave
-            participantGroupRepository.save(storedGroup)
-            LOGGER.info("Participant Group with id: ${storedGroup.id} is updated with a new snapshot.")
+            val oldSnapshot = optionalGroup.snapshot!!
+            optionalGroup.snapshot = objectMapper.valueToTree(snapshotToSave)
+            participantGroupRepository.save(optionalGroup)
+            LOGGER.info("Participant Group with id: ${optionalGroup.id} is updated with a new snapshot.")
 
             mapParticipantGroupSnapshotJsonNodeToParticipantGroup(oldSnapshot)
         }
@@ -127,11 +128,11 @@ class CoreParticipationRepository(
     /**
      * Maps [ParticipantGroupSnapshot] as a JsonNode to [ParticipantGroup]
      *
-     * @param node The [JsonNode] that needs mapping.
+     * @param node The [JsonNode] that needs deserialize.
      * @return [ParticipantGroup]
      */
     private fun mapParticipantGroupSnapshotJsonNodeToParticipantGroup(node: JsonNode): ParticipantGroup {
-        val snapshot = objectMapper.treeToValue(node, ParticipantGroupSnapshot::class.java)
+        val snapshot = WS_JSON.decodeFromString(ParticipantGroupSnapshot.serializer(), node.toString())
         return ParticipantGroup.fromSnapshot(snapshot)
     }
 }
