@@ -39,7 +39,6 @@ import dk.cachet.carp.studies.infrastructure.StudyServiceRequest
 import dk.cachet.carp.webservices.account.serdes.AccountIdentityDeserializer
 import dk.cachet.carp.webservices.account.serdes.AccountIdentitySerializer
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
-import dk.cachet.carp.webservices.common.input.WS_JSON
 import dk.cachet.carp.webservices.common.serialisers.serdes.UUIDDeserializer
 import dk.cachet.carp.webservices.common.serialisers.serdes.UUIDSerializer
 import dk.cachet.carp.webservices.datastream.serdes.*
@@ -48,7 +47,6 @@ import dk.cachet.carp.webservices.protocol.serdes.*
 import dk.cachet.carp.webservices.study.serdes.*
 import kotlinx.datetime.Instant
 import kotlinx.datetime.toJavaInstant
-import kotlinx.serialization.encodeToString
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
@@ -167,6 +165,7 @@ class ObjectMapperConfig(validationMessages: MessageBase) : SimpleModule() {
         this.addSerializer(java.time.Instant::class.java, InstantSerializer.INSTANCE)
         this.addDeserializer(java.time.Instant::class.java, InstantDeserializer.INSTANT)
 
+        // TODO: request change in http client and portal to use kotlinx.datetime.Instant
 //        this.addSerializer(Instant::class.java, KInstantSerializer.INSTANCE)
     }
 
@@ -176,9 +175,7 @@ class ObjectMapperConfig(validationMessages: MessageBase) : SimpleModule() {
             gen: JsonGenerator,
             serializers: SerializerProvider,
         ) {
-            val t = WS_JSON.encodeToString(value)
-            val ob = value.toJavaInstant()
-            return(InstantSerializer.INSTANCE.serialize(ob, gen, serializers))
+            return(InstantSerializer.INSTANCE.serialize(value.toJavaInstant(), gen, serializers))
         }
 
         companion object {
