@@ -2,6 +2,7 @@ package dk.cachet.carp.webservices.deployment.controller
 
 import dk.cachet.carp.deployments.infrastructure.DeploymentServiceRequest
 import dk.cachet.carp.deployments.infrastructure.ParticipationServiceRequest
+import dk.cachet.carp.webservices.common.input.WS_JSON
 import dk.cachet.carp.webservices.dataPoint.service.DataPointService
 import dk.cachet.carp.webservices.deployment.dto.DeploymentStatisticsRequestDto
 import dk.cachet.carp.webservices.deployment.dto.DeploymentStatisticsResponseDto
@@ -36,8 +37,9 @@ class StudyDeploymentController(
     @PostMapping(value = [DEPLOYMENT_SERVICE])
     @Operation(tags = ["studyDeployment/deployments.json"])
     suspend fun deployments(
-        @RequestBody request: DeploymentServiceRequest<*>,
+        @RequestBody httpMessage: String,
     ): ResponseEntity<Any> {
+        val request = WS_JSON.decodeFromString(DeploymentServiceRequest.Serializer, httpMessage)
         LOGGER.info("Start POST: $DEPLOYMENT_SERVICE -> ${ request::class.simpleName }")
         return deploymentService.core.invoke(request).let { ResponseEntity.ok(it) }
     }
@@ -45,8 +47,9 @@ class StudyDeploymentController(
     @PostMapping(value = [PARTICIPATION_SERVICE])
     @Operation(tags = ["studyDeployment/invitations.json"])
     suspend fun participation(
-        @RequestBody request: ParticipationServiceRequest<*>,
+        @RequestBody httpMessage: String,
     ): ResponseEntity<Any> {
+        val request = WS_JSON.decodeFromString(ParticipationServiceRequest.Serializer, httpMessage)
         LOGGER.info("Start POST: $PARTICIPATION_SERVICE -> ${ request::class.simpleName }")
         return participationService.core.invoke(request).let { ResponseEntity.ok(it) }
     }

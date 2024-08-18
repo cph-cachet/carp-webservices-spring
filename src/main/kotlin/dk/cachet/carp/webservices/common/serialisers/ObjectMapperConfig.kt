@@ -1,7 +1,10 @@
 package dk.cachet.carp.webservices.common.serialisers
 
+import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.datatype.jsr310.deser.InstantDeserializer
 import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer
@@ -36,12 +39,16 @@ import dk.cachet.carp.studies.infrastructure.StudyServiceRequest
 import dk.cachet.carp.webservices.account.serdes.AccountIdentityDeserializer
 import dk.cachet.carp.webservices.account.serdes.AccountIdentitySerializer
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
+import dk.cachet.carp.webservices.common.input.WS_JSON
 import dk.cachet.carp.webservices.common.serialisers.serdes.UUIDDeserializer
 import dk.cachet.carp.webservices.common.serialisers.serdes.UUIDSerializer
 import dk.cachet.carp.webservices.datastream.serdes.*
 import dk.cachet.carp.webservices.deployment.serdes.*
 import dk.cachet.carp.webservices.protocol.serdes.*
 import dk.cachet.carp.webservices.study.serdes.*
+import kotlinx.datetime.Instant
+import kotlinx.datetime.toJavaInstant
+import kotlinx.serialization.encodeToString
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
@@ -56,30 +63,31 @@ import org.springframework.context.annotation.Primary
 class ObjectMapperConfig(validationMessages: MessageBase) : SimpleModule() {
     init
     {
-        // Study
-        this.addSerializer(StudyServiceRequest::class.java, StudyServiceRequestSerializer(validationMessages))
-        this.addDeserializer(StudyServiceRequest::class.java, StudyServiceRequestDeserializer(validationMessages))
-        // Protocol
-        this.addSerializer(ProtocolServiceRequest::class.java, ProtocolServiceRequestSerializer(validationMessages))
-        this.addDeserializer(ProtocolServiceRequest::class.java, ProtocolServiceRequestDeserializer(validationMessages))
-        // StudyProtocolSnapshot
+        // Service Request Serializer
+        this.addSerializer(StudyServiceRequest::class.java, ServiceRequestSerializer(validationMessages))
+        this.addSerializer(ProtocolServiceRequest::class.java, ServiceRequestSerializer(validationMessages))
+        this.addSerializer(ProtocolFactoryServiceRequest::class.java, ServiceRequestSerializer(validationMessages))
+        this.addSerializer(ParticipationServiceRequest::class.java, ServiceRequestSerializer(validationMessages))
+        this.addSerializer(RecruitmentServiceRequest::class.java, ServiceRequestSerializer(validationMessages))
+        this.addSerializer(DeploymentServiceRequest::class.java, ServiceRequestSerializer(validationMessages))
+
+        // Snapshot Serializer
         this.addSerializer(StudyProtocolSnapshot::class.java, StudyProtocolSnapshotSerializer(validationMessages))
         this.addDeserializer(StudyProtocolSnapshot::class.java, StudyProtocolSnapshotDeserializer(validationMessages))
-        // DeviceRegistration
-        this.addSerializer(DeviceRegistration::class.java, DeviceRegistrationSerializer(validationMessages))
-        this.addDeserializer(DeviceRegistration::class.java, DeviceRegistrationDeserializer(validationMessages))
-        // Deployment
-        this.addSerializer(DeploymentServiceRequest::class.java, DeploymentServiceRequestSerializer(validationMessages))
-        this.addDeserializer(
-            DeploymentServiceRequest::class.java,
-            DeploymentServiceRequestDeserializer(validationMessages),
-        )
         // StudyDeploymentSnapshot
         this.addSerializer(StudyDeploymentSnapshot::class.java, StudyDeploymentSnapshotSerializer(validationMessages))
         this.addDeserializer(
             StudyDeploymentSnapshot::class.java,
             StudyDeploymentSnapshotDeserializer(validationMessages),
         )
+        // StudySnapshot
+        this.addSerializer(StudySnapshot::class.java, StudySnapshotSerializer(validationMessages))
+        this.addDeserializer(StudySnapshot::class.java, StudySnapshotDeserializer(validationMessages))
+
+        // DeviceRegistration
+        this.addSerializer(DeviceRegistration::class.java, DeviceRegistrationSerializer(validationMessages))
+        this.addDeserializer(DeviceRegistration::class.java, DeviceRegistrationDeserializer(validationMessages))
+
         // StudyDeploymentStatus
         this.addSerializer(StudyDeploymentStatus::class.java, StudyDeploymentStatusSerializer(validationMessages))
         this.addDeserializer(StudyDeploymentStatus::class.java, StudyDeploymentStatusDeserializer(validationMessages))
@@ -95,9 +103,7 @@ class ObjectMapperConfig(validationMessages: MessageBase) : SimpleModule() {
         // StudyStatus
         this.addSerializer(StudyStatus::class.java, StudyStatusSerializer(validationMessages))
         this.addDeserializer(StudyStatus::class.java, StudyStatusDeserializer(validationMessages))
-        // StudySnapshot
-        this.addSerializer(StudySnapshot::class.java, StudySnapshotSerializer(validationMessages))
-        this.addDeserializer(StudySnapshot::class.java, StudySnapshotDeserializer(validationMessages))
+
         // UUID
         this.addSerializer(UUID::class.java, UUIDSerializer(validationMessages))
         this.addDeserializer(UUID::class.java, UUIDDeserializer(validationMessages))
@@ -110,24 +116,7 @@ class ObjectMapperConfig(validationMessages: MessageBase) : SimpleModule() {
             ParticipantGroupStatus::class.java,
             ParticipantGroupStatusDeserializer(validationMessages),
         )
-        // ProtocolFactoryServiceRequest
-        this.addSerializer(
-            ProtocolFactoryServiceRequest::class.java,
-            ProtocolFactoryServiceSerializer(validationMessages),
-        )
-        this.addDeserializer(
-            ProtocolFactoryServiceRequest::class.java,
-            ProtocolFactoryServiceDeserializer(validationMessages),
-        )
-        // ParticipationServiceRequest
-        this.addSerializer(
-            ParticipationServiceRequest::class.java,
-            ParticipationServiceRequestSerializer(validationMessages),
-        )
-        this.addDeserializer(
-            ParticipationServiceRequest::class.java,
-            ParticipationServiceRequestDeserializer(validationMessages),
-        )
+
         // ParticipantGroupSnapshot
         this.addSerializer(ParticipantGroupSnapshot::class.java, ParticipantGroupSnapshotSerializer(validationMessages))
         this.addDeserializer(
@@ -146,15 +135,7 @@ class ObjectMapperConfig(validationMessages: MessageBase) : SimpleModule() {
             DataStreamsConfiguration::class.java,
             DataStreamsConfigurationDeserializer(validationMessages),
         )
-        // RecruitmentServiceRequest
-        this.addSerializer(
-            RecruitmentServiceRequest::class.java,
-            RecruitmentServiceRequestSerializer(validationMessages),
-        )
-        this.addDeserializer(
-            RecruitmentServiceRequest::class.java,
-            RecruitmentServiceRequestDeserializer(validationMessages),
-        )
+
         // ProtocolVersion
         this.addSerializer(ProtocolVersion::class.java, ProtocolVersionSerializer(validationMessages))
         this.addDeserializer(ProtocolVersion::class.java, ProtocolVersionDeserializer(validationMessages))
@@ -185,6 +166,24 @@ class ObjectMapperConfig(validationMessages: MessageBase) : SimpleModule() {
 
         this.addSerializer(java.time.Instant::class.java, InstantSerializer.INSTANCE)
         this.addDeserializer(java.time.Instant::class.java, InstantDeserializer.INSTANT)
+
+//        this.addSerializer(Instant::class.java, KInstantSerializer.INSTANCE)
+    }
+
+    class KInstantSerializer : JsonSerializer<Instant>() {
+        override fun serialize(
+            value: Instant,
+            gen: JsonGenerator,
+            serializers: SerializerProvider,
+        ) {
+            val t = WS_JSON.encodeToString(value)
+            val ob = value.toJavaInstant()
+            return(InstantSerializer.INSTANCE.serialize(ob, gen, serializers))
+        }
+
+        companion object {
+            val INSTANCE = KInstantSerializer()
+        }
     }
 
     /**

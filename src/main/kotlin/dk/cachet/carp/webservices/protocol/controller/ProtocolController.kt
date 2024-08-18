@@ -4,6 +4,7 @@ import dk.cachet.carp.protocols.infrastructure.ProtocolFactoryServiceRequest
 import dk.cachet.carp.protocols.infrastructure.ProtocolServiceRequest
 import dk.cachet.carp.webservices.common.constants.PathVariableName
 import dk.cachet.carp.webservices.common.exception.responses.ResourceNotFoundException
+import dk.cachet.carp.webservices.common.input.WS_JSON
 import dk.cachet.carp.webservices.common.services.CoreServiceContainer
 import dk.cachet.carp.webservices.protocol.dto.ProtocolOverview
 import dk.cachet.carp.webservices.protocol.service.ProtocolService
@@ -34,8 +35,9 @@ class ProtocolController(
     @PostMapping(value = [PROTOCOL_SERVICE])
     @Operation(tags = ["protocol/protocols.json"])
     suspend fun protocols(
-        @RequestBody request: ProtocolServiceRequest<*>,
+        @RequestBody httpMessage: String,
     ): ResponseEntity<Any> {
+        val request = WS_JSON.decodeFromString(ProtocolServiceRequest.Serializer, httpMessage)
         LOGGER.info("Start POST: $PROTOCOL_SERVICE -> ${ request::class.simpleName }")
         return protocolService.core.invoke(request).let { ResponseEntity.ok(it) }
     }
@@ -43,8 +45,9 @@ class ProtocolController(
     @PostMapping(value = [PROTOCOL_FACTORY_SERVICE])
     @Operation(tags = ["protocol/protocolFactory.json"])
     suspend fun protocolFactory(
-        @RequestBody request: ProtocolFactoryServiceRequest<*>,
+        @RequestBody httpMessage: String,
     ): ResponseEntity<Any> {
+        val request = WS_JSON.decodeFromString(ProtocolFactoryServiceRequest.Serializer, httpMessage)
         LOGGER.info("Start POST: $PROTOCOL_FACTORY_SERVICE -> ${ request::class.simpleName }")
         return services.protocolFactoryService.invoke(request).let { ResponseEntity.ok(it) }
     }

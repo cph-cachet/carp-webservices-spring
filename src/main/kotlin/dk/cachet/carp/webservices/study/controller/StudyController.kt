@@ -7,6 +7,7 @@ import dk.cachet.carp.studies.infrastructure.StudyServiceRequest
 import dk.cachet.carp.webservices.account.service.AccountService
 import dk.cachet.carp.webservices.common.constants.PathVariableName
 import dk.cachet.carp.webservices.common.constants.RequestParamName
+import dk.cachet.carp.webservices.common.input.WS_JSON
 import dk.cachet.carp.webservices.security.authentication.domain.Account
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
 import dk.cachet.carp.webservices.security.authorization.Claim
@@ -107,8 +108,9 @@ class StudyController(
     @PostMapping(value = [STUDY_SERVICE])
     @Operation(tags = ["study/studies.json"])
     suspend fun studies(
-        @RequestBody request: StudyServiceRequest<*>,
-    ): ResponseEntity<*> {
+        @RequestBody httpMessage: String,
+    ): ResponseEntity<Any> {
+        val request = WS_JSON.decodeFromString(StudyServiceRequest.Serializer, httpMessage)
         LOGGER.info("Start POST: $STUDY_SERVICE -> ${ request::class.simpleName }")
         return studyService.core.invoke(request).let { ResponseEntity.ok(it) }
     }
@@ -116,8 +118,9 @@ class StudyController(
     @PostMapping(value = [RECRUITMENT_SERVICE])
     @Operation(tags = ["study/recruitments.json"])
     suspend fun recruitments(
-        @RequestBody request: RecruitmentServiceRequest<*>,
+        @RequestBody httpMessage: String,
     ): ResponseEntity<*> {
+        val request = WS_JSON.decodeFromString(RecruitmentServiceRequest.Serializer, httpMessage)
         LOGGER.info("Start POST: $RECRUITMENT_SERVICE -> ${ request::class.simpleName }")
         return recruitmentService.core.invoke(request).let { ResponseEntity.ok(it) }
     }
