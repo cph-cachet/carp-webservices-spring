@@ -115,8 +115,7 @@ class StudyController(
         val request = WS_JSON.decodeFromString(StudyServiceRequest.Serializer, httpMessage)
         LOGGER.info("Start POST: $STUDY_SERVICE -> ${ request::class.simpleName }")
         val result = studyService.core.invoke(request)
-        val ret = serializeRequest(request, result)
-        return ret.let { ResponseEntity.ok(it) }
+        return serializeResponse(request, result).let { ResponseEntity.ok(it) }
     }
 
     @PostMapping(value = [RECRUITMENT_SERVICE])

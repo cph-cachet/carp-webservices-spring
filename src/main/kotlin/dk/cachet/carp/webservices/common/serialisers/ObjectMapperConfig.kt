@@ -20,10 +20,7 @@ import dk.cachet.carp.deployments.application.PrimaryDeviceDeployment
 import dk.cachet.carp.deployments.application.StudyDeploymentStatus
 import dk.cachet.carp.deployments.application.users.ActiveParticipationInvitation
 import dk.cachet.carp.deployments.application.users.ParticipantData
-import dk.cachet.carp.deployments.domain.StudyDeploymentSnapshot
 import dk.cachet.carp.deployments.domain.users.ParticipantGroupSnapshot
-import dk.cachet.carp.protocols.application.ProtocolVersion
-import dk.cachet.carp.protocols.application.StudyProtocolSnapshot
 import dk.cachet.carp.studies.application.users.ParticipantGroupStatus
 import dk.cachet.carp.studies.domain.users.RecruitmentSnapshot
 import dk.cachet.carp.webservices.account.serdes.AccountIdentityDeserializer
@@ -33,7 +30,8 @@ import dk.cachet.carp.webservices.common.serialisers.serdes.UUIDDeserializer
 import dk.cachet.carp.webservices.common.serialisers.serdes.UUIDSerializer
 import dk.cachet.carp.webservices.datastream.serdes.*
 import dk.cachet.carp.webservices.deployment.serdes.*
-import dk.cachet.carp.webservices.protocol.serdes.*
+import dk.cachet.carp.webservices.protocol.serdes.DeviceRegistrationDeserializer
+import dk.cachet.carp.webservices.protocol.serdes.DeviceRegistrationSerializer
 import dk.cachet.carp.webservices.study.serdes.*
 import kotlinx.datetime.Instant
 import kotlinx.datetime.toJavaInstant
@@ -51,16 +49,6 @@ import org.springframework.context.annotation.Primary
 class ObjectMapperConfig(validationMessages: MessageBase) : SimpleModule() {
     init
     {
-        // Snapshot Serializer
-        this.addSerializer(StudyProtocolSnapshot::class.java, StudyProtocolSnapshotSerializer(validationMessages))
-        this.addDeserializer(StudyProtocolSnapshot::class.java, StudyProtocolSnapshotDeserializer(validationMessages))
-        // StudyDeploymentSnapshot
-        this.addSerializer(StudyDeploymentSnapshot::class.java, StudyDeploymentSnapshotSerializer(validationMessages))
-        this.addDeserializer(
-            StudyDeploymentSnapshot::class.java,
-            StudyDeploymentSnapshotDeserializer(validationMessages),
-        )
-
         // DeviceRegistration
         this.addSerializer(DeviceRegistration::class.java, DeviceRegistrationSerializer(validationMessages))
         this.addDeserializer(DeviceRegistration::class.java, DeviceRegistrationDeserializer(validationMessages))
@@ -105,10 +93,6 @@ class ObjectMapperConfig(validationMessages: MessageBase) : SimpleModule() {
             DataStreamsConfiguration::class.java,
             DataStreamsConfigurationDeserializer(validationMessages),
         )
-
-        // ProtocolVersion
-        this.addSerializer(ProtocolVersion::class.java, ProtocolVersionSerializer(validationMessages))
-        this.addDeserializer(ProtocolVersion::class.java, ProtocolVersionDeserializer(validationMessages))
 
         // SyncPoint
         this.addSerializer(SyncPoint::class.java, SyncPointSerializer(validationMessages))

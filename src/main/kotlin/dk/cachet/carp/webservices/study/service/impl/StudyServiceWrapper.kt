@@ -35,19 +35,21 @@ class StudyServiceWrapper(
                 ?.let { repository.findAllByStudyIds(it) }
                 ?.map {
                     val status = it.getStatus()
-                    val details = core.getStudyDetails(status.studyId)
-                    val owner = accountService.findByUUID(details.ownerId)
-
+//                    val details = core.getStudyDetails(status.studyId)
+//                    val owner = accountService.findByUUID(details.ownerId)
+                    // TODO: Do we still need this?
                     StudyOverview(
                         status.studyId,
-                        it.name,
-                        it.createdOn,
+                        status.name,
+                        status.createdOn,
                         status.studyProtocolId,
-                        it.canSetInvitation,
-                        it.canSetStudyProtocol,
-                        it.canDeployToParticipants,
-                        details.description,
-                        owner?.fullName,
+                        status.canSetInvitation,
+                        status.canSetStudyProtocol,
+                        status.canDeployToParticipants,
+//                        details.description,
+                        "",
+                        "",
+//                        owner?.fullName,
                     )
                 }
                 ?: emptyList()

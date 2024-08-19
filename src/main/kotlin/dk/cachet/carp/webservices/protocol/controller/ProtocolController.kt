@@ -9,6 +9,7 @@ import dk.cachet.carp.webservices.common.services.CoreServiceContainer
 import dk.cachet.carp.webservices.protocol.dto.ProtocolOverview
 import dk.cachet.carp.webservices.protocol.service.ProtocolService
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
+import dk.cachet.carp.webservices.study.controller.serializeResponse
 import io.swagger.v3.oas.annotations.Operation
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -39,7 +40,8 @@ class ProtocolController(
     ): ResponseEntity<Any> {
         val request = WS_JSON.decodeFromString(ProtocolServiceRequest.Serializer, httpMessage)
         LOGGER.info("Start POST: $PROTOCOL_SERVICE -> ${ request::class.simpleName }")
-        return protocolService.core.invoke(request).let { ResponseEntity.ok(it) }
+        val ret = protocolService.core.invoke(request)
+        return serializeResponse(request, ret).let { ResponseEntity.ok(it) }
     }
 
     @PostMapping(value = [PROTOCOL_FACTORY_SERVICE])

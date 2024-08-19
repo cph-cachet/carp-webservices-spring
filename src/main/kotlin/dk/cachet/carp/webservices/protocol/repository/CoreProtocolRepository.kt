@@ -5,7 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.protocols.application.ProtocolVersion
 import dk.cachet.carp.protocols.application.StudyProtocolSnapshot
-import dk.cachet.carp.protocols.domain.*
+import dk.cachet.carp.protocols.domain.StudyProtocol
+import dk.cachet.carp.protocols.domain.StudyProtocolRepository
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.input.WS_JSON
 import dk.cachet.carp.webservices.protocol.domain.Protocol
@@ -28,7 +29,6 @@ class CoreProtocolRepository(
 ) : StudyProtocolRepository {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
-        private const val VERSION: Int = 0
     }
 
     /**
@@ -237,8 +237,8 @@ class CoreProtocolRepository(
         val wsProtocol = Protocol()
         wsProtocol.versionTag = version.tag
 
-        val snapshot = StudyProtocolSnapshot.fromProtocol(protocol, VERSION)
-        wsProtocol.snapshot = objectMapper.valueToTree(snapshot)
+        val snapshot = WS_JSON.encodeToString(StudyProtocolSnapshot.serializer(), protocol.getSnapshot())
+        wsProtocol.snapshot = objectMapper.readTree(snapshot)
 
         return wsProtocol
     }
