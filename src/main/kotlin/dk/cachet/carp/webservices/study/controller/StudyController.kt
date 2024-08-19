@@ -20,6 +20,7 @@ import dk.cachet.carp.webservices.study.service.StudyService
 import io.swagger.v3.oas.annotations.Operation
 import jakarta.validation.Valid
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.InternalSerializationApi
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.http.ResponseEntity
@@ -105,6 +106,7 @@ class StudyController(
         return studyService.getStudiesOverview(authenticationService.getId())
     }
 
+    @OptIn(InternalSerializationApi::class)
     @PostMapping(value = [STUDY_SERVICE])
     @Operation(tags = ["study/studies.json"])
     suspend fun studies(
@@ -112,7 +114,9 @@ class StudyController(
     ): ResponseEntity<Any> {
         val request = WS_JSON.decodeFromString(StudyServiceRequest.Serializer, httpMessage)
         LOGGER.info("Start POST: $STUDY_SERVICE -> ${ request::class.simpleName }")
-        return studyService.core.invoke(request).let { ResponseEntity.ok(it) }
+        val result = studyService.core.invoke(request)
+        val ret = serializeRequest(request, result)
+        return ret.let { ResponseEntity.ok(it) }
     }
 
     @PostMapping(value = [RECRUITMENT_SERVICE])

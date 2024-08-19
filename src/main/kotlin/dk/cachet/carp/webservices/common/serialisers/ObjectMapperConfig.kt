@@ -16,26 +16,16 @@ import dk.cachet.carp.data.application.DataStreamBatch
 import dk.cachet.carp.data.application.DataStreamsConfiguration
 import dk.cachet.carp.data.application.Measurement
 import dk.cachet.carp.data.application.SyncPoint
-import dk.cachet.carp.data.infrastructure.DataStreamServiceRequest
 import dk.cachet.carp.deployments.application.PrimaryDeviceDeployment
 import dk.cachet.carp.deployments.application.StudyDeploymentStatus
 import dk.cachet.carp.deployments.application.users.ActiveParticipationInvitation
 import dk.cachet.carp.deployments.application.users.ParticipantData
 import dk.cachet.carp.deployments.domain.StudyDeploymentSnapshot
 import dk.cachet.carp.deployments.domain.users.ParticipantGroupSnapshot
-import dk.cachet.carp.deployments.infrastructure.DeploymentServiceRequest
-import dk.cachet.carp.deployments.infrastructure.ParticipationServiceRequest
 import dk.cachet.carp.protocols.application.ProtocolVersion
 import dk.cachet.carp.protocols.application.StudyProtocolSnapshot
-import dk.cachet.carp.protocols.infrastructure.ProtocolFactoryServiceRequest
-import dk.cachet.carp.protocols.infrastructure.ProtocolServiceRequest
-import dk.cachet.carp.studies.application.StudyDetails
-import dk.cachet.carp.studies.application.StudyStatus
 import dk.cachet.carp.studies.application.users.ParticipantGroupStatus
-import dk.cachet.carp.studies.domain.StudySnapshot
 import dk.cachet.carp.studies.domain.users.RecruitmentSnapshot
-import dk.cachet.carp.studies.infrastructure.RecruitmentServiceRequest
-import dk.cachet.carp.studies.infrastructure.StudyServiceRequest
 import dk.cachet.carp.webservices.account.serdes.AccountIdentityDeserializer
 import dk.cachet.carp.webservices.account.serdes.AccountIdentitySerializer
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
@@ -61,14 +51,6 @@ import org.springframework.context.annotation.Primary
 class ObjectMapperConfig(validationMessages: MessageBase) : SimpleModule() {
     init
     {
-        // Service Request Serializer
-        this.addSerializer(StudyServiceRequest::class.java, ServiceRequestSerializer(validationMessages))
-        this.addSerializer(ProtocolServiceRequest::class.java, ServiceRequestSerializer(validationMessages))
-        this.addSerializer(ProtocolFactoryServiceRequest::class.java, ServiceRequestSerializer(validationMessages))
-        this.addSerializer(ParticipationServiceRequest::class.java, ServiceRequestSerializer(validationMessages))
-        this.addSerializer(RecruitmentServiceRequest::class.java, ServiceRequestSerializer(validationMessages))
-        this.addSerializer(DeploymentServiceRequest::class.java, ServiceRequestSerializer(validationMessages))
-
         // Snapshot Serializer
         this.addSerializer(StudyProtocolSnapshot::class.java, StudyProtocolSnapshotSerializer(validationMessages))
         this.addDeserializer(StudyProtocolSnapshot::class.java, StudyProtocolSnapshotDeserializer(validationMessages))
@@ -78,9 +60,6 @@ class ObjectMapperConfig(validationMessages: MessageBase) : SimpleModule() {
             StudyDeploymentSnapshot::class.java,
             StudyDeploymentSnapshotDeserializer(validationMessages),
         )
-        // StudySnapshot
-        this.addSerializer(StudySnapshot::class.java, StudySnapshotSerializer(validationMessages))
-        this.addDeserializer(StudySnapshot::class.java, StudySnapshotDeserializer(validationMessages))
 
         // DeviceRegistration
         this.addSerializer(DeviceRegistration::class.java, DeviceRegistrationSerializer(validationMessages))
@@ -98,16 +77,9 @@ class ObjectMapperConfig(validationMessages: MessageBase) : SimpleModule() {
         // AccountIdentity
         this.addSerializer(AccountIdentity::class.java, AccountIdentitySerializer(validationMessages))
         this.addDeserializer(AccountIdentity::class.java, AccountIdentityDeserializer(validationMessages))
-        // StudyStatus
-        this.addSerializer(StudyStatus::class.java, StudyStatusSerializer(validationMessages))
-        this.addDeserializer(StudyStatus::class.java, StudyStatusDeserializer(validationMessages))
-
         // UUID
         this.addSerializer(UUID::class.java, UUIDSerializer(validationMessages))
         this.addDeserializer(UUID::class.java, UUIDDeserializer(validationMessages))
-        // StudyDetails
-        this.addSerializer(StudyDetails::class.java, StudyDetailsSerializer(validationMessages))
-        this.addDeserializer(StudyDetails::class.java, StudyDetailsDeserializer(validationMessages))
         // ParticipantGroupStatus
         this.addSerializer(ParticipantGroupStatus::class.java, ParticipantGroupStatusSerializer(validationMessages))
         this.addDeserializer(
@@ -137,12 +109,7 @@ class ObjectMapperConfig(validationMessages: MessageBase) : SimpleModule() {
         // ProtocolVersion
         this.addSerializer(ProtocolVersion::class.java, ProtocolVersionSerializer(validationMessages))
         this.addDeserializer(ProtocolVersion::class.java, ProtocolVersionDeserializer(validationMessages))
-        // DataStream
-        this.addSerializer(DataStreamServiceRequest::class.java, DataStreamServiceRequestSerializer(validationMessages))
-        this.addDeserializer(
-            DataStreamServiceRequest::class.java,
-            DataStreamServiceRequestDeserializer(validationMessages),
-        )
+
         // SyncPoint
         this.addSerializer(SyncPoint::class.java, SyncPointSerializer(validationMessages))
         this.addDeserializer(SyncPoint::class.java, SyncPointDeserializer(validationMessages))

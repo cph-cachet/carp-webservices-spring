@@ -24,7 +24,6 @@ class CoreDeploymentRepository(
 ) : DeploymentRepository {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
-        private const val VERSION: Int = 0
     }
 
     override suspend fun add(studyDeployment: CoreStudyDeployment) =
@@ -40,8 +39,8 @@ class CoreDeploymentRepository(
             }
             val studyDeploymentToSave = StudyDeployment()
 
-            val snapshot = StudyDeploymentSnapshot.fromDeployment(studyDeployment, VERSION)
-            studyDeploymentToSave.snapshot = objectMapper.valueToTree(snapshot)
+            val snapshot = WS_JSON.encodeToString(StudyDeploymentSnapshot.serializer(), studyDeployment.getSnapshot())
+            studyDeploymentToSave.snapshot = objectMapper.readTree(snapshot)
 
             studyDeploymentRepository.save(studyDeploymentToSave)
             LOGGER.info("Deployment saved, id: ${studyDeployment.id.stringRepresentation}")
@@ -84,8 +83,8 @@ class CoreDeploymentRepository(
                 )
             }
 
-            val snapshot = StudyDeploymentSnapshot.fromDeployment(studyDeployment, VERSION)
-            stored.snapshot = objectMapper.valueToTree(snapshot)
+            val snapshot = WS_JSON.encodeToString(StudyDeploymentSnapshot.serializer(), studyDeployment.getSnapshot())
+            stored.snapshot = objectMapper.readTree(snapshot)
 
             studyDeploymentRepository.save(stored)
             LOGGER.info("Deployment updated, id: ${studyDeployment.id.stringRepresentation}")

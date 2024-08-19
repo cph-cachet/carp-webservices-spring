@@ -29,8 +29,9 @@ class DataStreamController(
     @PostMapping(value = [DATA_STREAM_SERVICE])
     @Operation(tags = ["dataStream/getDataStream.json"])
     suspend fun invoke(
-        @RequestBody request: DataStreamServiceRequest<*>,
+        @RequestBody httpMessage: String,
     ): ResponseEntity<Any> {
+        val request = WS_JSON.decodeFromString(DataStreamServiceRequest.Serializer, httpMessage)
         LOGGER.info("Start POST: $DATA_STREAM_SERVICE -> ${ request::class.simpleName }")
         return dataStreamService.core.invoke(request).let { ResponseEntity.ok(it) }
     }

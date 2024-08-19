@@ -1,7 +1,6 @@
 package dk.cachet.carp.webservices.protocol.service
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.protocols.application.StudyProtocolSnapshot
 import dk.cachet.carp.webservices.account.service.AccountService
@@ -17,6 +16,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.Clock
 import kotlinx.datetime.toJavaInstant
+import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import kotlin.test.*
@@ -26,7 +26,7 @@ import kotlin.time.toDuration
 class ProtocolServiceTest {
     val accountService: AccountService = mockk()
     val protocolRepository: ProtocolRepository = mockk()
-    val objectMapper: ObjectMapper = mockk()
+    val json: Json = mockk()
     val services: CoreServiceContainer = mockk()
 
     @BeforeEach
@@ -42,7 +42,7 @@ class ProtocolServiceTest {
             runTest {
                 every { protocolRepository.findAllByIdSortByCreatedAt(any()) } returns emptyList()
 
-                val sut = ProtocolServiceWrapper(accountService, protocolRepository, mockk(), services)
+                val sut = ProtocolServiceWrapper(accountService, protocolRepository, json, services)
 
                 assertNull(sut.getSingleProtocolOverview("id"))
             }
@@ -78,13 +78,18 @@ class ProtocolServiceTest {
                     }
 
                 every { protocolRepository.findAllByIdSortByCreatedAt("id") } returns versions
-                every { objectMapper.treeToValue(any(), any<Class<*>>()) } returns snapshot
+//                every { objectMapper.treeToValue(any(), any<Class<*>>()) } returns snapshot
+                coEvery { json.decodeFromString<StudyProtocolSnapshot>(any()) } returns snapshot
+
                 coEvery { accountService.findByUUID(any()) } returns account
 
-                val sut = ProtocolServiceWrapper(accountService, protocolRepository, objectMapper, services)
+                val sut = ProtocolServiceWrapper(accountService, protocolRepository, json, services)
 
                 val result = sut.getSingleProtocolOverview("id")
 
+                if (result != null) {
+                    println(result.ownerName)
+                }
                 assertNotNull(result)
                 assertEquals("John Doe", result.ownerName)
                 assertEquals("version 2", result.versionTag)
