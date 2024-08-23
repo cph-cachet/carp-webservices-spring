@@ -21,7 +21,6 @@ import dk.cachet.carp.deployments.application.StudyDeploymentStatus
 import dk.cachet.carp.deployments.application.users.ActiveParticipationInvitation
 import dk.cachet.carp.deployments.application.users.ParticipantData
 import dk.cachet.carp.deployments.domain.users.ParticipantGroupSnapshot
-import dk.cachet.carp.studies.application.users.ParticipantGroupStatus
 import dk.cachet.carp.studies.domain.users.RecruitmentSnapshot
 import dk.cachet.carp.webservices.account.serdes.AccountIdentityDeserializer
 import dk.cachet.carp.webservices.account.serdes.AccountIdentitySerializer
@@ -68,12 +67,6 @@ class ObjectMapperConfig(validationMessages: MessageBase) : SimpleModule() {
         // UUID
         this.addSerializer(UUID::class.java, UUIDSerializer(validationMessages))
         this.addDeserializer(UUID::class.java, UUIDDeserializer(validationMessages))
-        // ParticipantGroupStatus
-        this.addSerializer(ParticipantGroupStatus::class.java, ParticipantGroupStatusSerializer(validationMessages))
-        this.addDeserializer(
-            ParticipantGroupStatus::class.java,
-            ParticipantGroupStatusDeserializer(validationMessages),
-        )
 
         // ParticipantGroupSnapshot
         this.addSerializer(ParticipantGroupSnapshot::class.java, ParticipantGroupSnapshotSerializer(validationMessages))

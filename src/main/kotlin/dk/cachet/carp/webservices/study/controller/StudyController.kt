@@ -7,7 +7,7 @@ import dk.cachet.carp.studies.infrastructure.StudyServiceRequest
 import dk.cachet.carp.webservices.account.service.AccountService
 import dk.cachet.carp.webservices.common.constants.PathVariableName
 import dk.cachet.carp.webservices.common.constants.RequestParamName
-import dk.cachet.carp.webservices.common.input.WS_JSON
+import dk.cachet.carp.webservices.common.serialisers.ResponseSerializer
 import dk.cachet.carp.webservices.security.authentication.domain.Account
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
 import dk.cachet.carp.webservices.security.authorization.Claim
@@ -20,7 +20,6 @@ import dk.cachet.carp.webservices.study.service.StudyService
 import io.swagger.v3.oas.annotations.Operation
 import jakarta.validation.Valid
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.InternalSerializationApi
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.http.ResponseEntity
@@ -36,6 +35,8 @@ class StudyController(
 ) {
     companion object {
         val LOGGER: Logger = LogManager.getLogger()
+        val studySerializer: ResponseSerializer<*> = StudyRequestSerializer()
+        val recruitmentSerializer: ResponseSerializer<*> = RecruitmentRequestSerializer()
 
         /** Endpoint URI constants */
         const val STUDY_SERVICE = "/api/study-service"
@@ -106,16 +107,15 @@ class StudyController(
         return studyService.getStudiesOverview(authenticationService.getId())
     }
 
-    @OptIn(InternalSerializationApi::class)
     @PostMapping(value = [STUDY_SERVICE])
     @Operation(tags = ["study/studies.json"])
     suspend fun studies(
         @RequestBody httpMessage: String,
     ): ResponseEntity<Any> {
-        val request = WS_JSON.decodeFromString(StudyServiceRequest.Serializer, httpMessage)
+        val request = studySerializer.deserializeRequest(StudyServiceRequest.Serializer, httpMessage)
         LOGGER.info("Start POST: $STUDY_SERVICE -> ${ request::class.simpleName }")
         val result = studyService.core.invoke(request)
-        return serializeResponse(request, result).let { ResponseEntity.ok(it) }
+        return studySerializer.serializeResponse(request, result).let { ResponseEntity.ok(it) }
     }
 
     @PostMapping(value = [RECRUITMENT_SERVICE])
@@ -123,9 +123,10 @@ class StudyController(
     suspend fun recruitments(
         @RequestBody httpMessage: String,
     ): ResponseEntity<*> {
-        val request = WS_JSON.decodeFromString(RecruitmentServiceRequest.Serializer, httpMessage)
+        val request = recruitmentSerializer.deserializeRequest(RecruitmentServiceRequest.Serializer, httpMessage)
         LOGGER.info("Start POST: $RECRUITMENT_SERVICE -> ${ request::class.simpleName }")
-        return recruitmentService.core.invoke(request).let { ResponseEntity.ok(it) }
+        val ret = recruitmentService.core.invoke(request)
+        return recruitmentSerializer.serializeResponse(request, ret).let { ResponseEntity.ok(it) }
     }
 
     @PostMapping(value = [ADD_PARTICIPANTS])
