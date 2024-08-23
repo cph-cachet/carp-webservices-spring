@@ -43,7 +43,6 @@ The project can be set up using different profiles for different environments. T
 - local
 - development
 - testing
-- staging
 - production
 
 # Services
@@ -53,12 +52,12 @@ The main services of the application are the following:
 * Collections
 * Documents
 * Files
-* Consents
-* Datapoints
+* Data Points
 * Studies
 * Protocols
-* Deployments.
-* [Data](docs/ws-data)
+* Deployments
+* [Data Streams](docs/ws-datastream)
+* Exports
   
 All of them have a dedicated package with their own controller, service, and persistence layers, however, there are differences in their management.
 
@@ -104,9 +103,9 @@ Follow these steps to deploy CAWS:
    - Update the [environment file](.env) to match the newly created client.
 5. Rebuild the carp-ws image and restart the stack.
 
-# Developer Guide 
+# Developer Guide
 
-## Local development 
+## Local development
   
 - Make sure you have Docker (and Java 17) installed on your system.
 - Ensure Docker is able to mount the volume specified under carp-ws (/data/carp/storage/local); you may need to configure Docker File Sharing options to enable this
