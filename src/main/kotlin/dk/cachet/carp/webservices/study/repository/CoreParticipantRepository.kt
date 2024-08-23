@@ -1,6 +1,5 @@
 package dk.cachet.carp.webservices.study.repository
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.studies.domain.users.ParticipantRepository
@@ -33,7 +32,13 @@ class CoreParticipantRepository(
 
             check(existingRecruitment == null) { "A recruitment already exists for the study with id $studyId." }
 
-            val snapshotJsonNode = objectMapper.valueToTree<JsonNode>(recruitment.getSnapshot())
+            val snapshotJsonNode =
+                objectMapper.readTree(
+                    WS_JSON.encodeToString(
+                        RecruitmentSnapshot.serializer(),
+                        recruitment.getSnapshot(),
+                    ),
+                )
             val newRecruitment =
                 Recruitment().apply {
                     snapshot = snapshotJsonNode

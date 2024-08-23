@@ -104,6 +104,7 @@ class CoreDataStreamService(
     override suspend fun closeDataStreams(studyDeploymentIds: Set<UUID>) {
         val configs = configRepository.getConfigurationsForIds(studyDeploymentIds.map { it.stringRepresentation })
 
+        // TODO: warn instead of throwing exception
         require(configs.size == studyDeploymentIds.size) { "One of the configurations passed is not valid." }
 
         configs.forEach { it.closed = true }
