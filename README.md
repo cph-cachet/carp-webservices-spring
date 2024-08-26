@@ -49,15 +49,15 @@ The project can be set up using different profiles for different environments. T
 
 The main services of the application are the following: 
 
-* Collections
-* Documents
-* Files
+* [Collections](docs/ws-resources.md)
+* [Documents](docs/ws-resources.md)
+* [Files](docs/ws-resources.md)
 * Data Points
 * Studies
 * Protocols
 * Deployments
 * [Data Streams](docs/ws-datastream)
-* Exports
+* [Exports](docs/ws-exports)
   
 All of them have a dedicated package with their own controller, service, and persistence layers, however, there are differences in their management.
 
