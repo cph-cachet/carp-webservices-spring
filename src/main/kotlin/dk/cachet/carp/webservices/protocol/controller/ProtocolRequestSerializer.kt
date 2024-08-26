@@ -4,6 +4,7 @@ import dk.cachet.carp.common.application.services.ApplicationService
 import dk.cachet.carp.common.infrastructure.services.ApplicationServiceRequest
 import dk.cachet.carp.protocols.application.ProtocolVersion
 import dk.cachet.carp.protocols.application.StudyProtocolSnapshot
+import dk.cachet.carp.protocols.infrastructure.ProtocolFactoryServiceRequest
 import dk.cachet.carp.protocols.infrastructure.ProtocolServiceRequest
 import dk.cachet.carp.webservices.common.serialisers.ResponseSerializer
 import kotlinx.serialization.serializer
@@ -26,6 +27,20 @@ class ProtocolRequestSerializer : ResponseSerializer<ProtocolServiceRequest<*>>(
                 json.encodeToString(serializer<List<StudyProtocolSnapshot>>(), content as List<StudyProtocolSnapshot>)
             is ProtocolServiceRequest.GetVersionHistoryFor ->
                 json.encodeToString(serializer<List<ProtocolVersion>>(), content as List<ProtocolVersion>)
+            else -> content
+        }
+    }
+}
+
+class ProtocolFactoryRequestSerializer : ResponseSerializer<ProtocolFactoryServiceRequest<*>>() {
+    @Suppress("UNCHECKED_CAST")
+    override fun <TService : ApplicationService<TService, *>> serializeResponse(
+        request: ApplicationServiceRequest<TService, *>,
+        content: Any?,
+    ): Any? {
+        return when (request) {
+            is ProtocolFactoryServiceRequest.CreateCustomProtocol ->
+                json.encodeToString(serializer<StudyProtocolSnapshot>(), content as StudyProtocolSnapshot)
             else -> content
         }
     }

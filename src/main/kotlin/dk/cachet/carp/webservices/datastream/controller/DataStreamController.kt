@@ -20,6 +20,7 @@ class DataStreamController(
 ) {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
+        private val serializer = DataStreamRequestSerializer()
 
         /** Endpoint URI constants */
         const val DATA_STREAM_SERVICE = "/api/data-stream-service"
@@ -33,7 +34,8 @@ class DataStreamController(
     ): ResponseEntity<Any> {
         val request = WS_JSON.decodeFromString(DataStreamServiceRequest.Serializer, httpMessage)
         LOGGER.info("Start POST: $DATA_STREAM_SERVICE -> ${ request::class.simpleName }")
-        return dataStreamService.core.invoke(request).let { ResponseEntity.ok(it) }
+        val ret = dataStreamService.core.invoke(request)
+        return serializer.serializeResponse(request, ret).let { ResponseEntity.ok(it) }
     }
 
     @PostMapping(value = [DATA_STREAM_SERVICE_ZIP])

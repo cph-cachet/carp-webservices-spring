@@ -15,6 +15,8 @@ import dk.cachet.carp.webservices.study.domain.InactiveDeploymentInfo
 import dk.cachet.carp.webservices.study.domain.ParticipantGroupsStatus
 import dk.cachet.carp.webservices.study.domain.StudyOverview
 import dk.cachet.carp.webservices.study.dto.AddParticipantsRequestDto
+import dk.cachet.carp.webservices.study.serdes.RecruitmentRequestSerializer
+import dk.cachet.carp.webservices.study.serdes.StudyRequestSerializer
 import dk.cachet.carp.webservices.study.service.RecruitmentService
 import dk.cachet.carp.webservices.study.service.StudyService
 import io.swagger.v3.oas.annotations.Operation

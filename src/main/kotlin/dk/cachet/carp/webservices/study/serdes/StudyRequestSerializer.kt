@@ -1,4 +1,4 @@
-package dk.cachet.carp.webservices.study.controller
+package dk.cachet.carp.webservices.study.serdes
 
 import dk.cachet.carp.common.application.services.ApplicationService
 import dk.cachet.carp.common.infrastructure.services.ApplicationServiceRequest
@@ -18,19 +18,21 @@ class StudyRequestSerializer : ResponseSerializer<StudyServiceRequest<*>>() {
         content: Any?,
     ): Any? {
         return when (request) {
-            is StudyServiceRequest -> {
-                when (content) {
-                    is StudyStatus ->
-                        json.encodeToString(serializer<StudyStatus>(), content)
-                    is StudyDetails ->
-                        json.encodeToString(serializer<StudyDetails>(), content)
-                    is List<*> ->
-                        json.encodeToString(serializer<List<StudyStatus>>(), content as List<StudyStatus>)
-                    is Boolean ->
-                        json.encodeToString(serializer<Boolean>(), content)
-                    else -> content
-                }
-            }
+            is StudyServiceRequest.CreateStudy,
+            is StudyServiceRequest.GetStudyStatus,
+            is StudyServiceRequest.SetInternalDescription,
+            is StudyServiceRequest.SetInvitation,
+            is StudyServiceRequest.SetProtocol,
+            is StudyServiceRequest.RemoveProtocol,
+            is StudyServiceRequest.GoLive,
+            ->
+                json.encodeToString(serializer<StudyStatus>(), content as StudyStatus)
+            is StudyServiceRequest.GetStudyDetails ->
+                json.encodeToString(serializer<StudyDetails>(), content as StudyDetails)
+            is StudyServiceRequest.GetStudiesOverview ->
+                json.encodeToString(serializer<List<StudyDetails>>(), content as List<StudyDetails>)
+            is StudyServiceRequest.Remove ->
+                json.encodeToString(serializer<Boolean>(), content as Boolean)
             else -> content
         }
     }

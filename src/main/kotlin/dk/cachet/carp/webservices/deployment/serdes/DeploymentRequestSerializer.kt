@@ -5,7 +5,10 @@ import dk.cachet.carp.common.application.services.ApplicationService
 import dk.cachet.carp.common.infrastructure.services.ApplicationServiceRequest
 import dk.cachet.carp.deployments.application.PrimaryDeviceDeployment
 import dk.cachet.carp.deployments.application.StudyDeploymentStatus
+import dk.cachet.carp.deployments.application.users.ActiveParticipationInvitation
+import dk.cachet.carp.deployments.application.users.ParticipantData
 import dk.cachet.carp.deployments.infrastructure.DeploymentServiceRequest
+import dk.cachet.carp.deployments.infrastructure.ParticipationServiceRequest
 import dk.cachet.carp.webservices.common.serialisers.ResponseSerializer
 import kotlinx.serialization.serializer
 
@@ -34,6 +37,30 @@ class DeploymentRequestSerializer : ResponseSerializer<DeploymentServiceRequest<
                     content as List<StudyDeploymentStatus>,
                 )
             else -> content
+        }
+    }
+}
+
+class ParticipationRequestSerializer : ResponseSerializer<ParticipationServiceRequest<*>>() {
+    @Suppress("UNCHECKED_CAST")
+    override fun <TService : ApplicationService<TService, *>> serializeResponse(
+        request: ApplicationServiceRequest<TService, *>,
+        content: Any?,
+    ): Any? {
+        return when (request) {
+            is ParticipationServiceRequest.GetActiveParticipationInvitations ->
+                json.encodeToString(
+                    serializer<Set<ActiveParticipationInvitation>>(),
+                    content as Set<ActiveParticipationInvitation>,
+                )
+            is ParticipationServiceRequest.GetParticipantData ->
+                json.encodeToString(serializer<ParticipantData>(), content as ParticipantData)
+            is ParticipationServiceRequest.GetParticipantDataList ->
+                json.encodeToString(serializer<List<ParticipantData>>(), content as List<ParticipantData>)
+            is ParticipationServiceRequest.SetParticipantData ->
+                json.encodeToString(serializer<ParticipantData>(), content as ParticipantData)
+
+            else -> {}
         }
     }
 }

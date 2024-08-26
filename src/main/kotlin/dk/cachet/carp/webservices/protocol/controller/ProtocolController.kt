@@ -25,6 +25,7 @@ class ProtocolController(
     companion object {
         val LOGGER: Logger = LogManager.getLogger()
         val serializer: ProtocolRequestSerializer = ProtocolRequestSerializer()
+        val factorySerializer: ProtocolFactoryRequestSerializer = ProtocolFactoryRequestSerializer()
 
         /** Path variables */
         const val PROTOCOL_SERVICE = "/api/protocol-service"
@@ -51,7 +52,8 @@ class ProtocolController(
     ): ResponseEntity<Any> {
         val request = WS_JSON.decodeFromString(ProtocolFactoryServiceRequest.Serializer, httpMessage)
         LOGGER.info("Start POST: $PROTOCOL_FACTORY_SERVICE -> ${ request::class.simpleName }")
-        return services.protocolFactoryService.invoke(request).let { ResponseEntity.ok(it) }
+        val ret = services.protocolFactoryService.invoke(request)
+        return factorySerializer.serializeResponse(request, ret).let { ResponseEntity.ok(it) }
     }
 
     @GetMapping(value = [GET_PROTOCOL_OVERVIEW])
