@@ -27,7 +27,7 @@ class CoreDataStreamServiceTest {
     @Nested
     inner class AppendToDataStreams {
         @Test
-        fun `should throw if there are incorrect study deployment IDs in any of the batches`() =
+        fun `throw if there are incorrect study deployment IDs in any of the batches`() =
             runTest {
                 val incorrectId = UUID.randomUUID()
                 val correctId = UUID.randomUUID()
@@ -49,7 +49,7 @@ class CoreDataStreamServiceTest {
             }
 
         @Test
-        fun `should throw if study deployment ID is not in configuration`() =
+        fun `throw if study deployment ID is not in configuration`() =
             runTest {
                 val dataStreamConfigurationRepository = mockk<DataStreamConfigurationRepository>()
                 val studyDeploymentId = UUID.randomUUID()
@@ -95,7 +95,7 @@ class CoreDataStreamServiceTest {
             )
 
         @Test
-        fun `should throw IllegalArgumentException when fromSequenceId is negative`() =
+        fun `throw IllegalArgumentException when fromSequenceId is negative`() =
             runTest {
                 val dataStreamId =
                     DataStreamId(
@@ -110,7 +110,7 @@ class CoreDataStreamServiceTest {
             }
 
         @Test
-        fun `should throw IllegalArgumentException when toSequenceIdInclusive is smaller than fromSequenceId`() =
+        fun `throw IllegalArgumentException when toSequenceIdInclusive is smaller than fromSequenceId`() =
             runTest {
                 val dataStreamId =
                     DataStreamId(
@@ -125,7 +125,7 @@ class CoreDataStreamServiceTest {
             }
 
         @Test
-        fun `should throw IllegalArgumentException when no configuration is found for the given studyDeploymentId`() =
+        fun `throw IllegalArgumentException when no configuration is found for the given studyDeploymentId`() =
             runTest {
                 val dataStreamId =
                     DataStreamId(
@@ -143,7 +143,7 @@ class CoreDataStreamServiceTest {
             }
 
         @Test
-        fun `should throw IllegalArgumentException when dataStream is not configured for the given studyDeploymentId`() =
+        fun `throw IllegalArgumentException when dataStream is not configured for the given studyDeploymentId`() =
             runTest {
                 val dataStreamId =
                     DataStreamId(
@@ -158,7 +158,9 @@ class CoreDataStreamServiceTest {
                 } returns Optional.of(config)
                 coEvery { config.config } returns configNode
                 val coreConfig = mockk<DataStreamsConfiguration>()
-                coEvery { objectMapper.treeToValue(configNode, DataStreamsConfiguration::class.java) } returns coreConfig
+                coEvery {
+                    objectMapper.treeToValue(configNode, DataStreamsConfiguration::class.java)
+                } returns coreConfig
                 coEvery { coreConfig.expectedDataStreamIds } returns emptySet()
 
                 assertThrows<IllegalArgumentException> {
