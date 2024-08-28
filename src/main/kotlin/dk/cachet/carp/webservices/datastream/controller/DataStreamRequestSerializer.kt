@@ -4,11 +4,10 @@ import dk.cachet.carp.common.application.services.ApplicationService
 import dk.cachet.carp.common.infrastructure.services.ApplicationServiceRequest
 import dk.cachet.carp.data.application.DataStreamBatch
 import dk.cachet.carp.data.infrastructure.DataStreamServiceRequest
-import dk.cachet.carp.webservices.common.serialisers.ResponseSerializer
+import dk.cachet.carp.webservices.common.serialisers.ApplicationRequestSerializer
 import kotlinx.serialization.serializer
 
-class DataStreamRequestSerializer : ResponseSerializer<DataStreamServiceRequest<*>>() {
-    @Suppress("UNCHECKED_CAST")
+class DataStreamRequestSerializer : ApplicationRequestSerializer<DataStreamServiceRequest<*>>() {
     override fun <TService : ApplicationService<TService, *>> serializeResponse(
         request: ApplicationServiceRequest<TService, *>,
         content: Any?,

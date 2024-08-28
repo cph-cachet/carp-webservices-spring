@@ -6,26 +6,19 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.module.SimpleModule
-import com.fasterxml.jackson.datatype.jsr310.deser.InstantDeserializer
 import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import dk.cachet.carp.common.application.UUID
-import dk.cachet.carp.common.application.devices.DeviceRegistration
 import dk.cachet.carp.common.application.users.AccountIdentity
 import dk.cachet.carp.data.application.DataStreamBatch
 import dk.cachet.carp.data.application.Measurement
 import dk.cachet.carp.data.application.SyncPoint
-import dk.cachet.carp.deployments.domain.users.ParticipantGroupSnapshot
 import dk.cachet.carp.webservices.account.serdes.AccountIdentityDeserializer
 import dk.cachet.carp.webservices.account.serdes.AccountIdentitySerializer
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.serialisers.serdes.UUIDDeserializer
 import dk.cachet.carp.webservices.common.serialisers.serdes.UUIDSerializer
 import dk.cachet.carp.webservices.datastream.serdes.*
-import dk.cachet.carp.webservices.deployment.serdes.ParticipantGroupSnapshotDeserializer
-import dk.cachet.carp.webservices.deployment.serdes.ParticipantGroupSnapshotSerializer
-import dk.cachet.carp.webservices.protocol.serdes.DeviceRegistrationDeserializer
-import dk.cachet.carp.webservices.protocol.serdes.DeviceRegistrationSerializer
 import kotlinx.datetime.Instant
 import kotlinx.datetime.toJavaInstant
 import org.springframework.context.annotation.Bean
@@ -60,12 +53,7 @@ class ObjectMapperConfig(validationMessages: MessageBase) : SimpleModule() {
         this.addSerializer(DataStreamBatch::class.java, DataStreamBatchSerializer(validationMessages))
         this.addDeserializer(DataStreamBatch::class.java, DataStreamBatchDeserializer(validationMessages))
 
-        this.addSerializer(java.time.Instant::class.java, InstantSerializer.INSTANCE)
-        this.addDeserializer(java.time.Instant::class.java, InstantDeserializer.INSTANT)
-
-        // TODO: request change in http client and portal to use kotlinx.datetime.Instant
-        //  instead of java.time.Instant, then remove this.
-//        this.addSerializer(Instant::class.java, KInstantSerializer.INSTANCE)
+        this.addSerializer(Instant::class.java, KInstantSerializer.INSTANCE)
     }
 
     class KInstantSerializer : JsonSerializer<Instant>() {

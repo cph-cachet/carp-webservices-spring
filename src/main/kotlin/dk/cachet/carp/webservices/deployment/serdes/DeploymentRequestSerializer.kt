@@ -9,10 +9,10 @@ import dk.cachet.carp.deployments.application.users.ActiveParticipationInvitatio
 import dk.cachet.carp.deployments.application.users.ParticipantData
 import dk.cachet.carp.deployments.infrastructure.DeploymentServiceRequest
 import dk.cachet.carp.deployments.infrastructure.ParticipationServiceRequest
-import dk.cachet.carp.webservices.common.serialisers.ResponseSerializer
+import dk.cachet.carp.webservices.common.serialisers.ApplicationRequestSerializer
 import kotlinx.serialization.serializer
 
-class DeploymentRequestSerializer : ResponseSerializer<DeploymentServiceRequest<*>>() {
+class DeploymentRequestSerializer : ApplicationRequestSerializer<DeploymentServiceRequest<*>>() {
     @Suppress("UNCHECKED_CAST")
     override fun <TService : ApplicationService<TService, *>> serializeResponse(
         request: ApplicationServiceRequest<TService, *>,
@@ -25,8 +25,7 @@ class DeploymentRequestSerializer : ResponseSerializer<DeploymentServiceRequest<
             is DeploymentServiceRequest.GetStudyDeploymentStatus,
             is DeploymentServiceRequest.Stop,
             is DeploymentServiceRequest.UnregisterDevice,
-            ->
-                json.encodeToString(serializer<StudyDeploymentStatus>(), content as StudyDeploymentStatus)
+            -> json.encodeToString(serializer<StudyDeploymentStatus>(), content as StudyDeploymentStatus)
             is DeploymentServiceRequest.RemoveStudyDeployments ->
                 json.encodeToString(serializer<Set<UUID>>(), content as Set<UUID>)
             is DeploymentServiceRequest.GetDeviceDeploymentFor ->
@@ -41,7 +40,7 @@ class DeploymentRequestSerializer : ResponseSerializer<DeploymentServiceRequest<
     }
 }
 
-class ParticipationRequestSerializer : ResponseSerializer<ParticipationServiceRequest<*>>() {
+class ParticipationRequestSerializer : ApplicationRequestSerializer<ParticipationServiceRequest<*>>() {
     @Suppress("UNCHECKED_CAST")
     override fun <TService : ApplicationService<TService, *>> serializeResponse(
         request: ApplicationServiceRequest<TService, *>,
@@ -60,7 +59,7 @@ class ParticipationRequestSerializer : ResponseSerializer<ParticipationServiceRe
             is ParticipationServiceRequest.SetParticipantData ->
                 json.encodeToString(serializer<ParticipantData>(), content as ParticipantData)
 
-            else -> {}
+            else -> content
         }
     }
 }

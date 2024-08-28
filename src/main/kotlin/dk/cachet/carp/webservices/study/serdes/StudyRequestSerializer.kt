@@ -8,10 +8,10 @@ import dk.cachet.carp.studies.application.users.Participant
 import dk.cachet.carp.studies.application.users.ParticipantGroupStatus
 import dk.cachet.carp.studies.infrastructure.RecruitmentServiceRequest
 import dk.cachet.carp.studies.infrastructure.StudyServiceRequest
-import dk.cachet.carp.webservices.common.serialisers.ResponseSerializer
+import dk.cachet.carp.webservices.common.serialisers.ApplicationRequestSerializer
 import kotlinx.serialization.serializer
 
-class StudyRequestSerializer : ResponseSerializer<StudyServiceRequest<*>>() {
+class StudyRequestSerializer : ApplicationRequestSerializer<StudyServiceRequest<*>>() {
     @Suppress("UNCHECKED_CAST")
     override fun <TService : ApplicationService<TService, *>> serializeResponse(
         request: ApplicationServiceRequest<TService, *>,
@@ -38,7 +38,7 @@ class StudyRequestSerializer : ResponseSerializer<StudyServiceRequest<*>>() {
     }
 }
 
-class RecruitmentRequestSerializer : ResponseSerializer<RecruitmentServiceRequest<*>>() {
+class RecruitmentRequestSerializer : ApplicationRequestSerializer<RecruitmentServiceRequest<*>>() {
     @Suppress("UNCHECKED_CAST")
     override fun <TService : ApplicationService<TService, *>> serializeResponse(
         request: ApplicationServiceRequest<TService, *>,

@@ -8,7 +8,7 @@ import dk.cachet.carp.webservices.account.service.AccountService
 import dk.cachet.carp.webservices.common.constants.PathVariableName
 import dk.cachet.carp.webservices.common.constants.RequestParamName
 import dk.cachet.carp.webservices.common.input.WS_JSON
-import dk.cachet.carp.webservices.common.serialisers.ResponseSerializer
+import dk.cachet.carp.webservices.common.serialisers.ApplicationRequestSerializer
 import dk.cachet.carp.webservices.security.authentication.domain.Account
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
 import dk.cachet.carp.webservices.security.authorization.Claim
@@ -38,8 +38,8 @@ class StudyController(
 ) {
     companion object {
         val LOGGER: Logger = LogManager.getLogger()
-        val studySerializer: ResponseSerializer<*> = StudyRequestSerializer()
-        val recruitmentSerializer: ResponseSerializer<*> = RecruitmentRequestSerializer()
+        val studySerializer: ApplicationRequestSerializer<*> = StudyRequestSerializer()
+        val recruitmentSerializer: ApplicationRequestSerializer<*> = RecruitmentRequestSerializer()
 
         /** Endpoint URI constants */
         const val STUDY_SERVICE = "/api/study-service"

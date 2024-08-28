@@ -3,7 +3,7 @@ package dk.cachet.carp.webservices.deployment.controller
 import dk.cachet.carp.deployments.infrastructure.DeploymentServiceRequest
 import dk.cachet.carp.deployments.infrastructure.ParticipationServiceRequest
 import dk.cachet.carp.webservices.common.input.WS_JSON
-import dk.cachet.carp.webservices.common.serialisers.ResponseSerializer
+import dk.cachet.carp.webservices.common.serialisers.ApplicationRequestSerializer
 import dk.cachet.carp.webservices.dataPoint.service.DataPointService
 import dk.cachet.carp.webservices.deployment.dto.DeploymentStatisticsRequestDto
 import dk.cachet.carp.webservices.deployment.dto.DeploymentStatisticsResponseDto
@@ -30,8 +30,8 @@ class StudyDeploymentController(
 ) {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
-        private val deploymentSerializer: ResponseSerializer<*> = DeploymentRequestSerializer()
-        private val participationSerializer: ResponseSerializer<*> = ParticipationRequestSerializer()
+        private val deploymentSerializer: ApplicationRequestSerializer<*> = DeploymentRequestSerializer()
+        private val participationSerializer: ApplicationRequestSerializer<*> = ParticipationRequestSerializer()
 
         /** Endpoint URI constants */
         const val DEPLOYMENT_SERVICE = "/api/deployment-service"

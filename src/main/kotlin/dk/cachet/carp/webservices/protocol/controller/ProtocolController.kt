@@ -7,6 +7,8 @@ import dk.cachet.carp.webservices.common.exception.responses.ResourceNotFoundExc
 import dk.cachet.carp.webservices.common.input.WS_JSON
 import dk.cachet.carp.webservices.common.services.CoreServiceContainer
 import dk.cachet.carp.webservices.protocol.dto.ProtocolOverview
+import dk.cachet.carp.webservices.protocol.serdes.ProtocolFactoryRequestSerializer
+import dk.cachet.carp.webservices.protocol.serdes.ProtocolRequestSerializer
 import dk.cachet.carp.webservices.protocol.service.ProtocolService
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
 import io.swagger.v3.oas.annotations.Operation
