@@ -33,13 +33,15 @@ class CoreDataStreamServiceTest {
 
     @BeforeEach
     fun setUp() {
-        sut = CoreDataStreamService(
-            configRepository,
-            dataStreamIdRepository,
-            dataStreamSequenceRepository,
-            objectMapper,
-        )
+        sut =
+            CoreDataStreamService(
+                configRepository,
+                dataStreamIdRepository,
+                dataStreamSequenceRepository,
+                objectMapper,
+            )
     }
+
     @Nested
     inner class AppendToDataStreams {
         @Test
@@ -163,78 +165,146 @@ class CoreDataStreamServiceTest {
                 }
             }
     }
+
     @Nested
     inner class OpenDataStreams {
         @Test
-        fun `should save configuration and data stream IDs when valid configuration is provided`() = runTest {
-            val studyDeploymentId = UUID.randomUUID()
-            val configuration = DataStreamsConfiguration(
-                studyDeploymentId,
-                setOf(DataStreamsConfiguration.ExpectedDataStream("deviceRole", DataType("namespace", "name")))
-            )
-
-            val wsDataStreamId = dk.cachet.carp.webservices.datastream.domain.DataStreamId(
-                id = 0,
-                studyDeploymentId = studyDeploymentId.stringRepresentation,
-                deviceRoleName = "deviceRole",
-                name = "name",
-                nameSpace = "namespace"
-            )
-
-            coEvery { configRepository.existsById(studyDeploymentId.stringRepresentation) } returns false
-            coEvery { objectMapper.valueToTree<JsonNode>(configuration) } returns mockk()
-            coEvery { configRepository.save(any()) } returns DataStreamConfiguration(studyDeploymentId.stringRepresentation, mockk())
-
-            val dataStreamIds = listOf(wsDataStreamId)
-            coEvery { dataStreamIdRepository.saveAll(dataStreamIds) } returns dataStreamIds
-
-            sut.openDataStreams(configuration)
-
-            coVerify { configRepository.save(any()) }
-            coVerify { dataStreamIdRepository.saveAll(dataStreamIds) }
-        }
-
-        @Test
-        fun `should throw IllegalStateException when configuration already exists`() =
+        fun `save configuration and data stream IDs when valid configuration is provided`() =
             runTest {
-            val studyDeploymentId = UUID.randomUUID()
-            val configuration = DataStreamsConfiguration(studyDeploymentId, setOf(DataStreamsConfiguration.ExpectedDataStream("deviceRole", DataType("namespace", "name"))))
+                val studyDeploymentId = UUID.randomUUID()
+                val configuration =
+                    DataStreamsConfiguration(
+                        studyDeploymentId,
+                        setOf(
+                            DataStreamsConfiguration.ExpectedDataStream(
+                                "deviceRole",
+                                DataType("namespace", "name"),
+                            ),
+                        ),
+                    )
 
-            coEvery { configRepository.existsById(studyDeploymentId.stringRepresentation) } returns true
+                val wsDataStreamId =
+                    dk.cachet.carp.webservices.datastream.domain.DataStreamId(
+                        id = 0,
+                        studyDeploymentId = studyDeploymentId.stringRepresentation,
+                        deviceRoleName = "deviceRole",
+                        name = "name",
+                        nameSpace = "namespace",
+                    )
 
-            assertThrows<IllegalStateException> {
+                coEvery { configRepository.existsById(studyDeploymentId.stringRepresentation) } returns false
+                coEvery { objectMapper.valueToTree<JsonNode>(configuration) } returns mockk()
+                coEvery {
+                    configRepository.save(any())
+                } returns DataStreamConfiguration(studyDeploymentId.stringRepresentation, mockk())
+
+                val dataStreamIds = listOf(wsDataStreamId)
+                coEvery { dataStreamIdRepository.saveAll(dataStreamIds) } returns dataStreamIds
+
                 sut.openDataStreams(configuration)
+
+                coVerify { configRepository.save(any()) }
+                coVerify { dataStreamIdRepository.saveAll(dataStreamIds) }
             }
-        }
 
         @Test
-        fun `should log and save new data stream configuration`() =
+        fun `throw IllegalStateException when configuration already exists`() =
             runTest {
-            val studyDeploymentId = UUID.randomUUID()
-            val configuration = DataStreamsConfiguration(
-                studyDeploymentId,
-                setOf(DataStreamsConfiguration.ExpectedDataStream("deviceRole", DataType("namespace", "name")))
-            )
+                val studyDeploymentId = UUID.randomUUID()
+                val configuration =
+                    DataStreamsConfiguration(
+                        studyDeploymentId,
+                        setOf(
+                            DataStreamsConfiguration.ExpectedDataStream(
+                                "deviceRole",
+                                DataType("namespace", "name"),
+                            ),
+                        ),
+                    )
 
-            val wsDataStreamId = dk.cachet.carp.webservices.datastream.domain.DataStreamId(
-                id = 0,
-                studyDeploymentId = studyDeploymentId.stringRepresentation,
-                deviceRoleName = "deviceRole",
-                name = "name",
-                nameSpace = "namespace"
-            )
+                coEvery { configRepository.existsById(studyDeploymentId.stringRepresentation) } returns true
 
-            coEvery { configRepository.existsById(studyDeploymentId.stringRepresentation) } returns false
-            coEvery { objectMapper.valueToTree<JsonNode>(configuration) } returns mockk()
-            coEvery { configRepository.save(any()) } returnsArgument 0
+                assertThrows<IllegalStateException> {
+                    sut.openDataStreams(configuration)
+                }
+            }
 
-            val dataStreamIds = listOf(wsDataStreamId)
-            coEvery { dataStreamIdRepository.saveAll(dataStreamIds) } returns dataStreamIds
+        @Test
+        fun `log and save new data stream configuration`() =
+            runTest {
+                val studyDeploymentId = UUID.randomUUID()
+                val configuration =
+                    DataStreamsConfiguration(
+                        studyDeploymentId,
+                        setOf(
+                            DataStreamsConfiguration.ExpectedDataStream(
+                                "deviceRole",
+                                DataType("namespace", "name"),
+                            ),
+                        ),
+                    )
 
-            sut.openDataStreams(configuration)
+                val wsDataStreamId =
+                    dk.cachet.carp.webservices.datastream.domain.DataStreamId(
+                        id = 0,
+                        studyDeploymentId = studyDeploymentId.stringRepresentation,
+                        deviceRoleName = "deviceRole",
+                        name = "name",
+                        nameSpace = "namespace",
+                    )
 
-            coVerify { configRepository.save(any()) }
-            coVerify { dataStreamIdRepository.saveAll(dataStreamIds) }
-        }
+                coEvery { configRepository.existsById(studyDeploymentId.stringRepresentation) } returns false
+                coEvery { objectMapper.valueToTree<JsonNode>(configuration) } returns mockk()
+                coEvery { configRepository.save(any()) } returnsArgument 0
+
+                val dataStreamIds = listOf(wsDataStreamId)
+                coEvery { dataStreamIdRepository.saveAll(dataStreamIds) } returns dataStreamIds
+
+                sut.openDataStreams(configuration)
+
+                coVerify { configRepository.save(any()) }
+                coVerify { dataStreamIdRepository.saveAll(dataStreamIds) }
+            }
+    }
+
+    @Nested
+    inner class CloseDataStreams {
+        @Test
+        fun `close data streams when valid studyDeploymentIds are provided`() =
+            runTest {
+                val studyDeploymentId1 = UUID.randomUUID()
+                val studyDeploymentId2 = UUID.randomUUID()
+                val config1 = mockk<DataStreamConfiguration>(relaxed = true)
+                val config2 = mockk<DataStreamConfiguration>(relaxed = true)
+
+                coEvery {
+                    configRepository.getConfigurationsForIds(
+                        listOf(studyDeploymentId1.stringRepresentation, studyDeploymentId2.stringRepresentation),
+                    )
+                } returns listOf(config1, config2)
+                coEvery {
+                    configRepository.saveAll(any<List<DataStreamConfiguration>>())
+                } returns listOf(config1, config2)
+
+                sut.closeDataStreams(setOf(studyDeploymentId1, studyDeploymentId2))
+
+                coVerify { config1.closed = true }
+                coVerify { config2.closed = true }
+                coVerify { configRepository.saveAll(listOf(config1, config2)) }
+            }
+
+        @Test
+        fun `throw IllegalArgumentException when configuration does not exist`() =
+            runTest {
+                val studyDeploymentId = UUID.randomUUID()
+
+                coEvery {
+                    configRepository.getConfigurationsForIds(listOf(studyDeploymentId.stringRepresentation))
+                } returns emptyList()
+
+                assertThrows<IllegalArgumentException> {
+                    sut.closeDataStreams(setOf(studyDeploymentId))
+                }
+            }
     }
 }
