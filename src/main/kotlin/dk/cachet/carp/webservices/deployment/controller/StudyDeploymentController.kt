@@ -8,6 +8,7 @@ import dk.cachet.carp.webservices.dataPoint.service.DataPointService
 import dk.cachet.carp.webservices.deployment.dto.DeploymentStatisticsRequestDto
 import dk.cachet.carp.webservices.deployment.dto.DeploymentStatisticsResponseDto
 import dk.cachet.carp.webservices.deployment.serdes.DeploymentRequestSerializer
+import dk.cachet.carp.webservices.deployment.serdes.ParticipationRequestSerializer
 import dk.cachet.carp.webservices.deployment.service.DeploymentService
 import dk.cachet.carp.webservices.deployment.service.ParticipationService
 import io.swagger.v3.oas.annotations.Operation
@@ -29,7 +30,8 @@ class StudyDeploymentController(
 ) {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
-        private val serializer: ResponseSerializer<*> = DeploymentRequestSerializer()
+        private val deploymentSerializer: ResponseSerializer<*> = DeploymentRequestSerializer()
+        private val participationSerializer: ResponseSerializer<*> = ParticipationRequestSerializer()
 
         /** Endpoint URI constants */
         const val DEPLOYMENT_SERVICE = "/api/deployment-service"
@@ -42,10 +44,10 @@ class StudyDeploymentController(
     suspend fun deployments(
         @RequestBody httpMessage: String,
     ): ResponseEntity<Any> {
-        val request = serializer.deserializeRequest(DeploymentServiceRequest.Serializer, httpMessage)
+        val request = deploymentSerializer.deserializeRequest(DeploymentServiceRequest.Serializer, httpMessage)
         LOGGER.info("Start POST: $DEPLOYMENT_SERVICE -> ${ request::class.simpleName }")
         val ret = deploymentService.core.invoke(request)
-        return serializer.serializeResponse(request, ret).let { ResponseEntity.ok(it) }
+        return deploymentSerializer.serializeResponse(request, ret).let { ResponseEntity.ok(it) }
     }
 
     @PostMapping(value = [PARTICIPATION_SERVICE])
@@ -55,7 +57,8 @@ class StudyDeploymentController(
     ): ResponseEntity<Any> {
         val request = WS_JSON.decodeFromString(ParticipationServiceRequest.Serializer, httpMessage)
         LOGGER.info("Start POST: $PARTICIPATION_SERVICE -> ${ request::class.simpleName }")
-        return participationService.core.invoke(request).let { ResponseEntity.ok(it) }
+        val result = participationService.core.invoke(request)
+        return participationSerializer.serializeResponse(request, result).let { ResponseEntity.ok(it) }
     }
 
     /**

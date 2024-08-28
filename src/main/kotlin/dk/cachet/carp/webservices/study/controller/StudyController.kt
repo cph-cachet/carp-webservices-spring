@@ -7,6 +7,7 @@ import dk.cachet.carp.studies.infrastructure.StudyServiceRequest
 import dk.cachet.carp.webservices.account.service.AccountService
 import dk.cachet.carp.webservices.common.constants.PathVariableName
 import dk.cachet.carp.webservices.common.constants.RequestParamName
+import dk.cachet.carp.webservices.common.input.WS_JSON
 import dk.cachet.carp.webservices.common.serialisers.ResponseSerializer
 import dk.cachet.carp.webservices.security.authentication.domain.Account
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
@@ -88,11 +89,12 @@ class StudyController(
     @GetMapping(value = [GET_PARTICIPANT_GROUP_STATUS])
     @PreAuthorize("canManageStudy(#studyId)")
     @Operation(tags = ["study/getParticipantGroupStatus.json"])
-    fun getParticipantGroupStatus(
+    suspend fun getParticipantGroupStatus(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
-    ): ParticipantGroupsStatus {
+    ): String {
         LOGGER.info("Start GET: /api/studies/$studyId/participantGroup/status")
-        return runBlocking { recruitmentService.getParticipantGroupsStatus(studyId) }
+        val result = recruitmentService.getParticipantGroupsStatus(studyId)
+        return WS_JSON.encodeToString(ParticipantGroupsStatus.serializer(), result)
     }
 
     @DeleteMapping(value = [RESEARCHERS])

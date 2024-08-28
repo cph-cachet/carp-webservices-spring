@@ -42,21 +42,6 @@ import org.springframework.context.annotation.Primary
 class ObjectMapperConfig(validationMessages: MessageBase) : SimpleModule() {
     init
     {
-        // DeviceRegistration
-        // Part of StudyDeploymentStatus
-        this.addSerializer(DeviceRegistration::class.java, DeviceRegistrationSerializer(validationMessages))
-        this.addDeserializer(DeviceRegistration::class.java, DeviceRegistrationDeserializer(validationMessages))
-
-        // StudyDeploymentStatus
-//        this.addSerializer(StudyDeploymentStatus::class.java, StudyDeploymentStatusSerializer(validationMessages))
-//        this.addDeserializer(StudyDeploymentStatus::class.java, StudyDeploymentStatusDeserializer(validationMessages))
-
-        // MasterDeviceDeployment
-//        this.addSerializer(PrimaryDeviceDeployment::class.java, PrimaryDeviceDeploymentSerializer(validationMessages))
-//        this.addDeserializer(
-//            PrimaryDeviceDeployment::class.java,
-//            MasterDeviceDeploymentDeserializer(validationMessages),
-//        )
         // AccountIdentity
         this.addSerializer(AccountIdentity::class.java, AccountIdentitySerializer(validationMessages))
         this.addDeserializer(AccountIdentity::class.java, AccountIdentityDeserializer(validationMessages))
@@ -64,35 +49,13 @@ class ObjectMapperConfig(validationMessages: MessageBase) : SimpleModule() {
         this.addSerializer(UUID::class.java, UUIDSerializer(validationMessages))
         this.addDeserializer(UUID::class.java, UUIDDeserializer(validationMessages))
 
-        // ParticipantGroupSnapshot
-        this.addSerializer(ParticipantGroupSnapshot::class.java, ParticipantGroupSnapshotSerializer(validationMessages))
-        this.addDeserializer(
-            ParticipantGroupSnapshot::class.java,
-            ParticipantGroupSnapshotDeserializer(validationMessages),
-        )
-        // Participant Data
-//        this.addSerializer(ParticipantData::class.java, ParticipantDataSerializer(validationMessages))
-//        this.addDeserializer(ParticipantData::class.java, ParticipantDataDeserializer(validationMessages))
-        // Recruitment Snapshot
-//        this.addSerializer(RecruitmentSnapshot::class.java, RecruitmentSnapshotSerializer(validationMessages))
-//        this.addDeserializer(RecruitmentSnapshot::class.java, RecruitmentSnapshotDeserializer(validationMessages))
-
-
         // SyncPoint
         this.addSerializer(SyncPoint::class.java, SyncPointSerializer(validationMessages))
         this.addDeserializer(SyncPoint::class.java, SyncPointDeserializer(validationMessages))
         // Measurement
         this.addSerializer(Measurement::class.java, MeasurementSerializer(validationMessages))
         this.addDeserializer(Measurement::class.java, MeasurementDeserializer(validationMessages))
-        // Act
-//        this.addSerializer(
-//            ActiveParticipationInvitation::class.java,
-//            ActiveParticipationInvitationSerializer(validationMessages),
-//        )
-//        this.addDeserializer(
-//            ActiveParticipationInvitation::class.java,
-//            ActiveParticipationInvitationDeserializer(validationMessages),
-//        )
+
         // DataStreamBatch
         this.addSerializer(DataStreamBatch::class.java, DataStreamBatchSerializer(validationMessages))
         this.addDeserializer(DataStreamBatch::class.java, DataStreamBatchDeserializer(validationMessages))
@@ -101,6 +64,7 @@ class ObjectMapperConfig(validationMessages: MessageBase) : SimpleModule() {
         this.addDeserializer(java.time.Instant::class.java, InstantDeserializer.INSTANT)
 
         // TODO: request change in http client and portal to use kotlinx.datetime.Instant
+        //  instead of java.time.Instant, then remove this.
 //        this.addSerializer(Instant::class.java, KInstantSerializer.INSTANCE)
     }
 
