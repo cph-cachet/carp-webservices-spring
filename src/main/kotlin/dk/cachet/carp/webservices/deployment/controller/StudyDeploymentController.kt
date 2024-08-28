@@ -72,6 +72,7 @@ class StudyDeploymentController(
      * deployment ID as parameter, this could be used for displaying study related
      * statistics for a single participant group.
      */
+    @Deprecated("This endpoint is disabled")
     @PostMapping(value = [DEPLOYMENT_STATISTICS])
     @PreAuthorize("false")
     @Operation(tags = ["studyDeployment/statistics.json"])
