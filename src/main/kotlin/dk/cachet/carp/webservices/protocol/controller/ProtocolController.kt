@@ -41,8 +41,8 @@ class ProtocolController(
     ): ResponseEntity<Any> {
         val request = WS_JSON.decodeFromString(ProtocolServiceRequest.Serializer, httpMessage)
         LOGGER.info("Start POST: $PROTOCOL_SERVICE -> ${ request::class.simpleName }")
-        val ret = protocolService.core.invoke(request)
-        return serializer.serializeResponse(request, ret).let { ResponseEntity.ok(it) }
+        val result = protocolService.core.invoke(request)
+        return serializer.serializeResponse(request, result).let { ResponseEntity.ok(it) }
     }
 
     @PostMapping(value = [PROTOCOL_FACTORY_SERVICE])
@@ -52,8 +52,8 @@ class ProtocolController(
     ): ResponseEntity<Any> {
         val request = WS_JSON.decodeFromString(ProtocolFactoryServiceRequest.Serializer, httpMessage)
         LOGGER.info("Start POST: $PROTOCOL_FACTORY_SERVICE -> ${ request::class.simpleName }")
-        val ret = services.protocolFactoryService.invoke(request)
-        return factorySerializer.serializeResponse(request, ret).let { ResponseEntity.ok(it) }
+        val result = services.protocolFactoryService.invoke(request)
+        return factorySerializer.serializeResponse(request, result).let { ResponseEntity.ok(it) }
     }
 
     @GetMapping(value = [GET_PROTOCOL_OVERVIEW])

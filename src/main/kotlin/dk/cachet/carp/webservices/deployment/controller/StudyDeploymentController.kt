@@ -46,8 +46,8 @@ class StudyDeploymentController(
     ): ResponseEntity<Any> {
         val request = deploymentSerializer.deserializeRequest(DeploymentServiceRequest.Serializer, httpMessage)
         LOGGER.info("Start POST: $DEPLOYMENT_SERVICE -> ${ request::class.simpleName }")
-        val ret = deploymentService.core.invoke(request)
-        return deploymentSerializer.serializeResponse(request, ret).let { ResponseEntity.ok(it) }
+        val result = deploymentService.core.invoke(request)
+        return deploymentSerializer.serializeResponse(request, result).let { ResponseEntity.ok(it) }
     }
 
     @PostMapping(value = [PARTICIPATION_SERVICE])

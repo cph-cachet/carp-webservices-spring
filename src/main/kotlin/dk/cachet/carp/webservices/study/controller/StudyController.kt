@@ -129,8 +129,8 @@ class StudyController(
     ): ResponseEntity<*> {
         val request = recruitmentSerializer.deserializeRequest(RecruitmentServiceRequest.Serializer, httpMessage)
         LOGGER.info("Start POST: $RECRUITMENT_SERVICE -> ${ request::class.simpleName }")
-        val ret = recruitmentService.core.invoke(request)
-        return recruitmentSerializer.serializeResponse(request, ret).let { ResponseEntity.ok(it) }
+        val result = recruitmentService.core.invoke(request)
+        return recruitmentSerializer.serializeResponse(request, result).let { ResponseEntity.ok(it) }
     }
 
     @PostMapping(value = [ADD_PARTICIPANTS])
