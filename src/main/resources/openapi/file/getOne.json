@@ -2,7 +2,7 @@
   "tags": [
     "file-controller"
   ],
-  "description": "> `Description`: `get one` \n\nThis endpoint allows retrieving one file with the given [STUDY_ID] and [FILE_ID] as the request parameters.\n\n> `Request`: (Http Method: [GET]) https://cans.cachet.dk:443/api/studies/{{STUDY_ID}}/files/{{FILE_ID}}\n\nThis request must be authenticated using a HTTP OAuth 2.0 Authentication header.\n\n> `Response`:\n\n- On success a JSON object is returned with a fields `id`, `storage_name`, `original_name`, `metadata`, `created_by_user_id `, `created_at `, `updated_at ` and `study_id` list.\n- On failure status code `400` (bad request) is returned.\n- On failure status code `401` (unauthorized) is returned.\n- On failure status code `500` (internal server error) is returned.",
+  "description": "> `Description`: `get one` \n\nThis endpoint allows retrieving one file with the given [STUDY_ID] and [FILE_ID] as the request parameters. Ensure the JWT token is refreshed, before accessing this endpoint.\n\n> `Request`: (Http Method: [GET]) https://cans.cachet.dk:443/api/studies/{{STUDY_ID}}/files/{{FILE_ID}}\n\nThis request must be authenticated using a HTTP OAuth 2.0 Authentication header.\n\n> `Response`:\n\n- On success a JSON object is returned with a fields `id`, `storage_name`, `original_name`, `metadata`, `created_by_user_id `, `created_at `, `updated_at ` and `study_id` list.\n- If the JWT token is not refreshed, this would result in failure ’403’ (internal error).\n- On failure status code `400` (bad request) is returned.\n- On failure status code `401` (unauthorized) is returned.\n- On failure status code `500` (internal server error) is returned.",
   "responses": {
     "200": {
       "description": "get one file by studyId and fileId",
