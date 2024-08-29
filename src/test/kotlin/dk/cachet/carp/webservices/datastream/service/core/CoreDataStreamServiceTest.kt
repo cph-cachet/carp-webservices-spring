@@ -17,6 +17,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -24,6 +25,23 @@ import java.util.*
 import kotlin.test.assertFailsWith
 
 class CoreDataStreamServiceTest {
+    private lateinit var sut: CoreDataStreamService
+    private val configRepository = mockk<DataStreamConfigurationRepository>()
+    private val dataStreamIdRepository = mockk<DataStreamIdRepository>()
+    private val dataStreamSequenceRepository = mockk<DataStreamSequenceRepository>()
+    private val objectMapper = mockk<ObjectMapper>()
+
+    @BeforeEach
+    fun setUp() {
+        sut =
+            CoreDataStreamService(
+                configRepository,
+                dataStreamIdRepository,
+                dataStreamSequenceRepository,
+                objectMapper,
+            )
+    }
+
     @Nested
     inner class AppendToDataStreams {
         @Test
@@ -34,14 +52,6 @@ class CoreDataStreamServiceTest {
                 val batch = MutableDataStreamBatchDecorator()
                 batch.appendSequence(createStubSequence(correctId, 0, StubDataPoint()))
                 batch.appendSequence(createStubSequence(incorrectId, 0, StubDataPoint()))
-
-                val sut =
-                    CoreDataStreamService(
-                        mockk(),
-                        mockk(),
-                        mockk(),
-                        mockk(),
-                    )
 
                 assertThrows<IllegalArgumentException> {
                     sut.appendToDataStreams(correctId, batch)
@@ -80,20 +90,7 @@ class CoreDataStreamServiceTest {
     }
 
     @Nested
-    inner class GetDataStream {
-        private val configRepository = mockk<DataStreamConfigurationRepository>()
-        private val dataStreamIdRepository = mockk<DataStreamIdRepository>()
-        private val dataStreamSequenceRepository = mockk<DataStreamSequenceRepository>()
-        private val objectMapper = mockk<ObjectMapper>()
-
-        private val sut =
-            CoreDataStreamService(
-                configRepository,
-                dataStreamIdRepository,
-                dataStreamSequenceRepository,
-                objectMapper,
-            )
-
+    inner class GetDataStreams {
         @Test
         fun `throw IllegalArgumentException when fromSequenceId is negative`() =
             runTest {
@@ -165,6 +162,148 @@ class CoreDataStreamServiceTest {
 
                 assertThrows<IllegalArgumentException> {
                     sut.getDataStream(dataStreamId, 0, null)
+                }
+            }
+    }
+
+    @Nested
+    inner class OpenDataStreams {
+        @Test
+        fun `save configuration and data stream IDs when valid configuration is provided`() =
+            runTest {
+                val studyDeploymentId = UUID.randomUUID()
+                val configuration =
+                    DataStreamsConfiguration(
+                        studyDeploymentId,
+                        setOf(
+                            DataStreamsConfiguration.ExpectedDataStream(
+                                "deviceRole",
+                                DataType("namespace", "name"),
+                            ),
+                        ),
+                    )
+
+                val wsDataStreamId =
+                    dk.cachet.carp.webservices.datastream.domain.DataStreamId(
+                        id = 0,
+                        studyDeploymentId = studyDeploymentId.stringRepresentation,
+                        deviceRoleName = "deviceRole",
+                        name = "name",
+                        nameSpace = "namespace",
+                    )
+
+                coEvery { configRepository.existsById(studyDeploymentId.stringRepresentation) } returns false
+                coEvery { objectMapper.valueToTree<JsonNode>(configuration) } returns mockk()
+                coEvery {
+                    configRepository.save(any())
+                } returns DataStreamConfiguration(studyDeploymentId.stringRepresentation, mockk())
+
+                val dataStreamIds = listOf(wsDataStreamId)
+                coEvery { dataStreamIdRepository.saveAll(dataStreamIds) } returns dataStreamIds
+
+                sut.openDataStreams(configuration)
+
+                coVerify { configRepository.save(any()) }
+                coVerify { dataStreamIdRepository.saveAll(dataStreamIds) }
+            }
+
+        @Test
+        fun `throw IllegalStateException when configuration already exists`() =
+            runTest {
+                val studyDeploymentId = UUID.randomUUID()
+                val configuration =
+                    DataStreamsConfiguration(
+                        studyDeploymentId,
+                        setOf(
+                            DataStreamsConfiguration.ExpectedDataStream(
+                                "deviceRole",
+                                DataType("namespace", "name"),
+                            ),
+                        ),
+                    )
+
+                coEvery { configRepository.existsById(studyDeploymentId.stringRepresentation) } returns true
+
+                assertThrows<IllegalStateException> {
+                    sut.openDataStreams(configuration)
+                }
+            }
+
+        @Test
+        fun `log and save new data stream configuration`() =
+            runTest {
+                val studyDeploymentId = UUID.randomUUID()
+                val configuration =
+                    DataStreamsConfiguration(
+                        studyDeploymentId,
+                        setOf(
+                            DataStreamsConfiguration.ExpectedDataStream(
+                                "deviceRole",
+                                DataType("namespace", "name"),
+                            ),
+                        ),
+                    )
+
+                val wsDataStreamId =
+                    dk.cachet.carp.webservices.datastream.domain.DataStreamId(
+                        id = 0,
+                        studyDeploymentId = studyDeploymentId.stringRepresentation,
+                        deviceRoleName = "deviceRole",
+                        name = "name",
+                        nameSpace = "namespace",
+                    )
+
+                coEvery { configRepository.existsById(studyDeploymentId.stringRepresentation) } returns false
+                coEvery { objectMapper.valueToTree<JsonNode>(configuration) } returns mockk()
+                coEvery { configRepository.save(any()) } returnsArgument 0
+
+                val dataStreamIds = listOf(wsDataStreamId)
+                coEvery { dataStreamIdRepository.saveAll(dataStreamIds) } returns dataStreamIds
+
+                sut.openDataStreams(configuration)
+
+                coVerify { configRepository.save(any()) }
+                coVerify { dataStreamIdRepository.saveAll(dataStreamIds) }
+            }
+    }
+
+    @Nested
+    inner class CloseDataStreams {
+        @Test
+        fun `close data streams when valid studyDeploymentIds are provided`() =
+            runTest {
+                val studyDeploymentId1 = UUID.randomUUID()
+                val studyDeploymentId2 = UUID.randomUUID()
+                val config1 = mockk<DataStreamConfiguration>(relaxed = true)
+                val config2 = mockk<DataStreamConfiguration>(relaxed = true)
+
+                coEvery {
+                    configRepository.getConfigurationsForIds(
+                        listOf(studyDeploymentId1.stringRepresentation, studyDeploymentId2.stringRepresentation),
+                    )
+                } returns listOf(config1, config2)
+                coEvery {
+                    configRepository.saveAll(any<List<DataStreamConfiguration>>())
+                } returns listOf(config1, config2)
+
+                sut.closeDataStreams(setOf(studyDeploymentId1, studyDeploymentId2))
+
+                coVerify { config1.closed = true }
+                coVerify { config2.closed = true }
+                coVerify { configRepository.saveAll(listOf(config1, config2)) }
+            }
+
+        @Test
+        fun `throw IllegalArgumentException when configuration does not exist`() =
+            runTest {
+                val studyDeploymentId = UUID.randomUUID()
+
+                coEvery {
+                    configRepository.getConfigurationsForIds(listOf(studyDeploymentId.stringRepresentation))
+                } returns emptyList()
+
+                assertThrows<IllegalArgumentException> {
+                    sut.closeDataStreams(setOf(studyDeploymentId))
                 }
             }
     }
