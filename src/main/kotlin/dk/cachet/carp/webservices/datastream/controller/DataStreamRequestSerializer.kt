@@ -7,6 +7,10 @@ import dk.cachet.carp.data.infrastructure.DataStreamServiceRequest
 import dk.cachet.carp.webservices.common.serialisers.ApplicationRequestSerializer
 import kotlinx.serialization.serializer
 
+/**
+ * Serializes and deserializes [DataStreamServiceRequest] to and from the application service.
+ * This is used to deserialize requests to the application service and serialize responses from the application service.
+ */
 class DataStreamRequestSerializer : ApplicationRequestSerializer<DataStreamServiceRequest<*>>() {
     override fun <TService : ApplicationService<TService, *>> serializeResponse(
         request: ApplicationServiceRequest<TService, *>,
@@ -18,8 +22,7 @@ class DataStreamRequestSerializer : ApplicationRequestSerializer<DataStreamServi
             is DataStreamServiceRequest.OpenDataStreams,
             is DataStreamServiceRequest.AppendToDataStreams,
             is DataStreamServiceRequest.CloseDataStreams,
-            ->
-                json.encodeToString(serializer<Unit>(), content as Unit)
+            -> json.encodeToString(serializer<Unit>(), content as Unit)
             else -> content
         }
     }

@@ -12,6 +12,10 @@ import dk.cachet.carp.deployments.infrastructure.ParticipationServiceRequest
 import dk.cachet.carp.webservices.common.serialisers.ApplicationRequestSerializer
 import kotlinx.serialization.serializer
 
+/**
+ * Serializes and deserializes [DeploymentServiceRequest] to and from the application service.
+ * This is used to deserialize requests from the application service and serialize responses to the application service.
+ */
 class DeploymentRequestSerializer : ApplicationRequestSerializer<DeploymentServiceRequest<*>>() {
     @Suppress("UNCHECKED_CAST")
     override fun <TService : ApplicationService<TService, *>> serializeResponse(
@@ -40,6 +44,10 @@ class DeploymentRequestSerializer : ApplicationRequestSerializer<DeploymentServi
     }
 }
 
+/**
+ * Serializes and deserializes [ParticipationServiceRequest] to and from the application service.
+ * This is used to deserialize requests from the application service and serialize responses to the application service.
+ */
 class ParticipationRequestSerializer : ApplicationRequestSerializer<ParticipationServiceRequest<*>>() {
     @Suppress("UNCHECKED_CAST")
     override fun <TService : ApplicationService<TService, *>> serializeResponse(

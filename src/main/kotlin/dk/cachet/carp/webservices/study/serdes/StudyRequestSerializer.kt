@@ -11,6 +11,10 @@ import dk.cachet.carp.studies.infrastructure.StudyServiceRequest
 import dk.cachet.carp.webservices.common.serialisers.ApplicationRequestSerializer
 import kotlinx.serialization.serializer
 
+/**
+ * Serializes and deserializes [StudyServiceRequest] to and from the application service.
+ * This is used to deserialize requests from the application service and serialize responses to the application service.
+ */
 class StudyRequestSerializer : ApplicationRequestSerializer<StudyServiceRequest<*>>() {
     @Suppress("UNCHECKED_CAST")
     override fun <TService : ApplicationService<TService, *>> serializeResponse(
@@ -38,6 +42,10 @@ class StudyRequestSerializer : ApplicationRequestSerializer<StudyServiceRequest<
     }
 }
 
+/**
+ * Serializes and deserializes [RecruitmentServiceRequest] to and from the application service.
+ * This is used to deserialize requests from the application service and serialize responses to the application service.
+ */
 class RecruitmentRequestSerializer : ApplicationRequestSerializer<RecruitmentServiceRequest<*>>() {
     @Suppress("UNCHECKED_CAST")
     override fun <TService : ApplicationService<TService, *>> serializeResponse(

@@ -7,6 +7,9 @@ import kotlinx.serialization.KSerializer
 
 /**
  * Serializes and deserializes requests to and from the application service.
+ * This is used to serialize requests to the application service and deserialize responses from the application service.
+ *
+ * @param TRequest The type of request which can be serialized and deserialized.
  */
 abstract class ApplicationRequestSerializer<TRequest : ApplicationServiceRequest<*, *>> {
     companion object {
@@ -15,6 +18,10 @@ abstract class ApplicationRequestSerializer<TRequest : ApplicationServiceRequest
 
     /**
      * Deserialize the request from the specified [content].
+     *
+     * @param serializer The serializer to use to deserialize the request.
+     * @param content The content to deserialize from.
+     * @return The deserialized request object.
      */
     fun <TRequest> deserializeRequest(
         serializer: KSerializer<TRequest>,
@@ -25,6 +32,10 @@ abstract class ApplicationRequestSerializer<TRequest : ApplicationServiceRequest
 
     /**
      * Serialize the specified [request] to a string.
+     *
+     * @param request The request body to serialize.
+     * @param content The content to serialize.
+     * @return The serialized request string.
      */
     abstract fun <TService : ApplicationService<TService, *>> serializeResponse(
         request: ApplicationServiceRequest<TService, *>,

@@ -9,6 +9,10 @@ import dk.cachet.carp.protocols.infrastructure.ProtocolServiceRequest
 import dk.cachet.carp.webservices.common.serialisers.ApplicationRequestSerializer
 import kotlinx.serialization.serializer
 
+/**
+ * Serializes and deserializes [ProtocolServiceRequest] to and from the application service.
+ * This is used to deserialize requests from the application service and serialize responses to the application service.
+ */
 class ProtocolRequestSerializer : ApplicationRequestSerializer<ProtocolServiceRequest<*>>() {
     @Suppress("UNCHECKED_CAST")
     override fun <TService : ApplicationService<TService, *>> serializeResponse(
@@ -32,6 +36,10 @@ class ProtocolRequestSerializer : ApplicationRequestSerializer<ProtocolServiceRe
     }
 }
 
+/**
+ * Serializes and deserializes [ProtocolFactoryServiceRequest] to and from the application service.
+ * This is used to deserialize requests to the application service and serialize responses from the application service.
+ */
 class ProtocolFactoryRequestSerializer : ApplicationRequestSerializer<ProtocolFactoryServiceRequest<*>>() {
     override fun <TService : ApplicationService<TService, *>> serializeResponse(
         request: ApplicationServiceRequest<TService, *>,
