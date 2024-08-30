@@ -15,7 +15,10 @@ import dk.cachet.carp.webservices.study.domain.ParticipantAccount
 import dk.cachet.carp.webservices.study.domain.ParticipantGroupInfo
 import dk.cachet.carp.webservices.study.domain.ParticipantGroupsStatus
 import dk.cachet.carp.webservices.study.service.RecruitmentService
-import kotlinx.coroutines.*
+import dk.cachet.carp.webservices.study.service.StudyService
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.Instant
@@ -28,6 +31,7 @@ import org.springframework.stereotype.Service
 class RecruitmentServiceWrapper(
     private val accountService: AccountService,
     private val dataStreamService: DataStreamService,
+    private val studyService: StudyService,
     services: CoreServiceContainer,
 ) : RecruitmentService {
     final override val core = services.recruitmentService
@@ -135,6 +139,10 @@ class RecruitmentServiceWrapper(
 
     override suspend fun getParticipantGroupsStatus(studyId: UUID): ParticipantGroupsStatus =
         withContext(Dispatchers.IO + SecurityCoroutineContext()) {
+            if (!studyService.studyExists(studyId)) {
+                throw IllegalArgumentException("Study with id $studyId does not exist.")
+            }
+
             val participantGroupStatusList = core.getParticipantGroupStatusList(studyId)
 
             val participantGroupInfoList =
