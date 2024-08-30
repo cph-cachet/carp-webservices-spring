@@ -24,11 +24,11 @@ class DataStreamController(
 
         /** Endpoint URI constants */
         const val DATA_STREAM_SERVICE = "/api/data-stream-service"
-        const val DATA_STREAM_SERVICE_ZIP = "/api/data-stream-service-zip"
+        const val DATA_STREAM_SERVICE_GZIP = "/api/data-stream-service-zip"
     }
 
     @PostMapping(value = [DATA_STREAM_SERVICE])
-    @Operation(tags = ["dataStream/getDataStream.json"])
+    @Operation(tags = ["dataStream/request.json"])
     suspend fun invoke(
         @RequestBody httpMessage: String,
     ): ResponseEntity<Any> {
@@ -38,13 +38,13 @@ class DataStreamController(
         return serializer.serializeResponse(request, ret).let { ResponseEntity.ok(it) }
     }
 
-    @PostMapping(value = [DATA_STREAM_SERVICE_ZIP])
-    @Operation(tags = ["dataStream/zipRequest.json"])
+    @PostMapping(value = [DATA_STREAM_SERVICE_GZIP])
+    @Operation(tags = ["dataStream/compressGzipRequest.json"])
     @ResponseStatus(HttpStatus.OK)
     suspend fun handleCompressedData(
         @RequestBody data: ByteArray,
     ): ResponseEntity<Any> {
-        LOGGER.info("Start POST: $DATA_STREAM_SERVICE_ZIP")
+        LOGGER.info("Start POST: $DATA_STREAM_SERVICE_GZIP")
         val decompressedData = decompressGzip(data)
         val request = WS_JSON.decodeFromString(DataStreamServiceRequest.Serializer, decompressedData)
         return dataStreamService.core.invoke(request).let { ResponseEntity.ok(it) }
