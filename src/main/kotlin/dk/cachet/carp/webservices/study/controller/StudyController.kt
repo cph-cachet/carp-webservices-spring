@@ -85,7 +85,7 @@ class StudyController(
         LOGGER.info("Start GET: /api/studies/$studyId/researchers")
         return accountService.findAllByClaim(Claim.ManageStudy(studyId))
     }
-
+/* * */
     @GetMapping(value = [GET_PARTICIPANT_GROUP_STATUS])
     @PreAuthorize("canManageStudy(#studyId)")
     @Operation(tags = ["study/getParticipantGroupStatus.json"])

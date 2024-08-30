@@ -57,6 +57,14 @@ class StudyServiceWrapper(
 
     final override val dataFileName = "study.json"
 
+    override suspend fun studyExists(studyId: UUID): Boolean =
+        try {
+            repository.getWSStudyById(studyId)
+            true
+        } catch (e: IllegalStateException) {
+            false
+        }
+
     override suspend fun exportDataOrThrow(
         studyId: UUID,
         deploymentIds: Set<UUID>,
