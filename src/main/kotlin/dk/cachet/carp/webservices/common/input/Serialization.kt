@@ -7,8 +7,6 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
 
 /**
  * Types in the [dk.cachet.carp.webservices.common] module which need to be registered when using [Json] serializer.
@@ -24,12 +22,6 @@ private val WS_MODULE =
             subclass(Diagnosis::class)
         }
     }
-
-@Configuration
-class JsonConfiguration {
-    @Bean
-    fun createWSJSON(): Json = createDefaultJSON(WS_MODULE)
-}
 
 /** Carp Webservice JSON serializer. */
 val WS_JSON = createDefaultJSON(WS_MODULE)

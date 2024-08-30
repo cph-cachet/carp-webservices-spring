@@ -3,6 +3,7 @@ package dk.cachet.carp.webservices.protocol.service.impl
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.protocols.application.StudyProtocolSnapshot
 import dk.cachet.carp.webservices.account.service.AccountService
+import dk.cachet.carp.webservices.common.input.WS_JSON
 import dk.cachet.carp.webservices.common.services.CoreServiceContainer
 import dk.cachet.carp.webservices.protocol.domain.Protocol
 import dk.cachet.carp.webservices.protocol.dto.ProtocolOverview
@@ -18,7 +19,6 @@ import org.springframework.stereotype.Service
 class ProtocolServiceWrapper(
     private val accountService: AccountService,
     private val protocolRepository: ProtocolRepository,
-    private val json: Json,
     services: CoreServiceContainer,
 ) : ProtocolService {
     final override val core = services.protocolService
@@ -56,7 +56,7 @@ class ProtocolServiceWrapper(
         versions: List<Protocol>,
         account: Account? = null,
     ): ProtocolOverview {
-        val snapshot = json.decodeFromString<StudyProtocolSnapshot>(versions.last().snapshot!!.toString())
+        val snapshot = WS_JSON.decodeFromString<StudyProtocolSnapshot>(versions.last().snapshot!!.toString())
         val owner = account ?: accountService.findByUUID(snapshot.ownerId)
 
         return ProtocolOverview(
