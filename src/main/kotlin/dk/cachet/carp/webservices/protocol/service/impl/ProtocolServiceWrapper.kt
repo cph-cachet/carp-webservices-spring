@@ -1,9 +1,9 @@
 package dk.cachet.carp.webservices.protocol.service.impl
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.protocols.application.StudyProtocolSnapshot
 import dk.cachet.carp.webservices.account.service.AccountService
+import dk.cachet.carp.webservices.common.input.WS_JSON
 import dk.cachet.carp.webservices.common.services.CoreServiceContainer
 import dk.cachet.carp.webservices.protocol.domain.Protocol
 import dk.cachet.carp.webservices.protocol.dto.ProtocolOverview
@@ -12,13 +12,13 @@ import dk.cachet.carp.webservices.protocol.service.ProtocolService
 import dk.cachet.carp.webservices.security.authentication.domain.Account
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
 import org.springframework.stereotype.Service
 
 @Service
 class ProtocolServiceWrapper(
     private val accountService: AccountService,
     private val protocolRepository: ProtocolRepository,
-    private val objectMapper: ObjectMapper,
     services: CoreServiceContainer,
 ) : ProtocolService {
     final override val core = services.protocolService
@@ -56,7 +56,7 @@ class ProtocolServiceWrapper(
         versions: List<Protocol>,
         account: Account? = null,
     ): ProtocolOverview {
-        val snapshot = objectMapper.treeToValue(versions.last().snapshot, StudyProtocolSnapshot::class.java)
+        val snapshot = WS_JSON.decodeFromString<StudyProtocolSnapshot>(versions.last().snapshot!!.toString())
         val owner = account ?: accountService.findByUUID(snapshot.ownerId)
 
         return ProtocolOverview(

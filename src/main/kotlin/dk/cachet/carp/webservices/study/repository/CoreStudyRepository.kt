@@ -113,7 +113,8 @@ class CoreStudyRepository(
         withContext(Dispatchers.IO) {
             val existingStudy = getWSStudyById(study.id)
 
-            existingStudy.snapshot = objectMapper.valueToTree(study.getSnapshot())
+            val snapshot = WS_JSON.encodeToString(StudySnapshot.serializer(), study.getSnapshot())
+            existingStudy.snapshot = objectMapper.readTree(snapshot)
             studyRepository.save(existingStudy)
 
             LOGGER.info("Study updated, id: ${study.id.stringRepresentation}")

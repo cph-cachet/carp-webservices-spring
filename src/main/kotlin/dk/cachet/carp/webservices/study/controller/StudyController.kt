@@ -7,6 +7,8 @@ import dk.cachet.carp.studies.infrastructure.StudyServiceRequest
 import dk.cachet.carp.webservices.account.service.AccountService
 import dk.cachet.carp.webservices.common.constants.PathVariableName
 import dk.cachet.carp.webservices.common.constants.RequestParamName
+import dk.cachet.carp.webservices.common.input.WS_JSON
+import dk.cachet.carp.webservices.common.serialisers.ApplicationRequestSerializer
 import dk.cachet.carp.webservices.security.authentication.domain.Account
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
 import dk.cachet.carp.webservices.security.authorization.Claim
@@ -14,6 +16,8 @@ import dk.cachet.carp.webservices.study.domain.InactiveDeploymentInfo
 import dk.cachet.carp.webservices.study.domain.ParticipantGroupsStatus
 import dk.cachet.carp.webservices.study.domain.StudyOverview
 import dk.cachet.carp.webservices.study.dto.AddParticipantsRequestDto
+import dk.cachet.carp.webservices.study.serdes.RecruitmentRequestSerializer
+import dk.cachet.carp.webservices.study.serdes.StudyRequestSerializer
 import dk.cachet.carp.webservices.study.service.RecruitmentService
 import dk.cachet.carp.webservices.study.service.StudyService
 import io.swagger.v3.oas.annotations.Operation
@@ -34,6 +38,8 @@ class StudyController(
 ) {
     companion object {
         val LOGGER: Logger = LogManager.getLogger()
+        val studySerializer: ApplicationRequestSerializer<*> = StudyRequestSerializer()
+        val recruitmentSerializer: ApplicationRequestSerializer<*> = RecruitmentRequestSerializer()
 
         /** Endpoint URI constants */
         const val STUDY_SERVICE = "/api/study-service"
@@ -83,11 +89,12 @@ class StudyController(
     @GetMapping(value = [GET_PARTICIPANT_GROUP_STATUS])
     @PreAuthorize("canManageStudy(#studyId)")
     @Operation(tags = ["study/getParticipantGroupStatus.json"])
-    fun getParticipantGroupStatus(
+    suspend fun getParticipantGroupStatus(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
-    ): ParticipantGroupsStatus {
+    ): String {
         LOGGER.info("Start GET: /api/studies/$studyId/participantGroup/status")
-        return runBlocking { recruitmentService.getParticipantGroupsStatus(studyId) }
+        val result = recruitmentService.getParticipantGroupsStatus(studyId)
+        return WS_JSON.encodeToString(ParticipantGroupsStatus.serializer(), result)
     }
 
     @DeleteMapping(value = [RESEARCHERS])
@@ -107,19 +114,23 @@ class StudyController(
     @PostMapping(value = [STUDY_SERVICE])
     @Operation(tags = ["study/studies.json"])
     suspend fun studies(
-        @RequestBody request: StudyServiceRequest<*>,
-    ): ResponseEntity<*> {
+        @RequestBody httpMessage: String,
+    ): ResponseEntity<Any> {
+        val request = studySerializer.deserializeRequest(StudyServiceRequest.Serializer, httpMessage)
         LOGGER.info("Start POST: $STUDY_SERVICE -> ${ request::class.simpleName }")
-        return studyService.core.invoke(request).let { ResponseEntity.ok(it) }
+        val result = studyService.core.invoke(request)
+        return studySerializer.serializeResponse(request, result).let { ResponseEntity.ok(it) }
     }
 
     @PostMapping(value = [RECRUITMENT_SERVICE])
     @Operation(tags = ["study/recruitments.json"])
     suspend fun recruitments(
-        @RequestBody request: RecruitmentServiceRequest<*>,
+        @RequestBody httpMessage: String,
     ): ResponseEntity<*> {
+        val request = recruitmentSerializer.deserializeRequest(RecruitmentServiceRequest.Serializer, httpMessage)
         LOGGER.info("Start POST: $RECRUITMENT_SERVICE -> ${ request::class.simpleName }")
-        return recruitmentService.core.invoke(request).let { ResponseEntity.ok(it) }
+        val result = recruitmentService.core.invoke(request)
+        return recruitmentSerializer.serializeResponse(request, result).let { ResponseEntity.ok(it) }
     }
 
     @PostMapping(value = [ADD_PARTICIPANTS])

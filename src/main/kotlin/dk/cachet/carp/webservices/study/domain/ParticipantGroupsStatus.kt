@@ -7,18 +7,22 @@ import dk.cachet.carp.studies.application.users.Participant
 import dk.cachet.carp.studies.application.users.ParticipantGroupStatus
 import dk.cachet.carp.webservices.security.authentication.domain.Account
 import kotlinx.datetime.Instant
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class ParticipantGroupsStatus(
     val groups: List<ParticipantGroupInfo>,
     val groupStatuses: List<ParticipantGroupStatus>,
 )
 
+@Serializable
 data class ParticipantGroupInfo(
     val participantGroupId: UUID,
     val deploymentStatus: StudyDeploymentStatus,
     val participants: List<ParticipantAccount>,
 )
 
+@Serializable
 data class ParticipantAccount(
     val participantId: UUID,
     var firstName: String? = null,

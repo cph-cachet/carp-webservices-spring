@@ -4,8 +4,11 @@ import dk.cachet.carp.protocols.infrastructure.ProtocolFactoryServiceRequest
 import dk.cachet.carp.protocols.infrastructure.ProtocolServiceRequest
 import dk.cachet.carp.webservices.common.constants.PathVariableName
 import dk.cachet.carp.webservices.common.exception.responses.ResourceNotFoundException
+import dk.cachet.carp.webservices.common.input.WS_JSON
 import dk.cachet.carp.webservices.common.services.CoreServiceContainer
 import dk.cachet.carp.webservices.protocol.dto.ProtocolOverview
+import dk.cachet.carp.webservices.protocol.serdes.ProtocolFactoryRequestSerializer
+import dk.cachet.carp.webservices.protocol.serdes.ProtocolRequestSerializer
 import dk.cachet.carp.webservices.protocol.service.ProtocolService
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
 import io.swagger.v3.oas.annotations.Operation
@@ -23,6 +26,8 @@ class ProtocolController(
 ) {
     companion object {
         val LOGGER: Logger = LogManager.getLogger()
+        val serializer: ProtocolRequestSerializer = ProtocolRequestSerializer()
+        val factorySerializer: ProtocolFactoryRequestSerializer = ProtocolFactoryRequestSerializer()
 
         /** Path variables */
         const val PROTOCOL_SERVICE = "/api/protocol-service"
@@ -34,19 +39,23 @@ class ProtocolController(
     @PostMapping(value = [PROTOCOL_SERVICE])
     @Operation(tags = ["protocol/protocols.json"])
     suspend fun protocols(
-        @RequestBody request: ProtocolServiceRequest<*>,
+        @RequestBody httpMessage: String,
     ): ResponseEntity<Any> {
+        val request = WS_JSON.decodeFromString(ProtocolServiceRequest.Serializer, httpMessage)
         LOGGER.info("Start POST: $PROTOCOL_SERVICE -> ${ request::class.simpleName }")
-        return protocolService.core.invoke(request).let { ResponseEntity.ok(it) }
+        val result = protocolService.core.invoke(request)
+        return serializer.serializeResponse(request, result).let { ResponseEntity.ok(it) }
     }
 
     @PostMapping(value = [PROTOCOL_FACTORY_SERVICE])
     @Operation(tags = ["protocol/protocolFactory.json"])
     suspend fun protocolFactory(
-        @RequestBody request: ProtocolFactoryServiceRequest<*>,
+        @RequestBody httpMessage: String,
     ): ResponseEntity<Any> {
+        val request = WS_JSON.decodeFromString(ProtocolFactoryServiceRequest.Serializer, httpMessage)
         LOGGER.info("Start POST: $PROTOCOL_FACTORY_SERVICE -> ${ request::class.simpleName }")
-        return services.protocolFactoryService.invoke(request).let { ResponseEntity.ok(it) }
+        val result = services.protocolFactoryService.invoke(request)
+        return factorySerializer.serializeResponse(request, result).let { ResponseEntity.ok(it) }
     }
 
     @GetMapping(value = [GET_PROTOCOL_OVERVIEW])
