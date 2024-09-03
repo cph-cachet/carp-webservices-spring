@@ -12,6 +12,8 @@ import dk.cachet.carp.webservices.study.repository.CoreStudyRepository
 import dk.cachet.carp.webservices.study.service.StudyService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
 import org.springframework.stereotype.Service
 import java.nio.file.Path
 
@@ -22,6 +24,10 @@ class StudyServiceWrapper(
     services: CoreServiceContainer,
 ) : StudyService, ResourceExporter<StudySnapshot> {
     final override val core = services.studyService
+
+    companion object {
+        private val LOGGER: Logger = LogManager.getLogger()
+    }
 
     override suspend fun getStudiesOverview(accountId: UUID): List<StudyOverview> =
         withContext(Dispatchers.IO + SecurityCoroutineContext()) {
@@ -62,6 +68,7 @@ class StudyServiceWrapper(
             repository.getWSStudyById(studyId)
             true
         } catch (e: IllegalStateException) {
+            LOGGER.error("Error checking if study exists for studyId: $studyId", e)
             false
         }
 

@@ -15,7 +15,6 @@ import dk.cachet.carp.webservices.study.domain.ParticipantAccount
 import dk.cachet.carp.webservices.study.domain.ParticipantGroupInfo
 import dk.cachet.carp.webservices.study.domain.ParticipantGroupsStatus
 import dk.cachet.carp.webservices.study.service.RecruitmentService
-import dk.cachet.carp.webservices.study.service.StudyService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -31,7 +30,6 @@ import org.springframework.stereotype.Service
 class RecruitmentServiceWrapper(
     private val accountService: AccountService,
     private val dataStreamService: DataStreamService,
-    private val studyService: StudyService,
     services: CoreServiceContainer,
 ) : RecruitmentService {
     final override val core = services.recruitmentService
