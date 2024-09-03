@@ -139,10 +139,6 @@ class RecruitmentServiceWrapper(
 
     override suspend fun getParticipantGroupsStatus(studyId: UUID): ParticipantGroupsStatus =
         withContext(Dispatchers.IO + SecurityCoroutineContext()) {
-            if (!studyService.studyExists(studyId)) {
-                throw IllegalArgumentException("Study with id $studyId does not exist.")
-            }
-
             val participantGroupStatusList = core.getParticipantGroupStatusList(studyId)
 
             val participantGroupInfoList =

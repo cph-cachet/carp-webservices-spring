@@ -8,5 +8,6 @@ interface StudyService {
     val core: StudyServiceDecorator
 
     suspend fun getStudiesOverview(accountId: UUID): List<StudyOverview>
+
     suspend fun studyExists(studyId: UUID): Boolean
 }
