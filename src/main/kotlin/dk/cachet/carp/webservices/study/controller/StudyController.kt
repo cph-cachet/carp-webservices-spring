@@ -25,6 +25,7 @@ import jakarta.validation.Valid
 import kotlinx.coroutines.runBlocking
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
@@ -85,16 +86,22 @@ class StudyController(
         LOGGER.info("Start GET: /api/studies/$studyId/researchers")
         return accountService.findAllByClaim(Claim.ManageStudy(studyId))
     }
-/* * */
+
     @GetMapping(value = [GET_PARTICIPANT_GROUP_STATUS])
-    @PreAuthorize("canManageStudy(#studyId)")
     @Operation(tags = ["study/getParticipantGroupStatus.json"])
     suspend fun getParticipantGroupStatus(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
-    ): String {
+    ): ResponseEntity<String> {
         LOGGER.info("Start GET: /api/studies/$studyId/participantGroup/status")
+
+        if (!studyService.studyExists(studyId)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Study with id $studyId does not exist.")
+        }
+
+        authenticationService.getClaims().contains(Claim.ManageStudy(studyId))
+
         val result = recruitmentService.getParticipantGroupsStatus(studyId)
-        return WS_JSON.encodeToString(ParticipantGroupsStatus.serializer(), result)
+        return ResponseEntity.ok(WS_JSON.encodeToString(ParticipantGroupsStatus.serializer(), result))
     }
 
     @DeleteMapping(value = [RESEARCHERS])
