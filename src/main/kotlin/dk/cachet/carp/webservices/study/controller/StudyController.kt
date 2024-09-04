@@ -25,7 +25,6 @@ import jakarta.validation.Valid
 import kotlinx.coroutines.runBlocking
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
@@ -93,12 +92,6 @@ class StudyController(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
     ): ResponseEntity<String> {
         LOGGER.info("Start GET: /api/studies/$studyId/participantGroup/status")
-
-        if (!studyService.studyExists(studyId)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Study with id $studyId does not exist.")
-        }
-
-        authenticationService.getClaims().contains(Claim.ManageStudy(studyId))
 
         val result = recruitmentService.getParticipantGroupsStatus(studyId)
         return ResponseEntity.ok(WS_JSON.encodeToString(ParticipantGroupsStatus.serializer(), result))
