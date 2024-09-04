@@ -7,7 +7,6 @@ import dk.cachet.carp.webservices.account.service.AccountService
 import dk.cachet.carp.webservices.common.services.CoreServiceContainer
 import dk.cachet.carp.webservices.datastream.service.DataStreamService
 import dk.cachet.carp.webservices.security.authentication.domain.Account
-import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
 import dk.cachet.carp.webservices.security.authorization.Claim
 import dk.cachet.carp.webservices.security.authorization.Role
 import dk.cachet.carp.webservices.security.config.SecurityCoroutineContext
@@ -15,7 +14,6 @@ import dk.cachet.carp.webservices.study.domain.InactiveDeploymentInfo
 import dk.cachet.carp.webservices.study.domain.ParticipantAccount
 import dk.cachet.carp.webservices.study.domain.ParticipantGroupInfo
 import dk.cachet.carp.webservices.study.domain.ParticipantGroupsStatus
-import dk.cachet.carp.webservices.study.exceptions.StudyServiceException
 import dk.cachet.carp.webservices.study.service.RecruitmentService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -32,8 +30,6 @@ import org.springframework.stereotype.Service
 class RecruitmentServiceWrapper(
     private val accountService: AccountService,
     private val dataStreamService: DataStreamService,
-    private val authenticationService: AuthenticationService,
-    private val studyService: StudyServiceWrapper,
     services: CoreServiceContainer,
 ) : RecruitmentService {
     final override val core = services.recruitmentService
@@ -141,14 +137,6 @@ class RecruitmentServiceWrapper(
 
     override suspend fun getParticipantGroupsStatus(studyId: UUID): ParticipantGroupsStatus =
         withContext(Dispatchers.IO + SecurityCoroutineContext()) {
-            if (!studyService.studyExists(studyId)) {
-                throw StudyServiceException.studyNotFound(studyId)
-            }
-
-            if (!authenticationService.getClaims().contains(Claim.ManageStudy(studyId))) {
-                throw StudyServiceException.manageStudyPermissionDenied()
-            }
-
             val participantGroupStatusList = core.getParticipantGroupStatusList(studyId)
 
             val participantGroupInfoList =

@@ -87,6 +87,7 @@ class StudyController(
     }
 
     @GetMapping(value = [GET_PARTICIPANT_GROUP_STATUS])
+    @PreAuthorize("canManageStudy(#studyId)")
     @Operation(tags = ["study/getParticipantGroupStatus.json"])
     suspend fun getParticipantGroupStatus(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
