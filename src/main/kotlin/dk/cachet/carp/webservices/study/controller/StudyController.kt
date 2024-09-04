@@ -91,11 +91,10 @@ class StudyController(
     @Operation(tags = ["study/getParticipantGroupStatus.json"])
     suspend fun getParticipantGroupStatus(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
-    ): ResponseEntity<String> {
+    ): String {
         LOGGER.info("Start GET: /api/studies/$studyId/participantGroup/status")
-
         val result = recruitmentService.getParticipantGroupsStatus(studyId)
-        return ResponseEntity.ok(WS_JSON.encodeToString(ParticipantGroupsStatus.serializer(), result))
+        return WS_JSON.encodeToString(ParticipantGroupsStatus.serializer(), result)
     }
 
     @DeleteMapping(value = [RESEARCHERS])
