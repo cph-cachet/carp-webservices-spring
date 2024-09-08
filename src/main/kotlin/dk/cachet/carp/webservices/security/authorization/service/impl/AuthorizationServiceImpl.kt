@@ -84,7 +84,7 @@ class AuthorizationServiceImpl(
         }
 
         if (!value) {
-            val message = lazyMessage()
+            val message = "${lazyMessage()} - Access denied due to studyId not found."
             throw ForbiddenException(message.toString())
         }
     }

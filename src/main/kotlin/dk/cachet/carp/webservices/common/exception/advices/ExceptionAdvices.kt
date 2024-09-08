@@ -192,12 +192,11 @@ internal class ExceptionAdvices(
         ex: AccessDeniedException,
         request: WebRequest,
     ): ResponseEntity<CarpErrorResponse> {
-        val errorMessage = "${ex.message.orEmpty()} or studyId doesn't exist."
         val errorResponse =
             CarpErrorResponse(
                 HttpStatus.FORBIDDEN.value(),
                 ex::class.qualifiedName.orEmpty(),
-                errorMessage,
+                ex.message.orEmpty(),
                 getURIPathFromWebRequest(request),
             )
         LOGGER.error("Access denied exception: {}", errorResponse)
