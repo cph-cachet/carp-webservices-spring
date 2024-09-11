@@ -2,21 +2,16 @@ package dk.cachet.carp.webservices.security.authentication.service
 
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.Logger
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.web.access.AccessDeniedHandler
 import org.springframework.stereotype.Service
 
 @Service
 class CustomAccessDeniedHandler : AccessDeniedHandler {
-    companion object {
-        private val LOGGER: Logger = LogManager.getLogger()
-    }
     override fun handle(
         request: HttpServletRequest?,
         response: HttpServletResponse?,
-        accessDeniedException: AccessDeniedException?
+        accessDeniedException: AccessDeniedException?,
     ) {
         if (response != null && !response.isCommitted) {
             response.status = HttpServletResponse.SC_FORBIDDEN
@@ -29,7 +24,7 @@ class CustomAccessDeniedHandler : AccessDeniedHandler {
                         "exception": "${accessDeniedException?.javaClass?.kotlin?.qualifiedName}",
                         "message": "Custom error message: Access denied due to insufficient permissions.",
                         "path": "${request?.requestURI}"
-                    }"""
+                    }""",
                 )
             }
         }
