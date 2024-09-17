@@ -15,13 +15,16 @@ import dk.cachet.carp.webservices.study.domain.ParticipantAccount
 import dk.cachet.carp.webservices.study.domain.ParticipantGroupInfo
 import dk.cachet.carp.webservices.study.domain.ParticipantGroupsStatus
 import dk.cachet.carp.webservices.study.service.RecruitmentService
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.Instant
 import kotlinx.datetime.plus
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
 
 @Service
@@ -136,6 +139,13 @@ class RecruitmentServiceWrapper(
     override suspend fun getParticipantGroupsStatus(studyId: UUID): ParticipantGroupsStatus =
         withContext(Dispatchers.IO + SecurityCoroutineContext()) {
             val participantGroupStatusList = core.getParticipantGroupStatusList(studyId)
+
+            // TODO: change here so it chceks if the study exist, however quer-
+            //  ying for error handling is not necessary needed to optimize
+
+            if (participantGroupStatusList.isEmpty()) {
+                throw AccessDeniedException("Study ID $studyId does not exist.")
+            }
 
             val participantGroupInfoList =
                 participantGroupStatusList

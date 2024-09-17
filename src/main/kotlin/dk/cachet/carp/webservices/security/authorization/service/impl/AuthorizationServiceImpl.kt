@@ -85,6 +85,7 @@ class AuthorizationServiceImpl(
 
         if (!value) {
             val message = lazyMessage()
+
             throw ForbiddenException(message.toString())
         }
     }

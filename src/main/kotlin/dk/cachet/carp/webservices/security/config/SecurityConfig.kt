@@ -4,6 +4,7 @@ import com.c4_soft.springaddons.security.oidc.spring.SpringAddonsMethodSecurityE
 import com.c4_soft.springaddons.security.oidc.spring.SpringAddonsMethodSecurityExpressionRoot
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
+import dk.cachet.carp.webservices.security.authentication.service.CustomAccessDeniedHandler
 import dk.cachet.carp.webservices.security.authorization.Claim
 import dk.cachet.carp.webservices.security.authorization.Role
 import dk.cachet.carp.webservices.study.repository.CoreParticipantRepository
@@ -14,7 +15,10 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
+import org.springframework.security.config.annotation.web.builders.HttpSecurity
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.web.SecurityFilterChain
 
 /**
  * The default security configuration is overridden by c4-soft-spring-addons to be easier to configure.
@@ -24,8 +28,11 @@ import org.springframework.security.core.context.SecurityContextHolder
  * [GitHub repository](https://github.com/ch4mpy/spring-addons/tree/master/spring-addons-starter-oidc)
  */
 @Configuration
+@EnableWebSecurity
 @EnableMethodSecurity
-class SecurityConfig {
+class SecurityConfig(
+    private val customAccessDeniedHandler: CustomAccessDeniedHandler,
+) {
     @Bean
     fun methodSecurityExpressionHandler(
         participantRepository: CoreParticipantRepository,
@@ -37,6 +44,14 @@ class SecurityConfig {
 
     @PostConstruct
     fun init() = SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL)
+
+    @Bean
+    fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
+        http
+            .exceptionHandling { it.accessDeniedHandler(customAccessDeniedHandler) }
+            .authorizeHttpRequests { it.anyRequest().authenticated() }
+        return http.build()
+    }
 }
 
 /**
