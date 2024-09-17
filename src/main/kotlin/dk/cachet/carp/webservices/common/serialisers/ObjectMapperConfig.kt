@@ -54,6 +54,8 @@ class ObjectMapperConfig(validationMessages: MessageBase) : SimpleModule() {
         this.addDeserializer(DataStreamBatch::class.java, DataStreamBatchDeserializer(validationMessages))
 
         this.addSerializer(Instant::class.java, KInstantSerializer.INSTANCE)
+
+        this.addSerializer(java.time.Instant::class.java, InstantSerializer.INSTANCE)
     }
 
     class KInstantSerializer : JsonSerializer<Instant>() {
