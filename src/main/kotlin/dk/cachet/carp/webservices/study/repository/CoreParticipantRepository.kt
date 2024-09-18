@@ -1,6 +1,5 @@
 package dk.cachet.carp.webservices.study.repository
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.studies.domain.users.ParticipantRepository
 import dk.cachet.carp.studies.domain.users.RecruitmentSnapshot
@@ -19,7 +18,6 @@ import dk.cachet.carp.studies.domain.users.Recruitment as CoreRecruitment
 @Transactional
 class CoreParticipantRepository(
     private val recruitmentRepository: RecruitmentRepository,
-    private val objectMapper: ObjectMapper,
 ) : ParticipantRepository {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
@@ -32,13 +30,7 @@ class CoreParticipantRepository(
 
             check(existingRecruitment == null) { "A recruitment already exists for the study with id $studyId." }
 
-            val snapshotJsonNode =
-                objectMapper.readTree(
-                    WS_JSON.encodeToString(
-                        RecruitmentSnapshot.serializer(),
-                        recruitment.getSnapshot(),
-                    ),
-                )
+            val snapshotJsonNode = WS_JSON.encodeToString(RecruitmentSnapshot.serializer(), recruitment.getSnapshot())
             val newRecruitment =
                 Recruitment().apply {
                     snapshot = snapshotJsonNode
@@ -74,14 +66,14 @@ class CoreParticipantRepository(
                 recruitmentRepository.findRecruitmentByStudyId(studyId)
                     ?: throw ResourceNotFoundException("Recruitment with studyId $studyId is not found.")
 
-            val newSnapshotNode = WS_JSON.encodeToString(RecruitmentSnapshot.serializer(), recruitment.getSnapshot())
-            recruitmentFound.snapshot = objectMapper.readTree(newSnapshotNode)
+            val newSnapshot = WS_JSON.encodeToString(RecruitmentSnapshot.serializer(), recruitment.getSnapshot())
+            recruitmentFound.snapshot = newSnapshot
             recruitmentRepository.save(recruitmentFound)
             LOGGER.info("Recruitment with studyId $studyId is updated.")
         }
 
     private fun mapWSRecruitmentToCore(recruitment: Recruitment): CoreRecruitment {
-        val snapshot = WS_JSON.decodeFromString(RecruitmentSnapshot.serializer(), recruitment.snapshot!!.toString())
+        val snapshot = WS_JSON.decodeFromString(RecruitmentSnapshot.serializer(), recruitment.snapshot!!)
         return CoreRecruitment.fromSnapshot(snapshot)
     }
 }

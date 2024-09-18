@@ -31,7 +31,7 @@ class ExportAnonymousParticipants(
     private val studyId = UUID(entry.studyId)
 
     companion object {
-        const val MAX_AMOUNT = 1000
+        const val MAX_AMOUNT = 2500
         const val CSV_HEADER = "username,study_deployment_id,access_link,expiry_date"
     }
 
