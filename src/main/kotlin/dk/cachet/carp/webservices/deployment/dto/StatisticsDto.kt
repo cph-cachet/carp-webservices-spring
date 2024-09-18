@@ -1,5 +1,7 @@
 package dk.cachet.carp.webservices.deployment.dto
 
+import dk.cachet.carp.webservices.dataPoint.domain.DataPoint
+
 /**
  * DTO to group statistical information for different kinds of dataFormats from [DataPointHeaderDto].
  */

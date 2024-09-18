@@ -85,14 +85,18 @@ class DataPointServiceImpl(
         }
 
         if (role < Role.RESEARCHER) {
-            return dataPointRepository.findByDeploymentId(deploymentId, pageRequest).content
+            return withContext(Dispatchers.IO) {
+                dataPointRepository.findByDeploymentId(deploymentId, pageRequest)
+            }.content
         }
 
-        return dataPointRepository.findByDeploymentIdAndCreatedBy(
-            deploymentId,
-            id.stringRepresentation,
-            pageRequest,
-        ).content
+        return withContext(Dispatchers.IO) {
+            dataPointRepository.findByDeploymentIdAndCreatedBy(
+                deploymentId,
+                id.stringRepresentation,
+                pageRequest,
+            )
+        }.content
     }
 
     override fun getNumberOfDataPoints(
