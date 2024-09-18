@@ -1,12 +1,11 @@
 package dk.cachet.carp.webservices.study.repository
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.studies.domain.users.ParticipantRepository
 import dk.cachet.carp.studies.domain.users.Recruitment
 import dk.cachet.carp.studies.domain.users.RecruitmentSnapshot
 import dk.cachet.carp.webservices.common.exception.responses.ResourceNotFoundException
+import dk.cachet.carp.webservices.common.input.WS_JSON
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.apache.logging.log4j.LogManager
@@ -17,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 @Transactional
 class CoreParticipantRepository(
-    private val objectMapper: ObjectMapper,
     private val recruitmentRepository: RecruitmentRepository,
 ) : ParticipantRepository {
     companion object {
@@ -31,7 +29,7 @@ class CoreParticipantRepository(
 
             check(existingRecruitment == null) { "A recruitment already exists for the study with id $studyId." }
 
-            val snapshotJsonNode = objectMapper.valueToTree<JsonNode>(recruitment.getSnapshot())
+            val snapshotJsonNode = WS_JSON.encodeToString(RecruitmentSnapshot.serializer(), recruitment.getSnapshot())
             val newRecruitment =
                 dk.cachet.carp.webservices.study.domain.Recruitment().apply {
                     snapshot = snapshotJsonNode
@@ -67,14 +65,14 @@ class CoreParticipantRepository(
                 recruitmentRepository.findRecruitmentByStudyId(studyId)
                     ?: throw ResourceNotFoundException("Recruitment with studyId $studyId is not found.")
 
-            val newSnapshotNode = objectMapper.valueToTree<JsonNode>(recruitment.getSnapshot())
-            recruitmentFound.snapshot = newSnapshotNode
+            val newSnapshot = WS_JSON.encodeToString(RecruitmentSnapshot.serializer(), recruitment.getSnapshot())
+            recruitmentFound.snapshot = newSnapshot
             recruitmentRepository.save(recruitmentFound)
             LOGGER.info("Recruitment with studyId $studyId is updated.")
         }
 
     private fun mapWSRecruitmentToCore(recruitment: dk.cachet.carp.webservices.study.domain.Recruitment): Recruitment {
-        val snapshot = objectMapper.treeToValue(recruitment.snapshot!!, RecruitmentSnapshot::class.java)
+        val snapshot = WS_JSON.decodeFromString(RecruitmentSnapshot.serializer(), recruitment.snapshot!!)
         return Recruitment.fromSnapshot(snapshot)
     }
 }
