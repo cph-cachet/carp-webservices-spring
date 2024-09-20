@@ -13,8 +13,10 @@ import dk.cachet.carp.common.application.users.AccountIdentity
 import dk.cachet.carp.data.application.DataStreamBatch
 import dk.cachet.carp.data.application.Measurement
 import dk.cachet.carp.data.application.SyncPoint
+import dk.cachet.carp.protocols.application.StudyProtocolSnapshot
 import dk.cachet.carp.webservices.account.serdes.AccountIdentityDeserializer
 import dk.cachet.carp.webservices.account.serdes.AccountIdentitySerializer
+import dk.cachet.carp.webservices.account.serdes.StudyProtocolSnapshotSerializer
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.serialisers.serdes.UUIDDeserializer
 import dk.cachet.carp.webservices.common.serialisers.serdes.UUIDSerializer
@@ -56,6 +58,8 @@ class ObjectMapperConfig(validationMessages: MessageBase) : SimpleModule() {
         this.addSerializer(Instant::class.java, KInstantSerializer.INSTANCE)
 
         this.addSerializer(java.time.Instant::class.java, InstantSerializer.INSTANCE)
+
+        this.addSerializer(StudyProtocolSnapshot::class.java, StudyProtocolSnapshotSerializer(validationMessages))
     }
 
     class KInstantSerializer : JsonSerializer<Instant>() {
