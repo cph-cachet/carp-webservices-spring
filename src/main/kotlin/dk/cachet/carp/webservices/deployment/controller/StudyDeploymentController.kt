@@ -1,7 +1,9 @@
 package dk.cachet.carp.webservices.deployment.controller
 
+import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.deployments.infrastructure.DeploymentServiceRequest
 import dk.cachet.carp.deployments.infrastructure.ParticipationServiceRequest
+import dk.cachet.carp.webservices.common.constants.PathVariableName
 import dk.cachet.carp.webservices.common.input.WS_JSON
 import dk.cachet.carp.webservices.common.serialisers.ApplicationRequestSerializer
 import dk.cachet.carp.webservices.dataPoint.service.DataPointService
@@ -17,6 +19,7 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
@@ -36,6 +39,7 @@ class StudyDeploymentController(
         /** Endpoint URI constants */
         const val DEPLOYMENT_SERVICE = "/api/deployment-service"
         const val PARTICIPATION_SERVICE = "/api/participation-service"
+        const val PARTICIPATION_DATA_AS_RESEARCHER = "/api/studies/participation-service/{${PathVariableName.STUDY_ID}}"
         const val DEPLOYMENT_STATISTICS = "/api/deployment-service/statistics"
     }
 
@@ -58,6 +62,19 @@ class StudyDeploymentController(
         val request = WS_JSON.decodeFromString(ParticipationServiceRequest.Serializer, httpMessage)
         LOGGER.info("Start POST: $PARTICIPATION_SERVICE -> ${ request::class.simpleName }")
         val result = participationService.core.invoke(request)
+        return participationSerializer.serializeResponse(request, result).let { ResponseEntity.ok(it) }
+    }
+
+    @Suppress("unused")
+    @PostMapping(value = [PARTICIPATION_DATA_AS_RESEARCHER])
+    @PreAuthorize("canManageStudy(#studyId)")
+    suspend fun participationServiceForResearcher(
+        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
+        @RequestBody httpMessage: String,
+    ): ResponseEntity<Any> {
+        val request = WS_JSON.decodeFromString(ParticipationServiceRequest.Serializer, httpMessage)
+        LOGGER.info("Start POST: $PARTICIPATION_DATA_AS_RESEARCHER -> ${ request::class.simpleName }")
+        val result = participationService.participationDataRequest(request)
         return participationSerializer.serializeResponse(request, result).let { ResponseEntity.ok(it) }
     }
 

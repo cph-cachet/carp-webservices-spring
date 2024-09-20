@@ -98,8 +98,8 @@ class ProtocolServiceTest {
                 assertNotNull(result)
                 assertEquals("John Doe", result.ownerName)
                 assertEquals("version 2", result.versionTag)
-                assertEquals(yesterday.toJavaInstant(), result.firstVersionCreatedDate)
-                assertEquals(now.toJavaInstant(), result.lastVersionCreatedDate)
+                assertEquals(yesterday, result.firstVersionCreatedDate)
+                assertEquals(now, result.lastVersionCreatedDate)
             }
     }
 }

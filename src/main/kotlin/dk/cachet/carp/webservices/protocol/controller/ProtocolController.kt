@@ -63,10 +63,12 @@ class ProtocolController(
     @Operation(tags = ["protocol/getLatestProtocolById.json"])
     suspend fun getSingleProtocolOverview(
         @PathVariable(PathVariableName.PROTOCOL_ID) protocolId: String,
-    ): ProtocolOverview {
+    ): String {
         LOGGER.info("/api/protocols/$protocolId/latest")
-        return protocolService.getSingleProtocolOverview(protocolId)
-            ?: throw ResourceNotFoundException("No protocol found with id $protocolId.")
+        val overview =
+            protocolService.getSingleProtocolOverview(protocolId)
+                ?: throw ResourceNotFoundException("No protocol found with id $protocolId.")
+        return WS_JSON.encodeToString(ProtocolOverview.serializer(), overview)
     }
 
     @GetMapping(value = [GET_PROTOCOLS_OVERVIEW])
