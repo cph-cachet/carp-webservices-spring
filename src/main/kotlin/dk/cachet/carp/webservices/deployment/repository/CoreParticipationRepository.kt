@@ -69,6 +69,7 @@ class CoreParticipationRepository(
         withContext(Dispatchers.IO) {
             participantGroupRepository.findAllByAccountId(accountId.stringRepresentation)
                 .flatMap { mapParticipantGroupSnapshotJsonNodeToParticipantGroup(it.snapshot!!).participations }
+                .filter { it.accountId == accountId }
                 .toSet()
         }
 
