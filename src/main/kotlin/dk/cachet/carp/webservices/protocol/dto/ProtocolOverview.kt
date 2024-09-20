@@ -1,13 +1,14 @@
 package dk.cachet.carp.webservices.protocol.dto
 
 import dk.cachet.carp.protocols.application.StudyProtocolSnapshot
-import java.time.Instant
+import kotlinx.datetime.Instant
+import kotlinx.serialization.Serializable
 
 /**
  * A DTO representing the latest [StudyProtocolSnapshot] with auxiliary information.
  *
- * TODO: why are we using Java Instant here?
  */
+@Serializable
 data class ProtocolOverview(
     val ownerName: String?,
     val firstVersionCreatedDate: Instant?,

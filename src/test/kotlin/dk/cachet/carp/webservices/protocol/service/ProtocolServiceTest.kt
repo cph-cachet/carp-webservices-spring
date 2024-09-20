@@ -17,7 +17,6 @@ import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.Clock
 import kotlinx.datetime.toJavaInstant
-import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import kotlin.test.*
@@ -96,8 +95,8 @@ class ProtocolServiceTest {
                 assertNotNull(result)
                 assertEquals("John Doe", result.ownerName)
                 assertEquals("version 2", result.versionTag)
-                assertEquals(yesterday.toJavaInstant(), result.firstVersionCreatedDate)
-                assertEquals(now.toJavaInstant(), result.lastVersionCreatedDate)
+                assertEquals(yesterday, result.firstVersionCreatedDate)
+                assertEquals(now, result.lastVersionCreatedDate)
             }
     }
 }

@@ -78,7 +78,6 @@ class StudyDeploymentController(
         return participationSerializer.serializeResponse(request, result).let { ResponseEntity.ok(it) }
     }
 
-
     /**
      * Statistics endpoint is disabled, due to a refactor of the authorization
      * services with clear service boundaries. Also, none of the current clients
