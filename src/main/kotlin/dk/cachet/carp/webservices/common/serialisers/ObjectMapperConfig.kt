@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.module.SimpleModule
+import com.fasterxml.jackson.datatype.jsr310.deser.InstantDeserializer
 import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import dk.cachet.carp.common.application.UUID
@@ -58,6 +59,7 @@ class ObjectMapperConfig(validationMessages: MessageBase) : SimpleModule() {
         this.addSerializer(Instant::class.java, KInstantSerializer.INSTANCE)
 
         this.addSerializer(java.time.Instant::class.java, InstantSerializer.INSTANCE)
+        this.addDeserializer(java.time.Instant::class.java, InstantDeserializer.INSTANT)
 
         this.addSerializer(StudyProtocolSnapshot::class.java, StudyProtocolSnapshotSerializer(validationMessages))
     }
