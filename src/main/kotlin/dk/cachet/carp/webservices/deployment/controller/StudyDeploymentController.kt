@@ -39,7 +39,7 @@ class StudyDeploymentController(
         /** Endpoint URI constants */
         const val DEPLOYMENT_SERVICE = "/api/deployment-service"
         const val PARTICIPATION_SERVICE = "/api/participation-service"
-        const val PARTICIPATION_DATA_AS_RESEARCHER = "/api/studies/participation-service/{${PathVariableName.STUDY_ID}}"
+        const val PARTICIPATION_DATA_AS_RESEARCHER = "/api/participation-service/{${PathVariableName.STUDY_ID}}"
         const val DEPLOYMENT_STATISTICS = "/api/deployment-service/statistics"
     }
 
@@ -67,6 +67,7 @@ class StudyDeploymentController(
 
     @Suppress("unused")
     @PostMapping(value = [PARTICIPATION_DATA_AS_RESEARCHER])
+    @Operation(tags = ["studyDeployment/participationDataAsResearcher.json"])
     @PreAuthorize("canManageStudy(#studyId)")
     suspend fun participationServiceForResearcher(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
