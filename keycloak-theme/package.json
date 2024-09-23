@@ -23,6 +23,7 @@
     "@emotion/styled": "^11.11.5",
     "@mui/icons-material": "^5.15.17",
     "@mui/material": "^5.15.17",
+    "@mui/system": "^5.15.17",
     "evt": "^2.5.7",
     "formik": "^2.4.6",
     "keycloakify": "^9.6.6",
