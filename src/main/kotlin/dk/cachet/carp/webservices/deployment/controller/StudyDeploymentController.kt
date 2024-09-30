@@ -75,7 +75,17 @@ class StudyDeploymentController(
     ): ResponseEntity<Any> {
         val request = WS_JSON.decodeFromString(ParticipationServiceRequest.Serializer, httpMessage)
         LOGGER.info("Start POST: $PARTICIPATION_DATA_AS_RESEARCHER -> ${ request::class.simpleName }")
-        val result = participationService.participationDataRequest(request)
+        val result: Any =
+            when (request) {
+                is ParticipationServiceRequest.GetParticipantData,
+                -> participationService.core.getParticipantData(request.studyDeploymentId)
+                is ParticipationServiceRequest.GetParticipantDataList,
+                -> participationService.core.getParticipantDataList(request.studyDeploymentIds)
+                is ParticipationServiceRequest.SetParticipantData,
+                -> participationService.core.setParticipantData(request.studyDeploymentId, request.data)
+                is ParticipationServiceRequest.GetActiveParticipationInvitations,
+                -> throw IllegalArgumentException("GetActiveParticipationInvitations is not supported.")
+            }
         return participationSerializer.serializeResponse(request, result).let { ResponseEntity.ok(it) }
     }
 
