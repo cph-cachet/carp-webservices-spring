@@ -37,7 +37,7 @@ class AuthenticationServiceImpl(
                         runBlocking {
                             participantRepository.getRecruitment(claim.studyId)
                                 ?.participantGroups?.keys
-                                ?.map { deploymentId -> Claim.ManageDeployment(deploymentId) }
+                                ?.map { deploymentId -> Claim.InDeployment(deploymentId) }
                                 ?.plus(claim)
                                 ?: listOf(claim)
                         }
