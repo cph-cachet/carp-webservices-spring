@@ -88,6 +88,7 @@ class ResourceExporterServiceImpl(
         }
     }
 
+    // TODO: This will not work after change serialization to JSON
     private fun writeResourceAsJson(
         path: Path,
         resource: Any,

@@ -18,31 +18,31 @@ const Logo = ({ type }: Props) => {
   switch (type) {
     case 'white':
       return (
-        <DefaultLogo href="/" data-testid="link-white-logo">
+        <DefaultLogo data-testid="link-white-logo">
           <img src={logoWhite} alt="White carp logo" />
         </DefaultLogo>
       );
     case 'flat':
       return (
-        <FlatLogo href="/" data-testid="link-flat-logo">
+        <FlatLogo data-testid="link-flat-logo">
           <img src={logoFlat} alt="carp logo" />
         </FlatLogo>
       );
     case 'flat-colored':
       return (
-        <FlatColoredLogo href="/" data-testid="link-flat-colored-logo">
+        <FlatColoredLogo data-testid="link-flat-colored-logo">
           <img src={logoFlatColored} alt="carp logo" />
         </FlatColoredLogo>
       );
     case 'flat-white':
       return (
-        <FlatWhiteLogo href="/" data-testid="link-flat-colored-logo">
+        <FlatWhiteLogo data-testid="link-flat-colored-logo">
           <img src={logoFlatWhite} alt="carp logo" />
         </FlatWhiteLogo>
       );
     default:
       return (
-        <DefaultLogo href="/" data-testid="link-default-logo">
+        <DefaultLogo data-testid="link-default-logo">
           <img src={logoDefault} alt="carp logo" />
         </DefaultLogo>
       );

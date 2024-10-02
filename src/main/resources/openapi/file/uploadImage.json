@@ -1,0 +1,21 @@
+{
+  "tags": [
+    "file-controller"
+  ],
+  "description": "> `Description`: `uploadImage` \n\nThis endpoint enables uploading a image with the given [STUDY_ID] to S3 bucket.\n\n> `Request`: https://dev.carp.dk/api/studies/{study-id}/images\n\nThis request must be authenticated using a HTTP OAuth 2.0 Authentication header.\n\n> `Response`:\n\n- On success, a url link to the image is returned as String.\n- On failure status code `400` (bad request) is returned.\n- On failure status code `401` (unauthorized) is returned.\n- On failure status code `500` (internal server error) is returned.",
+  "requestBody": {
+    "content": {
+      "multipart/form-data": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "image": {
+              "type": "`multipart-file`",
+              "format": "binary"
+            }
+          }
+        }
+      }
+    }
+  }
+}

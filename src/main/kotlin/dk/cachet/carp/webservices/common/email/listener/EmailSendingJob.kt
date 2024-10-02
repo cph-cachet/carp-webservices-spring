@@ -6,7 +6,6 @@ import dk.cachet.carp.webservices.common.email.domain.EmailRequest
 import dk.cachet.carp.webservices.common.email.domain.EmailSendResult
 import dk.cachet.carp.webservices.common.email.service.impl.javamail.EmailServiceImpl
 import dk.cachet.carp.webservices.common.exception.email.EmailException
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger

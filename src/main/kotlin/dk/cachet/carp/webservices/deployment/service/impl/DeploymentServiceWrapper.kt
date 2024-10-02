@@ -1,8 +1,8 @@
 package dk.cachet.carp.webservices.deployment.service.impl
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.deployments.domain.StudyDeploymentSnapshot
+import dk.cachet.carp.webservices.common.input.WS_JSON
 import dk.cachet.carp.webservices.common.services.CoreServiceContainer
 import dk.cachet.carp.webservices.deployment.repository.StudyDeploymentRepository
 import dk.cachet.carp.webservices.deployment.service.DeploymentService
@@ -15,7 +15,6 @@ import java.nio.file.Path
 @Service
 class DeploymentServiceWrapper(
     private val repository: StudyDeploymentRepository,
-    private val objectMapper: ObjectMapper,
     services: CoreServiceContainer,
 ) : DeploymentService, ResourceExporter<StudyDeploymentSnapshot> {
     final override val core = services.deploymentService
@@ -29,6 +28,6 @@ class DeploymentServiceWrapper(
     ) = withContext(Dispatchers.IO) {
         repository
             .findAllByStudyDeploymentIds(deploymentIds.map { it.stringRepresentation })
-            .map { objectMapper.treeToValue(it.snapshot, StudyDeploymentSnapshot::class.java) }
+            .map { WS_JSON.decodeFromString(StudyDeploymentSnapshot.serializer(), it.snapshot!!.toString()) }
     }
 }

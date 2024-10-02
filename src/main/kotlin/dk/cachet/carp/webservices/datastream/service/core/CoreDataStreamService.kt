@@ -6,6 +6,7 @@ import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.common.application.data.Data
 import dk.cachet.carp.common.application.intersect
 import dk.cachet.carp.data.application.*
+import dk.cachet.carp.webservices.common.input.WS_JSON
 import dk.cachet.carp.webservices.datastream.domain.DataStreamConfiguration
 import dk.cachet.carp.webservices.datastream.domain.DataStreamSequence
 import dk.cachet.carp.webservices.datastream.domain.DataStreamSnapshot
@@ -13,6 +14,8 @@ import dk.cachet.carp.webservices.datastream.repository.DataStreamConfigurationR
 import dk.cachet.carp.webservices.datastream.repository.DataStreamIdRepository
 import dk.cachet.carp.webservices.datastream.repository.DataStreamSequenceRepository
 import dk.cachet.carp.webservices.datastream.service.impl.MutableDataStreamBatchDecorator
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.stereotype.Component
@@ -50,7 +53,10 @@ class CoreDataStreamService(
         ) { "The study deployment ID of one or more sequences in `batch` doesn't match `studyDeploymentId`." }
 
         // whether there is a config present in the database
-        val configOptional = configRepository.findById(studyDeploymentId.stringRepresentation)
+        val configOptional =
+            withContext(Dispatchers.IO) {
+                configRepository.findById(studyDeploymentId.stringRepresentation)
+            }
 
         require(configOptional.isPresent) {
             "No configuration was found for studyDeploymentId ${studyDeploymentId.stringRepresentation}."
@@ -102,8 +108,12 @@ class CoreDataStreamService(
      * @throws IllegalArgumentException when no data streams were ever opened for any of the [studyDeploymentIds].
      */
     override suspend fun closeDataStreams(studyDeploymentIds: Set<UUID>) {
-        val configs = configRepository.getConfigurationsForIds(studyDeploymentIds.map { it.stringRepresentation })
+        val configs =
+            withContext(Dispatchers.IO) {
+                configRepository.getConfigurationsForIds(studyDeploymentIds.map { it.stringRepresentation })
+            }
 
+        // TODO: warn instead of throwing exception
         require(configs.size == studyDeploymentIds.size) { "One of the configurations passed is not valid." }
 
         configs.forEach { it.closed = true }
@@ -122,6 +132,7 @@ class CoreDataStreamService(
      *  - [dataStream] has never been opened
      *  - [fromSequenceId] is negative or [toSequenceIdInclusive] is smaller than [fromSequenceId]
      */
+    @Suppress("LongMethod")
     override suspend fun getDataStream(
         dataStream: DataStreamId,
         fromSequenceId: Long,
@@ -140,7 +151,10 @@ class CoreDataStreamService(
         }
 
         // whether there is a config present in the database
-        val configOptional = configRepository.findById(dataStream.studyDeploymentId.stringRepresentation)
+        val configOptional =
+            withContext(Dispatchers.IO) {
+                configRepository.findById(dataStream.studyDeploymentId.stringRepresentation)
+            }
 
         require(configOptional.isPresent) {
             "No configuration was found " +
@@ -155,21 +169,25 @@ class CoreDataStreamService(
         ) { "Data stream wasn't configured for this study deployment." }
 
         val dataStreamId =
-            dataStreamIdRepository.findByStudyDeploymentIdAndDeviceRoleNameAndNameAndNameSpace(
-                studyDeploymentId = dataStream.studyDeploymentId.stringRepresentation,
-                deviceRoleName = dataStream.deviceRoleName,
-                name = dataStream.dataType.name,
-                nameSpace = dataStream.dataType.namespace,
-            ).get()
+            withContext(Dispatchers.IO) {
+                dataStreamIdRepository.findByStudyDeploymentIdAndDeviceRoleNameAndNameAndNameSpace(
+                    studyDeploymentId = dataStream.studyDeploymentId.stringRepresentation,
+                    deviceRoleName = dataStream.deviceRoleName,
+                    name = dataStream.dataType.name,
+                    nameSpace = dataStream.dataType.namespace,
+                )
+            }.get()
 
         val toSequenceId = toSequenceIdInclusive?.toInt() ?: Int.MAX_VALUE
 
         val dataStreamSequences =
-            dataStreamSequenceRepository.findAllBySequenceIdRange(
-                dataStreamId.id,
-                fromSequenceId.toInt(),
-                toSequenceId,
-            )
+            withContext(Dispatchers.IO) {
+                dataStreamSequenceRepository.findAllBySequenceIdRange(
+                    dataStreamId.id,
+                    fromSequenceId.toInt(),
+                    toSequenceId,
+                )
+            }
 
         return dataStreamSequences
             .mapNotNull {
@@ -204,12 +222,18 @@ class CoreDataStreamService(
     override suspend fun openDataStreams(configuration: DataStreamsConfiguration) {
         val id = configuration.studyDeploymentId.stringRepresentation
 
-        check(!configRepository.existsById(id)) {
+        check(
+            !withContext(Dispatchers.IO) {
+                configRepository.existsById(id)
+            },
+        ) {
             "Data streams for deployment with \\\"$id\\\" have already been configured."
         }
 
-        val node = objectMapper.valueToTree<JsonNode>(configuration)
-        configRepository.save(DataStreamConfiguration(id, node))
+        val node = WS_JSON.encodeToString(DataStreamsConfiguration.serializer(), configuration)
+        withContext(Dispatchers.IO) {
+            configRepository.save(DataStreamConfiguration(id, objectMapper.readTree(node)))
+        }
         LOGGER.info("New data stream configuration is saved for deployment with id $id.")
 
         val ids =
@@ -260,7 +284,11 @@ class CoreDataStreamService(
         return deploymentIds
     }
 
-    private fun mapToCoreConfig(node: JsonNode) = objectMapper.treeToValue(node, DataStreamsConfiguration::class.java)
+    private fun mapToCoreConfig(node: JsonNode) =
+        WS_JSON.decodeFromString(
+            DataStreamsConfiguration.serializer(),
+            node.toString(),
+        )
 
     private fun mapToDataStreamSnapshot(node: JsonNode) = objectMapper.treeToValue(node, DataStreamSnapshot::class.java)
 }

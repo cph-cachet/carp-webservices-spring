@@ -5,6 +5,7 @@ import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.deployments.domain.DeploymentRepository
 import dk.cachet.carp.deployments.domain.StudyDeploymentSnapshot
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
+import dk.cachet.carp.webservices.common.input.WS_JSON
 import dk.cachet.carp.webservices.deployment.domain.StudyDeployment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -23,12 +24,11 @@ class CoreDeploymentRepository(
 ) : DeploymentRepository {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
-        private const val VERSION: Int = 0
     }
 
     override suspend fun add(studyDeployment: CoreStudyDeployment) =
         withContext(Dispatchers.IO) {
-            if (studyDeploymentRepository.findByDeploymentId(studyDeployment.id.stringRepresentation).isPresent) {
+            if (studyDeploymentRepository.findByDeploymentId(studyDeployment.id.stringRepresentation) != null) {
                 LOGGER.warn("Deployment already exists, id: ${studyDeployment.id.stringRepresentation}")
                 throw IllegalArgumentException(
                     validationMessages.get(
@@ -39,8 +39,8 @@ class CoreDeploymentRepository(
             }
             val studyDeploymentToSave = StudyDeployment()
 
-            val snapshot = StudyDeploymentSnapshot.fromDeployment(studyDeployment, VERSION)
-            studyDeploymentToSave.snapshot = objectMapper.valueToTree(snapshot)
+            val snapshot = WS_JSON.encodeToString(StudyDeploymentSnapshot.serializer(), studyDeployment.getSnapshot())
+            studyDeploymentToSave.snapshot = objectMapper.readTree(snapshot)
 
             studyDeploymentRepository.save(studyDeploymentToSave)
             LOGGER.info("Deployment saved, id: ${studyDeployment.id.stringRepresentation}")
@@ -49,7 +49,7 @@ class CoreDeploymentRepository(
     override suspend fun getStudyDeploymentBy(id: UUID) =
         withContext(Dispatchers.IO) {
             val result = getWSDeploymentById(id) ?: return@withContext null
-            val snapshot = objectMapper.treeToValue(result.snapshot, StudyDeploymentSnapshot::class.java)
+            val snapshot = WS_JSON.decodeFromString<StudyDeploymentSnapshot>(result.snapshot!!.toString())
             CoreStudyDeployment.fromSnapshot(snapshot)
         }
 
@@ -83,8 +83,8 @@ class CoreDeploymentRepository(
                 )
             }
 
-            val snapshot = StudyDeploymentSnapshot.fromDeployment(studyDeployment, VERSION)
-            stored.snapshot = objectMapper.valueToTree(snapshot)
+            val snapshot = WS_JSON.encodeToString(StudyDeploymentSnapshot.serializer(), studyDeployment.getSnapshot())
+            stored.snapshot = objectMapper.readTree(snapshot)
 
             studyDeploymentRepository.save(stored)
             LOGGER.info("Deployment updated, id: ${studyDeployment.id.stringRepresentation}")
@@ -92,15 +92,15 @@ class CoreDeploymentRepository(
 
     fun getWSDeploymentById(id: UUID): StudyDeployment? {
         val optionalResult = studyDeploymentRepository.findByDeploymentId(id.stringRepresentation)
-        if (!optionalResult.isPresent) {
+        if (optionalResult == null) {
             LOGGER.info("Deployment is not found, id: ${id.stringRepresentation}")
             return null
         }
-        return optionalResult.get()
+        return optionalResult
     }
 
     private fun mapWSDeploymentToCore(deployment: StudyDeployment): CoreStudyDeployment {
-        val snapshot = objectMapper.treeToValue(deployment.snapshot, StudyDeploymentSnapshot::class.java)
+        val snapshot = WS_JSON.decodeFromString<StudyDeploymentSnapshot>(deployment.snapshot!!.toString())
         return CoreStudyDeployment.fromSnapshot(snapshot)
     }
 }

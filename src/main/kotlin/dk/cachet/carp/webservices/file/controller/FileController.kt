@@ -108,6 +108,7 @@ class FileController(private val fileStorage: FileStorage, private val fileServi
     }
 
     @PostMapping(UPLOAD_IMAGE)
+    @Operation(tags = ["file/uploadImage.json"])
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
     fun uploadS3(

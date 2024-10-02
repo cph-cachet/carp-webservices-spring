@@ -4,7 +4,6 @@ import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.deployments.application.DeploymentService
 import dk.cachet.carp.webservices.common.eventbus.CoreEventBus
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.decodeFromString
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.amqp.core.Message

@@ -1,0 +1,6 @@
+{
+  "tags": [
+    "study-deployment-controller"
+  ],
+  "description": "Access expected participation data as a researcher who can manage the study. Please refer to participation-service endpoint for details"
+}
