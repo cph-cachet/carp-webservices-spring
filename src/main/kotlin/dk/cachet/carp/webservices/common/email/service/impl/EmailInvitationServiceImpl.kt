@@ -2,7 +2,6 @@ package dk.cachet.carp.webservices.common.email.service.impl
 
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.deployments.application.users.StudyInvitation
-import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.email.domain.EmailRequest
 import dk.cachet.carp.webservices.common.email.domain.EmailType
 import dk.cachet.carp.webservices.common.email.listener.EmailSendingJob
@@ -10,7 +9,6 @@ import dk.cachet.carp.webservices.common.email.service.EmailInvitationService
 import dk.cachet.carp.webservices.common.email.service.impl.javamail.EmailServiceImpl
 import dk.cachet.carp.webservices.common.email.util.EmailTemplateUtil
 import dk.cachet.carp.webservices.common.email.util.EmailValidatorUtil
-import dk.cachet.carp.webservices.common.exception.responses.BadRequestException
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.stereotype.Service
@@ -27,7 +25,8 @@ class EmailInvitationServiceImpl(
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
-        override fun inviteToStudy(
+
+    override fun inviteToStudy(
         email: String,
         deploymentId: UUID,
         invitation: StudyInvitation,
@@ -72,6 +71,6 @@ class EmailInvitationServiceImpl(
     }
 
     private fun isEmailAddressValid(emailAddress: String?): Boolean {
-        return this.emailValidator.isValid(emailAddress);
+        return this.emailValidator.isValid(emailAddress)
     }
 }
