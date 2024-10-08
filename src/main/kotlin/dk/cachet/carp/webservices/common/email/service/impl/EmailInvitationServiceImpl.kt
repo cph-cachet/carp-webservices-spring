@@ -22,20 +22,21 @@ class EmailInvitationServiceImpl(
     private val emailValidator: EmailValidatorUtil,
     private val emailTemplate: EmailTemplateUtil,
     private val emailService: EmailServiceImpl,
-    private val validationMessages: MessageBase,
     private val emailSendingJob: EmailSendingJob,
 ) : EmailInvitationService {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
-
-    override fun inviteToStudy(
+        override fun inviteToStudy(
         email: String,
         deploymentId: UUID,
         invitation: StudyInvitation,
         emailType: EmailType,
     ) {
-        val emailAddress = validateEmailAddress(email)
+        if (!isEmailAddressValid(email)) {
+            LOGGER.warn("Invalid [email] address format, e-mail = $email. Email invitation was not sent!")
+            return
+        }
 
         val mailContent =
             emailTemplate.inviteAccount(
@@ -46,7 +47,7 @@ class EmailInvitationServiceImpl(
 
         val request =
             EmailRequest(
-                destinationEmail = emailAddress,
+                destinationEmail = email,
                 subject = invitation.name,
                 content = mailContent,
                 deploymentId = deploymentId.stringRepresentation,
@@ -61,22 +62,16 @@ class EmailInvitationServiceImpl(
         subject: String?,
         message: String?,
     ) {
-        val emailAddress = validateEmailAddress(recipient)
-        val mailContent = emailTemplate.sendNotificationEmail(message)
-        emailService.invoke(emailAddress, subject!!, mailContent)
-    }
-
-    private fun validateEmailAddress(emailAddress: String?): String {
-        if (!this.emailValidator.isValid(emailAddress)) {
-            LOGGER.info("Invalid [email] address format, e-mail = $emailAddress")
-            throw BadRequestException(
-                validationMessages.get(
-                    "email.invitation.service.format.invalid",
-                    emailAddress.toString(),
-                ),
-            )
+        if (!isEmailAddressValid(recipient)) {
+            LOGGER.warn("Invalid [email] address format, e-mail = $recipient. Email invitation was not sent!")
+            return
         }
 
-        return emailAddress!!
+        val mailContent = emailTemplate.sendNotificationEmail(message)
+        emailService.invoke(recipient!!, subject!!, mailContent)
+    }
+
+    private fun isEmailAddressValid(emailAddress: String?): Boolean {
+        return this.emailValidator.isValid(emailAddress);
     }
 }
