@@ -2,7 +2,6 @@ package dk.cachet.carp.webservices.common.email.service.impl
 
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.deployments.application.users.StudyInvitation
-import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.email.domain.EmailRequest
 import dk.cachet.carp.webservices.common.email.domain.EmailType
 import dk.cachet.carp.webservices.common.email.listener.EmailSendingJob
@@ -10,7 +9,6 @@ import dk.cachet.carp.webservices.common.email.service.EmailInvitationService
 import dk.cachet.carp.webservices.common.email.service.impl.javamail.EmailServiceImpl
 import dk.cachet.carp.webservices.common.email.util.EmailTemplateUtil
 import dk.cachet.carp.webservices.common.email.util.EmailValidatorUtil
-import dk.cachet.carp.webservices.common.exception.responses.BadRequestException
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.stereotype.Service
@@ -22,7 +20,6 @@ class EmailInvitationServiceImpl(
     private val emailValidator: EmailValidatorUtil,
     private val emailTemplate: EmailTemplateUtil,
     private val emailService: EmailServiceImpl,
-    private val validationMessages: MessageBase,
     private val emailSendingJob: EmailSendingJob,
 ) : EmailInvitationService {
     companion object {
@@ -35,7 +32,10 @@ class EmailInvitationServiceImpl(
         invitation: StudyInvitation,
         emailType: EmailType,
     ) {
-        val emailAddress = validateEmailAddress(email)
+        if (!isEmailAddressValid(email)) {
+            LOGGER.warn("Invalid [email] address format, e-mail = $email. Email invitation was not sent!")
+            return
+        }
 
         val mailContent =
             emailTemplate.inviteAccount(
@@ -46,7 +46,7 @@ class EmailInvitationServiceImpl(
 
         val request =
             EmailRequest(
-                destinationEmail = emailAddress,
+                destinationEmail = email,
                 subject = invitation.name,
                 content = mailContent,
                 deploymentId = deploymentId.stringRepresentation,
@@ -61,22 +61,16 @@ class EmailInvitationServiceImpl(
         subject: String?,
         message: String?,
     ) {
-        val emailAddress = validateEmailAddress(recipient)
-        val mailContent = emailTemplate.sendNotificationEmail(message)
-        emailService.invoke(emailAddress, subject!!, mailContent)
-    }
-
-    private fun validateEmailAddress(emailAddress: String?): String {
-        if (!this.emailValidator.isValid(emailAddress)) {
-            LOGGER.info("Invalid [email] address format, e-mail = $emailAddress")
-            throw BadRequestException(
-                validationMessages.get(
-                    "email.invitation.service.format.invalid",
-                    emailAddress.toString(),
-                ),
-            )
+        if (!isEmailAddressValid(recipient)) {
+            LOGGER.warn("Invalid [email] address format, e-mail = $recipient. Email invitation was not sent!")
+            return
         }
 
-        return emailAddress!!
+        val mailContent = emailTemplate.sendNotificationEmail(message)
+        emailService.invoke(recipient!!, subject!!, mailContent)
+    }
+
+    private fun isEmailAddressValid(emailAddress: String?): Boolean {
+        return this.emailValidator.isValid(emailAddress)
     }
 }
