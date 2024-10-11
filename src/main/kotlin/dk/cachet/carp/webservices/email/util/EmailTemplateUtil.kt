@@ -1,6 +1,6 @@
-package dk.cachet.carp.webservices.common.email.util
+package dk.cachet.carp.webservices.email.util
 
-import dk.cachet.carp.webservices.common.email.domain.EmailType
+import dk.cachet.carp.webservices.email.domain.EmailType
 import org.springframework.stereotype.Service
 import org.thymeleaf.TemplateEngine
 import org.thymeleaf.context.Context

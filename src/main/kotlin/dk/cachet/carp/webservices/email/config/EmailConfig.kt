@@ -1,4 +1,4 @@
-package dk.cachet.carp.webservices.common.email.config
+package dk.cachet.carp.webservices.email.config
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.*

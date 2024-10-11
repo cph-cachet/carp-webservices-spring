@@ -1,10 +1,10 @@
-package dk.cachet.carp.webservices.common.email.listener
+package dk.cachet.carp.webservices.email.listener
 
 import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
-import dk.cachet.carp.webservices.common.email.domain.EmailRequest
-import dk.cachet.carp.webservices.common.email.domain.EmailSendResult
-import dk.cachet.carp.webservices.common.email.service.impl.javamail.EmailServiceImpl
+import dk.cachet.carp.webservices.email.domain.EmailRequest
+import dk.cachet.carp.webservices.email.domain.EmailSendResult
+import dk.cachet.carp.webservices.email.service.impl.javamail.EmailSenderImpl
 import dk.cachet.carp.webservices.common.exception.email.EmailException
 import kotlinx.serialization.encodeToString
 import org.apache.logging.log4j.LogManager
@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component
 @Component
 class EmailSendingJob(
     private val rabbitTemplate: RabbitTemplate,
-    private val emailSend: EmailServiceImpl,
+    private val emailSend: EmailSenderImpl,
     private val validationMessages: MessageBase,
     private val environment: Environment,
 ) {
@@ -42,7 +42,7 @@ class EmailSendingJob(
 
     /**
      * Email message consumer.
-     * It sends the [emailRequest] using the [EmailServiceImpl] and waits
+     * It sends the [emailRequest] using the [EmailSenderImpl] and waits
      * for the response.
      *
      * @param emailRequest The request to be sent to the queue.

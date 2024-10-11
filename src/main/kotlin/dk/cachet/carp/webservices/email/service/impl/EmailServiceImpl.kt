@@ -1,14 +1,15 @@
-package dk.cachet.carp.webservices.common.email.service.impl
+package dk.cachet.carp.webservices.email.service.impl
 
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.deployments.application.users.StudyInvitation
-import dk.cachet.carp.webservices.common.email.domain.EmailRequest
-import dk.cachet.carp.webservices.common.email.domain.EmailType
-import dk.cachet.carp.webservices.common.email.listener.EmailSendingJob
-import dk.cachet.carp.webservices.common.email.service.EmailInvitationService
-import dk.cachet.carp.webservices.common.email.service.impl.javamail.EmailServiceImpl
-import dk.cachet.carp.webservices.common.email.util.EmailTemplateUtil
-import dk.cachet.carp.webservices.common.email.util.EmailValidatorUtil
+import dk.cachet.carp.webservices.email.domain.EmailRequest
+import dk.cachet.carp.webservices.email.domain.EmailType
+import dk.cachet.carp.webservices.email.listener.EmailSendingJob
+import dk.cachet.carp.webservices.email.service.EmailService
+import dk.cachet.carp.webservices.email.service.impl.javamail.EmailSenderImpl
+import dk.cachet.carp.webservices.email.dto.GenericEmailRequestDto
+import dk.cachet.carp.webservices.email.util.EmailTemplateUtil
+import dk.cachet.carp.webservices.email.util.EmailValidatorUtil
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.stereotype.Service
@@ -16,12 +17,12 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 @Transactional
-class EmailInvitationServiceImpl(
+class EmailServiceImpl(
     private val emailValidator: EmailValidatorUtil,
     private val emailTemplate: EmailTemplateUtil,
-    private val emailService: EmailServiceImpl,
+    private val emailService: EmailSenderImpl,
     private val emailSendingJob: EmailSendingJob,
-) : EmailInvitationService {
+) : EmailService {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
@@ -68,6 +69,19 @@ class EmailInvitationServiceImpl(
 
         val mailContent = emailTemplate.sendNotificationEmail(message)
         emailService.invoke(recipient!!, subject!!, mailContent)
+    }
+
+    override fun sendGenericEmail(requestDto: GenericEmailRequestDto) {
+        val request =
+            EmailRequest(
+                destinationEmail = requestDto.recipient,
+                subject = requestDto.subject,
+                content = "Sent by ${requestDto.sender}",
+                deploymentId = null,
+                id = UUID.randomUUID().stringRepresentation,
+            )
+
+        emailSendingJob.send(request)
     }
 
     private fun isEmailAddressValid(emailAddress: String?): Boolean {

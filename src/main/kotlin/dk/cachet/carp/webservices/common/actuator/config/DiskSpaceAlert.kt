@@ -1,7 +1,7 @@
 package dk.cachet.carp.webservices.common.actuator.config
 
 import dk.cachet.carp.webservices.common.actuator.service.IDiskSpaceStatus
-import dk.cachet.carp.webservices.common.email.service.EmailInvitationService
+import dk.cachet.carp.webservices.email.service.EmailService
 import dk.cachet.carp.webservices.common.notification.domain.TeamsChannel
 import dk.cachet.carp.webservices.common.notification.service.INotificationService
 import org.apache.logging.log4j.LogManager
@@ -25,7 +25,7 @@ import java.util.*
 class DiskSpaceAlert(
     private val diskSpace: IDiskSpaceStatus,
     private val notificationService: INotificationService,
-    private val emailNotificationService: EmailInvitationService,
+    private val emailNotificationService: EmailService,
     @Value("\${alert.admin-email}") private val alertEmail: String,
     @Value("\${alert.subject}") private val alertWarning: String,
 ) {

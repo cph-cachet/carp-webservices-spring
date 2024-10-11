@@ -1,6 +1,6 @@
-package dk.cachet.carp.webservices.common.email.service.impl.javamail
+package dk.cachet.carp.webservices.email.service.impl.javamail
 
-import dk.cachet.carp.webservices.common.email.domain.EmailSendResult
+import dk.cachet.carp.webservices.email.domain.EmailSendResult
 import dk.cachet.carp.webservices.common.exception.email.EmailException
 import dk.cachet.carp.webservices.common.notification.domain.TeamsChannel
 import dk.cachet.carp.webservices.common.notification.service.INotificationService
@@ -20,11 +20,11 @@ import java.nio.charset.StandardCharsets
 import java.util.concurrent.CompletableFuture
 
 /**
- * The Class [EmailServiceImpl].
- * The [EmailServiceImpl] implements the functionality logic for email sending.
+ * The Class [EmailSenderImpl].
+ * The [EmailSenderImpl] implements the functionality logic for email sending.
  */
 @Service
-class EmailServiceImpl(
+class EmailSenderImpl(
     @Qualifier("mailConfig")
     private val mailSender: JavaMailSender,
     private val environment: Environment,

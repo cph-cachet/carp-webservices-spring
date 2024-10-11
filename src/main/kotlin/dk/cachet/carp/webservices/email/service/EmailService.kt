@@ -1,10 +1,11 @@
-package dk.cachet.carp.webservices.common.email.service
+package dk.cachet.carp.webservices.email.service
 
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.deployments.application.users.StudyInvitation
-import dk.cachet.carp.webservices.common.email.domain.EmailType
+import dk.cachet.carp.webservices.email.domain.EmailType
+import dk.cachet.carp.webservices.email.dto.GenericEmailRequestDto
 
-interface EmailInvitationService {
+interface EmailService {
     fun inviteToStudy(
         email: String,
         deploymentId: UUID,
@@ -16,5 +17,9 @@ interface EmailInvitationService {
         recipient: String?,
         subject: String?,
         message: String?,
+    )
+
+    fun sendGenericEmail(
+        requestDto: GenericEmailRequestDto
     )
 }
