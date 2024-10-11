@@ -1,10 +1,10 @@
-package dk.cachet.carp.webservices.common.email.service.impl
+package dk.cachet.carp.webservices.email.service.impl
 
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.webservices.email.listener.EmailSendingJob
 import dk.cachet.carp.webservices.email.service.impl.javamail.EmailSenderImpl
-import dk.cachet.carp.webservices.common.email.util.EmailValidatorUtil
-import dk.cachet.carp.webservices.email.service.impl.EmailServiceImpl
+import dk.cachet.carp.webservices.email.util.EmailTemplateUtil
+import dk.cachet.carp.webservices.email.util.EmailValidatorUtil
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -14,12 +14,12 @@ import org.junit.jupiter.api.Test
 
 class EmailServiceImplTest {
     private val emailValidator: EmailValidatorUtil = mockk()
-    private val emailTemplate: _root_ide_package_.dk.cachet.carp.webservices.email.util.EmailTemplateUtil = mockk()
+    private val emailTemplate: EmailTemplateUtil = mockk()
     private val emailService: EmailSenderImpl = mockk()
     private val emailSendingJob: EmailSendingJob = mockk()
 
     @Nested
-    inner class inviteToStudy {
+    inner class InviteToStudy {
         @Test
         fun `should not throw if email address is invalid`() =
             runTest {

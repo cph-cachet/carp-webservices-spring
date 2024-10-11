@@ -4,10 +4,10 @@ import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.deployments.application.users.StudyInvitation
 import dk.cachet.carp.webservices.email.domain.EmailRequest
 import dk.cachet.carp.webservices.email.domain.EmailType
+import dk.cachet.carp.webservices.email.dto.GenericEmailRequestDto
 import dk.cachet.carp.webservices.email.listener.EmailSendingJob
 import dk.cachet.carp.webservices.email.service.EmailService
 import dk.cachet.carp.webservices.email.service.impl.javamail.EmailSenderImpl
-import dk.cachet.carp.webservices.email.dto.GenericEmailRequestDto
 import dk.cachet.carp.webservices.email.util.EmailTemplateUtil
 import dk.cachet.carp.webservices.email.util.EmailValidatorUtil
 import org.apache.logging.log4j.LogManager
@@ -50,7 +50,6 @@ class EmailServiceImpl(
                 destinationEmail = email,
                 subject = invitation.name,
                 content = mailContent,
-                deploymentId = deploymentId.stringRepresentation,
                 id = UUID.randomUUID().stringRepresentation,
             )
 
@@ -68,7 +67,7 @@ class EmailServiceImpl(
         }
 
         val mailContent = emailTemplate.sendNotificationEmail(message)
-        emailService.invoke(recipient!!, subject!!, mailContent)
+        emailService.invoke(recipient!!, subject!!, mailContent, emptyList())
     }
 
     override fun sendGenericEmail(requestDto: GenericEmailRequestDto) {
@@ -76,9 +75,9 @@ class EmailServiceImpl(
             EmailRequest(
                 destinationEmail = requestDto.recipient,
                 subject = requestDto.subject,
-                content = "Sent by ${requestDto.sender}",
-                deploymentId = null,
+                content = requestDto.message,
                 id = UUID.randomUUID().stringRepresentation,
+                cc = requestDto.cc,
             )
 
         emailSendingJob.send(request)

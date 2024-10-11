@@ -16,6 +16,6 @@ data class EmailRequest(
     val subject: String,
     /** The email request [content]. */
     val content: String,
-    /** The email request [deploymentId]. */
-    val deploymentId: String?,
+    /** The email request [cc]. */
+    val cc: List<String> = listOf(),
 )

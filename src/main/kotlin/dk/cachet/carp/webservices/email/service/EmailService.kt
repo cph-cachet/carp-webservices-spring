@@ -19,7 +19,5 @@ interface EmailService {
         message: String?,
     )
 
-    fun sendGenericEmail(
-        requestDto: GenericEmailRequestDto
-    )
+    fun sendGenericEmail(requestDto: GenericEmailRequestDto)
 }

@@ -1,9 +1,9 @@
 package dk.cachet.carp.webservices.common.actuator.config
 
 import dk.cachet.carp.webservices.common.actuator.service.IDatabaseConnection
-import dk.cachet.carp.webservices.email.service.EmailService
 import dk.cachet.carp.webservices.common.notification.domain.TeamsChannel
 import dk.cachet.carp.webservices.common.notification.service.INotificationService
+import dk.cachet.carp.webservices.email.service.EmailService
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.beans.factory.annotation.Value

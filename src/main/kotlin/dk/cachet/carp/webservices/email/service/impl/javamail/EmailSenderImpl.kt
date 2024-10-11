@@ -1,9 +1,9 @@
 package dk.cachet.carp.webservices.email.service.impl.javamail
 
-import dk.cachet.carp.webservices.email.domain.EmailSendResult
 import dk.cachet.carp.webservices.common.exception.email.EmailException
 import dk.cachet.carp.webservices.common.notification.domain.TeamsChannel
 import dk.cachet.carp.webservices.common.notification.service.INotificationService
+import dk.cachet.carp.webservices.email.domain.EmailSendResult
 import jakarta.mail.MessagingException
 import jakarta.mail.internet.MimeMessage
 import org.apache.logging.log4j.LogManager
@@ -41,6 +41,7 @@ class EmailSenderImpl(
      * @param destinationEmail The [destinationEmail] of the recipient.
      * @param subject The [subject] of the study.
      * @param content The [content] of the email body.
+     * @param cc The [cc] list of email addresses to be copied.
      * @return The status code of the response.
      */
     @Async
@@ -48,8 +49,9 @@ class EmailSenderImpl(
         destinationEmail: String,
         subject: String,
         content: String,
+        cc: List<String>,
     ): CompletableFuture<Int> {
-        val response = send(destinationEmail, subject, content)
+        val response = send(destinationEmail, subject, content, cc)
         return CompletableFuture.completedFuture(response)
     }
 
@@ -59,6 +61,7 @@ class EmailSenderImpl(
      * @param recipientEmailAddress The [recipientEmailAddress] email address of the recipient.
      * @param studyNameAsSubject The [studyNameAsSubject] subject of the email.
      * @param mailContent The [mailContent] of the email.
+     * @param cc The [cc] list of email addresses to be copied.
      * @return The status code of the response.
      */
     @Throws(EmailException::class)
@@ -67,6 +70,7 @@ class EmailSenderImpl(
         recipientEmailAddress: String,
         studyNameAsSubject: String,
         mailContent: String,
+        cc: List<String>,
     ): Int {
         try {
             val mimeMessage: MimeMessage = mailSender.createMimeMessage()
@@ -82,6 +86,7 @@ class EmailSenderImpl(
             mimeMessageHelper.setText(mailContent, true)
             mimeMessageHelper.setSubject(ifNullOrEmpty(studyNameAsSubject))
             mimeMessageHelper.setFrom(environment.getProperty("spring.mail.from")!!)
+            mimeMessageHelper.setCc(cc.toTypedArray())
 
             this.mailSender.send(mimeMessage)
         } catch (ex: MailSendException) {

@@ -2,10 +2,10 @@ package dk.cachet.carp.webservices.email.listener
 
 import dk.cachet.carp.common.infrastructure.serialization.JSON
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
+import dk.cachet.carp.webservices.common.exception.email.EmailException
 import dk.cachet.carp.webservices.email.domain.EmailRequest
 import dk.cachet.carp.webservices.email.domain.EmailSendResult
 import dk.cachet.carp.webservices.email.service.impl.javamail.EmailSenderImpl
-import dk.cachet.carp.webservices.common.exception.email.EmailException
 import kotlinx.serialization.encodeToString
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -56,6 +56,7 @@ class EmailSendingJob(
                 emailRequest.destinationEmail,
                 emailRequest.subject,
                 emailRequest.content,
+                emailRequest.cc,
             )
 
         val response = responseFuture.get()

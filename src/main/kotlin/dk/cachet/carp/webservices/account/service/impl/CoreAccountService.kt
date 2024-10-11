@@ -11,9 +11,9 @@ import dk.cachet.carp.deployments.application.users.StudyInvitation
 import dk.cachet.carp.deployments.domain.StudyDeployment
 import dk.cachet.carp.deployments.domain.users.AccountService
 import dk.cachet.carp.protocols.domain.StudyProtocol
+import dk.cachet.carp.webservices.deployment.repository.CoreDeploymentRepository
 import dk.cachet.carp.webservices.email.domain.EmailType
 import dk.cachet.carp.webservices.email.service.EmailService
-import dk.cachet.carp.webservices.deployment.repository.CoreDeploymentRepository
 import dk.cachet.carp.webservices.security.authentication.domain.Account
 import dk.cachet.carp.webservices.security.authorization.Claim
 import dk.cachet.carp.webservices.security.authorization.Role

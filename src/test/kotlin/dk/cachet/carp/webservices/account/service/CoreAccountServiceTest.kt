@@ -6,8 +6,8 @@ import dk.cachet.carp.deployments.application.users.Participation
 import dk.cachet.carp.deployments.domain.StudyDeployment
 import dk.cachet.carp.protocols.domain.StudyProtocol
 import dk.cachet.carp.webservices.account.service.impl.CoreAccountService
-import dk.cachet.carp.webservices.email.service.EmailService
 import dk.cachet.carp.webservices.deployment.repository.CoreDeploymentRepository
+import dk.cachet.carp.webservices.email.service.EmailService
 import dk.cachet.carp.webservices.security.authentication.domain.Account
 import io.mockk.*
 import kotlinx.coroutines.test.runTest
