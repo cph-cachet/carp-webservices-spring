@@ -113,10 +113,12 @@ class CoreDataStreamService(
                 configRepository.getConfigurationsForIds(studyDeploymentIds.map { it.stringRepresentation })
             }
 
-        // TODO: warn instead of throwing exception
-        require(configs.size == studyDeploymentIds.size) { "One of the configurations passed is not valid." }
-
         configs.forEach { it.closed = true }
+
+        if (configs.size != studyDeploymentIds.size) {
+            LOGGER.warn("While closing configurations: Number of deployments different from number of configurations")
+        }
+
         configRepository.saveAll(configs)
     }
 

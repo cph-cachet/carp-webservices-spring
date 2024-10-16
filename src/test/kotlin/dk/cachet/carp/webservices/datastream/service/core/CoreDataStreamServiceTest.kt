@@ -294,19 +294,5 @@ class CoreDataStreamServiceTest {
                 coVerify { config2.closed = true }
                 coVerify { configRepository.saveAll(listOf(config1, config2)) }
             }
-
-        @Test
-        fun `throw IllegalArgumentException when configuration does not exist`() =
-            runTest {
-                val studyDeploymentId = UUID.randomUUID()
-
-                coEvery {
-                    configRepository.getConfigurationsForIds(listOf(studyDeploymentId.stringRepresentation))
-                } returns emptyList()
-
-                assertThrows<IllegalArgumentException> {
-                    sut.closeDataStreams(setOf(studyDeploymentId))
-                }
-            }
     }
 }
