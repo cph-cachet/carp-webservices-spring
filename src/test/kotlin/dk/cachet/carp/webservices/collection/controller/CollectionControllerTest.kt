@@ -1,13 +1,14 @@
 package dk.cachet.carp.webservices.collection.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import dk.cachet.carp.webservices.account.domain.AccountRequest
+import dk.cachet.carp.common.application.UUID
+import dk.cachet.carp.webservices.collection.domain.Collection
 import dk.cachet.carp.webservices.collection.dto.CollectionCreateRequestDto
 import dk.cachet.carp.webservices.collection.service.CollectionService
-import dk.cachet.carp.webservices.security.authorization.Role
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Nested
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
@@ -31,15 +32,31 @@ class CollectionControllerTest {
 
     @Nested
     inner class Create {
+        private val randomId = UUID.randomUUID().stringRepresentation
+        private val url = "/api/studies/${randomId}/collections/"
+
         @Test
         fun `should return 400 if request body is invalid`() = runTest {
             val collectionCreateRequestDto = CollectionCreateRequestDto("")
 
             mockMvc.perform(
-                post("/api/studies/1/collections")
-                    .contentType(MediaType.APPLICATION_JSON)
+                post(url).contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(collectionCreateRequestDto)),
             ).andExpect(status().isBadRequest)
+        }
+
+        @Test
+        fun `should succeed if request is valid`() = runTest {
+            val collectionCreateRequestDto = CollectionCreateRequestDto("someName", "someDeploymentId")
+            val collectionMock: Collection = mockk(relaxed = true)
+            every { collectionService.create(any(), any(), any()) } returns collectionMock
+
+            mockMvc.perform(
+                post(url).contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(collectionCreateRequestDto)),
+            ).andExpect(status().isCreated)
+
+            verify { collectionService.create(collectionCreateRequestDto, randomId, "someDeploymentId") }
         }
 
     }
