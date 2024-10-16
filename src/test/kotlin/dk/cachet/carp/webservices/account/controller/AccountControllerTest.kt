@@ -6,7 +6,6 @@ import dk.cachet.carp.webservices.account.domain.AccountRequest
 import dk.cachet.carp.webservices.account.service.AccountService
 import io.mockk.coEvery
 import io.mockk.mockk
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Nested
 import org.springframework.http.MediaType
@@ -19,7 +18,6 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import dk.cachet.carp.webservices.security.authorization.Role as AccountRole
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class AccountControllerTest {
     private val accountService: AccountService = mockk()
     private val objectMapper: ObjectMapper = ObjectMapper()
