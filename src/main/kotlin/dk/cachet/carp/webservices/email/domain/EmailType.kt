@@ -1,4 +1,4 @@
-package dk.cachet.carp.webservices.common.email.domain
+package dk.cachet.carp.webservices.email.domain
 
 enum class EmailType {
     INVITE_NEW_ACCOUNT,

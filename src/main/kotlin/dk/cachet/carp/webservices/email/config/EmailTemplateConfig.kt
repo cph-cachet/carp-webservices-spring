@@ -1,4 +1,4 @@
-package dk.cachet.carp.webservices.common.email.config
+package dk.cachet.carp.webservices.email.config
 
 import org.apache.commons.codec.CharEncoding
 import org.springframework.context.annotation.Bean

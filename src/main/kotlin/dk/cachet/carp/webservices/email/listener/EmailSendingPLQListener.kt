@@ -1,9 +1,9 @@
-package dk.cachet.carp.webservices.common.email.listener
+package dk.cachet.carp.webservices.email.listener
 
 import dk.cachet.carp.common.infrastructure.serialization.JSON
-import dk.cachet.carp.webservices.common.email.domain.EmailRequest
 import dk.cachet.carp.webservices.common.notification.domain.TeamsChannel
 import dk.cachet.carp.webservices.common.notification.service.INotificationService
+import dk.cachet.carp.webservices.email.domain.EmailRequest
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.amqp.core.Message

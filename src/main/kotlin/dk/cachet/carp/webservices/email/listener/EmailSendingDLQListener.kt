@@ -1,4 +1,4 @@
-package dk.cachet.carp.webservices.common.email.listener
+package dk.cachet.carp.webservices.email.listener
 
 import dk.cachet.carp.webservices.common.queue.DLQListener
 import org.springframework.amqp.core.Message

@@ -1,4 +1,4 @@
-package dk.cachet.carp.webservices.common.email.domain
+package dk.cachet.carp.webservices.email.domain
 
 import kotlinx.serialization.Serializable
 
@@ -16,6 +16,6 @@ data class EmailRequest(
     val subject: String,
     /** The email request [content]. */
     val content: String,
-    /** The email request [deploymentId]. */
-    val deploymentId: String?,
+    /** The email request [cc]. */
+    val cc: List<String> = listOf(),
 )
