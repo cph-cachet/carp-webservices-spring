@@ -18,7 +18,7 @@ class AuthorizationServiceImpl(
 ) : AuthorizationService {
     companion object {
         // TODO: move to resources
-        private const val PERMISSION_DENIED_MSG = "Permission denied"
+        private const val PERMISSION_DENIED_MSG = "Permission denied or resource not found."
     }
 
     override fun require(claims: Set<Claim>) = require(*claims.toTypedArray()) { PERMISSION_DENIED_MSG }

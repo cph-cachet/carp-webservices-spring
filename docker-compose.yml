@@ -108,7 +108,7 @@ services:
     environment:
       - "KEYCLOAK_ADMIN=${ADMIN_USER}"
       - "KEYCLOAK_ADMIN_PASSWORD=${ADMIN_PASSWORD}"
-    image: quay.io/keycloak/keycloak:22.0.1
+    image: quay.io/keycloak/keycloak:23.0.5
     ports:
       - "${KC_PORT}:8080"
     profiles:
