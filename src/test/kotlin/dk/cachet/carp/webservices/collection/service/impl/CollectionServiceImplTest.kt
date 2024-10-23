@@ -6,24 +6,13 @@ import dk.cachet.carp.webservices.collection.repository.CollectionRepository
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
 
-import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.webservices.collection.domain.Collection
-import dk.cachet.carp.webservices.collection.dto.CollectionCreateRequestDto
 import dk.cachet.carp.webservices.collection.dto.CollectionUpdateRequestDto
-import dk.cachet.carp.webservices.collection.service.CollectionService
 import dk.cachet.carp.webservices.common.exception.responses.ResourceNotFoundException
 import io.mockk.*
-import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Nested
-import org.springframework.http.MediaType
-import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import dk.cachet.carp.common.application.users.AccountIdentity
+import dk.cachet.carp.webservices.collection.dto.CollectionCreateRequestDto
 import dk.cachet.carp.webservices.security.authorization.Claim
 import dk.cachet.carp.webservices.security.authentication.domain.Account
 import java.util.*
@@ -107,28 +96,84 @@ class CollectionServiceImplTest {
 
     @Nested
     inner class Update {
-//        @Test
-//        fun `collection is updated and returned`() {
-//            val mockStudyId = "123"
-//            val mockId = 1
-//            val updateRequest = CollectionUpdateRequestDto(name = "dsa")
-//            val mockCollection = mockk<Collection>(relaxed = true)
-//            every { collectionRepository.findCollectionByStudyIdAndId(mockStudyId, mockId) } returns Optional.of(
-//                mockCollection
-//            )
-//            val sut = CollectionServiceImpl(
-//                collectionRepository, accountService, authenticationService, validationMessages, objectMapper
-//            )
-//
-//            val result = sut.update(mockStudyId, mockId, updateRequest)
-//
-//            assertEquals("dsa", result.name)
-//        }
+        @Test
+        fun `collection is updated and returned`() {
+            val mockStudyId = "123"
+            val mockId = 1
+            val updateRequest = CollectionUpdateRequestDto(name = "dsa")
+            val collection = Collection(name = "old")
+            every { collectionRepository.findCollectionByStudyIdAndId(mockStudyId, mockId) } returns Optional.of(
+                collection
+            )
+            val sut = CollectionServiceImpl(
+                collectionRepository, accountService, authenticationService, validationMessages, objectMapper
+            )
+
+            val result = sut.update(mockStudyId, mockId, updateRequest)
+
+            assertEquals("dsa", result.name)
+        }
+
+        @Test
+        fun `collection is not updated if not found`() {
+            val mockStudyId = "123"
+            val mockId = 1
+            val updateRequest = CollectionUpdateRequestDto(name = "dsa")
+            every { collectionRepository.findCollectionByStudyIdAndId(mockStudyId, mockId) } returns Optional.empty()
+            every {
+                validationMessages.get(
+                    "collection.studyId-and-collectionId.not_found",
+                    mockStudyId,
+                    mockId
+                )
+            } returns "Collection not found"
+            val sut = CollectionServiceImpl(
+                collectionRepository, accountService, authenticationService, validationMessages, objectMapper
+            )
+
+            assertFailsWith(ResourceNotFoundException::class) {
+                sut.update(mockStudyId, mockId, updateRequest)
+            }
+        }
     }
 
     @Nested
     inner class Create {
+        @Test
+        fun `fun collection is created and returned`() {
+            val mockStudyId = "123"
+            val mockDeploymentId = "321"
+            val mockRequest = CollectionCreateRequestDto(name = "dsa")
+            val mockCollection = Collection().apply {
+                name = mockRequest.name
+                studyId = mockStudyId
+                studyDeploymentId = mockDeploymentId
+            }
+            val mockAccountIdentity = mockk<AccountIdentity>()
+            every { collectionRepository.findByStudyDeploymentIdAndName(mockDeploymentId, mockCollection.name) } returns Optional.empty()
+            every { collectionRepository.save(ofType<Collection>()) } returns mockCollection
+            every { authenticationService.getCarpIdentity() } returns mockAccountIdentity
+            coEvery {
+                accountService.grant(
+                    mockAccountIdentity,
+                    setOf(Claim.CollectionOwner(mockCollection.id))
+                )
+            } returns mockk<Account>()
+            val sut = CollectionServiceImpl(
+                collectionRepository, accountService, authenticationService, validationMessages, objectMapper
+            )
 
+            val result = sut.create(mockRequest, mockStudyId, mockDeploymentId)
+
+            assertEquals("dsa", result.name)
+            assertEquals(mockStudyId, result.studyId)
+            assertEquals(mockDeploymentId, result.studyDeploymentId)
+
+            verify { collectionRepository.save(any()) }
+            coVerify { accountService.grant(mockAccountIdentity, setOf(Claim.CollectionOwner(mockCollection.id))) }
+        }
+
+        //TODO add more from here
     }
 
     @Nested
