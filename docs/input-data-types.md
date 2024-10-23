@@ -216,7 +216,7 @@ val informedConsent = InformedConsent(
 
 ## PhoneNumber
 
-Represents a phone number with country code and ICO 3166 code.
+Represents a phone number with country code and ISO 3166 code.
 
 ### Data Type Name
 
@@ -225,7 +225,7 @@ Represents a phone number with country code and ICO 3166 code.
 ### Fields
 
 - `countryCode: String` - The country code of this phone number. The country code is represented by a string, since some country codes contain a hyphen ('-'). For example, "1-246" for Barbados or "44-1481" for Guernsey. See [Country Codes](https://countrycode.org/) or [List of Country Calling Codes](https://en.wikipedia.org/wiki/List_of_country_calling_codes).
-- `icoCode: String?` - The ICO 3166 code of the `countryCode`, if available. See [List of ISO 3166 Country Codes](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes). This field is optional and can be `null`.
+- `isoCode: String?` - The ISO 3166 code of the `countryCode`, if available. See [List of ISO 3166 Country Codes](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes). This field is optional and can be `null`.
 - `number: String` - The phone number. The phone number is represented as a string since it may be pretty-printed with spaces.
 
 ### Example
@@ -235,7 +235,7 @@ Here is an example of how to create an instance of the `PhoneNumber` class:
 ```kotlin
 val phoneNumber = PhoneNumber(
     countryCode = "1-246",
-    icoCode = "BB",
+    isoCode = "BB",
     number = "123 456 7890"
 )
 ```

@@ -21,10 +21,10 @@ data class PhoneNumber(
      */
     val countryCode: String,
     /**
-     *  The ICO 3166 code of the [countryCode], if available.
+     *  The ISO 3166 code of the [countryCode], if available.
      *    See https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes
      */
-    val icoCode: String? = null,
+    val isoCode: String? = null,
     /**
      *  The phone [number].
      *  The phone number is represented as a string since it may be pretty-printed
