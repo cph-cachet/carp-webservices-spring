@@ -104,9 +104,7 @@ class CollectionServiceImpl(
                 validationMessages.get("collection.studyId-and-collectionId.not_found", studyId, id),
             )
         }
-        val collection = collectionOp.get()
-        objectMapper.writeValueAsString(collection)
-        return collection
+        return collectionOp.get()
     }
 
     override fun getCollectionByStudyIdAndByName(
@@ -120,9 +118,7 @@ class CollectionServiceImpl(
                 validationMessages.get("collection.studyId-and-collectionName.not_found", studyId, name),
             )
         }
-        val collection = collectionOp.get()
-        objectMapper.writeValueAsString(collection)
-        return collection
+        return collectionOp.get()
     }
 
     /**
