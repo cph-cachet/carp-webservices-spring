@@ -1,6 +1,7 @@
 package dk.cachet.carp.webservices.collection.service.impl
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import cz.jirutka.rsql.parser.RSQLParser
 import dk.cachet.carp.webservices.account.service.AccountService
 import dk.cachet.carp.webservices.collection.repository.CollectionRepository
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
@@ -13,8 +14,13 @@ import io.mockk.*
 import org.junit.jupiter.api.Nested
 import dk.cachet.carp.common.application.users.AccountIdentity
 import dk.cachet.carp.webservices.collection.dto.CollectionCreateRequestDto
+import dk.cachet.carp.webservices.common.exception.responses.AlreadyExistsException
+import dk.cachet.carp.webservices.common.query.QueryUtil
+import dk.cachet.carp.webservices.common.query.QueryVisitor
 import dk.cachet.carp.webservices.security.authorization.Claim
 import dk.cachet.carp.webservices.security.authentication.domain.Account
+import org.junit.jupiter.api.AfterEach
+import org.springframework.data.jpa.domain.Specification
 import java.util.*
 import kotlin.test.*
 
@@ -140,7 +146,7 @@ class CollectionServiceImplTest {
     @Nested
     inner class Create {
         @Test
-        fun `fun collection is created and returned`() {
+        fun `collection is created and returned`() {
             val mockStudyId = "123"
             val mockDeploymentId = "321"
             val mockRequest = CollectionCreateRequestDto(name = "dsa")
@@ -173,7 +179,36 @@ class CollectionServiceImplTest {
             coVerify { accountService.grant(mockAccountIdentity, setOf(Claim.CollectionOwner(mockCollection.id))) }
         }
 
-        //TODO add more from here
+        @Test
+        fun `collection is not created if already exists`() {
+            val mockStudyId = "123"
+            val mockDeploymentId = "321"
+            val mockRequest = CollectionCreateRequestDto(name = "dsa", deploymentId = mockDeploymentId)
+            val mockCollection = Collection().apply {
+                name = mockRequest.name
+                studyId = mockStudyId
+                studyDeploymentId = mockDeploymentId
+            }
+            every { collectionRepository.findByStudyDeploymentIdAndName(mockDeploymentId, mockCollection.name) } returns Optional.of(
+                mockCollection
+            )
+            every {
+                validationMessages.get(
+                    "collection.already-exists",
+                    mockDeploymentId,
+                    mockCollection.name
+                )
+            } returns "Collection already exists"
+            val sut = CollectionServiceImpl(
+                collectionRepository, accountService, authenticationService, validationMessages, objectMapper
+            )
+
+            assertFailsWith(AlreadyExistsException::class) {
+                sut.create(mockRequest, mockStudyId, mockDeploymentId)
+            }
+
+            verify(exactly = 0) { collectionRepository.save(any()) }
+        }
     }
 
     @Nested
@@ -264,11 +299,55 @@ class CollectionServiceImplTest {
 
     @Nested
     inner class GetAll {
+        @Test
+        fun `all collections are returned when no query specified`() {
+            val mockStudyId = "123"
+            val mockCollections = listOf(mockk<Collection>(relaxed = true))
+            every { collectionRepository.findAllByStudyId(mockStudyId) } returns mockCollections
+            val sut = CollectionServiceImpl(
+                collectionRepository, accountService, authenticationService, validationMessages, objectMapper
+            )
 
+            val result = sut.getAll(mockStudyId)
+
+            assertEquals(mockCollections, result)
+        }
+
+        @Test
+        fun `should return all collections with validated query`() {
+            val mockStudyId = "123"
+            val mockQuery = "status=='active'"
+            val mockCollection = Collection(name = "Test Collection", studyId = mockStudyId)
+            val mockCollections = listOf(mockCollection)
+
+            every { collectionRepository.findAll(ofType<Specification<Collection>>()) } returns mockCollections
+
+            val sut = CollectionServiceImpl(
+                collectionRepository, accountService, authenticationService, validationMessages, objectMapper
+            )
+
+            val result = sut.getAll(mockStudyId, mockQuery)
+
+            assertEquals(mockCollections, result)
+            verify { collectionRepository.findAll(ofType<Specification<Collection>>()) }
+        }
     }
 
     @Nested
     inner class GetAllByStudyIdAndDeploymentId {
+        @Test
+        fun `should return all collections with studyId and deploymentId`() {
+            val mockStudyId = "123"
+            val mockDeploymentId = "321"
+            val mockCollections = listOf(mockk<Collection>(relaxed = true))
+            every { collectionRepository.findAllByStudyIdAndDeploymentId(mockStudyId, mockDeploymentId) } returns mockCollections
+            val sut = CollectionServiceImpl(
+                collectionRepository, accountService, authenticationService, validationMessages, objectMapper
+            )
 
+            val result = sut.getAllByStudyIdAndDeploymentId(mockStudyId, mockDeploymentId)
+
+            assertEquals(mockCollections, result)
+        }
     }
 }
