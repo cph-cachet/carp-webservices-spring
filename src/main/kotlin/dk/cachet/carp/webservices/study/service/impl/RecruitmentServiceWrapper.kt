@@ -115,7 +115,7 @@ class RecruitmentServiceWrapper(
                 }
                 .filter {
                     it.dateOfLastDataUpload != null &&
-                        it.dateOfLastDataUpload.plus(lastUpdate, DateTimeUnit.HOUR) < timeNow
+                            it.dateOfLastDataUpload.plus(lastUpdate, DateTimeUnit.HOUR) < timeNow
                 }
 
         if (offset >= 0 && limit > 0) {
