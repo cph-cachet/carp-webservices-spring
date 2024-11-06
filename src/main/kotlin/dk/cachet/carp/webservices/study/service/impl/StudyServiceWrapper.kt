@@ -39,17 +39,15 @@ class StudyServiceWrapper(
 //                    val owner = accountService.findByUUID(details.ownerId)
                     // TODO: Do we still need this?
                     StudyOverview(
-                        status.studyId,
-                        status.name,
-                        status.createdOn,
-                        status.studyProtocolId,
-                        status.canSetInvitation,
-                        status.canSetStudyProtocol,
-                        status.canDeployToParticipants,
-//                        details.description,
-                        "",
-                        "",
-//                        owner?.fullName,
+                        studyId = status.studyId,
+                        name = status.name,
+                        createdOn = status.createdOn,
+                        studyProtocolId = status.studyProtocolId,
+                        canSetInvitation = status.canSetInvitation,
+                        canSetStudyProtocol = status.canSetStudyProtocol,
+                        canDeployToParticipants = status.canDeployToParticipants,
+                        description = it.description,
+                        createdBy = "",
                     )
                 }
                 ?: emptyList()

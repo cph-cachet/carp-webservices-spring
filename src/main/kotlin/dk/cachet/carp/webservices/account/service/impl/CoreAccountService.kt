@@ -11,9 +11,9 @@ import dk.cachet.carp.deployments.application.users.StudyInvitation
 import dk.cachet.carp.deployments.domain.StudyDeployment
 import dk.cachet.carp.deployments.domain.users.AccountService
 import dk.cachet.carp.protocols.domain.StudyProtocol
-import dk.cachet.carp.webservices.common.email.domain.EmailType
-import dk.cachet.carp.webservices.common.email.service.EmailInvitationService
 import dk.cachet.carp.webservices.deployment.repository.CoreDeploymentRepository
+import dk.cachet.carp.webservices.email.domain.EmailType
+import dk.cachet.carp.webservices.email.service.EmailService
 import dk.cachet.carp.webservices.security.authentication.domain.Account
 import dk.cachet.carp.webservices.security.authorization.Claim
 import dk.cachet.carp.webservices.security.authorization.Role
@@ -30,7 +30,7 @@ import dk.cachet.carp.common.domain.users.Account as CoreAccount
 class CoreAccountService(
     private val accountService: dk.cachet.carp.webservices.account.service.AccountService,
     private val deploymentRepository: CoreDeploymentRepository,
-    private val emailInvitationService: EmailInvitationService,
+    private val emailService: EmailService,
 ) : AccountService {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
@@ -88,7 +88,7 @@ class CoreAccountService(
     ): Account {
         // only send out email invitations if the account's identity is an email address
         if (accountIdentity is EmailAccountIdentity) {
-            emailInvitationService.inviteToStudy(
+            emailService.inviteToStudy(
                 accountIdentity.emailAddress.address,
                 participation.studyDeploymentId,
                 invitation,

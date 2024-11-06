@@ -8,8 +8,8 @@
 <body class="body-container">
 <div th:replace="~{fragments/header :: header}"></div>
 
-<div th:with="study_invitation_id=${T(dk.cachet.carp.webservices.common.email.util.EmailTemplateUtil).INLINE_STUDY_INVITATION_ID},
-              study_description_id=${T(dk.cachet.carp.webservices.common.email.util.EmailTemplateUtil).INLINE_STUDY_DESCRIPTION_ID}">
+<div th:with="study_invitation_id=${T(dk.cachet.carp.webservices.email.util.EmailTemplateUtil).INLINE_STUDY_INVITATION_ID},
+              study_description_id=${T(dk.cachet.carp.webservices.email.util.EmailTemplateUtil).INLINE_STUDY_DESCRIPTION_ID}">
     <div class="content">
         <h3 style="text-align: center;"><br><strong>Welcome to the Copenhagen Research Platform</strong></h3>
         <p style="text-align: center;">(information på dansk nedenfor)</p>

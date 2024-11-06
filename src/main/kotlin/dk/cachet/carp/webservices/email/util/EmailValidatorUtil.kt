@@ -1,4 +1,4 @@
-package dk.cachet.carp.webservices.common.email.util
+package dk.cachet.carp.webservices.email.util
 
 import org.springframework.stereotype.Component
 import java.util.regex.Matcher
