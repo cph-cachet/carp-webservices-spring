@@ -11,6 +11,7 @@ import dk.cachet.carp.webservices.security.authentication.domain.Account
 import dk.cachet.carp.webservices.security.authorization.Role
 import kotlin.test.*
 import dk.cachet.carp.common.application.UUID
+import dk.cachet.carp.common.application.users.AccountIdentity
 import dk.cachet.carp.deployments.application.StudyDeploymentStatus
 import dk.cachet.carp.studies.application.users.Participant
 import dk.cachet.carp.studies.application.users.ParticipantGroupStatus
@@ -322,5 +323,231 @@ class RecruitmentServiceWrapperTest {
                 assertEquals(result.get(1).dateOfLastDataUpload, mockInstant2)
             }
         }
+
+        @Test
+        fun `filters out ParticipantGroupStatusList`() {
+            runTest {
+                val mockStudyId = UUID.randomUUID()
+
+                val pg1 = mockk<ParticipantGroupStatus.Staged>()
+                val pg2 = mockk<ParticipantGroupStatus.Staged>()
+
+                val mockParticipantGroupStatusList = listOf(pg1, pg2)
+
+                coEvery { services.recruitmentService.getParticipantGroupStatusList(mockStudyId) } returns mockParticipantGroupStatusList
+
+                val sut = RecruitmentServiceWrapper(accountService, dataStreamService, services)
+
+                val result = sut.getInactiveDeployments(mockStudyId, 0, 0, 0)
+                assertEquals(0, result.size)
+            }
+        }
+
+        @Test
+        fun `filters out active deployments 1`() {
+            runTest {
+                val mockStudyId = UUID.randomUUID()
+
+                val mockSdId1 = UUID.randomUUID()
+                val mockSds1 = mockk<StudyDeploymentStatus.Invited>().apply {
+                    every { studyDeploymentId } returns mockSdId1
+                    every { createdOn } returns Instant.fromEpochSeconds(0)
+                    every { startedOn } returns Instant.fromEpochSeconds(0)
+                }
+                val pg1 = ParticipantGroupStatus.InDeployment.fromDeploymentStatus(emptySet(), mockSds1)
+                val mockInstant1 = Instant.fromEpochSeconds(Clock.System.now().epochSeconds + 1)
+
+                val mockParticipantGroupStatusList = listOf(pg1)
+
+                coEvery { services.recruitmentService.getParticipantGroupStatusList(mockStudyId) } returns mockParticipantGroupStatusList
+
+                coEvery { dataStreamService.getLatestUpdatedAt(mockSdId1) } returns mockInstant1
+
+                val sut = RecruitmentServiceWrapper(accountService, dataStreamService, services)
+
+                val result = sut.getInactiveDeployments(mockStudyId, 0, 0, 0)
+                assertEquals(0, result.size)
+            }
+        }
+
+        @Test
+        fun `filters out active deployments 2`() {
+            runTest {
+                val mockStudyId = UUID.randomUUID()
+
+                val mockSdId1 = UUID.randomUUID()
+                val mockSds1 = mockk<StudyDeploymentStatus.Invited>().apply {
+                    every { studyDeploymentId } returns mockSdId1
+                    every { createdOn } returns Instant.fromEpochSeconds(0)
+                    every { startedOn } returns Instant.fromEpochSeconds(0)
+                }
+                val pg1 = ParticipantGroupStatus.InDeployment.fromDeploymentStatus(emptySet(), mockSds1)
+                val mockInstant1 = Instant.fromEpochSeconds(Clock.System.now().epochSeconds - 1)
+
+                val mockParticipantGroupStatusList = listOf(pg1)
+
+                coEvery { services.recruitmentService.getParticipantGroupStatusList(mockStudyId) } returns mockParticipantGroupStatusList
+
+                coEvery { dataStreamService.getLatestUpdatedAt(mockSdId1) } returns mockInstant1
+
+                val sut = RecruitmentServiceWrapper(accountService, dataStreamService, services)
+
+                val result = sut.getInactiveDeployments(mockStudyId, 1, 0, 0)
+                assertEquals(0, result.size)
+            }
+        }
+
+        @Test
+        fun `filters out active deployments 3`() {
+            runTest {
+                val mockStudyId = UUID.randomUUID()
+
+                val mockSdId1 = UUID.randomUUID()
+                val mockSds1 = mockk<StudyDeploymentStatus.Invited>().apply {
+                    every { studyDeploymentId } returns mockSdId1
+                    every { createdOn } returns Instant.fromEpochSeconds(0)
+                    every { startedOn } returns Instant.fromEpochSeconds(0)
+                }
+                val pg1 = ParticipantGroupStatus.InDeployment.fromDeploymentStatus(emptySet(), mockSds1)
+                val mockInstant1 = null
+
+                val mockParticipantGroupStatusList = listOf(pg1)
+                coEvery { services.recruitmentService.getParticipantGroupStatusList(mockStudyId) } returns mockParticipantGroupStatusList
+                coEvery { dataStreamService.getLatestUpdatedAt(mockSdId1) } returns mockInstant1
+
+                val sut = RecruitmentServiceWrapper(accountService, dataStreamService, services)
+
+                val result = sut.getInactiveDeployments(mockStudyId, 0, 0, 0)
+                assertEquals(0, result.size)
+            }
+        }
+
+        @Test
+        fun `returns results sorted`() {
+            runTest {
+                val mockStudyId = UUID.randomUUID()
+
+                val mockSdId1 = UUID.randomUUID()
+                val mockSds1 = mockk<StudyDeploymentStatus.Invited>().apply {
+                    every { studyDeploymentId } returns mockSdId1
+                    every { createdOn } returns Instant.fromEpochSeconds(0)
+                    every { startedOn } returns Instant.fromEpochSeconds(0)
+                }
+                val pg1 = ParticipantGroupStatus.InDeployment.fromDeploymentStatus(emptySet(), mockSds1)
+                val mockInstant1 = Instant.fromEpochSeconds(1)
+
+                val mockSdId2 = UUID.randomUUID()
+                val mockSds2 = mockk<StudyDeploymentStatus.Invited>().apply {
+                    every { studyDeploymentId } returns mockSdId2
+                    every { createdOn } returns Instant.fromEpochSeconds(0)
+                    every { startedOn } returns Instant.fromEpochSeconds(0)
+                }
+                val pg2 = ParticipantGroupStatus.InDeployment.fromDeploymentStatus(emptySet(), mockSds2)
+                val mockInstant2 = Instant.fromEpochSeconds(0)
+
+                val mockParticipantGroupStatusList = listOf(pg1, pg2)
+
+                coEvery { services.recruitmentService.getParticipantGroupStatusList(mockStudyId) } returns mockParticipantGroupStatusList
+
+                coEvery { dataStreamService.getLatestUpdatedAt(mockSdId1) } returns mockInstant1
+                coEvery { dataStreamService.getLatestUpdatedAt(mockSdId2) } returns mockInstant2
+
+                val sut = RecruitmentServiceWrapper(accountService, dataStreamService, services)
+
+                val result = sut.getInactiveDeployments(mockStudyId, 0, 0, 0)
+
+                assertEquals(2, result.size)
+                assertEquals(result.get(0).dateOfLastDataUpload, mockInstant2)
+                assertEquals(result.get(1).dateOfLastDataUpload, mockInstant1)
+            }
+        }
+
+
+        @Test
+        fun `applies offset and limit`() {
+            runTest {
+                val mockStudyId = UUID.randomUUID()
+
+                val mockSdId1 = UUID.randomUUID()
+                val mockSds1 = mockk<StudyDeploymentStatus.Invited>().apply {
+                    every { studyDeploymentId } returns mockSdId1
+                    every { createdOn } returns Instant.fromEpochSeconds(0)
+                    every { startedOn } returns Instant.fromEpochSeconds(0)
+                }
+                val pg1 = ParticipantGroupStatus.InDeployment.fromDeploymentStatus(emptySet(), mockSds1)
+                val mockInstant1 = Instant.fromEpochSeconds(0)
+
+                val mockSdId2 = UUID.randomUUID()
+                val mockSds2 = mockk<StudyDeploymentStatus.Invited>().apply {
+                    every { studyDeploymentId } returns mockSdId2
+                    every { createdOn } returns Instant.fromEpochSeconds(0)
+                    every { startedOn } returns Instant.fromEpochSeconds(0)
+                }
+                val pg2 = ParticipantGroupStatus.InDeployment.fromDeploymentStatus(emptySet(), mockSds2)
+                val mockInstant2 = Instant.fromEpochSeconds(0)
+
+                val mockParticipantGroupStatusList = listOf(pg1, pg2)
+
+                coEvery { services.recruitmentService.getParticipantGroupStatusList(mockStudyId) } returns mockParticipantGroupStatusList
+
+                coEvery { dataStreamService.getLatestUpdatedAt(mockSdId1) } returns mockInstant1
+                coEvery { dataStreamService.getLatestUpdatedAt(mockSdId2) } returns mockInstant2
+
+                val sut = RecruitmentServiceWrapper(accountService, dataStreamService, services)
+
+                val result = sut.getInactiveDeployments(mockStudyId, 0, 1, 1)
+
+                assertEquals(1, result.size)
+                assertEquals(result.get(0).dateOfLastDataUpload, mockInstant2)
+            }
+        }
     }
+
+//    @Nested inner class IsParticipant {
+//        @Test
+//        fun `returns true if participant is found`() {
+//            runTest {
+//                val mockStudyId = UUID.randomUUID()
+//                val mockAccountId = UUID.randomUUID()
+//
+//                val mockParticipants = listOf(
+//                    Participant(
+//                        id = mockAccountId,
+//                        accountIdentity = mockk<AccountIdentity>()
+//                    )
+//                )
+//
+//                coEvery { services.recruitmentService.getParticipants(mockStudyId) } returns mockParticipants
+//
+//                val sut = RecruitmentServiceWrapper(accountService, dataStreamService, services)
+//
+//                val result = sut.isParticipant(mockStudyId, mockAccountId)
+//
+//                assertTrue(result)
+//            }
+//        }
+//
+//        @Test
+//        fun `returns false if participant is not found`() {
+//            runTest {
+//                val mockStudyId = UUID.randomUUID()
+//                val mockAccountId = UUID.randomUUID()
+//
+//                val mockParticipants = listOf(
+//                    Participant(
+//                        id = UUID.randomUUID(),
+//                        accountIdentity = mockk<AccountIdentity>()
+//                    )
+//                )
+//
+//                coEvery { services.recruitmentService.getParticipants(mockStudyId) } returns mockParticipants
+//
+//                val sut = RecruitmentServiceWrapper(accountService, dataStreamService, services)
+//
+//                val result = sut.isParticipant(mockStudyId, mockAccountId)
+//
+//                assertFalse(result)
+//            }
+//        }
+//    }
 }
