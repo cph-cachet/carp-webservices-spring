@@ -503,51 +503,85 @@ class RecruitmentServiceWrapperTest {
         }
     }
 
-//    @Nested inner class IsParticipant {
-//        @Test
-//        fun `returns true if participant is found`() {
-//            runTest {
-//                val mockStudyId = UUID.randomUUID()
-//                val mockAccountId = UUID.randomUUID()
-//
-//                val mockParticipants = listOf(
-//                    Participant(
-//                        id = mockAccountId,
-//                        accountIdentity = mockk<AccountIdentity>()
-//                    )
-//                )
-//
-//                coEvery { services.recruitmentService.getParticipants(mockStudyId) } returns mockParticipants
-//
-//                val sut = RecruitmentServiceWrapper(accountService, dataStreamService, services)
-//
-//                val result = sut.isParticipant(mockStudyId, mockAccountId)
-//
-//                assertTrue(result)
-//            }
-//        }
-//
-//        @Test
-//        fun `returns false if participant is not found`() {
-//            runTest {
-//                val mockStudyId = UUID.randomUUID()
-//                val mockAccountId = UUID.randomUUID()
-//
-//                val mockParticipants = listOf(
-//                    Participant(
-//                        id = UUID.randomUUID(),
-//                        accountIdentity = mockk<AccountIdentity>()
-//                    )
-//                )
-//
-//                coEvery { services.recruitmentService.getParticipants(mockStudyId) } returns mockParticipants
-//
-//                val sut = RecruitmentServiceWrapper(accountService, dataStreamService, services)
-//
-//                val result = sut.isParticipant(mockStudyId, mockAccountId)
-//
-//                assertFalse(result)
-//            }
-//        }
-//    }
+    @Nested inner class IsParticipant {
+        @Test
+        fun `returns true if participant is found`() {
+            runTest {
+                val mockStudyId = UUID.randomUUID()
+                val mockAccountId = UUID.randomUUID()
+
+                val ai1 = EmailAccountIdentity("ai1@gmail.com")
+                val ai2 = EmailAccountIdentity("ai2@gmail.com")
+
+                val p1 = Participant(ai1)
+                val p2 = Participant(ai2)
+
+                val a1 = Account(email = ai1.emailAddress.address, id = mockAccountId.stringRepresentation)
+                val a2 = Account(email = ai2.emailAddress.address, id = UUID.randomUUID().stringRepresentation)
+
+                val mockParticipants = listOf(p1, p2)
+
+                coEvery { services.recruitmentService.getParticipants(mockStudyId) } returns mockParticipants
+                coEvery { accountService.findByAccountIdentity(ai1) } returns a1
+                coEvery { accountService.findByAccountIdentity(ai2) } returns a2
+
+
+                val sut = RecruitmentServiceWrapper(accountService, dataStreamService, services)
+
+                val result = sut.isParticipant(mockStudyId, mockAccountId)
+
+                assertTrue(result)
+            }
+        }
+
+        @Test
+        fun `returns false if participant is not found`() {
+            runTest {
+                val mockStudyId = UUID.randomUUID()
+                val mockAccountId = UUID.randomUUID()
+
+                val ai1 = EmailAccountIdentity("ai1@gmail.com")
+                val ai2 = EmailAccountIdentity("ai2@gmail.com")
+
+                val p1 = Participant(ai1)
+                val p2 = Participant(ai2)
+
+                val a1 = Account(email = ai1.emailAddress.address, id = UUID.randomUUID().stringRepresentation)
+                val a2 = Account(email = ai2.emailAddress.address, id = UUID.randomUUID().stringRepresentation)
+
+                val mockParticipants = listOf(p1, p2)
+
+                coEvery { services.recruitmentService.getParticipants(mockStudyId) } returns mockParticipants
+                coEvery { accountService.findByAccountIdentity(ai1) } returns a1
+                coEvery { accountService.findByAccountIdentity(ai2) } returns a2
+
+                val sut = RecruitmentServiceWrapper(accountService, dataStreamService, services)
+
+                val result = sut.isParticipant(mockStudyId, mockAccountId)
+
+                assertFalse(result)
+            }
+        }
+    }
+
+    @Nested inner class GetParticipantGroupsStatus {
+        @Test
+        fun `filters out participantGroupStatusList`() {
+            runTest {
+                val mockStudyId = UUID.randomUUID()
+
+                val pgs1 = mockk<ParticipantGroupStatus.Staged>()
+                val pgsList = listOf(pgs1)
+
+                coEvery { services.recruitmentService.getParticipantGroupStatusList(mockStudyId) } returns pgsList
+
+                val sut = RecruitmentServiceWrapper(accountService, dataStreamService, services)
+
+                val result = sut.getParticipantGroupsStatus(mockStudyId)
+
+                assertEquals(0, result.groups.size)
+                assertEquals(1, result.groupStatuses.size)
+            }
+        }
+    }
 }
