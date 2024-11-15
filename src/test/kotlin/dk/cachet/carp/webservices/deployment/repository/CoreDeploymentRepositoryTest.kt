@@ -1,6 +1,5 @@
 package dk.cachet.carp.webservices.deployment.repository
 
-
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
@@ -24,38 +23,40 @@ class CoreDeploymentRepositoryTest {
     @Nested
     inner class Remove {
         @Test
-        fun `removes deployment`() = runTest {
-            val mockUUID1 = UUID.randomUUID()
-            val mockId = 123;
+        fun `removes deployment`() =
+            runTest {
+                val mockUUID1 = UUID.randomUUID()
+                val mockId = 123
 
-            val studyDeploymentIds = setOf(mockUUID1)
+                val studyDeploymentIds = setOf(mockUUID1)
 
-            val studyDeployment1 = mockk<StudyDeployment>() {
-                every { id } returns mockId;
-                every { snapshot } returns getMockStudyDeployment(mockUUID1)
+                val studyDeployment1 =
+                    mockk<StudyDeployment> {
+                        every { id } returns mockId
+                        every { snapshot } returns getMockStudyDeployment(mockUUID1)
+                    }
+
+                val studyDeployments = listOf(studyDeployment1)
+
+                coEvery { studyDeploymentRepository.findAllByStudyDeploymentIds(any()) } returns studyDeployments
+                coEvery { studyDeploymentRepository.deleteByDeploymentIds(any()) } returns Unit
+                coEvery { auth.revokeClaimsFromAllAccounts(any()) } returns Unit
+
+                val sut = CoreDeploymentRepository(studyDeploymentRepository, objectMapper, validationMessages, auth)
+
+                val result = sut.remove(studyDeploymentIds)
+
+                coEvery { studyDeploymentRepository.findAllByStudyDeploymentIds(any()) }
+                coEvery { studyDeploymentRepository.deleteByDeploymentIds(any()) }
+
+                val claims =
+                    studyDeploymentIds.map {
+                        Claim.InDeployment(it)
+                    }.toSet()
+                coEvery { auth.revokeClaimsFromAllAccounts(claims) }
+                assertEquals(result.size, 1)
+                assertEquals(result.first(), mockUUID1)
             }
-
-            val studyDeployments = listOf(studyDeployment1)
-
-            coEvery { studyDeploymentRepository.findAllByStudyDeploymentIds(any()) } returns studyDeployments
-            coEvery { studyDeploymentRepository.deleteByDeploymentIds(any()) } returns Unit
-            coEvery { auth.revokeClaimsFromAllAccounts(any()) } returns Unit
-
-            val sut = CoreDeploymentRepository(studyDeploymentRepository, objectMapper, validationMessages, auth)
-
-            val result = sut.remove(studyDeploymentIds)
-
-            coEvery { studyDeploymentRepository.findAllByStudyDeploymentIds(any()) }
-            coEvery { studyDeploymentRepository.deleteByDeploymentIds(any()) }
-
-            val claims =
-                studyDeploymentIds.map {
-                    Claim.InDeployment(it)
-                }.toSet()
-            coEvery { auth.revokeClaimsFromAllAccounts(claims) }
-            assertEquals(result.size, 1)
-            assertEquals(result.first(), mockUUID1)
-        }
 
         private fun getMockStudyDeployment(uuid: UUID): JsonNode {
             val om = ObjectMapper()

@@ -24,7 +24,7 @@ class CoreDeploymentRepository(
     private val objectMapper: ObjectMapper,
     private val validationMessages: MessageBase,
     private val auth: AuthorizationService,
-    ) : DeploymentRepository {
+) : DeploymentRepository {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
