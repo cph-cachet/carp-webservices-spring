@@ -11,7 +11,6 @@ import dk.cachet.carp.webservices.security.authentication.domain.Account
 import dk.cachet.carp.webservices.security.authorization.Role
 import kotlin.test.*
 import dk.cachet.carp.common.application.UUID
-import dk.cachet.carp.common.application.users.AccountIdentity
 import dk.cachet.carp.deployments.application.StudyDeploymentStatus
 import dk.cachet.carp.studies.application.users.Participant
 import dk.cachet.carp.studies.application.users.ParticipantGroupStatus
@@ -19,7 +18,6 @@ import dk.cachet.carp.studies.infrastructure.RecruitmentServiceDecorator
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import kotlin.time.Duration
 
 
 class RecruitmentServiceWrapperTest {
@@ -503,7 +501,8 @@ class RecruitmentServiceWrapperTest {
         }
     }
 
-    @Nested inner class IsParticipant {
+    @Nested
+    inner class IsParticipant {
         @Test
         fun `returns true if participant is found`() {
             runTest {
@@ -564,7 +563,78 @@ class RecruitmentServiceWrapperTest {
         }
     }
 
-    @Nested inner class GetParticipantGroupsStatus {
+    @Nested
+    inner class GetParticipantGroupsStatus {
+        @Test
+        fun `getsParticipantGroupsStatuses`() {
+            runTest {
+                val mockStudyId = UUID.randomUUID()
+
+                val eai1 = EmailAccountIdentity("1@gmail.com");
+                val p1 = Participant(eai1)
+                val pgs1 = ParticipantGroupStatus.InDeployment.fromDeploymentStatus(
+                    setOf(p1),
+                    mockk<StudyDeploymentStatus.Invited>().apply {
+                        every { studyDeploymentId } returns UUID.randomUUID()
+                        every { createdOn } returns Instant.fromEpochSeconds(0)
+                        every { startedOn } returns Instant.fromEpochSeconds(0)
+                    }
+                )
+                val a1 = Account(email = eai1.emailAddress.address)
+
+                coEvery { accountService.findByAccountIdentity(eai1) } returns a1
+                val mockParticipantGroupStatusList = listOf(pgs1)
+                coEvery { services.recruitmentService.getParticipantGroupStatusList(mockStudyId) } returns mockParticipantGroupStatusList
+                coEvery { dataStreamService.getLatestUpdatedAt(any()) } returns Instant.fromEpochSeconds(0)
+
+                val sut = RecruitmentServiceWrapper(accountService, dataStreamService, services)
+
+                val result = sut.getParticipantGroupsStatus(mockStudyId)
+
+                assertEquals(1, result.groups.size)
+                assertEquals(result.groups.get(0).participants.size, 1)
+                assertEquals(result.groups.get(0).participants.get(0).participantId, p1.id)
+                assertEquals(result.groups.get(0).participants.get(0).email, eai1.emailAddress.address)
+                assertEquals(result.groups.get(0).participantGroupId, pgs1.id)
+                assertEquals(result.groups.get(0).deploymentStatus, pgs1.studyDeploymentStatus)
+            }
+        }
+
+        @Test
+        fun `getsParticipantGroupsStatuses account not found`() {
+            runTest {
+                val mockStudyId = UUID.randomUUID()
+
+                val eai1 = EmailAccountIdentity("1@gmail.com");
+                val p1 = Participant(eai1)
+                val pgs1 = ParticipantGroupStatus.InDeployment.fromDeploymentStatus(
+                    setOf(p1),
+                    mockk<StudyDeploymentStatus.Invited>().apply {
+                        every { studyDeploymentId } returns UUID.randomUUID()
+                        every { createdOn } returns Instant.fromEpochSeconds(0)
+                        every { startedOn } returns Instant.fromEpochSeconds(0)
+                    }
+                )
+
+                coEvery { accountService.findByAccountIdentity(eai1) } returns null
+                val mockParticipantGroupStatusList = listOf(pgs1)
+                coEvery { services.recruitmentService.getParticipantGroupStatusList(mockStudyId) } returns mockParticipantGroupStatusList
+                coEvery { dataStreamService.getLatestUpdatedAt(any()) } returns Instant.fromEpochSeconds(0)
+
+                val sut = RecruitmentServiceWrapper(accountService, dataStreamService, services)
+
+                val result = sut.getParticipantGroupsStatus(mockStudyId)
+
+                verify(exactly = 0) { dataStreamService.getLatestUpdatedAt(any()) }
+                assertEquals(1, result.groups.size)
+                assertEquals(result.groups.get(0).participants.size, 1)
+                assertEquals(result.groups.get(0).participants.get(0).participantId, p1.id)
+                assertEquals(result.groups.get(0).participants.get(0).email, eai1.emailAddress.address)
+                assertEquals(result.groups.get(0).participantGroupId, pgs1.id)
+                assertEquals(result.groups.get(0).deploymentStatus, pgs1.studyDeploymentStatus)
+            }
+        }
+
         @Test
         fun `filters out participantGroupStatusList`() {
             runTest {
