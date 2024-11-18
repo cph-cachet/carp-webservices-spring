@@ -7,6 +7,8 @@ import dk.cachet.carp.deployments.domain.StudyDeploymentSnapshot
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.input.WS_JSON
 import dk.cachet.carp.webservices.deployment.domain.StudyDeployment
+import dk.cachet.carp.webservices.security.authorization.Claim
+import dk.cachet.carp.webservices.security.authorization.service.AuthorizationService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.apache.logging.log4j.LogManager
@@ -21,6 +23,7 @@ class CoreDeploymentRepository(
     private val studyDeploymentRepository: StudyDeploymentRepository,
     private val objectMapper: ObjectMapper,
     private val validationMessages: MessageBase,
+    private val auth: AuthorizationService,
 ) : DeploymentRepository {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
@@ -67,7 +70,10 @@ class CoreDeploymentRepository(
                     .map { mapWSDeploymentToCore(it).id.stringRepresentation }
             studyDeploymentRepository.deleteByDeploymentIds(idsPresent)
             LOGGER.info("Deployments removed with ids: ${idsPresent.joinToString(", ")}")
-            idsPresent.map { UUID(it) }.toSet()
+            val idsPresentAsUUIDs = idsPresent.map { UUID(it) }.toSet()
+            revokeStudyDeploymentClaims(studyDeploymentIds)
+
+            idsPresentAsUUIDs
         }
 
     override suspend fun update(studyDeployment: CoreStudyDeployment) =
@@ -102,5 +108,14 @@ class CoreDeploymentRepository(
     private fun mapWSDeploymentToCore(deployment: StudyDeployment): CoreStudyDeployment {
         val snapshot = WS_JSON.decodeFromString<StudyDeploymentSnapshot>(deployment.snapshot!!.toString())
         return CoreStudyDeployment.fromSnapshot(snapshot)
+    }
+
+    private suspend fun revokeStudyDeploymentClaims(ids: Set<UUID>) {
+        val claims =
+            ids.map {
+                Claim.InDeployment(it)
+            }.toSet()
+
+        auth.revokeClaimsFromAllAccounts(claims)
     }
 }
