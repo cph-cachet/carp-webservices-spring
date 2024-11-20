@@ -1,31 +1,31 @@
 package dk.cachet.carp.webservices.study.service.impl
 
-import dk.cachet.carp.webservices.account.service.AccountService
-import io.mockk.*
-import org.junit.jupiter.api.Nested
-import dk.cachet.carp.common.application.users.EmailAccountIdentity
-import dk.cachet.carp.webservices.common.services.CoreServiceContainer
-import dk.cachet.carp.webservices.datastream.service.DataStreamService
-import dk.cachet.carp.webservices.security.authorization.Claim
-import dk.cachet.carp.webservices.security.authentication.domain.Account
-import dk.cachet.carp.webservices.security.authorization.Role
-import kotlin.test.*
 import dk.cachet.carp.common.application.UUID
+import dk.cachet.carp.common.application.users.EmailAccountIdentity
 import dk.cachet.carp.deployments.application.StudyDeploymentStatus
 import dk.cachet.carp.studies.application.users.Participant
 import dk.cachet.carp.studies.application.users.ParticipantGroupStatus
 import dk.cachet.carp.studies.infrastructure.RecruitmentServiceDecorator
+import dk.cachet.carp.webservices.account.service.AccountService
+import dk.cachet.carp.webservices.common.services.CoreServiceContainer
+import dk.cachet.carp.webservices.datastream.service.DataStreamService
+import dk.cachet.carp.webservices.security.authentication.domain.Account
+import dk.cachet.carp.webservices.security.authorization.Claim
+import dk.cachet.carp.webservices.security.authorization.Role
+import io.mockk.*
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-
+import org.junit.jupiter.api.Nested
+import kotlin.test.*
 
 class RecruitmentServiceWrapperTest {
     private val accountService: AccountService = mockk()
     private val dataStreamService: DataStreamService = mockk()
-    val services: CoreServiceContainer = mockk<CoreServiceContainer> {
-        every { recruitmentService } returns mockk<RecruitmentServiceDecorator>()
-    }
+    val services: CoreServiceContainer =
+        mockk<CoreServiceContainer> {
+            every { recruitmentService } returns mockk<RecruitmentServiceDecorator>()
+        }
 
     @Nested
     inner class InviteResearcher {
@@ -34,9 +34,10 @@ class RecruitmentServiceWrapperTest {
             runTest {
                 val mockStudyId = UUID.randomUUID()
                 val mockEmail = "test@gmail.com"
-                val mockAccount = Account(
-                    role = Role.RESEARCHER,
-                )
+                val mockAccount =
+                    Account(
+                        role = Role.RESEARCHER,
+                    )
 
                 coEvery { accountService.findByAccountIdentity(ofType<EmailAccountIdentity>()) } returns null
                 coEvery { accountService.addRole(ofType<EmailAccountIdentity>(), Role.RESEARCHER) } returns Unit
@@ -58,9 +59,10 @@ class RecruitmentServiceWrapperTest {
             runTest {
                 val mockStudyId = UUID.randomUUID()
                 val mockEmail = "test@gmail.com"
-                val mockAccount = Account(
-                    role = Role.PARTICIPANT,
-                )
+                val mockAccount =
+                    Account(
+                        role = Role.PARTICIPANT,
+                    )
 
                 coEvery { accountService.findByAccountIdentity(ofType<EmailAccountIdentity>()) } returns mockAccount
                 coEvery { accountService.addRole(ofType<EmailAccountIdentity>(), Role.RESEARCHER) } returns Unit
@@ -82,9 +84,10 @@ class RecruitmentServiceWrapperTest {
             runTest {
                 val mockStudyId = UUID.randomUUID()
                 val mockEmail = "test@gmail.com"
-                val mockAccount = Account(
-                    role = null,
-                )
+                val mockAccount =
+                    Account(
+                        role = null,
+                    )
 
                 coEvery { accountService.findByAccountIdentity(ofType<EmailAccountIdentity>()) } returns mockAccount
                 coEvery { accountService.addRole(ofType<EmailAccountIdentity>(), Role.RESEARCHER) } returns Unit
@@ -107,9 +110,10 @@ class RecruitmentServiceWrapperTest {
             runTest {
                 val mockStudyId = UUID.randomUUID()
                 val mockEmail = "test@gmail.com"
-                val mockAccount = Account(
-                    role = Role.RESEARCHER,
-                )
+                val mockAccount =
+                    Account(
+                        role = Role.RESEARCHER,
+                    )
 
                 coEvery { accountService.findByAccountIdentity(ofType<EmailAccountIdentity>()) } returns mockAccount
                 coEvery { accountService.addRole(ofType<EmailAccountIdentity>(), Role.RESEARCHER) } returns Unit
@@ -134,9 +138,11 @@ class RecruitmentServiceWrapperTest {
             runTest {
                 val mockStudyId = UUID.randomUUID()
                 val mockEmail = "test@gmail.com"
-                val mockAccount = Account(
-                    role = Role.RESEARCHER, carpClaims = emptySet()
-                )
+                val mockAccount =
+                    Account(
+                        role = Role.RESEARCHER,
+                        carpClaims = emptySet(),
+                    )
 
                 coEvery { accountService.revoke(ofType<EmailAccountIdentity>(), any()) } returns mockAccount
 
@@ -153,9 +159,11 @@ class RecruitmentServiceWrapperTest {
             runTest {
                 val mockStudyId = UUID.randomUUID()
                 val mockEmail = "test@gmail.com"
-                val mockAccount = Account(
-                    role = Role.RESEARCHER, carpClaims = setOf(Claim.ManageStudy(mockStudyId))
-                )
+                val mockAccount =
+                    Account(
+                        role = Role.RESEARCHER,
+                        carpClaims = setOf(Claim.ManageStudy(mockStudyId)),
+                    )
 
                 coEvery { accountService.revoke(ofType<EmailAccountIdentity>(), any()) } returns mockAccount
 
@@ -174,8 +182,8 @@ class RecruitmentServiceWrapperTest {
         fun `returns participants when offset and limit are not specified`() {
             runTest {
                 val mockStudyId = UUID.randomUUID()
-                val offset = 0;
-                val limit = 0;
+                val offset = 0
+                val limit = 0
 
                 val ai1 = EmailAccountIdentity("ai1@gmail.com")
                 val ai2 = EmailAccountIdentity("ai2@gmail.com")
@@ -211,8 +219,8 @@ class RecruitmentServiceWrapperTest {
         fun `returns participants when some participant account is not found`() {
             runTest {
                 val mockStudyId = UUID.randomUUID()
-                val offset = 0;
-                val limit = 0;
+                val offset = 0
+                val limit = 0
 
                 val ai1 = EmailAccountIdentity("ai1@gmail.com")
                 val ai2 = EmailAccountIdentity("ai2@gmail.com")
@@ -248,8 +256,8 @@ class RecruitmentServiceWrapperTest {
         fun `returns participants with applied offset and limit`() {
             runTest {
                 val mockStudyId = UUID.randomUUID()
-                val offset = 2;
-                val limit = 1;
+                val offset = 2
+                val limit = 1
 
                 val ai1 = EmailAccountIdentity("ai1@gmail.com")
                 val ai2 = EmailAccountIdentity("ai2@gmail.com")
@@ -288,26 +296,30 @@ class RecruitmentServiceWrapperTest {
                 val mockStudyId = UUID.randomUUID()
 
                 val mockSdId1 = UUID.randomUUID()
-                val mockSds1 = mockk<StudyDeploymentStatus.Invited>().apply {
-                    every { studyDeploymentId } returns mockSdId1
-                    every { createdOn } returns Instant.fromEpochSeconds(0)
-                    every { startedOn } returns Instant.fromEpochSeconds(0)
-                }
+                val mockSds1 =
+                    mockk<StudyDeploymentStatus.Invited>().apply {
+                        every { studyDeploymentId } returns mockSdId1
+                        every { createdOn } returns Instant.fromEpochSeconds(0)
+                        every { startedOn } returns Instant.fromEpochSeconds(0)
+                    }
                 val pg1 = ParticipantGroupStatus.InDeployment.fromDeploymentStatus(emptySet(), mockSds1)
                 val mockInstant1 = Instant.fromEpochSeconds(0)
 
                 val mockSdId2 = UUID.randomUUID()
-                val mockSds2 = mockk<StudyDeploymentStatus.Invited>().apply {
-                    every { studyDeploymentId } returns mockSdId2
-                    every { createdOn } returns Instant.fromEpochSeconds(0)
-                    every { startedOn } returns Instant.fromEpochSeconds(0)
-                }
+                val mockSds2 =
+                    mockk<StudyDeploymentStatus.Invited>().apply {
+                        every { studyDeploymentId } returns mockSdId2
+                        every { createdOn } returns Instant.fromEpochSeconds(0)
+                        every { startedOn } returns Instant.fromEpochSeconds(0)
+                    }
                 val pg2 = ParticipantGroupStatus.InDeployment.fromDeploymentStatus(emptySet(), mockSds2)
                 val mockInstant2 = Instant.fromEpochSeconds(0)
 
                 val mockParticipantGroupStatusList = listOf(pg1, pg2)
 
-                coEvery { services.recruitmentService.getParticipantGroupStatusList(mockStudyId) } returns mockParticipantGroupStatusList
+                coEvery {
+                    services.recruitmentService.getParticipantGroupStatusList(mockStudyId)
+                } returns mockParticipantGroupStatusList
 
                 coEvery { dataStreamService.getLatestUpdatedAt(mockSdId1) } returns mockInstant1
                 coEvery { dataStreamService.getLatestUpdatedAt(mockSdId2) } returns mockInstant2
@@ -332,7 +344,9 @@ class RecruitmentServiceWrapperTest {
 
                 val mockParticipantGroupStatusList = listOf(pg1, pg2)
 
-                coEvery { services.recruitmentService.getParticipantGroupStatusList(mockStudyId) } returns mockParticipantGroupStatusList
+                coEvery {
+                    services.recruitmentService.getParticipantGroupStatusList(mockStudyId)
+                } returns mockParticipantGroupStatusList
 
                 val sut = RecruitmentServiceWrapper(accountService, dataStreamService, services)
 
@@ -347,17 +361,20 @@ class RecruitmentServiceWrapperTest {
                 val mockStudyId = UUID.randomUUID()
 
                 val mockSdId1 = UUID.randomUUID()
-                val mockSds1 = mockk<StudyDeploymentStatus.Invited>().apply {
-                    every { studyDeploymentId } returns mockSdId1
-                    every { createdOn } returns Instant.fromEpochSeconds(0)
-                    every { startedOn } returns Instant.fromEpochSeconds(0)
-                }
+                val mockSds1 =
+                    mockk<StudyDeploymentStatus.Invited>().apply {
+                        every { studyDeploymentId } returns mockSdId1
+                        every { createdOn } returns Instant.fromEpochSeconds(0)
+                        every { startedOn } returns Instant.fromEpochSeconds(0)
+                    }
                 val pg1 = ParticipantGroupStatus.InDeployment.fromDeploymentStatus(emptySet(), mockSds1)
                 val mockInstant1 = Instant.fromEpochSeconds(Clock.System.now().epochSeconds + 1)
 
                 val mockParticipantGroupStatusList = listOf(pg1)
 
-                coEvery { services.recruitmentService.getParticipantGroupStatusList(mockStudyId) } returns mockParticipantGroupStatusList
+                coEvery {
+                    services.recruitmentService.getParticipantGroupStatusList(mockStudyId)
+                } returns mockParticipantGroupStatusList
 
                 coEvery { dataStreamService.getLatestUpdatedAt(mockSdId1) } returns mockInstant1
 
@@ -374,17 +391,20 @@ class RecruitmentServiceWrapperTest {
                 val mockStudyId = UUID.randomUUID()
 
                 val mockSdId1 = UUID.randomUUID()
-                val mockSds1 = mockk<StudyDeploymentStatus.Invited>().apply {
-                    every { studyDeploymentId } returns mockSdId1
-                    every { createdOn } returns Instant.fromEpochSeconds(0)
-                    every { startedOn } returns Instant.fromEpochSeconds(0)
-                }
+                val mockSds1 =
+                    mockk<StudyDeploymentStatus.Invited>().apply {
+                        every { studyDeploymentId } returns mockSdId1
+                        every { createdOn } returns Instant.fromEpochSeconds(0)
+                        every { startedOn } returns Instant.fromEpochSeconds(0)
+                    }
                 val pg1 = ParticipantGroupStatus.InDeployment.fromDeploymentStatus(emptySet(), mockSds1)
                 val mockInstant1 = Instant.fromEpochSeconds(Clock.System.now().epochSeconds - 1)
 
                 val mockParticipantGroupStatusList = listOf(pg1)
 
-                coEvery { services.recruitmentService.getParticipantGroupStatusList(mockStudyId) } returns mockParticipantGroupStatusList
+                coEvery {
+                    services.recruitmentService.getParticipantGroupStatusList(mockStudyId)
+                } returns mockParticipantGroupStatusList
 
                 coEvery { dataStreamService.getLatestUpdatedAt(mockSdId1) } returns mockInstant1
 
@@ -401,16 +421,19 @@ class RecruitmentServiceWrapperTest {
                 val mockStudyId = UUID.randomUUID()
 
                 val mockSdId1 = UUID.randomUUID()
-                val mockSds1 = mockk<StudyDeploymentStatus.Invited>().apply {
-                    every { studyDeploymentId } returns mockSdId1
-                    every { createdOn } returns Instant.fromEpochSeconds(0)
-                    every { startedOn } returns Instant.fromEpochSeconds(0)
-                }
+                val mockSds1 =
+                    mockk<StudyDeploymentStatus.Invited>().apply {
+                        every { studyDeploymentId } returns mockSdId1
+                        every { createdOn } returns Instant.fromEpochSeconds(0)
+                        every { startedOn } returns Instant.fromEpochSeconds(0)
+                    }
                 val pg1 = ParticipantGroupStatus.InDeployment.fromDeploymentStatus(emptySet(), mockSds1)
                 val mockInstant1 = null
 
                 val mockParticipantGroupStatusList = listOf(pg1)
-                coEvery { services.recruitmentService.getParticipantGroupStatusList(mockStudyId) } returns mockParticipantGroupStatusList
+                coEvery {
+                    services.recruitmentService.getParticipantGroupStatusList(mockStudyId)
+                } returns mockParticipantGroupStatusList
                 coEvery { dataStreamService.getLatestUpdatedAt(mockSdId1) } returns mockInstant1
 
                 val sut = RecruitmentServiceWrapper(accountService, dataStreamService, services)
@@ -426,26 +449,30 @@ class RecruitmentServiceWrapperTest {
                 val mockStudyId = UUID.randomUUID()
 
                 val mockSdId1 = UUID.randomUUID()
-                val mockSds1 = mockk<StudyDeploymentStatus.Invited>().apply {
-                    every { studyDeploymentId } returns mockSdId1
-                    every { createdOn } returns Instant.fromEpochSeconds(0)
-                    every { startedOn } returns Instant.fromEpochSeconds(0)
-                }
+                val mockSds1 =
+                    mockk<StudyDeploymentStatus.Invited>().apply {
+                        every { studyDeploymentId } returns mockSdId1
+                        every { createdOn } returns Instant.fromEpochSeconds(0)
+                        every { startedOn } returns Instant.fromEpochSeconds(0)
+                    }
                 val pg1 = ParticipantGroupStatus.InDeployment.fromDeploymentStatus(emptySet(), mockSds1)
                 val mockInstant1 = Instant.fromEpochSeconds(1)
 
                 val mockSdId2 = UUID.randomUUID()
-                val mockSds2 = mockk<StudyDeploymentStatus.Invited>().apply {
-                    every { studyDeploymentId } returns mockSdId2
-                    every { createdOn } returns Instant.fromEpochSeconds(0)
-                    every { startedOn } returns Instant.fromEpochSeconds(0)
-                }
+                val mockSds2 =
+                    mockk<StudyDeploymentStatus.Invited>().apply {
+                        every { studyDeploymentId } returns mockSdId2
+                        every { createdOn } returns Instant.fromEpochSeconds(0)
+                        every { startedOn } returns Instant.fromEpochSeconds(0)
+                    }
                 val pg2 = ParticipantGroupStatus.InDeployment.fromDeploymentStatus(emptySet(), mockSds2)
                 val mockInstant2 = Instant.fromEpochSeconds(0)
 
                 val mockParticipantGroupStatusList = listOf(pg1, pg2)
 
-                coEvery { services.recruitmentService.getParticipantGroupStatusList(mockStudyId) } returns mockParticipantGroupStatusList
+                coEvery {
+                    services.recruitmentService.getParticipantGroupStatusList(mockStudyId)
+                } returns mockParticipantGroupStatusList
 
                 coEvery { dataStreamService.getLatestUpdatedAt(mockSdId1) } returns mockInstant1
                 coEvery { dataStreamService.getLatestUpdatedAt(mockSdId2) } returns mockInstant2
@@ -460,33 +487,36 @@ class RecruitmentServiceWrapperTest {
             }
         }
 
-
         @Test
         fun `applies offset and limit`() {
             runTest {
                 val mockStudyId = UUID.randomUUID()
 
                 val mockSdId1 = UUID.randomUUID()
-                val mockSds1 = mockk<StudyDeploymentStatus.Invited>().apply {
-                    every { studyDeploymentId } returns mockSdId1
-                    every { createdOn } returns Instant.fromEpochSeconds(0)
-                    every { startedOn } returns Instant.fromEpochSeconds(0)
-                }
+                val mockSds1 =
+                    mockk<StudyDeploymentStatus.Invited>().apply {
+                        every { studyDeploymentId } returns mockSdId1
+                        every { createdOn } returns Instant.fromEpochSeconds(0)
+                        every { startedOn } returns Instant.fromEpochSeconds(0)
+                    }
                 val pg1 = ParticipantGroupStatus.InDeployment.fromDeploymentStatus(emptySet(), mockSds1)
                 val mockInstant1 = Instant.fromEpochSeconds(0)
 
                 val mockSdId2 = UUID.randomUUID()
-                val mockSds2 = mockk<StudyDeploymentStatus.Invited>().apply {
-                    every { studyDeploymentId } returns mockSdId2
-                    every { createdOn } returns Instant.fromEpochSeconds(0)
-                    every { startedOn } returns Instant.fromEpochSeconds(0)
-                }
+                val mockSds2 =
+                    mockk<StudyDeploymentStatus.Invited>().apply {
+                        every { studyDeploymentId } returns mockSdId2
+                        every { createdOn } returns Instant.fromEpochSeconds(0)
+                        every { startedOn } returns Instant.fromEpochSeconds(0)
+                    }
                 val pg2 = ParticipantGroupStatus.InDeployment.fromDeploymentStatus(emptySet(), mockSds2)
                 val mockInstant2 = Instant.fromEpochSeconds(0)
 
                 val mockParticipantGroupStatusList = listOf(pg1, pg2)
 
-                coEvery { services.recruitmentService.getParticipantGroupStatusList(mockStudyId) } returns mockParticipantGroupStatusList
+                coEvery {
+                    services.recruitmentService.getParticipantGroupStatusList(mockStudyId)
+                } returns mockParticipantGroupStatusList
 
                 coEvery { dataStreamService.getLatestUpdatedAt(mockSdId1) } returns mockInstant1
                 coEvery { dataStreamService.getLatestUpdatedAt(mockSdId2) } returns mockInstant2
@@ -523,7 +553,6 @@ class RecruitmentServiceWrapperTest {
                 coEvery { services.recruitmentService.getParticipants(mockStudyId) } returns mockParticipants
                 coEvery { accountService.findByAccountIdentity(ai1) } returns a1
                 coEvery { accountService.findByAccountIdentity(ai2) } returns a2
-
 
                 val sut = RecruitmentServiceWrapper(accountService, dataStreamService, services)
 
@@ -570,21 +599,24 @@ class RecruitmentServiceWrapperTest {
             runTest {
                 val mockStudyId = UUID.randomUUID()
 
-                val eai1 = EmailAccountIdentity("1@gmail.com");
+                val eai1 = EmailAccountIdentity("1@gmail.com")
                 val p1 = Participant(eai1)
-                val pgs1 = ParticipantGroupStatus.InDeployment.fromDeploymentStatus(
-                    setOf(p1),
-                    mockk<StudyDeploymentStatus.Invited>().apply {
-                        every { studyDeploymentId } returns UUID.randomUUID()
-                        every { createdOn } returns Instant.fromEpochSeconds(0)
-                        every { startedOn } returns Instant.fromEpochSeconds(0)
-                    }
-                )
+                val pgs1 =
+                    ParticipantGroupStatus.InDeployment.fromDeploymentStatus(
+                        setOf(p1),
+                        mockk<StudyDeploymentStatus.Invited>().apply {
+                            every { studyDeploymentId } returns UUID.randomUUID()
+                            every { createdOn } returns Instant.fromEpochSeconds(0)
+                            every { startedOn } returns Instant.fromEpochSeconds(0)
+                        },
+                    )
                 val a1 = Account(email = eai1.emailAddress.address)
 
                 coEvery { accountService.findByAccountIdentity(eai1) } returns a1
                 val mockParticipantGroupStatusList = listOf(pgs1)
-                coEvery { services.recruitmentService.getParticipantGroupStatusList(mockStudyId) } returns mockParticipantGroupStatusList
+                coEvery {
+                    services.recruitmentService.getParticipantGroupStatusList(mockStudyId)
+                } returns mockParticipantGroupStatusList
                 coEvery { dataStreamService.getLatestUpdatedAt(any()) } returns Instant.fromEpochSeconds(0)
 
                 val sut = RecruitmentServiceWrapper(accountService, dataStreamService, services)
@@ -605,20 +637,23 @@ class RecruitmentServiceWrapperTest {
             runTest {
                 val mockStudyId = UUID.randomUUID()
 
-                val eai1 = EmailAccountIdentity("1@gmail.com");
+                val eai1 = EmailAccountIdentity("1@gmail.com")
                 val p1 = Participant(eai1)
-                val pgs1 = ParticipantGroupStatus.InDeployment.fromDeploymentStatus(
-                    setOf(p1),
-                    mockk<StudyDeploymentStatus.Invited>().apply {
-                        every { studyDeploymentId } returns UUID.randomUUID()
-                        every { createdOn } returns Instant.fromEpochSeconds(0)
-                        every { startedOn } returns Instant.fromEpochSeconds(0)
-                    }
-                )
+                val pgs1 =
+                    ParticipantGroupStatus.InDeployment.fromDeploymentStatus(
+                        setOf(p1),
+                        mockk<StudyDeploymentStatus.Invited>().apply {
+                            every { studyDeploymentId } returns UUID.randomUUID()
+                            every { createdOn } returns Instant.fromEpochSeconds(0)
+                            every { startedOn } returns Instant.fromEpochSeconds(0)
+                        },
+                    )
 
                 coEvery { accountService.findByAccountIdentity(eai1) } returns null
                 val mockParticipantGroupStatusList = listOf(pgs1)
-                coEvery { services.recruitmentService.getParticipantGroupStatusList(mockStudyId) } returns mockParticipantGroupStatusList
+                coEvery {
+                    services.recruitmentService.getParticipantGroupStatusList(mockStudyId)
+                } returns mockParticipantGroupStatusList
                 coEvery { dataStreamService.getLatestUpdatedAt(any()) } returns Instant.fromEpochSeconds(0)
 
                 val sut = RecruitmentServiceWrapper(accountService, dataStreamService, services)

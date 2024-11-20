@@ -1,25 +1,20 @@
 package dk.cachet.carp.webservices.collection.service.impl
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import cz.jirutka.rsql.parser.RSQLParser
+import dk.cachet.carp.common.application.users.AccountIdentity
 import dk.cachet.carp.webservices.account.service.AccountService
+import dk.cachet.carp.webservices.collection.domain.Collection
+import dk.cachet.carp.webservices.collection.dto.CollectionCreateRequestDto
+import dk.cachet.carp.webservices.collection.dto.CollectionUpdateRequestDto
 import dk.cachet.carp.webservices.collection.repository.CollectionRepository
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
-import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
-
-import dk.cachet.carp.webservices.collection.domain.Collection
-import dk.cachet.carp.webservices.collection.dto.CollectionUpdateRequestDto
+import dk.cachet.carp.webservices.common.exception.responses.AlreadyExistsException
 import dk.cachet.carp.webservices.common.exception.responses.ResourceNotFoundException
+import dk.cachet.carp.webservices.security.authentication.domain.Account
+import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
+import dk.cachet.carp.webservices.security.authorization.Claim
 import io.mockk.*
 import org.junit.jupiter.api.Nested
-import dk.cachet.carp.common.application.users.AccountIdentity
-import dk.cachet.carp.webservices.collection.dto.CollectionCreateRequestDto
-import dk.cachet.carp.webservices.common.exception.responses.AlreadyExistsException
-import dk.cachet.carp.webservices.common.query.QueryUtil
-import dk.cachet.carp.webservices.common.query.QueryVisitor
-import dk.cachet.carp.webservices.security.authorization.Claim
-import dk.cachet.carp.webservices.security.authentication.domain.Account
-import org.junit.jupiter.api.AfterEach
 import org.springframework.data.jpa.domain.Specification
 import java.util.*
 import kotlin.test.*
@@ -39,30 +34,34 @@ class CollectionServiceImplTest {
             val mockId = 1
             val mockCollection = mockk<Collection>(relaxed = true)
             val mockAccountIdentity = mockk<AccountIdentity>()
-            every { collectionRepository.findCollectionByStudyIdAndId(mockStudyId, mockId) } returns Optional.of(
-                mockCollection
-            )
+            every { collectionRepository.findCollectionByStudyIdAndId(mockStudyId, mockId) } returns
+                Optional.of(
+                    mockCollection,
+                )
             every { collectionRepository.delete(mockCollection) } just Runs
             every { authenticationService.getCarpIdentity() } returns mockAccountIdentity
             coEvery {
                 accountService.revoke(
                     mockAccountIdentity,
-                    setOf(Claim.CollectionOwner(mockCollection.id))
+                    setOf(Claim.CollectionOwner(mockCollection.id)),
                 )
             } returns mockk<Account>()
-            val sut = CollectionServiceImpl(
-                collectionRepository,
-                accountService,
-                authenticationService,
-                validationMessages,
-                objectMapper
-            )
+            val sut =
+                CollectionServiceImpl(
+                    collectionRepository,
+                    accountService,
+                    authenticationService,
+                    validationMessages,
+                    objectMapper,
+                )
 
             sut.delete(mockStudyId, mockId)
 
             verify(exactly = 1) { collectionRepository.delete(mockCollection) }
             verify(exactly = 1) { authenticationService.getCarpIdentity() }
-            coVerify(exactly = 1) { accountService.revoke(mockAccountIdentity, setOf(Claim.CollectionOwner(mockCollection.id))) }
+            coVerify(
+                exactly = 1,
+            ) { accountService.revoke(mockAccountIdentity, setOf(Claim.CollectionOwner(mockCollection.id))) }
         }
 
         @Test
@@ -75,7 +74,7 @@ class CollectionServiceImplTest {
             coEvery {
                 accountService.revoke(
                     any(),
-                    any()
+                    any(),
                 )
             } returns mockk<Account>()
 
@@ -83,12 +82,17 @@ class CollectionServiceImplTest {
                 validationMessages.get(
                     "collection.studyId-and-collectionId.not_found",
                     mockStudyId,
-                    mockId
+                    mockId,
                 )
             } returns "Collection not found"
-            val sut = CollectionServiceImpl(
-                collectionRepository, accountService, authenticationService, validationMessages, objectMapper
-            )
+            val sut =
+                CollectionServiceImpl(
+                    collectionRepository,
+                    accountService,
+                    authenticationService,
+                    validationMessages,
+                    objectMapper,
+                )
 
             assertFailsWith(ResourceNotFoundException::class) {
                 sut.delete(mockStudyId, mockId)
@@ -108,12 +112,18 @@ class CollectionServiceImplTest {
             val mockId = 1
             val updateRequest = CollectionUpdateRequestDto(name = "dsa")
             val collection = Collection(name = "old")
-            every { collectionRepository.findCollectionByStudyIdAndId(mockStudyId, mockId) } returns Optional.of(
-                collection
-            )
-            val sut = CollectionServiceImpl(
-                collectionRepository, accountService, authenticationService, validationMessages, objectMapper
-            )
+            every { collectionRepository.findCollectionByStudyIdAndId(mockStudyId, mockId) } returns
+                Optional.of(
+                    collection,
+                )
+            val sut =
+                CollectionServiceImpl(
+                    collectionRepository,
+                    accountService,
+                    authenticationService,
+                    validationMessages,
+                    objectMapper,
+                )
 
             val result = sut.update(mockStudyId, mockId, updateRequest)
 
@@ -130,12 +140,17 @@ class CollectionServiceImplTest {
                 validationMessages.get(
                     "collection.studyId-and-collectionId.not_found",
                     mockStudyId,
-                    mockId
+                    mockId,
                 )
             } returns "Collection not found"
-            val sut = CollectionServiceImpl(
-                collectionRepository, accountService, authenticationService, validationMessages, objectMapper
-            )
+            val sut =
+                CollectionServiceImpl(
+                    collectionRepository,
+                    accountService,
+                    authenticationService,
+                    validationMessages,
+                    objectMapper,
+                )
 
             assertFailsWith(ResourceNotFoundException::class) {
                 sut.update(mockStudyId, mockId, updateRequest)
@@ -150,24 +165,32 @@ class CollectionServiceImplTest {
             val mockStudyId = "123"
             val mockDeploymentId = "321"
             val mockRequest = CollectionCreateRequestDto(name = "dsa")
-            val mockCollection = Collection().apply {
-                name = mockRequest.name
-                studyId = mockStudyId
-                studyDeploymentId = mockDeploymentId
-            }
+            val mockCollection =
+                Collection().apply {
+                    name = mockRequest.name
+                    studyId = mockStudyId
+                    studyDeploymentId = mockDeploymentId
+                }
             val mockAccountIdentity = mockk<AccountIdentity>()
-            every { collectionRepository.findByStudyDeploymentIdAndName(mockDeploymentId, mockCollection.name) } returns Optional.empty()
+            every {
+                collectionRepository.findByStudyDeploymentIdAndName(mockDeploymentId, mockCollection.name)
+            } returns Optional.empty()
             every { collectionRepository.save(ofType<Collection>()) } returns mockCollection
             every { authenticationService.getCarpIdentity() } returns mockAccountIdentity
             coEvery {
                 accountService.grant(
                     mockAccountIdentity,
-                    setOf(Claim.CollectionOwner(mockCollection.id))
+                    setOf(Claim.CollectionOwner(mockCollection.id)),
                 )
             } returns mockk<Account>()
-            val sut = CollectionServiceImpl(
-                collectionRepository, accountService, authenticationService, validationMessages, objectMapper
-            )
+            val sut =
+                CollectionServiceImpl(
+                    collectionRepository,
+                    accountService,
+                    authenticationService,
+                    validationMessages,
+                    objectMapper,
+                )
 
             val result = sut.create(mockRequest, mockStudyId, mockDeploymentId)
 
@@ -184,24 +207,31 @@ class CollectionServiceImplTest {
             val mockStudyId = "123"
             val mockDeploymentId = "321"
             val mockRequest = CollectionCreateRequestDto(name = "dsa", deploymentId = mockDeploymentId)
-            val mockCollection = Collection().apply {
-                name = mockRequest.name
-                studyId = mockStudyId
-                studyDeploymentId = mockDeploymentId
-            }
-            every { collectionRepository.findByStudyDeploymentIdAndName(mockDeploymentId, mockCollection.name) } returns Optional.of(
-                mockCollection
-            )
+            val mockCollection =
+                Collection().apply {
+                    name = mockRequest.name
+                    studyId = mockStudyId
+                    studyDeploymentId = mockDeploymentId
+                }
+            every { collectionRepository.findByStudyDeploymentIdAndName(mockDeploymentId, mockCollection.name) } returns
+                Optional.of(
+                    mockCollection,
+                )
             every {
                 validationMessages.get(
                     "collection.already-exists",
                     mockDeploymentId,
-                    mockCollection.name
+                    mockCollection.name,
                 )
             } returns "Collection already exists"
-            val sut = CollectionServiceImpl(
-                collectionRepository, accountService, authenticationService, validationMessages, objectMapper
-            )
+            val sut =
+                CollectionServiceImpl(
+                    collectionRepository,
+                    accountService,
+                    authenticationService,
+                    validationMessages,
+                    objectMapper,
+                )
 
             assertFailsWith(AlreadyExistsException::class) {
                 sut.create(mockRequest, mockStudyId, mockDeploymentId)
@@ -218,12 +248,18 @@ class CollectionServiceImplTest {
             val mockStudyId = "123"
             val mockId = 1
             val mockCollection = mockk<Collection>(relaxed = true)
-            every { collectionRepository.findCollectionByStudyIdAndId(mockStudyId, mockId) } returns Optional.of(
-                mockCollection
-            )
-            val sut = CollectionServiceImpl(
-                collectionRepository, accountService, authenticationService, validationMessages, objectMapper
-            )
+            every { collectionRepository.findCollectionByStudyIdAndId(mockStudyId, mockId) } returns
+                Optional.of(
+                    mockCollection,
+                )
+            val sut =
+                CollectionServiceImpl(
+                    collectionRepository,
+                    accountService,
+                    authenticationService,
+                    validationMessages,
+                    objectMapper,
+                )
 
             val result = sut.getCollectionByStudyIdAndId(mockStudyId, mockId)
             assertEquals(mockCollection, result)
@@ -238,12 +274,17 @@ class CollectionServiceImplTest {
                 validationMessages.get(
                     "collection.studyId-and-collectionId.not_found",
                     mockStudyId,
-                    mockId
+                    mockId,
                 )
             } returns "Collection not found"
-            val sut = CollectionServiceImpl(
-                collectionRepository, accountService, authenticationService, validationMessages, objectMapper
-            )
+            val sut =
+                CollectionServiceImpl(
+                    collectionRepository,
+                    accountService,
+                    authenticationService,
+                    validationMessages,
+                    objectMapper,
+                )
 
             assertFailsWith(ResourceNotFoundException::class) {
                 sut.getCollectionByStudyIdAndId(mockStudyId, mockId)
@@ -258,12 +299,18 @@ class CollectionServiceImplTest {
             val mockStudyId = "123"
             val mockName = "name"
             val mockCollection = mockk<Collection>(relaxed = true)
-            every { collectionRepository.findCollectionByStudyIdAndName(mockStudyId, mockName) } returns Optional.of(
-                mockCollection
-            )
-            val sut = CollectionServiceImpl(
-                collectionRepository, accountService, authenticationService, validationMessages, objectMapper
-            )
+            every { collectionRepository.findCollectionByStudyIdAndName(mockStudyId, mockName) } returns
+                Optional.of(
+                    mockCollection,
+                )
+            val sut =
+                CollectionServiceImpl(
+                    collectionRepository,
+                    accountService,
+                    authenticationService,
+                    validationMessages,
+                    objectMapper,
+                )
 
             val result = sut.getCollectionByStudyIdAndByName(mockStudyId, mockName)
 
@@ -277,19 +324,24 @@ class CollectionServiceImplTest {
             every {
                 collectionRepository.findCollectionByStudyIdAndName(
                     mockStudyId,
-                    mockName
+                    mockName,
                 )
             } returns Optional.empty()
             every {
                 validationMessages.get(
                     "collection.studyId-and-collectionName.not_found",
                     mockStudyId,
-                    mockName
+                    mockName,
                 )
             } returns "Collection not found"
-            val sut = CollectionServiceImpl(
-                collectionRepository, accountService, authenticationService, validationMessages, objectMapper
-            )
+            val sut =
+                CollectionServiceImpl(
+                    collectionRepository,
+                    accountService,
+                    authenticationService,
+                    validationMessages,
+                    objectMapper,
+                )
 
             assertFailsWith(ResourceNotFoundException::class) {
                 sut.getCollectionByStudyIdAndByName(mockStudyId, mockName)
@@ -304,9 +356,14 @@ class CollectionServiceImplTest {
             val mockStudyId = "123"
             val mockCollections = listOf(mockk<Collection>(relaxed = true))
             every { collectionRepository.findAllByStudyId(mockStudyId) } returns mockCollections
-            val sut = CollectionServiceImpl(
-                collectionRepository, accountService, authenticationService, validationMessages, objectMapper
-            )
+            val sut =
+                CollectionServiceImpl(
+                    collectionRepository,
+                    accountService,
+                    authenticationService,
+                    validationMessages,
+                    objectMapper,
+                )
 
             val result = sut.getAll(mockStudyId)
 
@@ -322,9 +379,14 @@ class CollectionServiceImplTest {
 
             every { collectionRepository.findAll(ofType<Specification<Collection>>()) } returns mockCollections
 
-            val sut = CollectionServiceImpl(
-                collectionRepository, accountService, authenticationService, validationMessages, objectMapper
-            )
+            val sut =
+                CollectionServiceImpl(
+                    collectionRepository,
+                    accountService,
+                    authenticationService,
+                    validationMessages,
+                    objectMapper,
+                )
 
             val result = sut.getAll(mockStudyId, mockQuery)
 
@@ -341,9 +403,14 @@ class CollectionServiceImplTest {
             val mockDeploymentId = "321"
             val mockCollections = listOf(mockk<Collection>(relaxed = true))
             every { collectionRepository.findAllByStudyIdAndDeploymentId(mockStudyId, mockDeploymentId) } returns mockCollections
-            val sut = CollectionServiceImpl(
-                collectionRepository, accountService, authenticationService, validationMessages, objectMapper
-            )
+            val sut =
+                CollectionServiceImpl(
+                    collectionRepository,
+                    accountService,
+                    authenticationService,
+                    validationMessages,
+                    objectMapper,
+                )
 
             val result = sut.getAllByStudyIdAndDeploymentId(mockStudyId, mockDeploymentId)
 
