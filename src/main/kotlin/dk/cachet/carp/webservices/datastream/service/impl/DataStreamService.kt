@@ -60,7 +60,7 @@ class DataStreamService(
             dataStreams.sortedByDescending { it.updatedAt }.firstOrNull()
                 ?: return null
 
-        return sortedDataPoint.updatedAt?.toKotlinInstant()
+        return sortedDataPoint.updatedAt
     }
 
     /**

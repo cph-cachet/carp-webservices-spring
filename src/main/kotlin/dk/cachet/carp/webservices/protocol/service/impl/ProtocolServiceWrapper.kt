@@ -61,8 +61,8 @@ class ProtocolServiceWrapper(
 
         return ProtocolOverview(
             owner?.fullName,
-            versions.first().createdAt?.toKotlinInstant(),
-            versions.last().createdAt?.toKotlinInstant(),
+            versions.first().createdAt,
+            versions.last().createdAt,
             versions.last().versionTag,
             snapshot,
         )
