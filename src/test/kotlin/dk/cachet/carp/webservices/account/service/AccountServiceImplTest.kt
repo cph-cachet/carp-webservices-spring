@@ -159,16 +159,14 @@ class AccountServiceImplTest {
         @Test
         fun `should return null if exception occurred`() =
             runTest {
-                runTest {
-                    val uuid = UUID.randomUUID()
-                    coEvery { issuerFacade.getAccount(any<UUID>()) } throws Exception()
-                    val sut = AccountServiceImpl(issuerFacade)
+                val uuid = UUID.randomUUID()
+                coEvery { issuerFacade.getAccount(any<UUID>()) } throws Exception()
+                val sut = AccountServiceImpl(issuerFacade)
 
-                    val result = sut.findByUUID(uuid)
+                val result = sut.findByUUID(uuid)
 
-                    coVerify(exactly = 1) { issuerFacade.getAccount(uuid) }
-                    expect(null) { result }
-                }
+                coVerify(exactly = 1) { issuerFacade.getAccount(uuid) }
+                expect(null) { result }
             }
     }
 
