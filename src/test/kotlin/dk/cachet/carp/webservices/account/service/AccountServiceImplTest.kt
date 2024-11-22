@@ -12,6 +12,7 @@ import dk.cachet.carp.webservices.security.authorization.Role
 import io.mockk.*
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Nested
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 import kotlin.test.expect
@@ -129,7 +130,7 @@ class AccountServiceImplTest {
                 coEvery { issuerFacade.getAccount(any<AccountIdentity>()) } returns null
                 coEvery { issuerFacade.createAccount(any()) } returns account
                 coEvery { issuerFacade.addRole(any(), any()) } just runs
-                coEvery { issuerFacade.executeActions(any(), any(), any()) } throws Exception()
+                coEvery { issuerFacade.executeActions(any(), any(), any()) } throws mockk<WebClientResponseException>()
 
                 val sut = AccountServiceImpl(issuerFacade)
 
