@@ -41,7 +41,11 @@ class AccountServiceImpl(
         account.role = role
 
         if (isNewAccount && !account.email.isNullOrBlank()) {
-            issuerFacade.executeActions(account, redirectUri, RequiredActions.forNewAccounts)
+            try {
+                issuerFacade.executeActions(account, redirectUri, RequiredActions.forNewAccounts)
+            } catch (e: Exception) {
+                LOGGER.error("Failed to send an email to the user with a link they can click to execute particular actions: $identity", e)
+            }
         }
 
         return account

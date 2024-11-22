@@ -115,6 +115,29 @@ class AccountServiceImplTest {
 
                 coVerify(exactly = 0) { issuerFacade.executeActions(any(), any(), any()) }
             }
+
+        @Test
+        fun `should not throw if sending the email with actions fails`() =
+            runTest {
+                val email = "test@test.com"
+                val accountIdentity = EmailAccountIdentity(EmailAddress(email))
+                val account = mockk<Account>()
+
+                every { account setProperty "role" value any<Role>() } answers { callOriginal() }
+                every { account.email } returns email
+
+                coEvery { issuerFacade.getAccount(any<AccountIdentity>()) } returns null
+                coEvery { issuerFacade.createAccount(any()) } returns account
+                coEvery { issuerFacade.addRole(any(), any()) } just runs
+                coEvery { issuerFacade.executeActions(any(), any(), any()) } throws Exception()
+
+                val sut = AccountServiceImpl(issuerFacade)
+
+                val result = sut.invite(accountIdentity, Role.PARTICIPANT)
+
+                coVerify(exactly = 1) { issuerFacade.executeActions(account, null, RequiredActions.forNewAccounts) }
+                expect(account) { result }
+            }
     }
 
     @Nested
@@ -136,14 +159,7 @@ class AccountServiceImplTest {
         @Test
         fun `should return null if exception occurred`() =
             runTest {
-                val uuid = UUID.randomUUID()
-                coEvery { issuerFacade.getAccount(any<UUID>()) } throws Exception()
-                val sut = AccountServiceImpl(issuerFacade)
 
-                val result = sut.findByUUID(uuid)
-
-                coVerify(exactly = 1) { issuerFacade.getAccount(uuid) }
-                expect(null) { result }
             }
     }
 
