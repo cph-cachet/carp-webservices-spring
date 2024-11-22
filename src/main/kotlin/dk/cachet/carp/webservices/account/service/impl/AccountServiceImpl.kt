@@ -13,6 +13,7 @@ import dk.cachet.carp.webservices.security.authorization.Role
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.stereotype.Service
+import org.springframework.web.reactive.function.client.WebClientResponseException
 
 @Service
 class AccountServiceImpl(
@@ -43,9 +44,9 @@ class AccountServiceImpl(
         if (isNewAccount && !account.email.isNullOrBlank()) {
             try {
                 issuerFacade.executeActions(account, redirectUri, RequiredActions.forNewAccounts)
-            } catch (e: Exception) {
+            } catch (e: WebClientResponseException) {
                 LOGGER.error(
-                    "Failed to send an email to the user with a link they can click to execute particular actions: $identity",
+                    "Failed to send an email with actions: $identity",
                     e,
                 )
             }
