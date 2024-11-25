@@ -46,21 +46,20 @@ class DataStreamService(
      */
 
     override fun getLatestUpdatedAt(deploymentId: UUID): Instant? {
-        val dataStreamIds =
-            dataStreamIdRepository.getAllByDeploymentId(
-                deploymentId.toString(),
-            )
+        val dataStreamIds = findDataStreamIdsByDeploymentId(deploymentId)
+        return findLatestUpdatedAtByDataStreamIds(dataStreamIds)
+    }
 
-        val dataStreams =
-            dataStreamSequenceRepository.findAllByDataStreamIds(
-                dataStreamIds.map { it.id },
-            )
+    fun findDataStreamIdsByDeploymentId(deploymentId: UUID): List<Int> {
+        return dataStreamIdRepository.getAllByDeploymentId(deploymentId.toString()).map { it.id }
+    }
 
-        val sortedDataPoint =
-            dataStreams.sortedByDescending { it.updatedAt }.firstOrNull()
-                ?: return null
-
-        return sortedDataPoint.updatedAt
+    fun findLatestUpdatedAtByDataStreamIds(dataStreamIds: List<Int>): Instant? {
+        return if (dataStreamIds.isEmpty()) {
+            null
+        } else {
+            dataStreamSequenceRepository.findMaxUpdatedAtByDataStreamIds(dataStreamIds)?.toKotlinInstant()
+        }
     }
 
     /**

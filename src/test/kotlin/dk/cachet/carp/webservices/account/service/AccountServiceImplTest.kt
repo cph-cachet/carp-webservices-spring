@@ -12,6 +12,7 @@ import dk.cachet.carp.webservices.security.authorization.Role
 import io.mockk.*
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Nested
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 import kotlin.test.expect
@@ -114,6 +115,29 @@ class AccountServiceImplTest {
                 sut.invite(accountIdentity, Role.PARTICIPANT)
 
                 coVerify(exactly = 0) { issuerFacade.executeActions(any(), any(), any()) }
+            }
+
+        @Test
+        fun `should not throw if sending the email with actions fails`() =
+            runTest {
+                val email = "test@test.com"
+                val accountIdentity = EmailAccountIdentity(EmailAddress(email))
+                val account = mockk<Account>()
+
+                every { account setProperty "role" value any<Role>() } answers { callOriginal() }
+                every { account.email } returns email
+
+                coEvery { issuerFacade.getAccount(any<AccountIdentity>()) } returns null
+                coEvery { issuerFacade.createAccount(any()) } returns account
+                coEvery { issuerFacade.addRole(any(), any()) } just runs
+                coEvery { issuerFacade.executeActions(any(), any(), any()) } throws mockk<WebClientResponseException>()
+
+                val sut = AccountServiceImpl(issuerFacade)
+
+                val result = sut.invite(accountIdentity, Role.PARTICIPANT)
+
+                coVerify(exactly = 1) { issuerFacade.executeActions(account, null, RequiredActions.forNewAccounts) }
+                expect(account) { result }
             }
     }
 
