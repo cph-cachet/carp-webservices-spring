@@ -1,13 +1,12 @@
-package dk.cachet.carp.webservices.common.converter;
+package dk.cachet.carp.webservices.common.converter
 
 import jakarta.persistence.AttributeConverter
 import jakarta.persistence.Converter
 import kotlinx.datetime.toJavaInstant
 import kotlinx.datetime.toKotlinInstant
 import java.time.Instant
-import kotlinx.datetime.Instant as KotlinInstant
 import java.time.Instant as JavaInstant
-
+import kotlinx.datetime.Instant as KotlinInstant
 
 @Converter()
 class InstantConverter : AttributeConverter<KotlinInstant, JavaInstant> {
