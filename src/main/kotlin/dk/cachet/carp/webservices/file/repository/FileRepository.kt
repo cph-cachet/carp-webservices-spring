@@ -19,14 +19,6 @@ interface FileRepository : JpaRepository<File, Int>, JpaSpecificationExecutor<Fi
     ): List<File>
 
     fun findByStudyId(studyId: String): List<File>
-
-    @Modifying
-    @Transactional
-    @Query(
-        nativeQuery = true,
-        value = "DELETE FROM files WHERE study_id = ?1",
-    )
-    fun deleteByStudyId(studyId: String)
 }
 
 // TODO: This is not a repository, dont't be mislead by that, it needs to be moved to its own service somewhere else.
