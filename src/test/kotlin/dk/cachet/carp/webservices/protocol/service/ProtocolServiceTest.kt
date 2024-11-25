@@ -62,12 +62,12 @@ class ProtocolServiceTest {
                         mockk<Protocol> {
                             every { versionTag } returns "version 1"
                             every { snapshot } returns mockk<JsonNode>()
-                            every { createdAt } returns yesterday.toJavaInstant()
+                            every { createdAt } returns yesterday
                         },
                         mockk<Protocol> {
                             every { versionTag } returns "version 2"
                             every { snapshot } returns mockk<JsonNode>()
-                            every { createdAt } returns now.toJavaInstant()
+                            every { createdAt } returns now
                         },
                     )
 
