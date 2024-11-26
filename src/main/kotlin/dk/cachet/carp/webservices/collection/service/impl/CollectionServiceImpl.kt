@@ -1,6 +1,5 @@
 package dk.cachet.carp.webservices.collection.service.impl
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import cz.jirutka.rsql.parser.RSQLParser
 import dk.cachet.carp.webservices.account.service.AccountService
 import dk.cachet.carp.webservices.collection.domain.Collection
@@ -30,7 +29,6 @@ class CollectionServiceImpl(
     private val accountService: AccountService,
     private val authenticationService: AuthenticationService,
     private val validationMessages: MessageBase,
-    private val objectMapper: ObjectMapper,
 ) : CollectionService {
     private val backgroundWorker = CoroutineScope(Dispatchers.IO)
 
