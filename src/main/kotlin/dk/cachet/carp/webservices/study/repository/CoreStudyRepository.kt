@@ -13,7 +13,6 @@ import dk.cachet.carp.webservices.consent.repository.ConsentDocumentRepository
 import dk.cachet.carp.webservices.dataPoint.repository.DataPointRepository
 import dk.cachet.carp.webservices.document.repository.DocumentRepository
 import dk.cachet.carp.webservices.export.repository.ExportRepository
-import dk.cachet.carp.webservices.file.repository.FileRepository
 import dk.cachet.carp.webservices.file.service.FileService
 import dk.cachet.carp.webservices.study.domain.Study
 import kotlinx.coroutines.Dispatchers

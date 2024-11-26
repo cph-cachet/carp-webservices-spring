@@ -136,16 +136,17 @@ class FileServiceImpl(
     }
 
     override suspend fun deleteAllByStudyId(studyId: String) {
-        val files = withContext(Dispatchers.IO) {
-            fileRepository.findByStudyId(studyId)
-        }
+        val files =
+            withContext(Dispatchers.IO) {
+                fileRepository.findByStudyId(studyId)
+            }
         val claimsToRemove = HashSet<Claim>()
         files.forEach {
             claimsToRemove.add(Claim.FileOwner(it.id))
         }
-        authorizationService.revokeClaimsFromAllAccounts(claimsToRemove);
+        authorizationService.revokeClaimsFromAllAccounts(claimsToRemove)
 
-        files.forEach { delete(it.id) }
+        files.forEach { fileRepository.deleteById(it.id) }
         files.forEach { fileStorage.deleteFile(it.storageName) }
 
         LOGGER.info("All files deleted for study, studyId = $studyId")
