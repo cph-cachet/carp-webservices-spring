@@ -67,12 +67,12 @@ class FileController(private val fileStorage: FileStorage, private val fileServi
         @PathVariable(PathVariableName.FILE_ID) id: Int,
     ): ResponseEntity<Resource> {
         LOGGER.info("Start GET: /api/studies/$studyId/files/$id/download")
-        val file = fileService.getOne(id)
-        val fileToDownload = fileStorage.getFile(file.storageName)
+        val (fileToDownload, originalFilename) = fileService.download(id, studyId)
+
         return ResponseEntity.ok().header(
             HttpHeaders.CONTENT_DISPOSITION,
-            "attachment; filename=\"" + file.originalName + "\"",
-        ).body<Resource>(fileToDownload)
+            "attachment; filename=\"$originalFilename\"",
+        ).body(fileToDownload)
     }
 
     @PostMapping(
@@ -104,7 +104,7 @@ class FileController(private val fileStorage: FileStorage, private val fileServi
         @PathVariable(PathVariableName.FILE_ID) fileId: Int,
     ) {
         LOGGER.info("Start DELETE: /api/studies/$studyId/files/$fileId")
-        fileService.delete(fileId)
+        fileService.delete(fileId, studyId)
     }
 
     @PostMapping(UPLOAD_IMAGE)

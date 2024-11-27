@@ -32,6 +32,8 @@ import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.util.UriComponentsBuilder
 import java.nio.file.Files
 import java.nio.file.Path
+import org.springframework.core.io.Resource
+
 
 @Service
 @Transactional
@@ -97,7 +99,7 @@ class FileServiceImpl(
         file: MultipartFile,
         metadata: String?,
     ): File {
-        val filename = fileStorage.store(file)
+        val filename = fileStorage.storeAtPath(file, Path.of("studies", studyId))
 
         val saved =
             fileRepository.save(
@@ -117,9 +119,18 @@ class FileServiceImpl(
         return saved
     }
 
-    override fun delete(id: Int) {
+    //TODO not backwards compatible
+    override fun download(id: Int, studyId: UUID): Pair<Resource, String> {
         val file = getOne(id)
-        fileStorage.deleteFile(file.storageName)
+        val fileToDownload = fileStorage.getFileAtPath(file.storageName, Path.of("studies", studyId.stringRepresentation))
+
+        return Pair(fileToDownload, file.originalName)
+    }
+
+    //TODO not backwards compatible
+    override fun delete(id: Int, studyId: UUID) {
+        val file = getOne(id)
+        fileStorage.deleteFileAtPath(file.storageName, Path.of("studies", studyId.stringRepresentation))
         fileRepository.delete(file)
 
         LOGGER.info("File deleted, id = $id")
