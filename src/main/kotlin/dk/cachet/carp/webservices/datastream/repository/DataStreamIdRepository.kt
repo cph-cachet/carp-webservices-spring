@@ -40,11 +40,11 @@ interface DataStreamIdRepository : JpaRepository<DataStreamId, Int> {
 
     @Query(
         nativeQuery = true,
-        value = "SELECT id FROM data_stream_ids WHERE study_deployment_id IN (:deploymentIds)",
+        value = "SELECT * FROM data_stream_ids WHERE study_deployment_id IN (:deploymentIds)",
     )
     fun getAllByDeploymentIds(
         @Param("deploymentIds") ids: Collection<String>,
-    ): List<Int>
+    ): List<DataStreamId>
 
     @Query(
         nativeQuery = true,

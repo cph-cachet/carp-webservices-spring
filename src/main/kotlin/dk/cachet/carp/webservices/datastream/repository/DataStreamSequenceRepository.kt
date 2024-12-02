@@ -22,8 +22,18 @@ interface DataStreamSequenceRepository : JpaRepository<DataStreamSequence, Int> 
     )
     fun findAllBySequenceIdRange(
         @Param("dataStreamId") dataStreamId: Int,
-        @Param("from") from: Int,
-        @Param("to") to: Int,
+        @Param("from") from: Long,
+        @Param("to") to: Long,
+    ): List<DataStreamSequence>
+
+    @Query(
+        nativeQuery = true,
+        value =
+            "SELECT * FROM data_stream_sequence " +
+                "WHERE data_stream_id = :dataStreamId ",
+    )
+    fun findAllBySequenceId(
+        @Param("dataStreamId") dataStreamId: Int,
     ): List<DataStreamSequence>
 
     @Modifying

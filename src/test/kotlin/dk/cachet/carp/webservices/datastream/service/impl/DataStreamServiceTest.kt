@@ -59,6 +59,8 @@ class DataStreamServiceTest {
                     DataStreamService(
                         mockk(),
                         mockk(),
+                        mockk(),
+                        mockk(),
                         services,
                     )
 
@@ -112,6 +114,8 @@ class DataStreamServiceTest {
                     DataStreamService(
                         mockk(),
                         mockk(),
+                        mockk(),
+                        mockk(),
                         services,
                     )
 
@@ -143,6 +147,8 @@ class DataStreamServiceTest {
                     )
                 val sut =
                     DataStreamService(
+                        mockk(),
+                        mockk(),
                         mockk(),
                         mockk(),
                         services,

@@ -3,7 +3,6 @@ package dk.cachet.carp.webservices.datastream.service.core
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import dk.cachet.carp.common.application.UUID
-import dk.cachet.carp.common.application.data.Data
 import dk.cachet.carp.common.application.intersect
 import dk.cachet.carp.data.application.*
 import dk.cachet.carp.webservices.common.input.WS_JSON
@@ -13,7 +12,10 @@ import dk.cachet.carp.webservices.datastream.domain.DataStreamSnapshot
 import dk.cachet.carp.webservices.datastream.repository.DataStreamConfigurationRepository
 import dk.cachet.carp.webservices.datastream.repository.DataStreamIdRepository
 import dk.cachet.carp.webservices.datastream.repository.DataStreamSequenceRepository
+import dk.cachet.carp.webservices.datastream.service.createSequence
+import dk.cachet.carp.webservices.datastream.service.fetchValidatedDataStreamId
 import dk.cachet.carp.webservices.datastream.service.impl.MutableDataStreamBatchDecorator
+import dk.cachet.carp.webservices.datastream.service.validateConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.apache.logging.log4j.LogManager
@@ -134,86 +136,76 @@ class CoreDataStreamService(
      *  - [dataStream] has never been opened
      *  - [fromSequenceId] is negative or [toSequenceIdInclusive] is smaller than [fromSequenceId]
      */
-    @Suppress("LongMethod")
     override suspend fun getDataStream(
         dataStream: DataStreamId,
         fromSequenceId: Long,
         toSequenceIdInclusive: Long?,
+    ): DataStreamBatch =
+        withContext(Dispatchers.IO) {
+            // Validate inputs and configuration
+            validateSequenceRange(fromSequenceId, toSequenceIdInclusive)
+            validateConfig(dataStream, configRepository)
+
+            // Fetch data stream ID and sequences
+            val dataStreamId = fetchValidatedDataStreamId(dataStream, dataStreamIdRepository)
+            val sequenceRange = fromSequenceId..(toSequenceIdInclusive ?: Long.MAX_VALUE)
+            val dataStreamSequences = fetchSequencesInRange(dataStreamId.id, sequenceRange)
+
+            // Return empty batch if no sequences found
+            if (dataStreamSequences.isEmpty()) return@withContext MutableDataStreamBatchDecorator()
+
+            // Build and return the DataStreamBatch
+            buildDataStreamBatch(dataStream, dataStreamSequences, sequenceRange)
+        }
+
+    // Validation helper methods
+    private fun validateSequenceRange(
+        fromSequenceId: Long,
+        toSequenceIdInclusive: Long?,
+    ) {
+        require(fromSequenceId >= 0) {
+            "Invalid [fromSequenceId]: cannot be negative."
+        }
+        require(toSequenceIdInclusive == null || fromSequenceId <= toSequenceIdInclusive) {
+            "Invalid range: [toSequenceIdInclusive] ($toSequenceIdInclusive) is smaller than " +
+                "[fromSequenceId] ($fromSequenceId)."
+        }
+    }
+
+    // Data fetching helper methods
+
+    private suspend fun fetchSequencesInRange(
+        dataStreamId: Int,
+        sequenceRange: LongRange,
+    ): List<DataStreamSequence> {
+        return withContext(Dispatchers.IO) {
+            dataStreamSequenceRepository.findAllBySequenceIdRange(
+                dataStreamId,
+                sequenceRange.first,
+                sequenceRange.last,
+            )
+        }
+    }
+
+    // DataStreamBatch building logic
+    private fun buildDataStreamBatch(
+        dataStream: DataStreamId,
+        dataStreamSequences: List<DataStreamSequence>,
+        sequenceRange: LongRange,
     ): DataStreamBatch {
-        when {
-            fromSequenceId < 0 -> throw IllegalArgumentException(
-                "[fromSequenceId] is negative for requested dataStream " +
-                    "with studyDeploymentId ${dataStream.studyDeploymentId.stringRepresentation}",
-            )
-
-            toSequenceIdInclusive != null && fromSequenceId > toSequenceIdInclusive -> throw IllegalArgumentException(
-                "[toSequenceIdInclusive] is smaller than [fromSequenceId] for requested dataStream " +
-                    "with studyDeploymentId ${dataStream.studyDeploymentId.stringRepresentation}",
-            )
-        }
-
-        // whether there is a config present in the database
-        val configOptional =
-            withContext(Dispatchers.IO) {
-                configRepository.findById(dataStream.studyDeploymentId.stringRepresentation)
-            }
-
-        require(configOptional.isPresent) {
-            "No configuration was found " +
-                "for studyDeploymentId ${dataStream.studyDeploymentId.stringRepresentation} or study is closed"
-        }
-
-        val config = mapToCoreConfig(configOptional.get().config!!)
-
-        // checks if dataStream is configured for studyDeploymentId
-        require(
-            dataStream in config.expectedDataStreamIds,
-        ) { "Data stream wasn't configured for this study deployment." }
-
-        val dataStreamId =
-            withContext(Dispatchers.IO) {
-                dataStreamIdRepository.findByStudyDeploymentIdAndDeviceRoleNameAndNameAndNameSpace(
-                    studyDeploymentId = dataStream.studyDeploymentId.stringRepresentation,
-                    deviceRoleName = dataStream.deviceRoleName,
-                    name = dataStream.dataType.name,
-                    nameSpace = dataStream.dataType.namespace,
-                )
-            }.get()
-
-        val toSequenceId = toSequenceIdInclusive?.toInt() ?: Int.MAX_VALUE
-
-        val dataStreamSequences =
-            withContext(Dispatchers.IO) {
-                dataStreamSequenceRepository.findAllBySequenceIdRange(
-                    dataStreamId.id,
-                    fromSequenceId.toInt(),
-                    toSequenceId,
-                )
-            }
-
         return dataStreamSequences
-            .mapNotNull {
-                val queryRange = fromSequenceId.rangeTo(toSequenceId)
-                val range = (it.firstSequenceId!!)..(it.lastSequenceId!!)
-                val subRange = range.intersect(queryRange)
-                if (subRange.isEmpty()) {
-                    null
-                } else {
-                    val snapshot = mapToDataStreamSnapshot(it.snapshot!!)
-                    MutableDataStreamSequence<Data>(dataStream, subRange.first, snapshot.triggerIds, snapshot.syncPoint)
-                        .apply {
-                            val startOffset = subRange.first - range.first
-                            val exclusiveEnd = startOffset + subRange.last - subRange.first + 1
-                            check(
-                                startOffset <= Int.MAX_VALUE && exclusiveEnd <= Int.MAX_VALUE,
-                            ) { "Exceeded capacity of measurements which can be held in memory." }
-                            appendMeasurements(snapshot.measurements.subList(startOffset.toInt(), exclusiveEnd.toInt()))
-                        }
-                }
+            .mapNotNull { sequence ->
+                val subRange = sequence.toRange().intersect(sequenceRange)
+                if (subRange.isEmpty()) null else createSequence(dataStream, sequence, subRange, objectMapper)
             }
             .fold(MutableDataStreamBatchDecorator()) { batch, sequence ->
                 batch.apply { appendSequence(sequence) }
             }
+    }
+
+    // Mapping helper methods
+    private fun DataStreamSequence.toRange(): LongRange {
+        return firstSequenceId!!..lastSequenceId!!
     }
 
     /**
@@ -291,6 +283,4 @@ class CoreDataStreamService(
             DataStreamsConfiguration.serializer(),
             node.toString(),
         )
-
-    private fun mapToDataStreamSnapshot(node: JsonNode) = objectMapper.treeToValue(node, DataStreamSnapshot::class.java)
 }
