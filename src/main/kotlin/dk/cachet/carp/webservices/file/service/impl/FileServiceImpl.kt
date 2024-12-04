@@ -238,11 +238,26 @@ class FileServiceImpl(
         deploymentIds: Set<UUID>,
         target: Path,
     ) = withContext(Dispatchers.IO) {
-        getAll(null, studyId.stringRepresentation)
-            .onEach {
-                val resource = fileStorage.getResource(it.storageName)
-                val copyPath = target.resolve(it.originalName)
-                Files.copy(resource.file.toPath(), copyPath)
-            }
+//        getAll(null, studyId.stringRepresentation)
+//            .onEach {
+//                val resource = fileStorage.getResourceAtPath(it.storageName, Path.of("studies", studyId.stringRepresentation))
+//                val copyPath = target.resolve(it.originalName)
+//                Files.copy(resource.file.toPath(), copyPath)
+//            }
+        tempCopyFiles(studyId, target)
     }
+
+    private fun tempCopyFiles(
+        studyId: UUID,
+        target: Path
+    ) = getAll(null, studyId.stringRepresentation)
+        .onEach {
+            val resource: Resource = try {
+                fileStorage.getResource(it.storageName)
+            } catch (E: Exception) {
+                fileStorage.getResourceAtPath(it.storageName, Path.of("studies", studyId.stringRepresentation))
+            }
+            val copyPath = target.resolve(it.originalName)
+            Files.copy(resource.file.toPath(), copyPath)
+        }
 }

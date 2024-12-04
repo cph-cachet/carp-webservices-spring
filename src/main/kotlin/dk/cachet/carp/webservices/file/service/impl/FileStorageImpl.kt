@@ -168,6 +168,37 @@ class FileStorageImpl(
     override fun getResource(fileName: String): Resource {
         try {
             val file = resolveFullPathForFilename(fileName)
+
+            if (!Files.exists(file)) {
+                throw ResourceNotFoundException(validationMessages.get("file.store.file.exists", fileName))
+            }
+
+            return UrlResource(file.toUri())
+        } catch (ex: MalformedURLException) {
+            LOGGER.error("Unable to resolve file location: $fileName", ex)
+            throw BadRequestException(
+                validationMessages.get("file.store.file.resolve", fileName, ex.message.toString()),
+            )
+        }
+    }
+
+    /**
+     * The function [getResourceAtPath] retrieves the resource with the given [fileName], [relativePathFromBase] parameters.
+     *
+     * @param fileName The [fileName] of the file to retrieve.
+     * @param relativePathFromBase The [relativePathFromBase] path of the file.
+     * @throws FileStorageException when the file does not exist or is not readable.
+     * @return The [Resource] of the file requested.
+     */
+
+    override fun getResourceAtPath(fileName: String, relativePathFromBase: Path): Resource {
+        try {
+            val file = resolveFullPathForFilenameAndRelativePath(fileName, relativePathFromBase)
+
+            if (!Files.exists(file)) {
+                throw ResourceNotFoundException(validationMessages.get("file.store.file.exists", fileName))
+            }
+
             return UrlResource(file.toUri())
         } catch (ex: MalformedURLException) {
             LOGGER.error("Unable to resolve file location: $fileName", ex)

@@ -29,4 +29,7 @@ interface FileStorage {
 
     /** The [getResource] interface for export the file to storage. */
     fun getResource(fileName: String): Resource
+
+    /** The [getResourceAtPath] interface for export the file to storage. */
+    fun getResourceAtPath(fileName: String, relativePathFromBase: Path): Resource
 }
