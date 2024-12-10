@@ -18,7 +18,6 @@ import dk.cachet.carp.webservices.datastream.service.DataStreamService
 import dk.cachet.carp.webservices.datastream.service.createSequence
 import dk.cachet.carp.webservices.datastream.service.fetchValidatedDataStreamId
 import dk.cachet.carp.webservices.datastream.service.validateConfig
-import dk.cachet.carp.webservices.export.service.ResourceExporter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
@@ -40,7 +39,7 @@ class DataStreamService(
     private val configRepository: DataStreamConfigurationRepository,
     private val objectMapper: ObjectMapper,
     services: CoreServiceContainer,
-) : DataStreamService, ResourceExporter<DataStreamPoint<*>> {
+) : DataStreamService {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
@@ -149,13 +148,12 @@ class DataStreamService(
             return@withContext dataStreamServiceRequest
         }
 
-    override val dataFileName = "data-streams.json"
+    val dataFileName = "data-streams.json"
 
-    override suspend fun exportDataOrThrow(
-        studyId: UUID,
+    suspend fun exportDataOrThrow(
         deploymentIds: Set<UUID>,
         target: Path,
-    ): List<DataStreamPoint<*>> =
+    ): Unit =
         withContext(Dispatchers.IO) {
             val dataStreamIds =
                 dataStreamIdRepository.getAllByDeploymentIds(
@@ -168,7 +166,18 @@ class DataStreamService(
                     )
                 }
 
-            getDataStreams(dataStreamIds).toList()
+            val result: List<DataStreamPoint<*>> = getDataStreams(dataStreamIds).toList()
+            val path = target.resolve(dataFileName)
+
+            try {
+                val jsonGenerator = objectMapper.factory.createGenerator(path.toFile().outputStream())
+
+                jsonGenerator.use { objectMapper.writeValue(it, result) }
+
+                LOGGER.info("A new file is created for zipping with name ${path.fileName}.")
+            } catch (e: IOException) {
+                LOGGER.error("An error occurred while storing the file ${path.fileName}", e)
+            }
         }
 
     private fun DataStreamSequence.toRange(): LongRange {
