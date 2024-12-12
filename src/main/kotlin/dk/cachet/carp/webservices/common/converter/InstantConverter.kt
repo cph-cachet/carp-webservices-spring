@@ -8,13 +8,17 @@ import java.time.Instant
 import java.time.Instant as JavaInstant
 import kotlinx.datetime.Instant as KotlinInstant
 
-@Converter()
+@Converter
 class InstantConverter : AttributeConverter<KotlinInstant, JavaInstant> {
-    override fun convertToDatabaseColumn(p0: kotlinx.datetime.Instant?): Instant {
-        return p0?.toJavaInstant() ?: JavaInstant.EPOCH
+    override fun convertToDatabaseColumn(p0: kotlinx.datetime.Instant?): Instant? {
+        if (p0 == null) return null
+
+        return p0.toJavaInstant()
     }
 
-    override fun convertToEntityAttribute(p0: Instant?): kotlinx.datetime.Instant {
-        return p0?.toKotlinInstant() ?: KotlinInstant.fromEpochMilliseconds(0)
+    override fun convertToEntityAttribute(p0: Instant?): kotlinx.datetime.Instant? {
+        if (p0 == null) return null
+
+        return p0.toKotlinInstant()
     }
 }
