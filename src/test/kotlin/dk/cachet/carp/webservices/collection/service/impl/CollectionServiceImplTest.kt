@@ -23,7 +23,6 @@ class CollectionServiceImplTest {
     private val collectionRepository: CollectionRepository = mockk()
     private val accountService: AccountService = mockk()
     private val authenticationService: AuthenticationService = mockk()
-    private val objectMapper: ObjectMapper = mockk()
     private val validationMessages: MessageBase = mockk()
 
     @Nested
@@ -52,7 +51,6 @@ class CollectionServiceImplTest {
                     accountService,
                     authenticationService,
                     validationMessages,
-                    objectMapper,
                 )
 
             sut.delete(mockStudyId, mockId)
@@ -91,7 +89,6 @@ class CollectionServiceImplTest {
                     accountService,
                     authenticationService,
                     validationMessages,
-                    objectMapper,
                 )
 
             assertFailsWith(ResourceNotFoundException::class) {
@@ -122,7 +119,6 @@ class CollectionServiceImplTest {
                     accountService,
                     authenticationService,
                     validationMessages,
-                    objectMapper,
                 )
 
             val result = sut.update(mockStudyId, mockId, updateRequest)
@@ -149,7 +145,6 @@ class CollectionServiceImplTest {
                     accountService,
                     authenticationService,
                     validationMessages,
-                    objectMapper,
                 )
 
             assertFailsWith(ResourceNotFoundException::class) {
@@ -189,7 +184,6 @@ class CollectionServiceImplTest {
                     accountService,
                     authenticationService,
                     validationMessages,
-                    objectMapper,
                 )
 
             val result = sut.create(mockRequest, mockStudyId, mockDeploymentId)
@@ -230,7 +224,6 @@ class CollectionServiceImplTest {
                     accountService,
                     authenticationService,
                     validationMessages,
-                    objectMapper,
                 )
 
             assertFailsWith(AlreadyExistsException::class) {
@@ -258,7 +251,6 @@ class CollectionServiceImplTest {
                     accountService,
                     authenticationService,
                     validationMessages,
-                    objectMapper,
                 )
 
             val result = sut.getCollectionByStudyIdAndId(mockStudyId, mockId)
@@ -283,7 +275,6 @@ class CollectionServiceImplTest {
                     accountService,
                     authenticationService,
                     validationMessages,
-                    objectMapper,
                 )
 
             assertFailsWith(ResourceNotFoundException::class) {
@@ -309,7 +300,6 @@ class CollectionServiceImplTest {
                     accountService,
                     authenticationService,
                     validationMessages,
-                    objectMapper,
                 )
 
             val result = sut.getCollectionByStudyIdAndByName(mockStudyId, mockName)
@@ -340,7 +330,6 @@ class CollectionServiceImplTest {
                     accountService,
                     authenticationService,
                     validationMessages,
-                    objectMapper,
                 )
 
             assertFailsWith(ResourceNotFoundException::class) {
@@ -362,7 +351,6 @@ class CollectionServiceImplTest {
                     accountService,
                     authenticationService,
                     validationMessages,
-                    objectMapper,
                 )
 
             val result = sut.getAll(mockStudyId)
@@ -385,7 +373,6 @@ class CollectionServiceImplTest {
                     accountService,
                     authenticationService,
                     validationMessages,
-                    objectMapper,
                 )
 
             val result = sut.getAll(mockStudyId, mockQuery)
@@ -409,7 +396,6 @@ class CollectionServiceImplTest {
                     accountService,
                     authenticationService,
                     validationMessages,
-                    objectMapper,
                 )
 
             val result = sut.getAllByStudyIdAndDeploymentId(mockStudyId, mockDeploymentId)

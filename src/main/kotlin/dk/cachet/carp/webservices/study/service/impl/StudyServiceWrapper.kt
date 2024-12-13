@@ -18,7 +18,7 @@ import java.nio.file.Path
 @Service
 class StudyServiceWrapper(
     private val accountService: AccountService,
-    private val repository: CoreStudyRepository,
+    private val studyRepository: CoreStudyRepository,
     services: CoreServiceContainer,
 ) : StudyService, ResourceExporter<StudySnapshot> {
     final override val core = services.studyService
@@ -32,7 +32,7 @@ class StudyServiceWrapper(
             account.carpClaims
                 ?.filterIsInstance<Claim.ManageStudy>()
                 ?.map { it.studyId }
-                ?.let { repository.findAllByStudyIds(it) }
+                ?.let { studyRepository.findAllByStudyIds(it) }
                 ?.map {
                     val status = it.getStatus()
 //                    val details = core.getStudyDetails(status.studyId)
@@ -59,5 +59,5 @@ class StudyServiceWrapper(
         studyId: UUID,
         deploymentIds: Set<UUID>,
         target: Path,
-    ): Collection<StudySnapshot> = setOf(repository.getStudySnapshotById(studyId))
+    ): Collection<StudySnapshot> = setOf(studyRepository.getStudySnapshotById(studyId))
 }
