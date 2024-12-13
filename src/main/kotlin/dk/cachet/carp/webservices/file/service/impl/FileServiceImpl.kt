@@ -120,55 +120,15 @@ class FileServiceImpl(
     }
 
     override fun download(id: Int, studyId: UUID): Pair<Resource, String> {
-        //TODO uncomment after migration and remove tempDownload
-//        val file = getOne(id)
-//        val fileToDownload = fileStorage.getFileAtPath(file.storageName, Path.of("studies", studyId.stringRepresentation))
-//
-//        return Pair(fileToDownload, file.originalName)
-
-        return tempDownload(id, studyId)
-    }
-
-    private fun tempDownload(id: Int, studyId: UUID): Pair<Resource, String> {
         val file = getOne(id)
-
-        var fileToDownload: Resource
-
-        try {
-            fileToDownload =
-                fileStorage.getFileAtPath(file.storageName, Path.of("studies", studyId.stringRepresentation))
-        } catch (e: Exception) {
-            fileToDownload = fileStorage.getFile(file.storageName)
-        }
+        val fileToDownload = fileStorage.getFileAtPath(file.storageName, Path.of("studies", studyId.stringRepresentation))
 
         return Pair(fileToDownload, file.originalName)
     }
 
     override fun delete(id: Int, studyId: UUID) {
-        //TODO uncomment after migration and remove tempDelete
-//        val file = getOne(id)
-//        fileStorage.deleteFileAtPath(file.storageName, Path.of("studies", studyId.stringRepresentation))
-//        fileRepository.delete(file)
-//
-//        LOGGER.info("File deleted, id = $id")
-//
-//        val identity = authenticationService.getCarpIdentity()
-//        backgroundWorker.launch {
-//            accountService.revoke(identity, setOf(Claim.FileOwner(file.id)))
-//        }
-
-        tempDelete(id, studyId)
-    }
-
-    private fun tempDelete(id: Int, studyId: UUID) {
         val file = getOne(id)
-
-        val r = fileStorage.deleteFileAtPath(file.storageName, Path.of("studies", studyId.stringRepresentation))
-
-        if (!r) {
-            fileStorage.deleteFile(file.storageName)
-        }
-
+        fileStorage.deleteFileAtPath(file.storageName, Path.of("studies", studyId.stringRepresentation))
         fileRepository.delete(file)
 
         LOGGER.info("File deleted, id = $id")
@@ -238,26 +198,11 @@ class FileServiceImpl(
         deploymentIds: Set<UUID>,
         target: Path,
     ) = withContext(Dispatchers.IO) {
-//        getAll(null, studyId.stringRepresentation)
-//            .onEach {
-//                val resource = fileStorage.getResourceAtPath(it.storageName, Path.of("studies", studyId.stringRepresentation))
-//                val copyPath = target.resolve(it.originalName)
-//                Files.copy(resource.file.toPath(), copyPath)
-//            }
-        tempCopyFiles(studyId, target)
-    }
-
-    private fun tempCopyFiles(
-        studyId: UUID,
-        target: Path
-    ) = getAll(null, studyId.stringRepresentation)
-        .onEach {
-            val resource: Resource = try {
-                fileStorage.getResource(it.storageName)
-            } catch (E: Exception) {
-                fileStorage.getResourceAtPath(it.storageName, Path.of("studies", studyId.stringRepresentation))
+        getAll(null, studyId.stringRepresentation)
+            .onEach {
+                val resource = fileStorage.getResourceAtPath(it.storageName, Path.of("studies", studyId.stringRepresentation))
+                val copyPath = target.resolve(it.originalName)
+                Files.copy(resource.file.toPath(), copyPath)
             }
-            val copyPath = target.resolve(it.originalName)
-            Files.copy(resource.file.toPath(), copyPath)
-        }
+    }
 }
