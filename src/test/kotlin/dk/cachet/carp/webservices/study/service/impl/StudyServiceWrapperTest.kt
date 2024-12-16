@@ -1,6 +1,5 @@
 package dk.cachet.carp.webservices.study.service.impl
 
-import org.junit.jupiter.api.Assertions.*
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.studies.application.StudyStatus
 import dk.cachet.carp.studies.domain.Study
@@ -14,17 +13,18 @@ import dk.cachet.carp.webservices.study.repository.CoreStudyRepository
 import io.mockk.*
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.Instant
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Nested
-import kotlin.test.*
 import java.nio.file.Path
-
+import kotlin.test.*
 
 class StudyServiceWrapperTest {
     private val accountService: AccountService = mockk()
     private val studyRepository: CoreStudyRepository = mockk()
-    val services: CoreServiceContainer = mockk<CoreServiceContainer> {
-        every { studyService } returns mockk<StudyServiceDecorator>()
-    }
+    val services: CoreServiceContainer =
+        mockk<CoreServiceContainer> {
+            every { studyService } returns mockk<StudyServiceDecorator>()
+        }
 
     @Nested
     inner class ExportDataOrThrow {
@@ -32,14 +32,17 @@ class StudyServiceWrapperTest {
         fun `should export data`() {
             runTest {
                 val mockStudyId = UUID.randomUUID()
-                val mockDeploymentIds = setOf(
-                    UUID.randomUUID(), UUID.randomUUID()
-                )
+                val mockDeploymentIds =
+                    setOf(
+                        UUID.randomUUID(),
+                        UUID.randomUUID(),
+                    )
                 val mockTarget = mockk<Path>()
                 val mockStudySnapshot = mockk<StudySnapshot>()
-                val mockStudySnapshots = setOf(
-                    mockStudySnapshot
-                )
+                val mockStudySnapshots =
+                    setOf(
+                        mockStudySnapshot,
+                    )
                 coEvery { studyRepository.getStudySnapshotById(mockStudyId) } returns mockStudySnapshot
                 val sut = StudyServiceWrapper(accountService, studyRepository, services)
 
@@ -67,19 +70,23 @@ class StudyServiceWrapperTest {
                 coEvery { mockStudyStatus12.studyId } returns mockStudyId1
                 val mockStudyStatus21 = mockk<StudyStatus.Configuring>(relaxed = true)
                 coEvery { mockStudyStatus21.studyId } returns mockStudyId2
-                val mockStudy11 = mockk<Study>(relaxed = true).apply {
-                    coEvery { getStatus() } returns mockStudyStatus11
-                }
-                val mockStudy12 = mockk<Study>(relaxed = true).apply {
-                    coEvery { getStatus() } returns mockStudyStatus12
-                }
-                val mockStudy21 = mockk<Study>(relaxed = true).apply {
-                    coEvery { getStatus() } returns mockStudyStatus21
-                }
+                val mockStudy11 =
+                    mockk<Study>(relaxed = true).apply {
+                        coEvery { getStatus() } returns mockStudyStatus11
+                    }
+                val mockStudy12 =
+                    mockk<Study>(relaxed = true).apply {
+                        coEvery { getStatus() } returns mockStudyStatus12
+                    }
+                val mockStudy21 =
+                    mockk<Study>(relaxed = true).apply {
+                        coEvery { getStatus() } returns mockStudyStatus21
+                    }
                 coEvery { accountService.findByUUID(mockAccountId) } returns mockAccount
-                coEvery { studyRepository.findAllByStudyIds(listOf(mockStudyId1, mockStudyId2)) } returns listOf(
-                    mockStudy11, mockStudy12, mockStudy21
-                )
+                coEvery { studyRepository.findAllByStudyIds(listOf(mockStudyId1, mockStudyId2)) } returns
+                    listOf(
+                        mockStudy11, mockStudy12, mockStudy21,
+                    )
 
                 val sut = StudyServiceWrapper(accountService, studyRepository, services)
 
@@ -132,19 +139,21 @@ class StudyServiceWrapperTest {
                 val mockClaim1 = Claim.ManageStudy(mockStudyId1)
                 val mockAccount = mockk<Account>()
                 coEvery { mockAccount.carpClaims } returns setOf(mockClaim1)
-                val mockStudyStatus11 = StudyStatus.Configuring(
-                    studyId = mockStudyId1,
-                    name = "Study 1",
-                    createdOn = Instant.fromEpochSeconds(0),
-                    studyProtocolId = UUID.randomUUID(),
-                    canSetInvitation = true,
-                    canSetStudyProtocol = true,
-                    canDeployToParticipants = true,
-                    canGoLive = true
-                )
-                val mockStudy11 = mockk<Study>(relaxed = true).apply {
-                    coEvery { getStatus() } returns mockStudyStatus11
-                }
+                val mockStudyStatus11 =
+                    StudyStatus.Configuring(
+                        studyId = mockStudyId1,
+                        name = "Study 1",
+                        createdOn = Instant.fromEpochSeconds(0),
+                        studyProtocolId = UUID.randomUUID(),
+                        canSetInvitation = true,
+                        canSetStudyProtocol = true,
+                        canDeployToParticipants = true,
+                        canGoLive = true,
+                    )
+                val mockStudy11 =
+                    mockk<Study>(relaxed = true).apply {
+                        coEvery { getStatus() } returns mockStudyStatus11
+                    }
                 coEvery { accountService.findByUUID(mockAccountId) } returns mockAccount
                 coEvery { studyRepository.findAllByStudyIds(listOf(mockStudyId1)) } returns listOf(mockStudy11)
 

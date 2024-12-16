@@ -1,6 +1,5 @@
 package dk.cachet.carp.webservices.collection.service.impl
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import dk.cachet.carp.common.application.users.AccountIdentity
 import dk.cachet.carp.webservices.account.service.AccountService
 import dk.cachet.carp.webservices.collection.domain.Collection
