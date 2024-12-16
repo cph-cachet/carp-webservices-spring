@@ -65,8 +65,6 @@ class FileStorageImpl(
         val fileName = generateFileName(file)
         val filePath = fileUtil.resolveFileStoragePathForFilenameAndRelativePath(fileName, relativePathFromBase)
 
-        Files.createDirectories(filePath.parent)
-
         try {
             file.inputStream.use { inputStream ->
                 Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING)
