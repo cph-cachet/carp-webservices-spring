@@ -1,23 +1,20 @@
 package dk.cachet.carp.webservices.datastream.service.impl
 
+import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.common.application.data.DataType
 import dk.cachet.carp.common.infrastructure.serialization.JSON
-import dk.cachet.carp.data.application.DataStreamBatch
 import dk.cachet.carp.data.application.DataStreamId
-import dk.cachet.carp.data.application.DataStreamPoint
 import dk.cachet.carp.data.infrastructure.DataStreamServiceRequest
 import dk.cachet.carp.webservices.common.services.CoreServiceContainer
 import dk.cachet.carp.webservices.datastream.domain.DataStreamSequence
-import dk.cachet.carp.webservices.datastream.repository.DataStreamConfigurationRepository
 import dk.cachet.carp.webservices.datastream.repository.DataStreamIdRepository
 import dk.cachet.carp.webservices.datastream.repository.DataStreamSequenceRepository
 import dk.cachet.carp.webservices.datastream.service.DataStreamService
 import dk.cachet.carp.webservices.datastream.service.createSequence
-import dk.cachet.carp.webservices.datastream.service.fetchValidatedDataStreamId
-import dk.cachet.carp.webservices.datastream.service.validateConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
@@ -25,6 +22,7 @@ import kotlinx.datetime.toKotlinInstant
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
+import org.springframework.dao.DataAccessException
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import java.io.IOException
@@ -36,7 +34,6 @@ import java.nio.file.StandardOpenOption
 class DataStreamService(
     private val dataStreamIdRepository: DataStreamIdRepository,
     private val dataStreamSequenceRepository: DataStreamSequenceRepository,
-    private val configRepository: DataStreamConfigurationRepository,
     private val objectMapper: ObjectMapper,
     services: CoreServiceContainer,
 ) : DataStreamService {
@@ -158,22 +155,12 @@ class DataStreamService(
             val dataStreamIds =
                 dataStreamIdRepository.getAllByDeploymentIds(
                     deploymentIds.map { it.toString() },
-                ).map {
-                    DataStreamId(
-                        UUID(it.studyDeploymentId!!),
-                        it.deviceRoleName!!,
-                        DataType(it.nameSpace!!, it.name!!),
-                    )
-                }
+                )
 
-            val result: List<DataStreamPoint<*>> = getDataStreams(dataStreamIds).toList()
             val path = target.resolve(dataFileName)
 
             try {
-                val jsonGenerator = objectMapper.factory.createGenerator(path.toFile().outputStream())
-
-                jsonGenerator.use { objectMapper.writeValue(it, result) }
-
+                getDataStreams(dataStreamIds, target)
                 LOGGER.info("A new file is created for zipping with name ${path.fileName}.")
             } catch (e: IOException) {
                 LOGGER.error("An error occurred while storing the file ${path.fileName}", e)
@@ -184,62 +171,75 @@ class DataStreamService(
         return firstSequenceId!!..lastSequenceId!!
     }
 
-    suspend fun getDataStreams(dataStreams: List<DataStreamId>): DataStreamBatch =
-        withContext(Dispatchers.IO) {
-            // Validate inputs
-            require(dataStreams.isNotEmpty()) { "DataStream list cannot be empty." }
+    suspend fun getDataStreams(
+        dataStreamIds: List<Int>,
+        target: Path,
+    ) = withContext(Dispatchers.IO) {
+        // Validate inputs
+        require(dataStreamIds.isNotEmpty()) { "DataStream list cannot be empty." }
 
-            // Validate and fetch sequences for all dataStreams
-            val dataStreamBatches =
-                dataStreams.mapNotNull { dataStream ->
-                    try {
-                        // Validate configuration for each data stream
-                        validateConfig(dataStream, configRepository)
+        val path = target.resolve(dataFileName)
 
-                        // Fetch data stream ID and sequences
-                        val dataStreamId = fetchValidatedDataStreamId(dataStream, dataStreamIdRepository)
-                        val dataStreamSequences = fetchAllSequences(dataStreamId.id)
+        val jsonGenerator = objectMapper.factory.createGenerator(path.toFile().outputStream())
+        jsonGenerator.writeStartArray()
 
-                        // Return empty if no sequences found
-                        if (dataStreamSequences.isEmpty()) {
-                            null
-                        } else {
-                            buildDataStreamBatch(dataStream, dataStreamSequences)
-                        }
-                    } catch (e: IllegalArgumentException) {
-                        LOGGER.error(
-                            "Failed to process dataStream " +
-                                "${dataStream.studyDeploymentId.stringRepresentation}: ${e.message}",
-                        )
-                        null // Skip invalid or missing streams
-                    }
-                }
+        val sequenceIds = dataStreamSequenceRepository.findSequenceIdsByStreamId(dataStreamIds)
 
-            // Combine all DataStreamBatches into one
-            return@withContext dataStreamBatches.fold(MutableDataStreamBatchDecorator()) { combinedBatch, batch ->
-                combinedBatch.apply { appendBatch(batch) }
+        sequenceIds.map { sequenceId ->
+            try {
+                // Return empty if no sequences found
+                val sequence = dataStreamSequenceRepository.findById(sequenceId).orElse(null)
+
+                buildDataStreamBatch(sequence, jsonGenerator)
+            } catch (e: IllegalArgumentException) {
+                LOGGER.info(
+                    "Failed to process dataStream " +
+                        "$sequenceId: ${e.message}",
+                )
             }
         }
-
-    // Helper to fetch all sequences for a dataStream
-    private suspend fun fetchAllSequences(dataStreamId: Int): List<DataStreamSequence> {
-        return withContext(Dispatchers.IO) {
-            dataStreamSequenceRepository.findAllBySequenceId(dataStreamId)
-        }
+        jsonGenerator.writeEndArray()
+        jsonGenerator.close()
     }
 
-    // Modified batch-building method for a single dataStream
     private fun buildDataStreamBatch(
-        dataStream: DataStreamId,
-        dataStreamSequences: List<DataStreamSequence>,
-    ): DataStreamBatch {
-        return dataStreamSequences
-            .map { sequence ->
-                val sequenceRange = sequence.toRange()
-                createSequence(dataStream, sequence, sequenceRange, objectMapper)
+        dataStreamSequence: DataStreamSequence,
+        jsonGenerator: JsonGenerator,
+    ) {
+        val id =
+            dataStreamIdRepository.findByDataStreamId(dataStreamSequence.dataStreamId!!)
+        check(id != null) { "DataStreamId not found for ID: ${dataStreamSequence.dataStreamId}" }
+
+        val dataStreamId =
+            DataStreamId(
+                studyDeploymentId =
+                    UUID(
+                        id.studyDeploymentId ?: error("StudyDeploymentId not found"),
+                    ),
+                deviceRoleName = id.deviceRoleName ?: error("DeviceRoleName is null"),
+                dataType =
+                    DataType(
+                        namespace = id.nameSpace ?: error("NameSpace is null"),
+                        name = id.name ?: error("Name is null"),
+                    ),
+            )
+
+        try {
+            val sequenceRange = dataStreamSequence.toRange()
+            val sequence = createSequence(dataStreamId, dataStreamSequence, sequenceRange, objectMapper)
+
+            val batch = MutableDataStreamBatchDecorator()
+            batch.appendSequence(sequence)
+
+            batch.toList().map { dataStreamPoint ->
+                objectMapper.writeValue(jsonGenerator, dataStreamPoint)
             }
-            .fold(MutableDataStreamBatchDecorator()) { batch, sequence ->
-                batch.apply { appendSequence(sequence) }
-            }
+        } catch (e: IllegalStateException) {
+            LOGGER.error("State error while processing sequence ID: ${dataStreamSequence.id} - ${e.message}", e)
+        } catch (e: JsonProcessingException) {
+            LOGGER.error("JSON serialization error for sequence ID: ${dataStreamSequence.id} - ${e.message}", e)
+        } catch (e: DataAccessException) {
+            LOGGER.error("Database access error for sequence ID: ${dataStreamSequence.id} - ${e.message}", e)
+        }
     }
 }
