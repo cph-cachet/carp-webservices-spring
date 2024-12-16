@@ -127,7 +127,7 @@ class CollectionControllerTest {
     }
 
     @Nested
-    inner class GetAll() {
+    inner class GetAll {
         @Test
         fun `should return the collection of collection if query is not specified`() =
             runTest {
@@ -167,7 +167,7 @@ class CollectionControllerTest {
     }
 
     @Nested
-    inner class GetByStudyIdAndDeploymentId() {
+    inner class GetByStudyIdAndDeploymentId {
         @Test
         fun `should return the collection of collection if url is correct`() =
             runTest {
@@ -203,7 +203,7 @@ class CollectionControllerTest {
     }
 
     @Nested
-    inner class Delete() {
+    inner class Delete {
         @Test
         fun `should return 200 if collection is deleted`() =
             runTest {
@@ -236,7 +236,7 @@ class CollectionControllerTest {
     }
 
     @Nested
-    inner class Update() {
+    inner class Update {
         @Test
         fun `should return 400 if body is not valid`() =
             runTest {

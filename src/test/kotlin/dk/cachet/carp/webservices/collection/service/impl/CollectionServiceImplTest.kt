@@ -388,7 +388,9 @@ class CollectionServiceImplTest {
             val mockStudyId = "123"
             val mockDeploymentId = "321"
             val mockCollections = listOf(mockk<Collection>(relaxed = true))
-            every { collectionRepository.findAllByStudyIdAndDeploymentId(mockStudyId, mockDeploymentId) } returns mockCollections
+            every {
+                collectionRepository.findAllByStudyIdAndDeploymentId(mockStudyId, mockDeploymentId)
+            } returns mockCollections
             val sut =
                 CollectionServiceImpl(
                     collectionRepository,
