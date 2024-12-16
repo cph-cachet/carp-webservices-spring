@@ -35,10 +35,11 @@ class FileUtil(
     }
 
     fun resolveFileStoragePathForFilenameAndRelativePath(fileName: String, relativePath: Path): Path {
-        filePath.parent?.let { createDirectories(it) }
-
         val rootFolder: Path? = Paths.get(filePath.toString()).toAbsolutePath().normalize()
-        return storageDirectory.resolve(removeRootPrefix(rootFolder.toString()) + "/" + relativePath + "/" + fileName)
+        val path = storageDirectory.resolve(removeRootPrefix(rootFolder.toString()) + "/" + relativePath + "/" + fileName)
+        isDirectoryOrElseCreate(path.parent)
+
+        return path
     }
 
     fun isDirectoryOrElseCreate(storagePath: Path?): Path {
