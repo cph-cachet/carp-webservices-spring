@@ -34,9 +34,15 @@ class FileUtil(
         return storageDirectory.resolve(removeRootPrefix(rootFolder.toString()) + "/" + fileName)
     }
 
-    fun resolveFileStoragePathForFilenameAndRelativePath(fileName: String, relativePath: Path): Path {
+    fun resolveFileStoragePathForFilenameAndRelativePath(
+        fileName: String,
+        relativePath: Path,
+    ): Path {
         val rootFolder: Path? = Paths.get(filePath.toString()).toAbsolutePath().normalize()
-        val path = storageDirectory.resolve(removeRootPrefix(rootFolder.toString()) + "/" + relativePath + "/" + fileName)
+        val path =
+            storageDirectory.resolve(
+                removeRootPrefix(rootFolder.toString()) + "/" + relativePath + "/" + fileName,
+            )
         isDirectoryOrElseCreate(path.parent)
 
         return path
@@ -49,6 +55,7 @@ class FileUtil(
         }
         return path
     }
+
     fun setDefaultStoragePermissions(directory: Path?): Boolean {
         val retrieveDirectoryPermissions = directory?.let { filePermission.getPermissionsFor(it) }
         if (!retrieveDirectoryPermissions.equals("rwxr-xr-x")) {

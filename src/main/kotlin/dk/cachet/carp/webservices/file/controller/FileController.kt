@@ -5,7 +5,6 @@ import dk.cachet.carp.webservices.common.constants.PathVariableName
 import dk.cachet.carp.webservices.common.constants.RequestParamName
 import dk.cachet.carp.webservices.file.domain.File
 import dk.cachet.carp.webservices.file.service.FileService
-import dk.cachet.carp.webservices.file.service.FileStorage
 import io.swagger.v3.oas.annotations.Operation
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -19,7 +18,7 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 
 @RestController
-class FileController(private val fileStorage: FileStorage, private val fileService: FileService) {
+class FileController(private val fileService: FileService) {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
 

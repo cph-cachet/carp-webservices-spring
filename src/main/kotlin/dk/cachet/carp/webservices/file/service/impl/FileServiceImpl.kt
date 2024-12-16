@@ -25,6 +25,7 @@ import kotlinx.coroutines.*
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.core.io.Resource
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.StringUtils
@@ -32,8 +33,6 @@ import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.util.UriComponentsBuilder
 import java.nio.file.Files
 import java.nio.file.Path
-import org.springframework.core.io.Resource
-
 
 @Service
 @Transactional
@@ -119,14 +118,24 @@ class FileServiceImpl(
         return saved
     }
 
-    override fun download(id: Int, studyId: UUID): Pair<Resource, String> {
+    override fun download(
+        id: Int,
+        studyId: UUID,
+    ): Pair<Resource, String> {
         val file = getOne(id)
-        val fileToDownload = fileStorage.getFileAtPath(file.storageName, Path.of("studies", studyId.stringRepresentation))
+        val fileToDownload =
+            fileStorage.getFileAtPath(
+                file.storageName,
+                Path.of("studies", studyId.stringRepresentation),
+            )
 
         return Pair(fileToDownload, file.originalName)
     }
 
-    override fun delete(id: Int, studyId: UUID) {
+    override fun delete(
+        id: Int,
+        studyId: UUID,
+    ) {
         val file = getOne(id)
         fileStorage.deleteFileAtPath(file.storageName, Path.of("studies", studyId.stringRepresentation))
         fileRepository.delete(file)
@@ -200,7 +209,11 @@ class FileServiceImpl(
     ) = withContext(Dispatchers.IO) {
         getAll(null, studyId.stringRepresentation)
             .onEach {
-                val resource = fileStorage.getResourceAtPath(it.storageName, Path.of("studies", studyId.stringRepresentation))
+                val resource =
+                    fileStorage.getResourceAtPath(
+                        it.storageName,
+                        Path.of("studies", studyId.stringRepresentation),
+                    )
                 val copyPath = target.resolve(it.originalName)
                 Files.copy(resource.file.toPath(), copyPath)
             }

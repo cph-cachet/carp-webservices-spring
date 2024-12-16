@@ -55,13 +55,17 @@ class FileStorageImpl(
 
     /**
      * Similar to [store], but allows storing the file at a specific path relative to the base storage directory.
-     * E.g. /Users/johnpork/home/carp/storage/local/studies/123 where /studies/123/ is the relativePathFromBase argument to method call.
+     * E.g. /Users/johnpork/home/carp/storage/local/studies/123 where /studies/123/ is the relativePathFromBase
+     * argument to method call.
      *
      * @param file The [file] to store into the file storage.
      * @throws FileStorageException when the file cannot be stored/written into the storage.
      * @return A [file] stored in the storage.
      */
-    override fun storeAtPath(file: MultipartFile, relativePathFromBase: Path): String {
+    override fun storeAtPath(
+        file: MultipartFile,
+        relativePathFromBase: Path,
+    ): String {
         val fileName = generateFileName(file)
         val filePath = fileUtil.resolveFileStoragePathForFilenameAndRelativePath(fileName, relativePathFromBase)
 
@@ -108,7 +112,10 @@ class FileStorageImpl(
      * @throws FileStorageException when the file does not exist or is not readable.
      * @return The [Resource] of the file requested.
      */
-    override fun getFileAtPath(fileName: String, relativePathFromBase: Path): Resource {
+    override fun getFileAtPath(
+        fileName: String,
+        relativePathFromBase: Path,
+    ): Resource {
         try {
             val file = resolveFullPathForFilenameAndRelativePath(fileName, relativePathFromBase)
             val resource = UrlResource(file.toUri())
@@ -147,7 +154,10 @@ class FileStorageImpl(
      * @param relativePathFromBase The [relativePathFromBase] path of the file.
      * @return true if successful, false if not.
      */
-    override fun deleteFileAtPath(filename: String, relativePathFromBase: Path): Boolean {
+    override fun deleteFileAtPath(
+        filename: String,
+        relativePathFromBase: Path,
+    ): Boolean {
         val file = resolveFullPathForFilenameAndRelativePath(filename, relativePathFromBase)
         if (Files.exists(file)) {
             Files.delete(file)
@@ -181,7 +191,8 @@ class FileStorageImpl(
     }
 
     /**
-     * The function [getResourceAtPath] retrieves the resource with the given [fileName], [relativePathFromBase] parameters.
+     * The function [getResourceAtPath] retrieves the resource with the given [fileName], [relativePathFromBase]
+     * parameters.
      *
      * @param fileName The [fileName] of the file to retrieve.
      * @param relativePathFromBase The [relativePathFromBase] path of the file.
@@ -189,7 +200,10 @@ class FileStorageImpl(
      * @return The [Resource] of the file requested.
      */
 
-    override fun getResourceAtPath(fileName: String, relativePathFromBase: Path): Resource {
+    override fun getResourceAtPath(
+        fileName: String,
+        relativePathFromBase: Path,
+    ): Resource {
         try {
             val file = resolveFullPathForFilenameAndRelativePath(fileName, relativePathFromBase)
 
@@ -234,7 +248,10 @@ class FileStorageImpl(
         return fileUtil.resolveFileStorage(fileName)
     }
 
-    private fun resolveFullPathForFilenameAndRelativePath(fileName: String, relativePath: Path): Path {
+    private fun resolveFullPathForFilenameAndRelativePath(
+        fileName: String,
+        relativePath: Path,
+    ): Path {
         return fileUtil.resolveFileStoragePathForFilenameAndRelativePath(fileName, relativePath)
     }
 }

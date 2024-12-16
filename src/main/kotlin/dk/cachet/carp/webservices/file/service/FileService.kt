@@ -12,7 +12,10 @@ import org.springframework.web.multipart.MultipartFile
  */
 interface FileService {
     /** The [delete] interface for deleting a file. */
-    fun delete(id: Int, studyId: UUID)
+    fun delete(
+        id: Int,
+        studyId: UUID,
+    )
 
     /** The [create] interface for creating a file. */
     fun create(
@@ -22,7 +25,10 @@ interface FileService {
     ): File
 
     /** The [download] interface for downloading a file for a given id and study id. */
-    fun download(id: Int, studyId: UUID): Pair<Resource, String>
+    fun download(
+        id: Int,
+        studyId: UUID,
+    ): Pair<Resource, String>
 
     /** The [getOne] interface for retrieving a file for a given id. */
     fun getOne(id: Int): File

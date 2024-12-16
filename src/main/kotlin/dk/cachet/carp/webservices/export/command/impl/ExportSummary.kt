@@ -7,7 +7,6 @@ import dk.cachet.carp.webservices.export.service.ResourceExporterService
 import dk.cachet.carp.webservices.file.util.FileUtil
 import org.apache.logging.log4j.LogManager
 import java.io.IOException
-import java.nio.file.Path
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.deleteRecursively

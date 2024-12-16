@@ -21,7 +21,7 @@ class FileUtilTest {
                 val filename = "filename"
 
                 every { environment.getProperty("storage.directory") } returns "/foo/bar/baz/"
-                val sut = FileUtil(filePermission, environment);
+                val sut = FileUtil(filePermission, environment)
 
                 val result = sut.resolveFileStorage(filename)
 
@@ -40,7 +40,7 @@ class FileUtilTest {
                 val relativePath = Path("/studies/study-1/")
 
                 every { environment.getProperty("storage.directory") } returns "/foo/bar/baz/"
-                val sut = FileUtil(filePermission, environment);
+                val sut = FileUtil(filePermission, environment)
 
                 val result = sut.resolveFileStoragePathForFilenameAndRelativePath(filename, relativePath)
 
