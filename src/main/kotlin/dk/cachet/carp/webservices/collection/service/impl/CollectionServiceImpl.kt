@@ -1,5 +1,6 @@
 package dk.cachet.carp.webservices.collection.service.impl
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import cz.jirutka.rsql.parser.RSQLParser
 import dk.cachet.carp.webservices.account.service.AccountService
 import dk.cachet.carp.webservices.collection.domain.Collection
@@ -29,6 +30,7 @@ class CollectionServiceImpl(
     private val accountService: AccountService,
     private val authenticationService: AuthenticationService,
     private val validationMessages: MessageBase,
+    private val objectMapper: ObjectMapper,
 ) : CollectionService {
     private val backgroundWorker = CoroutineScope(Dispatchers.IO)
 
@@ -102,7 +104,9 @@ class CollectionServiceImpl(
                 validationMessages.get("collection.studyId-and-collectionId.not_found", studyId, id),
             )
         }
-        return collectionOp.get()
+        val collection = collectionOp.get()
+        objectMapper.writeValueAsString(collection)
+        return collection
     }
 
     override fun getCollectionByStudyIdAndByName(
@@ -116,7 +120,9 @@ class CollectionServiceImpl(
                 validationMessages.get("collection.studyId-and-collectionName.not_found", studyId, name),
             )
         }
-        return collectionOp.get()
+        val collection = collectionOp.get()
+        objectMapper.writeValueAsString(collection)
+        return collection
     }
 
     /**
