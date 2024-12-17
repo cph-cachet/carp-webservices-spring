@@ -5,10 +5,7 @@ import dk.cachet.carp.webservices.file.domain.File
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
-import org.springframework.data.jpa.repository.Modifying
-import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
-import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 
 @Repository
@@ -19,14 +16,6 @@ interface FileRepository : JpaRepository<File, Int>, JpaSpecificationExecutor<Fi
     ): List<File>
 
     fun findByStudyId(studyId: String): List<File>
-
-    @Modifying
-    @Transactional
-    @Query(
-        nativeQuery = true,
-        value = "DELETE FROM files WHERE study_id = ?1",
-    )
-    fun deleteByStudyId(studyId: String)
 }
 
 // TODO: This is not a repository, dont't be mislead by that, it needs to be moved to its own service somewhere else.

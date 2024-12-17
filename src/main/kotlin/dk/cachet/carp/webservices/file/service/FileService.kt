@@ -12,6 +12,8 @@ interface FileService {
     /** The [delete] interface for deleting a file. */
     fun delete(id: Int)
 
+    suspend fun deleteAllByStudyId(studyId: String)
+
     /** The [create] interface for creating a file. */
     fun create(
         studyId: String,
