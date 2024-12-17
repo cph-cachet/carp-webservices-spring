@@ -13,7 +13,7 @@ import dk.cachet.carp.webservices.consent.repository.ConsentDocumentRepository
 import dk.cachet.carp.webservices.dataPoint.repository.DataPointRepository
 import dk.cachet.carp.webservices.document.repository.DocumentRepository
 import dk.cachet.carp.webservices.export.repository.ExportRepository
-import dk.cachet.carp.webservices.file.repository.FileRepository
+import dk.cachet.carp.webservices.file.service.FileService
 import dk.cachet.carp.webservices.study.domain.Study
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -35,9 +35,9 @@ class CoreStudyRepository(
     private val consentDocumentRepository: ConsentDocumentRepository,
     private val documentRepository: DocumentRepository,
     private val exportRepository: ExportRepository,
-    private val filesRepository: FileRepository,
     private val objectMapper: ObjectMapper,
     private val validationMessages: MessageBase,
+    private val fileService: FileService,
 ) : StudyRepository {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
@@ -100,7 +100,7 @@ class CoreStudyRepository(
             consentDocumentRepository.deleteAllByDeploymentIds(idsToRemove.map { it.stringRepresentation })
             dataPointRepository.deleteAllByDeploymentIds(idsToRemove.map { it.stringRepresentation })
 
-            filesRepository.deleteByStudyId(studyId.stringRepresentation)
+            fileService.deleteAllByStudyId(studyId.stringRepresentation)
             exportRepository.deleteByStudyId(studyId.stringRepresentation)
             studyRepository.deleteByStudyId(studyId.stringRepresentation)
 
