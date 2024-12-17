@@ -1,6 +1,5 @@
 package dk.cachet.carp.webservices
 
-import dk.cachet.carp.webservices.common.exception.file.FileStorageException
 import dk.cachet.carp.webservices.file.repository.FileRepository
 import org.springframework.beans.BeansException
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -10,11 +9,10 @@ import org.springframework.context.ApplicationContextAware
 import org.springframework.scheduling.annotation.EnableAsync
 import org.springframework.stereotype.Component
 import dk.cachet.carp.webservices.file.util.FileUtil
-import dk.cachet.carp.webservices.file.util.FileUtil.OS
-import org.apache.commons.io.FileUtils
+import org.apache.logging.log4j.LogManager
+import org.springframework.core.env.Environment
 import java.nio.file.Path
 import java.nio.file.Paths
-import org.springframework.core.env.Environment
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
@@ -30,8 +28,20 @@ fun main(args: Array<String>) {
 
 class REMOVE_AFTER_MIGRATION {
     fun run(ctx: ApplicationContext) {
+        LogManager.getLogger().info(">-----------------------------------------------------Starting migration https://github.com/cph-cachet/carp-webservices-spring/issues/195")
         val filesRepo = ctx.getBean(FileRepository::class.java)
         val fileUtil = ctx.getBean(FileUtil::class.java)
+        val environment = ctx.getBean(Environment::class.java)
+
+        if (environment.activeProfiles.get(0) != ("development")) {
+            LogManager.getLogger().info(">----------------------------------Migration skipped as its only meant for development environment")
+            return
+        }
+
+        if (fileUtil.isDirectory(fileUtil.filePath.resolve("studies"))) {
+            LogManager.getLogger().info(">----------------------------------Migration already completed previously")
+            return
+        }
 
         val files = filesRepo.findAll()
 
@@ -42,10 +52,20 @@ class REMOVE_AFTER_MIGRATION {
                     Path.of("studies", file.studyId),
                     fileUtil,
                 )
-                println(file.id)
+
+                val sourcePath = fileUtil.resolveFileStorage(file.storageName)
+
+                LogManager.getLogger().info("copyFileStart" + file.id)
+                copyFile(sourcePath, targetPath)
+                LogManager.getLogger().info("copyFileEnd" + file.id)
+
+                LogManager.getLogger().info("deleteFileStart" + file.id)
+                deleteFile(sourcePath)
+                LogManager.getLogger().info("deleteFileEnd" + file.id)
             }
         }
 
+        LogManager.getLogger().info(">-----------------------------------------------------Migration completed")
     }
 
     fun copyFile(sourcePath: Path, targetPath: Path) {
@@ -56,7 +76,15 @@ class REMOVE_AFTER_MIGRATION {
             // Copy the file from source to target
             Files.copy(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING)
         } catch (e: IOException) {
-            throw FileStorageException("Failed to copy file: ${e.message}")
+            LogManager.getLogger().info("Failed to copy file: ${e.message}")
+        }
+    }
+
+    fun deleteFile(file: Path) {
+        try {
+            Files.delete(file)
+        } catch (e: IOException) {
+            LogManager.getLogger().info("Failed to delete file: ${e.message}")
         }
     }
 
