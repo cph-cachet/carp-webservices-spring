@@ -17,6 +17,8 @@ interface FileService {
         studyId: UUID,
     )
 
+    suspend fun deleteAllByStudyId(studyId: String)
+
     /** The [create] interface for creating a file. */
     fun create(
         studyId: String,

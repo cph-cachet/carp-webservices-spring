@@ -21,7 +21,11 @@ import dk.cachet.carp.webservices.file.service.FileStorage
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
 import dk.cachet.carp.webservices.security.authorization.Claim
 import dk.cachet.carp.webservices.security.authorization.Role
-import kotlinx.coroutines.*
+import dk.cachet.carp.webservices.security.authorization.service.AuthorizationService
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.beans.factory.annotation.Value
@@ -45,6 +49,7 @@ class FileServiceImpl(
     private val s3Client: AmazonS3,
     private val authenticationService: AuthenticationService,
     private val accountService: AccountService,
+    private val authorizationService: AuthorizationService,
     @Value("\${s3.space.bucket}") private val s3SpaceBucket: String,
     @Value("\${s3.space.endpoint}") private val s3SpaceEndpoint: String,
 ) : FileService, ResourceExporter<File> {
@@ -146,6 +151,23 @@ class FileServiceImpl(
         backgroundWorker.launch {
             accountService.revoke(identity, setOf(Claim.FileOwner(file.id)))
         }
+    }
+
+    override suspend fun deleteAllByStudyId(studyId: String) {
+        val files =
+            withContext(Dispatchers.IO) {
+                fileRepository.findByStudyId(studyId)
+            }
+        val claimsToRemove = HashSet<Claim>()
+        files.forEach {
+            claimsToRemove.add(Claim.FileOwner(it.id))
+        }
+        authorizationService.revokeClaimsFromAllAccounts(claimsToRemove)
+
+        files.forEach { fileRepository.deleteById(it.id) }
+        files.forEach { fileStorage.deleteFile(it.storageName) }
+
+        LOGGER.info("All files deleted for study, studyId = $studyId")
     }
 
     /**
