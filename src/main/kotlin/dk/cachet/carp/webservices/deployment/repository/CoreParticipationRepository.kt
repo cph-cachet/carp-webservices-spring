@@ -45,7 +45,7 @@ class CoreParticipationRepository(
                 LOGGER.warn(
                     "Participant group was not found for deployment with id: ${studyDeploymentId.stringRepresentation}",
                 )
-                validationMessage.get("participantGroup.notFound", studyDeploymentId.stringRepresentation)
+                validationMessage.get("deployment.participant_group.not_found", studyDeploymentId.stringRepresentation)
                 return@withContext null
             }
             mapParticipantGroupSnapshotJsonNodeToParticipantGroup(group.snapshot!!)
