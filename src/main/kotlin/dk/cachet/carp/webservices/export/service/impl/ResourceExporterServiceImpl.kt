@@ -2,6 +2,7 @@ package dk.cachet.carp.webservices.export.service.impl
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import dk.cachet.carp.common.application.UUID
+import dk.cachet.carp.webservices.datastream.service.impl.DataStreamService
 import dk.cachet.carp.webservices.export.domain.ExportLog
 import dk.cachet.carp.webservices.export.service.ResourceExporter
 import dk.cachet.carp.webservices.export.service.ResourceExporterService
@@ -18,6 +19,7 @@ class ResourceExporterServiceImpl(
     private val objectMapper: ObjectMapper,
     private val studyRepository: CoreStudyRepository,
     beanFactory: ListableBeanFactory,
+    private val dataStreamService: DataStreamService,
 ) : ResourceExporterService {
     private val exporters = beanFactory.getBeansOfType(ResourceExporter::class.java).values
 
@@ -46,6 +48,8 @@ class ResourceExporterServiceImpl(
             val path = targetDir.resolve(it.dataFileName)
             writeResourceAsJson(path, exports, log)
         }
+
+        dataStreamService.exportDataOrThrow(studyDeploymentIds, targetDir)
 
         exportLogAsFile(log, targetDir)
     }

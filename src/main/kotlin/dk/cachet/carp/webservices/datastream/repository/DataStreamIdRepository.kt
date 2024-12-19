@@ -53,4 +53,12 @@ interface DataStreamIdRepository : JpaRepository<DataStreamId, Int> {
     fun getAllByDeploymentId(
         @Param("deploymentId") id: String,
     ): List<DataStreamId>
+
+    @Query(
+        nativeQuery = true,
+        value = "SELECT * FROM data_stream_ids WHERE id = :ids ",
+    )
+    fun findByDataStreamId(
+        @Param("ids") ids: Int,
+    ): DataStreamId?
 }
