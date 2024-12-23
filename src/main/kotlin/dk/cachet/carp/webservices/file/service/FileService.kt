@@ -19,8 +19,8 @@ interface FileService {
 
     suspend fun deleteAllByStudyId(studyId: String)
 
-    /** The [create] interface for creating a file. */
-    fun create(
+    /** The [createDEPRICATED] interface for creating a file. */
+    fun createDEPRICATED(
         studyId: String,
         file: MultipartFile,
         metadata: String?,

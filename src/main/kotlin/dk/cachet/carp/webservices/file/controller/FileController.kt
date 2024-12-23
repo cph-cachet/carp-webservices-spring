@@ -27,6 +27,7 @@ class FileController(private val fileService: FileService) {
         const val UPLOAD_IMAGE = "/api/studies/{${PathVariableName.STUDY_ID}}/images"
         const val DOWNLOAD = "$FILE_BASE/{${PathVariableName.FILE_ID}}/download"
         const val FILE_ID = "$FILE_BASE/{${PathVariableName.FILE_ID}}"
+        const val CREATE = "$FILE_BASE/{${PathVariableName.DEPLOYMENT_ID}}"
     }
 
     @GetMapping(FILE_BASE)
@@ -85,13 +86,36 @@ class FileController(private val fileService: FileService) {
     @Operation(tags = ["file/create.json"])
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
-    fun create(
+    @Deprecated("Use the other -create- method instead.")
+    fun createDEPRICATED(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @RequestParam(RequestParamName.METADATA, required = false) metadata: String?,
         @RequestPart file: MultipartFile,
     ): File {
         LOGGER.info("Start POST: /api/studies/$studyId/files")
-        return fileService.create(studyId.stringRepresentation, file, metadata)
+        return fileService.createDEPRICATED(studyId.stringRepresentation, file, metadata)
+    }
+
+    @PostMapping(
+        consumes = [
+            MediaType.MULTIPART_FORM_DATA_VALUE,
+            MediaType.APPLICATION_OCTET_STREAM_VALUE,
+        ],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+        value = [CREATE],
+    )
+    @Operation(tags = ["file/create.json"])
+    @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
+    @Deprecated("Use the other -create- method instead.")
+    fun create(
+        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
+        @PathVariable(PathVariableName.DEPLOYMENT_ID) deploymentId: UUID,
+        @RequestParam(RequestParamName.METADATA, required = false) metadata: String?,
+        @RequestPart file: MultipartFile,
+    ): File {
+        LOGGER.info("Start POST: /api/studies/$studyId/files/$deploymentId")
+        return fileService.createDEPRICATED(studyId.stringRepresentation, file, metadata)
     }
 
     @DeleteMapping(FILE_ID)

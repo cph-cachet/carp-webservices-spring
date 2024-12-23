@@ -98,7 +98,7 @@ class FileServiceImpl(
         return optionalFile.get()
     }
 
-    override fun create(
+    override fun createDEPRICATED(
         studyId: String,
         file: MultipartFile,
         metadata: String?,
@@ -121,6 +121,34 @@ class FileServiceImpl(
         }
 
         return saved
+    }
+
+    override fun create(
+        studyId: String,
+        deploymentId: UUID,
+        ownerId: UUID,
+        file: MultipartFile,
+        metadata: String?,
+    ): File {
+
+//        val filename = fileStorage.storeAtPath(file, Path.of("studies", studyId))
+//
+//        val saved =
+//            fileRepository.save(
+//                studyId,
+//                file,
+//                filename,
+//                metadata?.let { json -> ObjectMapper().readTree(json) },
+//            )
+//
+//        LOGGER.info("File saved, id = ${saved.id}")
+//
+//        val identity = authenticationService.getCarpIdentity()
+//        backgroundWorker.launch {
+//            accountService.grant(identity, setOf(Claim.FileOwner(saved.id)))
+//        }
+//
+//        return saved
     }
 
     override fun download(
