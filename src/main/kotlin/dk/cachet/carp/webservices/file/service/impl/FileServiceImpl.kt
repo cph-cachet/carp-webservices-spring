@@ -130,6 +130,7 @@ class FileServiceImpl(
         file: MultipartFile,
         metadata: String?,
     ): File {
+        return createDEPRICATED(studyId, file, metadata)
 
 //        val filename = fileStorage.storeAtPath(file, Path.of("studies", studyId))
 //

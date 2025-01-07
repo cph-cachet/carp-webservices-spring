@@ -26,6 +26,15 @@ interface FileService {
         metadata: String?,
     ): File
 
+    /** The [create] interface for creating a file. */
+    fun create(
+        studyId: String,
+        deploymentId: UUID,
+        ownerId: UUID,
+        file: MultipartFile,
+        metadata: String?,
+    ): File
+
     /** The [download] interface for downloading a file for a given id and study id. */
     fun download(
         id: Int,
