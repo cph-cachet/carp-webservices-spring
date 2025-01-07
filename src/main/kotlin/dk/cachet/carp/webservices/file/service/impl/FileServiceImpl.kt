@@ -98,7 +98,8 @@ class FileServiceImpl(
         return optionalFile.get()
     }
 
-    override fun createDEPRICATED(
+    @Deprecated("Use -create- instead")
+    override fun createDEPRECATED(
         studyId: String,
         file: MultipartFile,
         metadata: String?,
@@ -113,7 +114,7 @@ class FileServiceImpl(
                 metadata?.let { json -> ObjectMapper().readTree(json) },
             )
 
-        LOGGER.info("File saved, id = ${saved.id}")
+        LOGGER.info("File saved (deprecated method), id = ${saved.id}")
 
         val identity = authenticationService.getCarpIdentity()
         backgroundWorker.launch {
@@ -124,15 +125,16 @@ class FileServiceImpl(
     }
 
     override fun create(
-        studyId: String,
+        studyId: UUID,
         deploymentId: UUID,
         ownerId: UUID,
         file: MultipartFile,
         metadata: String?,
     ): File {
-        return createDEPRICATED(studyId, file, metadata)
+        //todo from here
+        return createDEPRECATED(studyId, file, metadata)
 
-//        val filename = fileStorage.storeAtPath(file, Path.of("studies", studyId))
+        val filename = fileStorage.storeAtPath(file, Path.of("studies", studyId.stringRepresentation, "deployments", deploymentId.stringRepresentation))
 //
 //        val saved =
 //            fileRepository.save(

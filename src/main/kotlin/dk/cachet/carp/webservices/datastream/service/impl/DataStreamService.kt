@@ -213,15 +213,15 @@ class DataStreamService(
         val dataStreamId =
             DataStreamId(
                 studyDeploymentId =
-                    UUID(
-                        id.studyDeploymentId ?: error("StudyDeploymentId not found"),
-                    ),
+                UUID(
+                    id.studyDeploymentId ?: error("StudyDeploymentId not found"),
+                ),
                 deviceRoleName = id.deviceRoleName ?: error("DeviceRoleName is null"),
                 dataType =
-                    DataType(
-                        namespace = id.nameSpace ?: error("NameSpace is null"),
-                        name = id.name ?: error("Name is null"),
-                    ),
+                DataType(
+                    namespace = id.nameSpace ?: error("NameSpace is null"),
+                    name = id.name ?: error("Name is null"),
+                ),
             )
 
         try {

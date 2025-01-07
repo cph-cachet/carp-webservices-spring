@@ -24,9 +24,9 @@ interface ParticipantGroupRepository : JpaRepository<ParticipantGroup, Int> {
     @Query(
         nativeQuery = true,
         value =
-            "SELECT p.* FROM participant_groups p " +
-                "CROSS JOIN LATERAL jsonb_array_elements(p.snapshot -> 'participations') AS a " +
-                "WHERE a ->> 'accountId' = ?1",
+        "SELECT p.* FROM participant_groups p " +
+            "CROSS JOIN LATERAL jsonb_array_elements(p.snapshot -> 'participations') AS a " +
+            "WHERE a ->> 'accountId' = ?1",
     )
     fun findAllByAccountId(accountId: String): List<ParticipantGroup>
 

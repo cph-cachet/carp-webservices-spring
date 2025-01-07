@@ -5,6 +5,7 @@ import dk.cachet.carp.webservices.common.constants.PathVariableName
 import dk.cachet.carp.webservices.common.constants.RequestParamName
 import dk.cachet.carp.webservices.file.domain.File
 import dk.cachet.carp.webservices.file.service.FileService
+import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
 import io.swagger.v3.oas.annotations.Operation
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -18,7 +19,7 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 
 @RestController
-class FileController(private val fileService: FileService) {
+class FileController(private val fileService: FileService, private val authenticationService: AuthenticationService) {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
 
@@ -93,7 +94,7 @@ class FileController(private val fileService: FileService) {
         @RequestPart file: MultipartFile,
     ): File {
         LOGGER.info("Start POST: /api/studies/$studyId/files")
-        return fileService.createDEPRICATED(studyId.stringRepresentation, file, metadata)
+        return fileService.createDEPRECATED(studyId.stringRepresentation, file, metadata)
     }
 
     @PostMapping(
@@ -115,7 +116,8 @@ class FileController(private val fileService: FileService) {
         @RequestPart file: MultipartFile,
     ): File {
         LOGGER.info("Start POST: /api/studies/$studyId/files/$deploymentId")
-        return fileService.createDEPRICATED(studyId.stringRepresentation, file, metadata)
+        val ownerId = authenticationService.getId()
+        return fileService.create(studyId, deploymentId, ownerId, file, metadata)
     }
 
     @DeleteMapping(FILE_ID)
