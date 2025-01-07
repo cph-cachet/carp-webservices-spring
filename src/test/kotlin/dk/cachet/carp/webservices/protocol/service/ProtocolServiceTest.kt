@@ -16,7 +16,6 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.Clock
-import kotlinx.datetime.toJavaInstant
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import kotlin.test.Test
@@ -62,12 +61,12 @@ class ProtocolServiceTest {
                         mockk<Protocol> {
                             every { versionTag } returns "version 1"
                             every { snapshot } returns mockk<JsonNode>()
-                            every { createdAt } returns yesterday.toJavaInstant()
+                            every { createdAt } returns yesterday
                         },
                         mockk<Protocol> {
                             every { versionTag } returns "version 2"
                             every { snapshot } returns mockk<JsonNode>()
-                            every { createdAt } returns now.toJavaInstant()
+                            every { createdAt } returns now
                         },
                     )
 
