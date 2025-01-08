@@ -48,5 +48,21 @@ class FileUtilTest {
                 assertEquals(expected, result)
             }
         }
+
+        @Test
+        fun `should resolve file storage path for filename and relative path 2`() {
+            runTest {
+                val filename = "filename.lol"
+                val relativePath = java.nio.file.Path.of("studies", "123", "deployments", "456")
+
+                every { environment.getProperty("storage.directory") } returns "/foo/bar/baz/"
+                val sut = FileUtil(filePermission, environment)
+
+                val result = sut.resolveFileStoragePathForFilenameAndRelativePath(filename, relativePath)
+
+                val expected = Path(FileUtils.getUserDirectoryPath() + "/foo/bar/baz/studies/123/deployments/456/filename.lol")
+                assertEquals(expected, result)
+            }
+        }
     }
 }

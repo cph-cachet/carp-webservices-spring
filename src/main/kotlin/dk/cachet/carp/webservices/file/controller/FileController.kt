@@ -31,6 +31,17 @@ class FileController(private val fileService: FileService, private val authentic
         const val CREATE = "$FILE_BASE/{${PathVariableName.DEPLOYMENT_ID}}"
     }
 
+    @GetMapping(FILE_ID)
+    @Operation(tags = ["file/getOne.json"])
+    @PreAuthorize("canManageStudy(#studyId) or @fileControllerAuthorizer.isFileOwner(#fileId)")
+    fun getOne(
+        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
+        @PathVariable(PathVariableName.FILE_ID) fileId: Int,
+    ): File {
+        LOGGER.info("Start GET: /api/studies/$studyId/files/$fileId")
+        return fileService.getOne(fileId)
+    }
+
     @GetMapping(FILE_BASE)
     @Operation(tags = ["file/getAll.json"])
     @PreAuthorize("canManageStudy(#studyId)")
@@ -42,17 +53,6 @@ class FileController(private val fileService: FileService, private val authentic
         return fileService.getAll(query, studyId.stringRepresentation)
     }
 
-    @GetMapping(FILE_ID)
-    @Operation(tags = ["file/getOne.json"])
-    @PreAuthorize("canManageStudy(#studyId) or isFileOwner(#fileId)")
-    fun getOne(
-        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
-        @PathVariable(PathVariableName.FILE_ID) fileId: Int,
-    ): File {
-        LOGGER.info("Start GET: /api/studies/$studyId/files/$fileId")
-        return fileService.getOne(fileId)
-    }
-
     @GetMapping(
         produces = [
             MediaType.MULTIPART_FORM_DATA_VALUE,
@@ -62,7 +62,7 @@ class FileController(private val fileService: FileService, private val authentic
     )
     @ResponseBody
     @Operation(tags = ["file/download.json"])
-    @PreAuthorize("canManageStudy(#studyId) or isFileOwner(#id)")
+    @PreAuthorize("canManageStudy(#studyId) or @fileControllerAuthorizer.isFileOwner(#id)")
     fun download(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @PathVariable(PathVariableName.FILE_ID) id: Int,
@@ -123,7 +123,7 @@ class FileController(private val fileService: FileService, private val authentic
     @DeleteMapping(FILE_ID)
     @Operation(tags = ["file/delete.json"])
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("canManageStudy(#studyId) or isFileOwner(#fileId)")
+    @PreAuthorize("canManageStudy(#studyId) or @fileControllerAuthorizer.isFileOwner(#fileId)")
     fun delete(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @PathVariable(PathVariableName.FILE_ID) fileId: Int,

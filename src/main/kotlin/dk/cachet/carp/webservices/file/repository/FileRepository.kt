@@ -27,12 +27,16 @@ interface FileRepositoryCustom {
      * @param uploadedFile The [uploadedFile] in a multipart request.
      * @param fileName The [fileName] of the file.
      * @param metadata The [metadata] of the file.
+     * @param ownerId The [ownerId] of the file.
+     * @param deploymentId The [deploymentId] of the file.
      */
     fun save(
         studyId: String,
         uploadedFile: MultipartFile,
         fileName: String,
         metadata: JsonNode?,
+        ownerId: String?,
+        deploymentId: String?,
     ): File
 }
 
@@ -46,12 +50,17 @@ class FileRepositoryImpl(
      * @param studyId The [studyId] of the study to save the file.
      * @param uploadedFile The [uploadedFile] to be saved to the filesystem.
      * @param fileName The [fileName] of the file.
+     * @param metadata The [metadata] of the file.
+     * @param ownerId The [ownerId] of the file.
+     * @param deploymentId The [deploymentId] of the file.
      */
     override fun save(
         studyId: String,
         uploadedFile: MultipartFile,
         fileName: String,
         metadata: JsonNode?,
+        ownerId: String?,
+        deploymentId: String?,
     ): File {
         val file =
             File(
@@ -59,6 +68,8 @@ class FileRepositoryImpl(
                 storageName = fileName,
                 originalName = uploadedFile.originalFilename!!,
                 metadata = metadata,
+                ownerId = ownerId,
+                deploymentId = deploymentId,
             )
         return fileRepository.save(file)
     }

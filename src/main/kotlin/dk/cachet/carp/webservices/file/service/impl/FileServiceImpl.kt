@@ -49,7 +49,6 @@ class FileServiceImpl(
     private val s3Client: AmazonS3,
     private val authenticationService: AuthenticationService,
     private val accountService: AccountService,
-    private val authorizationService: AuthorizationService,
     @Value("\${s3.space.bucket}") private val s3SpaceBucket: String,
     @Value("\${s3.space.endpoint}") private val s3SpaceEndpoint: String,
 ) : FileService, ResourceExporter<File> {
@@ -112,6 +111,8 @@ class FileServiceImpl(
                 file,
                 filename,
                 metadata?.let { json -> ObjectMapper().readTree(json) },
+                null,
+                null,
             )
 
         LOGGER.info("File saved (deprecated method), id = ${saved.id}")
@@ -131,27 +132,21 @@ class FileServiceImpl(
         file: MultipartFile,
         metadata: String?,
     ): File {
-        //todo from here
-        return createDEPRECATED(studyId, file, metadata)
-
         val filename = fileStorage.storeAtPath(file, Path.of("studies", studyId.stringRepresentation, "deployments", deploymentId.stringRepresentation))
-//
-//        val saved =
-//            fileRepository.save(
-//                studyId,
-//                file,
-//                filename,
-//                metadata?.let { json -> ObjectMapper().readTree(json) },
-//            )
-//
-//        LOGGER.info("File saved, id = ${saved.id}")
-//
-//        val identity = authenticationService.getCarpIdentity()
-//        backgroundWorker.launch {
-//            accountService.grant(identity, setOf(Claim.FileOwner(saved.id)))
-//        }
-//
-//        return saved
+
+        val saved =
+            fileRepository.save(
+                studyId = studyId.stringRepresentation,
+                uploadedFile = file,
+                fileName = filename,
+                metadata = metadata?.let { json -> ObjectMapper().readTree(json) },
+                ownerId = ownerId.stringRepresentation,
+                deploymentId = deploymentId.stringRepresentation,
+            )
+
+        LOGGER.info("File saved, id = ${saved.id}")
+
+        return saved
     }
 
     override fun download(
@@ -177,11 +172,6 @@ class FileServiceImpl(
         fileRepository.delete(file)
 
         LOGGER.info("File deleted, id = $id")
-
-        val identity = authenticationService.getCarpIdentity()
-        backgroundWorker.launch {
-            accountService.revoke(identity, setOf(Claim.FileOwner(file.id)))
-        }
     }
 
     override suspend fun deleteAllByStudyId(studyId: String) {
@@ -189,11 +179,6 @@ class FileServiceImpl(
             withContext(Dispatchers.IO) {
                 fileRepository.findByStudyId(studyId)
             }
-        val claimsToRemove = HashSet<Claim>()
-        files.forEach {
-            claimsToRemove.add(Claim.FileOwner(it.id))
-        }
-        authorizationService.revokeClaimsFromAllAccounts(claimsToRemove)
 
         files.forEach { fileRepository.deleteById(it.id) }
         files.forEach { fileStorage.deleteFile(it.storageName) }
