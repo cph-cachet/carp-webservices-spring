@@ -27,4 +27,6 @@ data class File(
     var metadata: JsonNode? = null,
     @field:NotNull
     var studyId: String = "",
+    var ownerId: String? = null,
+    var deploymentId: String? = null,
 ) : Auditable()

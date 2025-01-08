@@ -70,11 +70,11 @@ interface DataPointRepository :
     @Query(
         nativeQuery = true,
         value =
-            "select deployment_id as did, " +
-                "count(*) as total, " +
-                "carp_header->'data_format'->>'name' as format, " +
-                "cast(created_at as DATE) as stamp " +
-                "from data_points where deployment_id in (:ids) group by deployment_id, stamp, format",
+        "select deployment_id as did, " +
+            "count(*) as total, " +
+            "carp_header->'data_format'->>'name' as format, " +
+            "cast(created_at as DATE) as stamp " +
+            "from data_points where deployment_id in (:ids) group by deployment_id, stamp, format",
     )
     fun getStatistics(
         @Param("ids") deploymentIds: Collection<String>,

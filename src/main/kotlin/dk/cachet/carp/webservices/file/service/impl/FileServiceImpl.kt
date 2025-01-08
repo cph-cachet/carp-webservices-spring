@@ -29,6 +29,7 @@ import kotlinx.coroutines.withContext
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.core.io.Resource
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.StringUtils
@@ -48,7 +49,6 @@ class FileServiceImpl(
     private val s3Client: AmazonS3,
     private val authenticationService: AuthenticationService,
     private val accountService: AccountService,
-    private val authorizationService: AuthorizationService,
     @Value("\${s3.space.bucket}") private val s3SpaceBucket: String,
     @Value("\${s3.space.endpoint}") private val s3SpaceEndpoint: String,
 ) : FileService, ResourceExporter<File> {
@@ -97,12 +97,13 @@ class FileServiceImpl(
         return optionalFile.get()
     }
 
-    override fun create(
+    @Deprecated("Use -create- instead")
+    override fun createDEPRECATED(
         studyId: String,
         file: MultipartFile,
         metadata: String?,
     ): File {
-        val filename = fileStorage.store(file)
+        val filename = fileStorage.storeAtPath(file, Path.of("studies", studyId))
 
         val saved =
             fileRepository.save(
@@ -110,9 +111,11 @@ class FileServiceImpl(
                 file,
                 filename,
                 metadata?.let { json -> ObjectMapper().readTree(json) },
+                null,
+                null,
             )
 
-        LOGGER.info("File saved, id = ${saved.id}")
+        LOGGER.info("File saved (deprecated method), id = ${saved.id}")
 
         val identity = authenticationService.getCarpIdentity()
         backgroundWorker.launch {
@@ -122,17 +125,53 @@ class FileServiceImpl(
         return saved
     }
 
-    override fun delete(id: Int) {
+    override fun create(
+        studyId: UUID,
+        deploymentId: UUID,
+        ownerId: UUID,
+        file: MultipartFile,
+        metadata: String?,
+    ): File {
+        val filename = fileStorage.storeAtPath(file, Path.of("studies", studyId.stringRepresentation, "deployments", deploymentId.stringRepresentation))
+
+        val saved =
+            fileRepository.save(
+                studyId = studyId.stringRepresentation,
+                uploadedFile = file,
+                fileName = filename,
+                metadata = metadata?.let { json -> ObjectMapper().readTree(json) },
+                ownerId = ownerId.stringRepresentation,
+                deploymentId = deploymentId.stringRepresentation,
+            )
+
+        LOGGER.info("File saved, id = ${saved.id}")
+
+        return saved
+    }
+
+    override fun download(
+        id: Int,
+        studyId: UUID,
+    ): Pair<Resource, String> {
         val file = getOne(id)
-        fileStorage.deleteFile(file.storageName)
+        val fileToDownload =
+            fileStorage.getFileAtPath(
+                file.storageName,
+                Path.of("studies", studyId.stringRepresentation),
+            )
+
+        return Pair(fileToDownload, file.originalName)
+    }
+
+    override fun delete(
+        id: Int,
+        studyId: UUID,
+    ) {
+        val file = getOne(id)
+        fileStorage.deleteFileAtPath(file.storageName, Path.of("studies", studyId.stringRepresentation))
         fileRepository.delete(file)
 
         LOGGER.info("File deleted, id = $id")
-
-        val identity = authenticationService.getCarpIdentity()
-        backgroundWorker.launch {
-            accountService.revoke(identity, setOf(Claim.FileOwner(file.id)))
-        }
     }
 
     override suspend fun deleteAllByStudyId(studyId: String) {
@@ -140,11 +179,6 @@ class FileServiceImpl(
             withContext(Dispatchers.IO) {
                 fileRepository.findByStudyId(studyId)
             }
-        val claimsToRemove = HashSet<Claim>()
-        files.forEach {
-            claimsToRemove.add(Claim.FileOwner(it.id))
-        }
-        authorizationService.revokeClaimsFromAllAccounts(claimsToRemove)
 
         files.forEach { fileRepository.deleteById(it.id) }
         files.forEach { fileStorage.deleteFile(it.storageName) }
@@ -213,7 +247,11 @@ class FileServiceImpl(
     ) = withContext(Dispatchers.IO) {
         getAll(null, studyId.stringRepresentation)
             .onEach {
-                val resource = fileStorage.getResource(it.storageName)
+                val resource =
+                    fileStorage.getResourceAtPath(
+                        it.storageName,
+                        Path.of("studies", studyId.stringRepresentation),
+                    )
                 val copyPath = target.resolve(it.originalName)
                 Files.copy(resource.file.toPath(), copyPath)
             }

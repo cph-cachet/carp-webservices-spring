@@ -14,11 +14,11 @@ interface DataStreamSequenceRepository : JpaRepository<DataStreamSequence, Int> 
     @Query(
         nativeQuery = true,
         value =
-            "SELECT * FROM data_stream_sequence " +
-                "WHERE data_stream_id = :dataStreamId " +
-                "AND ( (first_sequence_id <= :from AND last_sequence_id >= :from) " +
-                "OR (last_sequence_id <= :to AND last_sequence_id >= :from) " +
-                "OR (first_sequence_id <= :to AND first_sequence_id >= :from) )",
+        "SELECT * FROM data_stream_sequence " +
+            "WHERE data_stream_id = :dataStreamId " +
+            "AND ( (first_sequence_id <= :from AND last_sequence_id >= :from) " +
+            "OR (last_sequence_id <= :to AND last_sequence_id >= :from) " +
+            "OR (first_sequence_id <= :to AND first_sequence_id >= :from) )",
     )
     fun findAllBySequenceIdRange(
         @Param("dataStreamId") dataStreamId: Int,

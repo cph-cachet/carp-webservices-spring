@@ -20,10 +20,10 @@ interface ProtocolRepository : JpaRepository<Protocol, String> {
      */
     @Query(
         value =
-            "SELECT DISTINCT ON (snapshot->>'id') snapshot->>'id', * " +
-                "FROM protocols " +
-                "where snapshot->>'ownerId'= ?1 " +
-                "ORDER BY (snapshot->>'id'), created_at DESC ",
+        "SELECT DISTINCT ON (snapshot->>'id') snapshot->>'id', * " +
+            "FROM protocols " +
+            "where snapshot->>'ownerId'= ?1 " +
+            "ORDER BY (snapshot->>'id'), created_at DESC ",
         nativeQuery = true,
     )
     fun findAllByOwnerId(ownerId: String): List<Protocol>
@@ -38,9 +38,9 @@ interface ProtocolRepository : JpaRepository<Protocol, String> {
      */
     @Query(
         value =
-            "SELECT * FROM protocols WHERE snapshot->>'id' = ?1" +
-                " AND (?2 IS NULL OR version_tag = cast(?2 as varchar))" +
-                " ORDER BY created_at DESC",
+        "SELECT * FROM protocols WHERE snapshot->>'id' = ?1" +
+            " AND (?2 IS NULL OR version_tag = cast(?2 as varchar))" +
+            " ORDER BY created_at DESC",
         nativeQuery = true,
     )
     fun findByParams(
@@ -58,10 +58,10 @@ interface ProtocolRepository : JpaRepository<Protocol, String> {
 
     @Query(
         value =
-            "SELECT * FROM protocols WHERE snapshot->>'id' = :id" +
-                " ORDER BY :desc" +
-                ", CASE WHEN :desc THEN created_at END DESC" +
-                ", CASE WHEN NOT :desc THEN created_at END",
+        "SELECT * FROM protocols WHERE snapshot->>'id' = :id" +
+            " ORDER BY :desc" +
+            ", CASE WHEN :desc THEN created_at END DESC" +
+            ", CASE WHEN NOT :desc THEN created_at END",
         nativeQuery = true,
     )
     fun findAllByIdSortByCreatedAt(

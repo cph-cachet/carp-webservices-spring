@@ -54,6 +54,33 @@ class FileStorageImpl(
     }
 
     /**
+     * Similar to [store], but allows storing the file at a specific path relative to the base storage directory.
+     * E.g. /Users/johnpork/home/carp/storage/local/studies/123 where /studies/123/ is the relativePathFromBase
+     * argument to method call.
+     *
+     * @param file The [file] to store into the file storage.
+     * @throws FileStorageException when the file cannot be stored/written into the storage.
+     * @return A [file] stored in the storage.
+     */
+    override fun storeAtPath(
+        file: MultipartFile,
+        relativePathFromBase: Path,
+    ): String {
+        val fileName = generateFileName(file)
+        val filePath = fileUtil.resolveFileStoragePathForFilenameAndRelativePath(fileName, relativePathFromBase)
+
+        try {
+            file.inputStream.use { inputStream ->
+                Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING)
+            }
+            return fileName
+        } catch (ex: IOException) {
+            LOGGER.error("Failed to store the file ${file.originalFilename} into file storage. ", ex)
+            throw FileStorageException(validationMessages.get("file.store.failed", file.originalFilename!!))
+        }
+    }
+
+    /**
      * The function [getFile] retrieves the file with the given [fileName] parameter.
      *
      * @param fileName The [fileName] of the file to retrieve.
@@ -63,6 +90,34 @@ class FileStorageImpl(
     override fun getFile(fileName: String): Resource {
         try {
             val file = resolveFullPathForFilename(fileName)
+            val resource = UrlResource(file.toUri())
+            if (resource.exists() || resource.isReadable) {
+                return resource
+            }
+
+            throw ResourceNotFoundException(validationMessages.get("file.store.file.exists", fileName))
+        } catch (ex: MalformedURLException) {
+            LOGGER.error("Unable to resolve file location: $fileName", ex)
+            throw BadRequestException(
+                validationMessages.get("file.store.file.resolve", fileName, ex.message.toString()),
+            )
+        }
+    }
+
+    /**
+     * The function [getFileAtPath] retrieves the file with the given [fileName], [relativePathFromBase] parameters.
+     *
+     * @param fileName The [fileName] of the file to retrieve.
+     * @param relativePathFromBase The [relativePathFromBase] path of the file.
+     * @throws FileStorageException when the file does not exist or is not readable.
+     * @return The [Resource] of the file requested.
+     */
+    override fun getFileAtPath(
+        fileName: String,
+        relativePathFromBase: Path,
+    ): Resource {
+        try {
+            val file = resolveFullPathForFilenameAndRelativePath(fileName, relativePathFromBase)
             val resource = UrlResource(file.toUri())
             if (resource.exists() || resource.isReadable) {
                 return resource
@@ -93,6 +148,25 @@ class FileStorageImpl(
     }
 
     /**
+     * Delete the file from storage.
+     *
+     * @param filename The [filename] to remove.
+     * @param relativePathFromBase The [relativePathFromBase] path of the file.
+     * @return true if successful, false if not.
+     */
+    override fun deleteFileAtPath(
+        filename: String,
+        relativePathFromBase: Path,
+    ): Boolean {
+        val file = resolveFullPathForFilenameAndRelativePath(filename, relativePathFromBase)
+        if (Files.exists(file)) {
+            Files.delete(file)
+            return true
+        }
+        return false
+    }
+
+    /**
      * The function [getResource] retrieves the resource with the given [fileName] parameter.
      *
      * @param fileName The [fileName] of the file to retrieve.
@@ -102,6 +176,41 @@ class FileStorageImpl(
     override fun getResource(fileName: String): Resource {
         try {
             val file = resolveFullPathForFilename(fileName)
+
+            if (!Files.exists(file)) {
+                throw ResourceNotFoundException(validationMessages.get("file.store.file.exists", fileName))
+            }
+
+            return UrlResource(file.toUri())
+        } catch (ex: MalformedURLException) {
+            LOGGER.error("Unable to resolve file location: $fileName", ex)
+            throw BadRequestException(
+                validationMessages.get("file.store.file.resolve", fileName, ex.message.toString()),
+            )
+        }
+    }
+
+    /**
+     * The function [getResourceAtPath] retrieves the resource with the given [fileName], [relativePathFromBase]
+     * parameters.
+     *
+     * @param fileName The [fileName] of the file to retrieve.
+     * @param relativePathFromBase The [relativePathFromBase] path of the file.
+     * @throws FileStorageException when the file does not exist or is not readable.
+     * @return The [Resource] of the file requested.
+     */
+
+    override fun getResourceAtPath(
+        fileName: String,
+        relativePathFromBase: Path,
+    ): Resource {
+        try {
+            val file = resolveFullPathForFilenameAndRelativePath(fileName, relativePathFromBase)
+
+            if (!Files.exists(file)) {
+                throw ResourceNotFoundException(validationMessages.get("file.store.file.exists", fileName))
+            }
+
             return UrlResource(file.toUri())
         } catch (ex: MalformedURLException) {
             LOGGER.error("Unable to resolve file location: $fileName", ex)
@@ -137,5 +246,12 @@ class FileStorageImpl(
      */
     private fun resolveFullPathForFilename(fileName: String): Path {
         return fileUtil.resolveFileStorage(fileName)
+    }
+
+    private fun resolveFullPathForFilenameAndRelativePath(
+        fileName: String,
+        relativePath: Path,
+    ): Path {
+        return fileUtil.resolveFileStoragePathForFilenameAndRelativePath(fileName, relativePath)
     }
 }
