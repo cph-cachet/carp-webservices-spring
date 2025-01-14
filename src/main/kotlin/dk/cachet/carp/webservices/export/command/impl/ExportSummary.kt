@@ -3,6 +3,7 @@ package dk.cachet.carp.webservices.export.command.impl
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.webservices.export.command.ExportCommand
 import dk.cachet.carp.webservices.export.domain.Export
+import dk.cachet.carp.webservices.export.domain.ExportType
 import dk.cachet.carp.webservices.export.service.ResourceExporterService
 import dk.cachet.carp.webservices.file.util.FileUtil
 import org.apache.logging.log4j.LogManager
@@ -10,6 +11,7 @@ import java.io.IOException
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.deleteRecursively
+import java.nio.file.Path
 
 class ExportSummary(
     entry: Export,
@@ -26,7 +28,16 @@ class ExportSummary(
     @OptIn(ExperimentalPathApi::class)
     override suspend fun execute() {
         val workingDir = createTempDirectory()
-        val zipPath = fileUtil.resolveFileStorage(entry.fileName)
+        val zipPath = if (entry.type == ExportType.STUDY_DATA) {
+            fileUtil.resolveFileStoragePathForFilenameAndRelativePath(
+                entry.fileName,
+                Path.of("studies", entry.studyId, "exports")
+            )
+        } else {
+            fileUtil.resolveFileStoragePathForFilenameAndRelativePath(
+                entry.fileName,
+                Path.of("studies", entry.studyId, "deployments", deploymentIds!!.first().stringRepresentation, "exports"))
+        }
 
         resourceExporter.exportStudyData(UUID(entry.studyId), deploymentIds, workingDir, logger)
 

@@ -251,7 +251,7 @@ class FileServiceImpl(
         getAll(null, studyId.stringRepresentation).onEach {
             val resource = fileStorage.getResourceAtPath(
                 it.storageName,
-                Path.of("studies", studyId.stringRepresentation),
+                Path.of("studies", studyId.stringRepresentation, "deployments", it.deploymentId ?: "unknown"),
             )
             val copyPath = target.resolve(it.originalName)
             Files.copy(resource.file.toPath(), copyPath)
