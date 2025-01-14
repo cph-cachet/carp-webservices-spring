@@ -70,18 +70,14 @@ class FileServiceImpl(
             return fileRepository.findByStudyId(studyId)
         } else {
             query?.let {
-                val queryForRole =
-                    if (!isResearcher) {
-                        // Return data relevant to this user only.
-                        "$query;created_by==$id;study_id==$studyId"
-                    } else {
-                        // Return data relevant to this study.
-                        "$query;study_id==$studyId"
-                    }
-                val specification =
-                    RSQLParser()
-                        .parse(queryForRole)
-                        .accept(QueryVisitor<File>())
+                val queryForRole = if (!isResearcher) {
+                    // Return data relevant to this user only.
+                    "$query;created_by==$id;study_id==$studyId"
+                } else {
+                    // Return data relevant to this study.
+                    "$query;study_id==$studyId"
+                }
+                val specification = RSQLParser().parse(queryForRole).accept(QueryVisitor<File>())
                 return fileRepository.findAll(specification)
             }
             return fileRepository.findByStudyIdAndCreatedBy(studyId, id.stringRepresentation)
@@ -103,24 +99,20 @@ class FileServiceImpl(
         file: MultipartFile,
         metadata: String?,
     ): File {
-        val filename = fileStorage.storeAtPath(file, Path.of("studies", studyId))
+        val filename = fileStorage.storeAtPath(
+            file, Path.of("studies", studyId, "deployments", "unknown")
+        )
 
-        val saved =
-            fileRepository.save(
-                studyId,
-                file,
-                filename,
-                metadata?.let { json -> ObjectMapper().readTree(json) },
-                null,
-                null,
-            )
+        val saved = fileRepository.save(
+            studyId,
+            file,
+            filename,
+            metadata?.let { json -> ObjectMapper().readTree(json) },
+            null,
+            null,
+        )
 
         LOGGER.info("File saved (deprecated method), id = ${saved.id}")
-
-        val identity = authenticationService.getCarpIdentity()
-        backgroundWorker.launch {
-            accountService.grant(identity, setOf(Claim.FileOwner(saved.id)))
-        }
 
         return saved
     }
@@ -132,17 +124,18 @@ class FileServiceImpl(
         file: MultipartFile,
         metadata: String?,
     ): File {
-        val filename = fileStorage.storeAtPath(file, Path.of("studies", studyId.stringRepresentation, "deployments", deploymentId.stringRepresentation))
+        val filename = fileStorage.storeAtPath(
+            file, Path.of("studies", studyId.stringRepresentation, "deployments", deploymentId.stringRepresentation)
+        )
 
-        val saved =
-            fileRepository.save(
-                studyId = studyId.stringRepresentation,
-                uploadedFile = file,
-                fileName = filename,
-                metadata = metadata?.let { json -> ObjectMapper().readTree(json) },
-                ownerId = ownerId.stringRepresentation,
-                deploymentId = deploymentId.stringRepresentation,
-            )
+        val saved = fileRepository.save(
+            studyId = studyId.stringRepresentation,
+            uploadedFile = file,
+            fileName = filename,
+            metadata = metadata?.let { json -> ObjectMapper().readTree(json) },
+            ownerId = ownerId.stringRepresentation,
+            deploymentId = deploymentId.stringRepresentation,
+        )
 
         LOGGER.info("File saved, id = ${saved.id}")
 
@@ -154,11 +147,14 @@ class FileServiceImpl(
         studyId: UUID,
     ): Pair<Resource, String> {
         val file = getOne(id)
-        val fileToDownload =
-            fileStorage.getFileAtPath(
-                file.storageName,
-                Path.of("studies", studyId.stringRepresentation),
-            )
+        val studyId1 = file.studyId
+        val deploymentId = file.deploymentId ?: "unknown"
+
+
+        val fileToDownload = fileStorage.getFileAtPath(
+            file.storageName,
+            Path.of("studies", studyId1, "deployments", deploymentId),
+        )
 
         return Pair(fileToDownload, file.originalName)
     }
@@ -168,20 +164,27 @@ class FileServiceImpl(
         studyId: UUID,
     ) {
         val file = getOne(id)
-        fileStorage.deleteFileAtPath(file.storageName, Path.of("studies", studyId.stringRepresentation))
+        val studyId1 = file.studyId
+        val deploymentId = file.deploymentId ?: "unknown"
+
+        fileStorage.deleteFileAtPath(file.storageName, Path.of("studies", studyId1, "deployments", deploymentId))
         fileRepository.delete(file)
 
         LOGGER.info("File deleted, id = $id")
     }
 
     override suspend fun deleteAllByStudyId(studyId: String) {
-        val files =
-            withContext(Dispatchers.IO) {
-                fileRepository.findByStudyId(studyId)
-            }
+        val files = withContext(Dispatchers.IO) {
+            fileRepository.findByStudyId(studyId)
+        }
 
         files.forEach { fileRepository.deleteById(it.id) }
-        files.forEach { fileStorage.deleteFile(it.storageName) }
+        files.forEach {
+            fileStorage.deleteFileAtPath(
+                it.storageName,
+                Path.of("studies", studyId, "deployments", it.deploymentId ?: "unknown"),
+            )
+        }
 
         LOGGER.info("All files deleted for study, studyId = $studyId")
     }
@@ -211,16 +214,16 @@ class FileServiceImpl(
         }
 
         s3Client.putObject(
-            PutObjectRequest(s3SpaceBucket, filename, file.inputStream, metadata)
-                .withCannedAcl(CannedAccessControlList.PublicRead),
+            PutObjectRequest(
+                s3SpaceBucket,
+                filename,
+                file.inputStream,
+                metadata
+            ).withCannedAcl(CannedAccessControlList.PublicRead),
         )
 
-        return UriComponentsBuilder
-            .fromUriString(s3SpaceEndpoint)
-            .pathSegment(s3SpaceBucket)
-            .pathSegment(filename)
-            .build()
-            .toUriString()
+        return UriComponentsBuilder.fromUriString(s3SpaceEndpoint).pathSegment(s3SpaceBucket).pathSegment(filename)
+            .build().toUriString()
     }
 
     override fun deleteImage(url: String) {
@@ -245,15 +248,13 @@ class FileServiceImpl(
         deploymentIds: Set<UUID>,
         target: Path,
     ) = withContext(Dispatchers.IO) {
-        getAll(null, studyId.stringRepresentation)
-            .onEach {
-                val resource =
-                    fileStorage.getResourceAtPath(
-                        it.storageName,
-                        Path.of("studies", studyId.stringRepresentation),
-                    )
-                val copyPath = target.resolve(it.originalName)
-                Files.copy(resource.file.toPath(), copyPath)
-            }
+        getAll(null, studyId.stringRepresentation).onEach {
+            val resource = fileStorage.getResourceAtPath(
+                it.storageName,
+                Path.of("studies", studyId.stringRepresentation),
+            )
+            val copyPath = target.resolve(it.originalName)
+            Files.copy(resource.file.toPath(), copyPath)
+        }
     }
 }

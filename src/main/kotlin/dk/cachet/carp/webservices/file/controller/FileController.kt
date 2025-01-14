@@ -84,7 +84,7 @@ class FileController(private val fileService: FileService, private val authentic
         produces = [MediaType.APPLICATION_JSON_VALUE],
         value = [FILE_BASE],
     )
-    @Operation(tags = ["file/create_depricated.json"])
+    @Operation(tags = ["file/create_deprecated.json"])
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
     @Deprecated("Use the other -create- method instead.")
