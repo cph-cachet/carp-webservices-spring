@@ -108,7 +108,6 @@ class FileController(private val fileService: FileService, private val authentic
     @Operation(tags = ["file/create.json"])
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
-    @Deprecated("Use the other -create- method instead.")
     fun create(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @PathVariable(PathVariableName.DEPLOYMENT_ID) deploymentId: UUID,
