@@ -28,15 +28,23 @@ class ExportSummary(
     @OptIn(ExperimentalPathApi::class)
     override suspend fun execute() {
         val workingDir = createTempDirectory()
-        val zipPath = if (entry.type == ExportType.STUDY_DATA) {
-            fileUtil.resolveFileStoragePathForFilenameAndRelativePath(
-                entry.fileName,
-                Path.of("studies", entry.studyId, "exports")
-            )
-        } else {
-            fileUtil.resolveFileStoragePathForFilenameAndRelativePath(
-                entry.fileName,
-                Path.of("studies", entry.studyId, "deployments", deploymentIds!!.first().stringRepresentation, "exports"))
+
+        val zipPath = when (entry.type) {
+            ExportType.STUDY_DATA -> {
+                fileUtil.resolveFileStoragePathForFilenameAndRelativePath(
+                    entry.fileName, Path.of("studies", entry.studyId, "exports")
+                )
+            }
+            ExportType.DEPLOYMENT_DATA -> {
+                fileUtil.resolveFileStoragePathForFilenameAndRelativePath(
+                    entry.fileName, Path.of(
+                        "studies", entry.studyId, "deployments", deploymentIds!!.first().stringRepresentation, "exports"
+                    )
+                )
+            }
+            else -> {
+                throw IllegalStateException("Export type not supported: ${entry.type}")
+            }
         }
 
         resourceExporter.exportStudyData(UUID(entry.studyId), deploymentIds, workingDir, logger)

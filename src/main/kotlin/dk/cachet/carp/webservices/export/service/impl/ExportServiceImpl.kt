@@ -6,6 +6,7 @@ import dk.cachet.carp.webservices.export.command.ExportCommand
 import dk.cachet.carp.webservices.export.command.ExportCommandInvoker
 import dk.cachet.carp.webservices.export.domain.Export
 import dk.cachet.carp.webservices.export.domain.ExportStatus
+import dk.cachet.carp.webservices.export.domain.ExportType
 import dk.cachet.carp.webservices.export.repository.ExportRepository
 import dk.cachet.carp.webservices.export.service.ExportService
 import dk.cachet.carp.webservices.file.service.FileStorage
@@ -13,6 +14,7 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.core.io.Resource
 import org.springframework.stereotype.Service
+import java.nio.file.Path
 
 @Service
 class ExportServiceImpl(
@@ -40,7 +42,17 @@ class ExportServiceImpl(
     ): Resource {
         val export = getExportOrThrow(exportId, studyId)
 
-        val file = fileStorage.getFile(export.fileName)
+        val file = when (export.type) {
+            ExportType.STUDY_DATA -> {
+                fileStorage.getFileAtPath(export.fileName, Path.of("studies", studyId.toString(), "exports"))
+            }
+            ExportType.DEPLOYMENT_DATA -> {
+                fileStorage.getFileAtPath(export.fileName, Path.of("studies", studyId.toString(), "deployments", export.deploymentId, "exports"))
+            }
+            else -> {
+                throw IllegalStateException("Export type not supported: ${export.type}")
+            }
+        }
 
         LOGGER.info("Summary with id $studyId is being downloaded.")
 
@@ -60,6 +72,19 @@ class ExportServiceImpl(
         }
 
         fileStorage.deleteFile(export.fileName)
+
+        when (export.type) {
+            ExportType.STUDY_DATA -> {
+                fileStorage.deleteFileAtPath(export.fileName, Path.of("studies", studyId.toString(), "exports"))
+            }
+            ExportType.DEPLOYMENT_DATA -> {
+                fileStorage.deleteFileAtPath(export.fileName, Path.of("studies", studyId.toString(), "deployments", export.deploymentId, "exports"))
+            }
+            else -> {
+                throw IllegalStateException("Export type not supported: ${export.type}")
+            }
+        }
+
         exportRepository.delete(export)
         LOGGER.info("Export with id $exportId has been successfully deleted.")
         return studyId
