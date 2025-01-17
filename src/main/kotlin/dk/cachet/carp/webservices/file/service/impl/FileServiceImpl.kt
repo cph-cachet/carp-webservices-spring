@@ -9,7 +9,6 @@ import com.amazonaws.services.s3.model.PutObjectRequest
 import com.fasterxml.jackson.databind.ObjectMapper
 import cz.jirutka.rsql.parser.RSQLParser
 import dk.cachet.carp.common.application.UUID
-import dk.cachet.carp.webservices.account.service.AccountService
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.exception.responses.ResourceNotFoundException
 import dk.cachet.carp.webservices.common.query.QueryVisitor
@@ -19,12 +18,8 @@ import dk.cachet.carp.webservices.file.repository.FileRepository
 import dk.cachet.carp.webservices.file.service.FileService
 import dk.cachet.carp.webservices.file.service.FileStorage
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
-import dk.cachet.carp.webservices.security.authorization.Claim
 import dk.cachet.carp.webservices.security.authorization.Role
-import dk.cachet.carp.webservices.security.authorization.service.AuthorizationService
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -48,12 +43,9 @@ class FileServiceImpl(
     private val validateMessages: MessageBase,
     private val s3Client: AmazonS3,
     private val authenticationService: AuthenticationService,
-    private val accountService: AccountService,
     @Value("\${s3.space.bucket}") private val s3SpaceBucket: String,
     @Value("\${s3.space.endpoint}") private val s3SpaceEndpoint: String,
 ) : FileService, ResourceExporter<File> {
-    private val backgroundWorker = CoroutineScope(Dispatchers.IO)
-
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
@@ -70,13 +62,14 @@ class FileServiceImpl(
             return fileRepository.findByStudyId(studyId)
         } else {
             query?.let {
-                val queryForRole = if (!isResearcher) {
-                    // Return data relevant to this user only.
-                    "$query;created_by==$id;study_id==$studyId"
-                } else {
-                    // Return data relevant to this study.
-                    "$query;study_id==$studyId"
-                }
+                val queryForRole =
+                    if (!isResearcher) {
+                        // Return data relevant to this user only.
+                        "$query;created_by==$id;study_id==$studyId"
+                    } else {
+                        // Return data relevant to this study.
+                        "$query;study_id==$studyId"
+                    }
                 val specification = RSQLParser().parse(queryForRole).accept(QueryVisitor<File>())
                 return fileRepository.findAll(specification)
             }
@@ -98,19 +91,21 @@ class FileServiceImpl(
         studyId: String,
         file: MultipartFile,
         metadata: String?,
+        ownerId: UUID,
     ): File {
-        val filename = fileStorage.storeAtPath(
-            file, Path.of("studies", studyId, "deployments", "unknown")
-        )
+        val relativePath = Path.of("studies", studyId, "deployments", "unknown")
+        val filename = fileStorage.storeAtPath(file, relativePath)
 
-        val saved = fileRepository.save(
-            studyId,
-            file,
-            filename,
-            metadata?.let { json -> ObjectMapper().readTree(json) },
-            null,
-            null,
-        )
+        val saved =
+            fileRepository.save(
+                studyId,
+                file,
+                filename,
+                metadata?.let { json -> ObjectMapper().readTree(json) },
+                ownerId.toString(),
+                null,
+                relativePath.toString(),
+            )
 
         LOGGER.info("File saved (deprecated method), id = ${saved.id}")
 
@@ -124,18 +119,20 @@ class FileServiceImpl(
         file: MultipartFile,
         metadata: String?,
     ): File {
-        val filename = fileStorage.storeAtPath(
-            file, Path.of("studies", studyId.stringRepresentation, "deployments", deploymentId.stringRepresentation)
-        )
+        val relativePath =
+            Path.of("studies", studyId.stringRepresentation, "deployments", deploymentId.stringRepresentation)
+        val filename = fileStorage.storeAtPath(file, relativePath)
 
-        val saved = fileRepository.save(
-            studyId = studyId.stringRepresentation,
-            uploadedFile = file,
-            fileName = filename,
-            metadata = metadata?.let { json -> ObjectMapper().readTree(json) },
-            ownerId = ownerId.stringRepresentation,
-            deploymentId = deploymentId.stringRepresentation,
-        )
+        val saved =
+            fileRepository.save(
+                studyId = studyId.stringRepresentation,
+                uploadedFile = file,
+                fileName = filename,
+                metadata = metadata?.let { json -> ObjectMapper().readTree(json) },
+                ownerId = ownerId.stringRepresentation,
+                deploymentId = deploymentId.stringRepresentation,
+                relativePath = relativePath.toString(),
+            )
 
         LOGGER.info("File saved, id = ${saved.id}")
 
@@ -147,14 +144,12 @@ class FileServiceImpl(
         studyId: UUID,
     ): Pair<Resource, String> {
         val file = getOne(id)
-        val studyId1 = file.studyId
-        val deploymentId = file.deploymentId ?: "unknown"
 
-
-        val fileToDownload = fileStorage.getFileAtPath(
-            file.storageName,
-            Path.of("studies", studyId1, "deployments", deploymentId),
-        )
+        val fileToDownload =
+            fileStorage.getFileAtPath(
+                file.fileName,
+                Path.of(file.relativePath),
+            )
 
         return Pair(fileToDownload, file.originalName)
     }
@@ -164,27 +159,21 @@ class FileServiceImpl(
         studyId: UUID,
     ) {
         val file = getOne(id)
-        val studyId1 = file.studyId
-        val deploymentId = file.deploymentId ?: "unknown"
 
-        fileStorage.deleteFileAtPath(file.storageName, Path.of("studies", studyId1, "deployments", deploymentId))
+        fileStorage.deleteFileAtPath(file.fileName, Path.of(file.relativePath))
         fileRepository.delete(file)
 
         LOGGER.info("File deleted, id = $id")
     }
 
     override suspend fun deleteAllByStudyId(studyId: String) {
-        val files = withContext(Dispatchers.IO) {
-            fileRepository.findByStudyId(studyId)
-        }
+        val files =
+            withContext(Dispatchers.IO) {
+                fileRepository.findByStudyId(studyId)
+            }
 
         files.forEach { fileRepository.deleteById(it.id) }
-        files.forEach {
-            fileStorage.deleteFileAtPath(
-                it.storageName,
-                Path.of("studies", studyId, "deployments", it.deploymentId ?: "unknown"),
-            )
-        }
+        files.forEach { fileStorage.deleteFileAtPath(it.fileName, Path.of(it.relativePath)) }
 
         LOGGER.info("All files deleted for study, studyId = $studyId")
     }
@@ -218,7 +207,7 @@ class FileServiceImpl(
                 s3SpaceBucket,
                 filename,
                 file.inputStream,
-                metadata
+                metadata,
             ).withCannedAcl(CannedAccessControlList.PublicRead),
         )
 
@@ -249,10 +238,11 @@ class FileServiceImpl(
         target: Path,
     ) = withContext(Dispatchers.IO) {
         getAll(null, studyId.stringRepresentation).onEach {
-            val resource = fileStorage.getResourceAtPath(
-                it.storageName,
-                Path.of("studies", studyId.stringRepresentation, "deployments", it.deploymentId ?: "unknown"),
-            )
+            val resource =
+                fileStorage.getResourceAtPath(
+                    it.fileName,
+                    Path.of("studies", studyId.stringRepresentation, "deployments", it.deploymentId ?: "unknown"),
+                )
             val copyPath = target.resolve(it.originalName)
             Files.copy(resource.file.toPath(), copyPath)
         }

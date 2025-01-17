@@ -24,6 +24,7 @@ interface FileService {
         studyId: String,
         file: MultipartFile,
         metadata: String?,
+        ownerId: UUID,
     ): File
 
     /** The [create] interface for creating a file. */

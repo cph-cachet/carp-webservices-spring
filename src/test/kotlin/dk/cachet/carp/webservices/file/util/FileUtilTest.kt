@@ -60,7 +60,8 @@ class FileUtilTest {
 
                 val result = sut.resolveFileStoragePathForFilenameAndRelativePath(filename, relativePath)
 
-                val expected = Path(FileUtils.getUserDirectoryPath() + "/foo/bar/baz/studies/123/deployments/456/filename.lol")
+                val expected =
+                    Path(FileUtils.getUserDirectoryPath() + "/foo/bar/baz/studies/123/deployments/456/filename.lol")
                 assertEquals(expected, result)
             }
         }

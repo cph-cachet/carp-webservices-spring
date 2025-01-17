@@ -17,6 +17,7 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.toJavaInstant
 import org.springframework.stereotype.Service
 import java.nio.ByteBuffer
+import java.nio.file.Path
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
@@ -64,13 +65,21 @@ class ExportCommandFactory(
                 ExportType.DEPLOYMENT_DATA
             }
 
+        val relativePath =
+            if (exportType == ExportType.STUDY_DATA) {
+                Path.of("studies", studyId.toString(), "exports")
+            } else {
+                Path.of("studies", studyId.toString(), "deployments", deploymentIds.toString(), "exports")
+            }
+
         val entry =
             Export(
                 id = id.toString(),
                 fileName = getDefaultFileName(studyId, exportType, "zip"),
-                studyId = studyId.toString(),
                 status = ExportStatus.IN_PROGRESS,
+                studyId = studyId.toString(),
                 type = exportType,
+                relativePath = relativePath.toString(),
             )
 
         return ExportSummary(entry, deploymentIds, resourceExporter, fileUtil)
@@ -86,13 +95,16 @@ class ExportCommandFactory(
                 Clock.System.now().toJavaInstant().truncatedTo(ChronoUnit.SECONDS).toString(),
             )
 
+        val relativePath = Path.of("studies", studyId.toString(), "anonymous-participants-exports")
+
         val entry =
             Export(
                 id = id.toString(),
                 fileName = getDefaultFileName(studyId, ExportType.ANONYMOUS_PARTICIPANTS, "csv"),
-                studyId = studyId.toString(),
                 status = ExportStatus.IN_PROGRESS,
+                studyId = studyId.toString(),
                 type = ExportType.ANONYMOUS_PARTICIPANTS,
+                relativePath = relativePath.toString(),
             )
 
         return ExportAnonymousParticipants(

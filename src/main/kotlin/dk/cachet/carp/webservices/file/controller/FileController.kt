@@ -94,7 +94,9 @@ class FileController(private val fileService: FileService, private val authentic
         @RequestPart file: MultipartFile,
     ): File {
         LOGGER.info("Start POST: /api/studies/$studyId/files")
-        return fileService.createDEPRECATED(studyId.stringRepresentation, file, metadata)
+        val ownerId = authenticationService.getId()
+
+        return fileService.createDEPRECATED(studyId.stringRepresentation, file, metadata, ownerId)
     }
 
     @PostMapping(
@@ -116,6 +118,7 @@ class FileController(private val fileService: FileService, private val authentic
     ): File {
         LOGGER.info("Start POST: /api/studies/$studyId/files/$deploymentId")
         val ownerId = authenticationService.getId()
+
         return fileService.create(studyId, deploymentId, ownerId, file, metadata)
     }
 

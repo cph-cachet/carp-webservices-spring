@@ -6,7 +6,6 @@ import dk.cachet.carp.webservices.export.command.ExportCommand
 import dk.cachet.carp.webservices.export.command.ExportCommandInvoker
 import dk.cachet.carp.webservices.export.domain.Export
 import dk.cachet.carp.webservices.export.domain.ExportStatus
-import dk.cachet.carp.webservices.export.domain.ExportType
 import dk.cachet.carp.webservices.export.repository.ExportRepository
 import dk.cachet.carp.webservices.export.service.ExportService
 import dk.cachet.carp.webservices.file.service.FileStorage
@@ -41,18 +40,7 @@ class ExportServiceImpl(
         exportId: UUID,
     ): Resource {
         val export = getExportOrThrow(exportId, studyId)
-
-        val file = when (export.type) {
-            ExportType.STUDY_DATA -> {
-                fileStorage.getFileAtPath(export.fileName, Path.of("studies", studyId.toString(), "exports"))
-            }
-            ExportType.DEPLOYMENT_DATA -> {
-                fileStorage.getFileAtPath(export.fileName, Path.of("studies", studyId.toString(), "deployments", export.deploymentId, "exports"))
-            }
-            else -> {
-                throw IllegalStateException("Export type not supported: ${export.type}")
-            }
-        }
+        val file = fileStorage.getFileAtPath(export.fileName, Path.of(export.relativePath))
 
         LOGGER.info("Summary with id $studyId is being downloaded.")
 
@@ -71,22 +59,11 @@ class ExportServiceImpl(
             throw ConflictException("The export creation is still in progress.")
         }
 
-        fileStorage.deleteFile(export.fileName)
-
-        when (export.type) {
-            ExportType.STUDY_DATA -> {
-                fileStorage.deleteFileAtPath(export.fileName, Path.of("studies", studyId.toString(), "exports"))
-            }
-            ExportType.DEPLOYMENT_DATA -> {
-                fileStorage.deleteFileAtPath(export.fileName, Path.of("studies", studyId.toString(), "deployments", export.deploymentId, "exports"))
-            }
-            else -> {
-                throw IllegalStateException("Export type not supported: ${export.type}")
-            }
-        }
-
+        fileStorage.deleteFileAtPath(export.fileName, Path.of(export.relativePath))
         exportRepository.delete(export)
+
         LOGGER.info("Export with id $exportId has been successfully deleted.")
+
         return studyId
     }
 
