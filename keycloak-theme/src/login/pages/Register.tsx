@@ -176,7 +176,7 @@ const Register = (
         <AuthActionButton text={msgStr("doRegister")} loading={isLoading} />
         <AuthInfoText variant="h4_web" hideOnMobile>
           {msgStr("byRegisteringYouAgree")}{" "}
-          <StyledLink to="https://carp.cachet.dk/privacy-policy-service/">
+          <StyledLink to="https://carp.dk/privacy-policy-service/">
             {msgStr("carpPrivacyPolicy")}
           </StyledLink>{" "}
           {msgStr("and")}{" "}

@@ -164,7 +164,7 @@ const Login = (
           <AuthActionButton loading={isLoading} text={msgStr("doLogIn")} />
           <AuthInfoText variant="h4_web" hideOnMobile>
             {msgStr("agreeToPrivacyPolicy")}{" "}
-            <StyledLink to="https://carp.cachet.dk/privacy-policy-service/">
+            <StyledLink to="https://carp.dk/privacy-policy-service/">
               {msgStr("carpPrivacyPolicy")}
             </StyledLink>
             .
