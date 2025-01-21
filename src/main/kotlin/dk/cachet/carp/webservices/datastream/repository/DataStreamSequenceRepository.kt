@@ -22,8 +22,8 @@ interface DataStreamSequenceRepository : JpaRepository<DataStreamSequence, Int> 
     )
     fun findAllBySequenceIdRange(
         @Param("dataStreamId") dataStreamId: Int,
-        @Param("from") from: Int,
-        @Param("to") to: Int,
+        @Param("from") from: Long,
+        @Param("to") to: Long,
     ): List<DataStreamSequence>
 
     @Modifying
@@ -54,4 +54,15 @@ interface DataStreamSequenceRepository : JpaRepository<DataStreamSequence, Int> 
     fun findMaxUpdatedAtByDataStreamIds(
         @Param("dataStreamIds") dataStreamIds: List<Int>,
     ): Instant?
+
+    @Query(
+        """
+    SELECT dsq.id
+    FROM data_stream_sequence dsq
+    WHERE dsq.dataStreamId IN :dataStreamIds
+    """,
+    )
+    fun findSequenceIdsByStreamId(
+        @Param("dataStreamIds") dataStreamIds: List<Int>,
+    ): List<Int>
 }
