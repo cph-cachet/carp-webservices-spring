@@ -26,7 +26,7 @@ x-keycloak-prod-commands: &keycloak-prod-commands
 # Apply the following configuration if hosting behind a reverse proxy
 #    - "--hostname-url=${KC_URL}"
 #    - "--hostname-admin-url=${KC_URL}"
-#    - "--proxy edge
+#    - "--proxy edge"
 
 services:
   carp-ws:
