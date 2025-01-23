@@ -3,7 +3,6 @@ package dk.cachet.carp.webservices.files.service
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.DeleteObjectRequest
 import com.amazonaws.services.s3.model.PutObjectRequest
-import dk.cachet.carp.webservices.account.service.AccountService
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.file.domain.File
 import dk.cachet.carp.webservices.file.repository.FileRepository
@@ -28,7 +27,6 @@ class FileServiceTest {
     private val messageBase: MessageBase = mockk()
     private val s3Client: AmazonS3 = mockk()
     private val authenticationService: AuthenticationService = mockk()
-    private val accountService: AccountService = mockk()
     private val authorizationService: AuthorizationService = mockk()
 
     private val s3SpaceBucket = "s3://bucket"
@@ -40,15 +38,19 @@ class FileServiceTest {
         fun `delete all files by study id`() {
             runTest {
                 val studyId = dk.cachet.carp.common.application.UUID.randomUUID().stringRepresentation
+                val relativePath1 = java.nio.file.Path.of("foo", "bar", "baz")
+                val relativePath2 = java.nio.file.Path.of("foo", "bar", "qux")
                 val file1 =
                     mockk<File> {
                         every { id } returns 1
-                        every { storageName } returns "file1"
+                        every { fileName } returns "file1"
+                        every { relativePath } returns relativePath1.toString()
                     }
                 val file2 =
                     mockk<File> {
                         every { id } returns 2
-                        every { storageName } returns "file2"
+                        every { fileName } returns "file2"
+                        every { relativePath } returns relativePath2.toString()
                     }
 
                 coEvery { fileRepository.findByStudyId(studyId) } returns listOf(file1, file2)
@@ -59,8 +61,8 @@ class FileServiceTest {
                 coEvery { authorizationService.revokeClaimsFromAllAccounts(setOf(claim1, claim2)) } returns Unit
                 coEvery { fileRepository.deleteById(1) } just runs
                 coEvery { fileRepository.deleteById(2) } just runs
-                coEvery { fileStorage.deleteFile("file1") } returns true
-                coEvery { fileStorage.deleteFile("file2") } returns true
+                coEvery { fileStorage.deleteFileAtPath("file1", relativePath1) } returns true
+                coEvery { fileStorage.deleteFileAtPath("file2", relativePath2) } returns true
 
                 val sut =
                     FileServiceImpl(
@@ -69,8 +71,6 @@ class FileServiceTest {
                         messageBase,
                         s3Client,
                         authenticationService,
-                        accountService,
-                        authorizationService,
                         s3SpaceBucket,
                         s3SpaceEndpoint,
                     )
@@ -78,11 +78,11 @@ class FileServiceTest {
                 sut.deleteAllByStudyId(studyId)
 
                 verify { fileRepository.findByStudyId(studyId) }
-                coVerify { authorizationService.revokeClaimsFromAllAccounts(setOf(claim1, claim2)) }
+                coVerify(exactly = 0) { authorizationService.revokeClaimsFromAllAccounts(setOf(claim1, claim2)) }
                 coVerify { fileRepository.deleteById(1) }
                 coVerify { fileRepository.deleteById(2) }
-                coVerify { fileStorage.deleteFile("file1") }
-                coVerify { fileStorage.deleteFile("file2") }
+                coVerify { fileStorage.deleteFileAtPath("file1", relativePath1) }
+                coVerify { fileStorage.deleteFileAtPath("file2", relativePath2) }
             }
         }
     }
@@ -102,8 +102,6 @@ class FileServiceTest {
                     messageBase,
                     s3Client,
                     authenticationService,
-                    accountService,
-                    authorizationService,
                     s3SpaceBucket,
                     s3SpaceEndpoint,
                 )
@@ -129,8 +127,6 @@ class FileServiceTest {
                     messageBase,
                     s3Client,
                     authenticationService,
-                    accountService,
-                    authorizationService,
                     s3SpaceBucket,
                     s3SpaceEndpoint,
                 )
@@ -162,8 +158,6 @@ class FileServiceTest {
                     messageBase,
                     s3Client,
                     authenticationService,
-                    accountService,
-                    authorizationService,
                     s3SpaceBucket,
                     s3SpaceEndpoint,
                 )
@@ -187,8 +181,6 @@ class FileServiceTest {
                     messageBase,
                     s3Client,
                     authenticationService,
-                    accountService,
-                    authorizationService,
                     s3SpaceBucket,
                     s3SpaceEndpoint,
                 )

@@ -19,7 +19,7 @@ interface FileRepository : JpaRepository<File, Int>, JpaSpecificationExecutor<Fi
 }
 
 // TODO: This is not a repository, dont't be mislead by that, it needs to be moved to its own service somewhere else.
-interface FileRepositoryCustom {
+interface FileRepositoryCustom{
     /**
      * The [save] interface inserters the files in the filesystem.
      *
@@ -27,12 +27,19 @@ interface FileRepositoryCustom {
      * @param uploadedFile The [uploadedFile] in a multipart request.
      * @param fileName The [fileName] of the file.
      * @param metadata The [metadata] of the file.
+     * @param ownerId The [ownerId] of the file.
+     * @param deploymentId The [deploymentId] of the file.
+     * @param relativePath The [relativePath] of the file.
      */
+    @Suppress("LongParameterList")
     fun save(
         studyId: String,
         uploadedFile: MultipartFile,
         fileName: String,
         metadata: JsonNode?,
+        ownerId: String?,
+        deploymentId: String?,
+        relativePath: String,
     ): File
 }
 
@@ -46,19 +53,29 @@ class FileRepositoryImpl(
      * @param studyId The [studyId] of the study to save the file.
      * @param uploadedFile The [uploadedFile] to be saved to the filesystem.
      * @param fileName The [fileName] of the file.
+     * @param metadata The [metadata] of the file.
+     * @param ownerId The [ownerId] of the file.
+     * @param deploymentId The [deploymentId] of the file.
+     * @param relativePath The [relativePath] of the file.
      */
     override fun save(
         studyId: String,
         uploadedFile: MultipartFile,
         fileName: String,
         metadata: JsonNode?,
+        ownerId: String?,
+        deploymentId: String?,
+        relativePath: String,
     ): File {
         val file =
             File(
-                studyId = studyId,
-                storageName = fileName,
+                fileName = fileName,
                 originalName = uploadedFile.originalFilename!!,
                 metadata = metadata,
+                studyId = studyId,
+                ownerId = ownerId,
+                deploymentId = deploymentId,
+                relativePath = relativePath,
             )
         return fileRepository.save(file)
     }
