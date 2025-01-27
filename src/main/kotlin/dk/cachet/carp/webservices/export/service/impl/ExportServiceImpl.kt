@@ -13,6 +13,7 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.core.io.Resource
 import org.springframework.stereotype.Service
+import java.nio.file.Path
 
 @Service
 class ExportServiceImpl(
@@ -39,8 +40,7 @@ class ExportServiceImpl(
         exportId: UUID,
     ): Resource {
         val export = getExportOrThrow(exportId, studyId)
-
-        val file = fileStorage.getFile(export.fileName)
+        val file = fileStorage.getFileAtPath(export.fileName, Path.of(export.relativePath))
 
         LOGGER.info("Summary with id $studyId is being downloaded.")
 
@@ -59,9 +59,11 @@ class ExportServiceImpl(
             throw ConflictException("The export creation is still in progress.")
         }
 
-        fileStorage.deleteFile(export.fileName)
+        fileStorage.deleteFileAtPath(export.fileName, Path.of(export.relativePath))
         exportRepository.delete(export)
+
         LOGGER.info("Export with id $exportId has been successfully deleted.")
+
         return studyId
     }
 
