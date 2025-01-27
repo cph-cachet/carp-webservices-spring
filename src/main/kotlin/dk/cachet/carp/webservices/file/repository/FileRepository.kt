@@ -19,7 +19,7 @@ interface FileRepository : JpaRepository<File, Int>, JpaSpecificationExecutor<Fi
 }
 
 // TODO: This is not a repository, dont't be mislead by that, it needs to be moved to its own service somewhere else.
-interface FileRepositoryCustom{
+interface FileRepositoryCustom {
     /**
      * The [save] interface inserters the files in the filesystem.
      *
