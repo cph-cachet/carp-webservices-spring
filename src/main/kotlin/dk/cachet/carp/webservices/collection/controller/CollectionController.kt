@@ -26,6 +26,7 @@ class CollectionController(
 
         /** Endpoint URI constants */
         const val COLLECTION_BASE = "/api/studies/{${PathVariableName.STUDY_ID}}/collections"
+        //todo remove /id/ from path
         const val GET_COLLECTION_BY_ID = "/id/{${PathVariableName.COLLECTION_ID}}"
         const val GET_COLLECTION_BY_NAME = "/{${PathVariableName.COLLECTION_NAME}}"
         const val GET_COLLECTION_BY_DEPLOYMENT_ID = "/deployments/{${PathVariableName.DEPLOYMENT_ID}}"
@@ -44,7 +45,7 @@ class CollectionController(
 
     @GetMapping(value = [GET_COLLECTION_BY_ID])
     @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
-    @Operation(tags = ["collection/getByStudyIdAndCollectionId.json"])
+    @ResponseStatus(HttpStatus.OK)
     fun getByStudyIdAndCollectionId(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @PathVariable(PathVariableName.COLLECTION_ID) collectionId: Int,
@@ -53,9 +54,11 @@ class CollectionController(
         return collectionService.getCollectionByStudyIdAndId(studyId.stringRepresentation, collectionId)
     }
 
+    //todo replace with .../collection?collectionName=...
     @GetMapping(value = [GET_COLLECTION_BY_NAME])
     @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
-    @Operation(tags = ["collection/getByStudyIdAndCollectionName.json"])
+    @Operation(description = "Gets a collection by studyId and collectionName")
+    @ResponseStatus(HttpStatus.OK)
     fun getByStudyIdAndCollectionName(
         @PathVariable(PathVariableName.STUDY_ID) studyId: String,
         @PathVariable(PathVariableName.COLLECTION_NAME) collectionName: String,
@@ -66,7 +69,7 @@ class CollectionController(
 
     @GetMapping
     @PreAuthorize("canManageStudy(#studyId)")
-    @Operation(tags = ["collection/getAll.json"])
+    @ResponseStatus(HttpStatus.OK)
     fun getAll(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @RequestParam(RequestParamName.QUERY, required = true) query: String?,
@@ -75,7 +78,10 @@ class CollectionController(
         return collectionService.getAll(studyId.stringRepresentation, query)
     }
 
+    //todo replace with .../collection?deploymentId=...
     @GetMapping(value = [GET_COLLECTION_BY_DEPLOYMENT_ID])
+    @Operation(description = "Gets a collection by studyId and deploymentId")
+    @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("canManageStudy(#studyId) or isInDeployment(#deploymentId)")
     fun getByStudyIdAndDeploymentId(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
@@ -90,7 +96,7 @@ class CollectionController(
 
     @DeleteMapping(value = [GET_COLLECTION_BY_ID])
     @PreAuthorize("canManageStudy(#studyId) or isCollectionOwner(#collectionId)")
-    @Operation(tags = ["collection/delete.json"])
+    @ResponseStatus(HttpStatus.OK)
     fun delete(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @PathVariable(PathVariableName.COLLECTION_ID) collectionId: Int,
@@ -101,7 +107,7 @@ class CollectionController(
 
     @PutMapping(value = [GET_COLLECTION_BY_ID])
     @PreAuthorize("canManageStudy(#studyId) or isCollectionOwner(#collectionId)")
-    @Operation(tags = ["collection/update.json"])
+    @ResponseStatus(HttpStatus.OK)
     fun update(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @PathVariable(PathVariableName.COLLECTION_ID) collectionId: Int,
