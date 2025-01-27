@@ -69,7 +69,7 @@ class ExportCommandFactory(
             if (exportType == ExportType.STUDY_DATA) {
                 Path.of("studies", studyId.toString(), "exports")
             } else {
-                Path.of("studies", studyId.toString(), "deployments", deploymentIds.toString(), "exports")
+                Path.of("studies", studyId.toString(), "deployments", deploymentIds!!.first().toString(), "exports")
             }
 
         val entry =

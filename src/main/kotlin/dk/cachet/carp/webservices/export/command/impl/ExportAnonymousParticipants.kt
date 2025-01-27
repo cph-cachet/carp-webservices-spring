@@ -17,6 +17,7 @@ import dk.cachet.carp.webservices.study.domain.AnonymousParticipantRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
+import java.nio.file.Path
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
@@ -90,7 +91,7 @@ class ExportAnonymousParticipants(
                 "${it.username},${it.studyDeploymentId},\"${it.magicLink}\",${it.expiryDate}"
             }
 
-        val csvPath = fileUtil.resolveFileStorage(entry.fileName)
+        val csvPath = fileUtil.resolveFileStoragePathForFilenameAndRelativePath(entry.fileName, Path.of(entry.relativePath))
         resourceExporter.exportCSV(CSV_HEADER, csvBody, csvPath, logger)
     }
 
