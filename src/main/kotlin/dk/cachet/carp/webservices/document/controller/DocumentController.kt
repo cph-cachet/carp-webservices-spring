@@ -47,7 +47,7 @@ class DocumentController(
 
     @GetMapping(value = [DOCUMENTS])
     @PreAuthorize("canManageStudy(#studyId)")
-    @Operation(tags = ["document/getAll.json"])
+    @ResponseStatus(HttpStatus.OK)
     fun getAll(
         @RequestParam(RequestParamName.QUERY) query: String?,
         @RequestParam(RequestParamName.SORT, required = false) sort: String?,
@@ -62,6 +62,8 @@ class DocumentController(
     @GetMapping(value = [COLLECTIONS], produces = [MediaType.APPLICATION_JSON_VALUE])
     @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
     @Suppress("TooGenericExceptionCaught", "SwallowedException")
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(description = "Get a document by its path e.g. .../collections/foo/bar/baz")
     fun getByDocumentPath(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         request: HttpServletRequest,
@@ -81,6 +83,7 @@ class DocumentController(
     @PostMapping(value = [COLLECTIONS], produces = [MediaType.APPLICATION_JSON_VALUE])
     @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
     @ResponseStatus(HttpStatus.CREATED)
+    @Operation(description = "Create a document by its path e.g. .../collections/foo/bar/baz")
     fun createByDocumentPath(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @RequestBody data: JsonNode?,
@@ -93,7 +96,7 @@ class DocumentController(
 
     @GetMapping(value = [GET_DOCUMENT_BY_ID], produces = [MediaType.APPLICATION_JSON_VALUE])
     @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
-    @Operation(tags = ["document/getOne.json"])
+    @ResponseStatus(HttpStatus.OK)
     fun getOne(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @PathVariable(PathVariableName.DOCUMENT_ID) id: Int,
@@ -105,7 +108,6 @@ class DocumentController(
     @PostMapping(value = [DOCUMENTS], produces = [MediaType.APPLICATION_JSON_VALUE])
     @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
     @ResponseStatus(HttpStatus.CREATED)
-    @Operation(tags = ["document/create.json"])
     fun create(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @Valid @RequestBody request: CreateDocumentRequestDto,
@@ -116,7 +118,7 @@ class DocumentController(
 
     @DeleteMapping(value = [GET_DOCUMENT_BY_ID])
     @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
-    @Operation(tags = ["document/delete.json"])
+    @ResponseStatus(HttpStatus.OK)
     fun delete(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @PathVariable(PathVariableName.DOCUMENT_ID) id: Int,
@@ -127,7 +129,7 @@ class DocumentController(
 
     @PutMapping(value = [GET_DOCUMENT_BY_ID])
     @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
-    @Operation(tags = ["document/update.json"])
+    @ResponseStatus(HttpStatus.OK)
     fun update(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @PathVariable(PathVariableName.DOCUMENT_ID) id: Int,
@@ -139,7 +141,7 @@ class DocumentController(
 
     @PutMapping(value = [GET_DOCUMENT_BY_ID + APPEND])
     @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
-    @Operation(tags = ["document/append.json"])
+    @ResponseStatus(HttpStatus.OK)
     fun append(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @PathVariable(PathVariableName.DOCUMENT_ID) id: Int,

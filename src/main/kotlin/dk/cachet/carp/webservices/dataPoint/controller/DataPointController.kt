@@ -19,6 +19,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 
+//todo should we delete?
 @Deprecated("Data Point is deprecated, use DataStream instead.")
 @RestController
 @RequestMapping(value = [DATA_POINT_BASE])
@@ -38,7 +39,7 @@ class DataPointController(private val dataPointService: DataPointService) {
 
     @GetMapping
     @PreAuthorize("canManageDeployment(#deploymentId) or isInDeployment(#deploymentId)")
-    @Operation(tags = ["dataPoint/getAll.json"])
+    @ResponseStatus(HttpStatus.OK)
     fun getAll(
         @RequestParam(RequestParamName.PAGE, required = false) page: Int?,
         @RequestParam(RequestParamName.QUERY, required = false) query: String?,
@@ -52,7 +53,7 @@ class DataPointController(private val dataPointService: DataPointService) {
 
     @GetMapping(value = [GET_DATAPOINT_BY_ID])
     @PreAuthorize("canManageDeployment(#deploymentId) or isInDeployment(#deploymentId)")
-    @Operation(tags = ["dataPoint/getOne.json"])
+    @ResponseStatus(HttpStatus.OK)
     fun getOne(
         @PathVariable(PathVariableName.DEPLOYMENT_ID) deploymentId: UUID,
         @PathVariable(PathVariableName.DATA_POINT_ID) dataPointId: Int,
@@ -64,7 +65,6 @@ class DataPointController(private val dataPointService: DataPointService) {
     @PostMapping
     @PreAuthorize("isInDeployment(#deploymentId)")
     @ResponseStatus(HttpStatus.CREATED)
-    @Operation(tags = ["dataPoint/create.json"])
     fun create(
         @PathVariable(PathVariableName.DEPLOYMENT_ID) deploymentId: UUID,
         @RequestPart file: MultipartFile?,
@@ -76,7 +76,7 @@ class DataPointController(private val dataPointService: DataPointService) {
 
     @PostMapping(value = [BATCH])
     @PreAuthorize("isInDeployment(#deploymentId)")
-    @Operation(tags = ["dataPoint/createMany.json"])
+    @ResponseStatus(HttpStatus.OK)
     fun createMany(
         @PathVariable(PathVariableName.DEPLOYMENT_ID) deploymentId: UUID,
         @RequestPart file: MultipartFile,
@@ -87,7 +87,7 @@ class DataPointController(private val dataPointService: DataPointService) {
 
     @DeleteMapping(value = [GET_DATAPOINT_BY_ID])
     @PreAuthorize("canManageDeployment(#deploymentId) or isInDeploymentOfStudy(#deploymentId)")
-    @Operation(tags = ["dataPoint/delete.json"])
+    @ResponseStatus(HttpStatus.OK)
     fun delete(
         @PathVariable(PathVariableName.DEPLOYMENT_ID) deploymentId: UUID,
         @PathVariable(PathVariableName.DATA_POINT_ID) dataPointId: Int,
@@ -98,7 +98,7 @@ class DataPointController(private val dataPointService: DataPointService) {
 
     @GetMapping(value = [COUNT])
     @PreAuthorize("canManageDeployment(#deploymentId) or isInDeployment(#deploymentId)")
-    @Operation(tags = ["dataPoint/count.json"])
+    @ResponseStatus(HttpStatus.OK)
     fun count(
         @RequestParam(RequestParamName.QUERY, required = false) query: String?,
         @PathVariable(PathVariableName.DEPLOYMENT_ID, required = true) deploymentId: UUID,

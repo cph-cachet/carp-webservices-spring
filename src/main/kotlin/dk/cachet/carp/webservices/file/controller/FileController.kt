@@ -6,7 +6,6 @@ import dk.cachet.carp.webservices.common.constants.RequestParamName
 import dk.cachet.carp.webservices.file.domain.File
 import dk.cachet.carp.webservices.file.service.FileService
 import dk.cachet.carp.webservices.file.service.FileStorage
-import io.swagger.v3.oas.annotations.Operation
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.core.io.Resource
@@ -31,8 +30,8 @@ class FileController(private val fileStorage: FileStorage, private val fileServi
     }
 
     @GetMapping(FILE_BASE)
-    @Operation(tags = ["file/getAll.json"])
     @PreAuthorize("canManageStudy(#studyId)")
+    @ResponseStatus(HttpStatus.OK)
     fun getAll(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @RequestParam(RequestParamName.QUERY) query: String?,
@@ -42,8 +41,8 @@ class FileController(private val fileStorage: FileStorage, private val fileServi
     }
 
     @GetMapping(FILE_ID)
-    @Operation(tags = ["file/getOne.json"])
     @PreAuthorize("canManageStudy(#studyId) or isFileOwner(#fileId)")
+    @ResponseStatus(HttpStatus.OK)
     fun getOne(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @PathVariable(PathVariableName.FILE_ID) fileId: Int,
@@ -60,8 +59,8 @@ class FileController(private val fileStorage: FileStorage, private val fileServi
         value = [DOWNLOAD],
     )
     @ResponseBody
-    @Operation(tags = ["file/download.json"])
     @PreAuthorize("canManageStudy(#studyId) or isFileOwner(#id)")
+    @ResponseStatus(HttpStatus.OK)
     fun download(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @PathVariable(PathVariableName.FILE_ID) id: Int,
@@ -83,7 +82,6 @@ class FileController(private val fileStorage: FileStorage, private val fileServi
         produces = [MediaType.APPLICATION_JSON_VALUE],
         value = [FILE_BASE],
     )
-    @Operation(tags = ["file/create.json"])
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
     fun create(
@@ -96,7 +94,6 @@ class FileController(private val fileStorage: FileStorage, private val fileServi
     }
 
     @DeleteMapping(FILE_ID)
-    @Operation(tags = ["file/delete.json"])
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("canManageStudy(#studyId) or isFileOwner(#fileId)")
     fun delete(
@@ -108,7 +105,6 @@ class FileController(private val fileStorage: FileStorage, private val fileServi
     }
 
     @PostMapping(UPLOAD_IMAGE)
-    @Operation(tags = ["file/uploadImage.json"])
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
     fun uploadS3(

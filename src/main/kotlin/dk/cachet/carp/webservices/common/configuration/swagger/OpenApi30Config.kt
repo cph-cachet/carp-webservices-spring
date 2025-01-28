@@ -31,6 +31,7 @@ import kotlin.collections.ArrayList
 class OpenApi30Config(
     @Value("\${spring.application.name}") private val moduleName: String,
     @Value("\${spring.application.version}") private val apiVersion: String,
+    //todo update this
     @Value("classpath:openapi/description.txt") private val docResource: Resource,
     private val objectMapper: ObjectMapper,
     private val environmentUtil: EnvironmentUtil,
