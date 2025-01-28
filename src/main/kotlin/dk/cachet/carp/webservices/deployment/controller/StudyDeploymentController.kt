@@ -11,16 +11,21 @@ import dk.cachet.carp.webservices.deployment.serdes.DeploymentRequestSerializer
 import dk.cachet.carp.webservices.deployment.serdes.ParticipationRequestSerializer
 import dk.cachet.carp.webservices.deployment.service.DeploymentService
 import dk.cachet.carp.webservices.deployment.service.ParticipationService
-import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.Valid
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import io.swagger.v3.oas.annotations.parameters.RequestBody as RequestBodySwagger
 
+// todo RPC openapi doc
 @RestController
 class StudyDeploymentController(
     private val deploymentService: DeploymentService,
@@ -39,28 +44,6 @@ class StudyDeploymentController(
         const val DEPLOYMENT_STATISTICS = "/api/deployment-service/statistics"
     }
 
-    @PostMapping(value = [DEPLOYMENT_SERVICE])
-    @Operation(tags = ["studyDeployment/deployments.json"])
-    suspend fun deployments(
-        @RequestBody httpMessage: String,
-    ): ResponseEntity<Any> {
-        val request = deploymentSerializer.deserializeRequest(DeploymentServiceRequest.Serializer, httpMessage)
-        LOGGER.info("Start POST: $DEPLOYMENT_SERVICE -> ${ request::class.simpleName }")
-        val result = deploymentService.core.invoke(request)
-        return deploymentSerializer.serializeResponse(request, result).let { ResponseEntity.ok(it) }
-    }
-
-    @PostMapping(value = [PARTICIPATION_SERVICE])
-    @Operation(tags = ["studyDeployment/invitations.json"])
-    suspend fun participation(
-        @RequestBody httpMessage: String,
-    ): ResponseEntity<Any> {
-        val request = WS_JSON.decodeFromString(ParticipationServiceRequest.Serializer, httpMessage)
-        LOGGER.info("Start POST: $PARTICIPATION_SERVICE -> ${ request::class.simpleName }")
-        val result = participationService.core.invoke(request)
-        return participationSerializer.serializeResponse(request, result).let { ResponseEntity.ok(it) }
-    }
-
     /**
      * Statistics endpoint is disabled, due to a refactor of the authorization
      * services with clear service boundaries. Also, none of the current clients
@@ -75,11 +58,68 @@ class StudyDeploymentController(
     @Deprecated("This endpoint is disabled")
     @PostMapping(value = [DEPLOYMENT_STATISTICS])
     @PreAuthorize("false")
-    @Operation(tags = ["studyDeployment/statistics.json"])
+    @ResponseStatus(HttpStatus.OK)
     fun statistics(
         @Valid @RequestBody request: DeploymentStatisticsRequestDto,
     ): DeploymentStatisticsResponseDto {
         LOGGER.info("Start POST: /api/deployment-service/statistics")
         return dataPointService.getStatistics(request.deploymentIds)
+    }
+
+    @PostMapping(value = [DEPLOYMENT_SERVICE])
+    @RequestBodySwagger(
+        description = "Body: SERIALIZED DeploymentServiceRequest (string). See below for possible request types.",
+        content = [
+            Content(
+                schema =
+                    Schema(
+                        oneOf = [
+                            DeploymentServiceRequest.CreateStudyDeployment::class,
+                            DeploymentServiceRequest.RemoveStudyDeployments::class,
+                            DeploymentServiceRequest.GetStudyDeploymentStatus::class,
+                            DeploymentServiceRequest.GetStudyDeploymentStatusList::class,
+                            DeploymentServiceRequest.RegisterDevice::class,
+                            DeploymentServiceRequest.UnregisterDevice::class,
+                            DeploymentServiceRequest.GetDeviceDeploymentFor::class,
+                            DeploymentServiceRequest.DeviceDeployed::class,
+                            DeploymentServiceRequest.Stop::class,
+                        ],
+                    ),
+            ),
+        ],
+    )
+    suspend fun deployments(
+        @RequestBody httpMessage: String,
+    ): ResponseEntity<Any> {
+        val request = deploymentSerializer.deserializeRequest(DeploymentServiceRequest.Serializer, httpMessage)
+        LOGGER.info("Start POST: $DEPLOYMENT_SERVICE -> ${ request::class.simpleName }")
+        val result = deploymentService.core.invoke(request)
+        return deploymentSerializer.serializeResponse(request, result).let { ResponseEntity.ok(it) }
+    }
+
+    @PostMapping(value = [PARTICIPATION_SERVICE])
+    @RequestBodySwagger(
+        description = "Body: SERIALIZED ParticipationServiceRequest (string). See below for possible request types.",
+        content = [
+            Content(
+                schema =
+                    Schema(
+                        oneOf = [
+                            ParticipationServiceRequest.GetActiveParticipationInvitations::class,
+                            ParticipationServiceRequest.GetParticipantData::class,
+                            ParticipationServiceRequest.GetParticipantDataList::class,
+                            ParticipationServiceRequest.SetParticipantData::class,
+                        ],
+                    ),
+            ),
+        ],
+    )
+    suspend fun participation(
+        @RequestBody httpMessage: String,
+    ): ResponseEntity<Any> {
+        val request = WS_JSON.decodeFromString(ParticipationServiceRequest.Serializer, httpMessage)
+        LOGGER.info("Start POST: $PARTICIPATION_SERVICE -> ${ request::class.simpleName }")
+        val result = participationService.core.invoke(request)
+        return participationSerializer.serializeResponse(request, result).let { ResponseEntity.ok(it) }
     }
 }

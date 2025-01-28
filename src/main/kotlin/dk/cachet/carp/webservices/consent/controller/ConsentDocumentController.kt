@@ -5,14 +5,13 @@ import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.webservices.common.constants.PathVariableName
 import dk.cachet.carp.webservices.consent.domain.ConsentDocument
 import dk.cachet.carp.webservices.consent.service.ConsentDocumentService
-import io.swagger.v3.oas.annotations.Operation
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 
-//todo should we delete?
+// todo should we delete?
 @Deprecated("This class is deprecated, use participantData instead")
 @RestController
 class ConsentDocumentController(

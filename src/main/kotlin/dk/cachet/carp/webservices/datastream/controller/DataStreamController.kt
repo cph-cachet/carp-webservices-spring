@@ -40,8 +40,9 @@ class DataStreamController(
 
     @PostMapping(value = [DATA_STREAM_SERVICE_GZIP])
     @Operation(
-        description = "Same as data-stream-service, but take ByteArray instead of JSON string," +
-                " the ByteArray should be a compressed DataStreamServiceRequest via Gzip."
+        description =
+            "Same as data-stream-service, but take ByteArray instead of JSON string," +
+                " the ByteArray should be a compressed DataStreamServiceRequest via Gzip.",
     )
     @ResponseStatus(HttpStatus.OK)
     suspend fun handleCompressedData(

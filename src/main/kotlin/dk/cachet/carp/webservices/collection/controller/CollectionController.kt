@@ -26,7 +26,8 @@ class CollectionController(
 
         /** Endpoint URI constants */
         const val COLLECTION_BASE = "/api/studies/{${PathVariableName.STUDY_ID}}/collections"
-        //todo remove /id/ from path
+
+        // todo remove /id/ from path
         const val GET_COLLECTION_BY_ID = "/id/{${PathVariableName.COLLECTION_ID}}"
         const val GET_COLLECTION_BY_NAME = "/{${PathVariableName.COLLECTION_NAME}}"
         const val GET_COLLECTION_BY_DEPLOYMENT_ID = "/deployments/{${PathVariableName.DEPLOYMENT_ID}}"
@@ -54,7 +55,7 @@ class CollectionController(
         return collectionService.getCollectionByStudyIdAndId(studyId.stringRepresentation, collectionId)
     }
 
-    //todo replace with .../collection?collectionName=...
+    // todo replace with .../collection?collectionName=...
     @GetMapping(value = [GET_COLLECTION_BY_NAME])
     @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
     @Operation(description = "Gets a collection by studyId and collectionName")
@@ -78,7 +79,7 @@ class CollectionController(
         return collectionService.getAll(studyId.stringRepresentation, query)
     }
 
-    //todo replace with .../collection?deploymentId=...
+    // todo replace with .../collection?deploymentId=...
     @GetMapping(value = [GET_COLLECTION_BY_DEPLOYMENT_ID])
     @Operation(description = "Gets a collection by studyId and deploymentId")
     @ResponseStatus(HttpStatus.OK)

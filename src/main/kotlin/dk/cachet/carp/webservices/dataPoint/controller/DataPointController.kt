@@ -8,7 +8,6 @@ import dk.cachet.carp.webservices.dataPoint.controller.DataPointController.Compa
 import dk.cachet.carp.webservices.dataPoint.domain.DataPoint
 import dk.cachet.carp.webservices.dataPoint.dto.CreateDataPointRequestDto
 import dk.cachet.carp.webservices.dataPoint.service.DataPointService
-import io.swagger.v3.oas.annotations.Operation
 import jakarta.validation.Valid
 import kotlinx.coroutines.runBlocking
 import org.apache.logging.log4j.LogManager
@@ -19,7 +18,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 
-//todo should we delete?
+// todo should we delete?
 @Deprecated("Data Point is deprecated, use DataStream instead.")
 @RestController
 @RequestMapping(value = [DATA_POINT_BASE])
