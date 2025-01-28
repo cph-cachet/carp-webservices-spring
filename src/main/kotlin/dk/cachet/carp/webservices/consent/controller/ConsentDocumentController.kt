@@ -5,13 +5,13 @@ import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.webservices.common.constants.PathVariableName
 import dk.cachet.carp.webservices.consent.domain.ConsentDocument
 import dk.cachet.carp.webservices.consent.service.ConsentDocumentService
-import io.swagger.v3.oas.annotations.Operation
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 
+// todo should we delete?
 @Deprecated("This class is deprecated, use participantData instead")
 @RestController
 class ConsentDocumentController(
@@ -30,6 +30,7 @@ class ConsentDocumentController(
         value = [ CONSENT_BY_STUDY_ID, CONSENT_BY_DEPLOYMENT_ID ],
         method = [ RequestMethod.GET ],
     )
+    @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("canManageDeployment( #deploymentId ) or canManageStudy( #studyId ) ")
     fun getAll(
         @PathVariable(PathVariableName.DEPLOYMENT_ID, required = false) deploymentId: UUID?,
@@ -48,7 +49,7 @@ class ConsentDocumentController(
 
     @GetMapping(CONSENT_BY_DEPLOYMENT_ID + CONSENT_BY_ID)
     @PreAuthorize("canManageDeployment( #deploymentId ) or isInDeployment( #deploymentId )")
-    @Operation(tags = ["consentDocument/getOne.json"])
+    @ResponseStatus(HttpStatus.OK)
     fun getOne(
         @PathVariable(PathVariableName.DEPLOYMENT_ID) deploymentId: UUID,
         @PathVariable(PathVariableName.CONSENT_ID) consentId: Int,
@@ -60,7 +61,6 @@ class ConsentDocumentController(
     @PostMapping(CONSENT_BY_DEPLOYMENT_ID)
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("isInDeployment( #deploymentId )")
-    @Operation(tags = ["consentDocument/create.json"])
     fun create(
         @PathVariable(PathVariableName.DEPLOYMENT_ID) deploymentId: UUID,
         @RequestBody data: JsonNode?,
@@ -71,7 +71,7 @@ class ConsentDocumentController(
 
     @DeleteMapping(CONSENT_BY_DEPLOYMENT_ID + CONSENT_BY_ID)
     @PreAuthorize("canManageDeployment( #deploymentId ) or isInDeployment( #deploymentId )")
-    @Operation(tags = ["consentDocument/delete.json"])
+    @ResponseStatus(HttpStatus.OK)
     fun delete(
         @PathVariable(PathVariableName.DEPLOYMENT_ID) deploymentId: UUID,
         @PathVariable(PathVariableName.CONSENT_ID) consentId: Int,
