@@ -16,6 +16,7 @@ import dk.cachet.carp.webservices.deployment.serdes.DeploymentRequestSerializer
 import dk.cachet.carp.webservices.deployment.serdes.ParticipationRequestSerializer
 import dk.cachet.carp.webservices.deployment.service.DeploymentService
 import dk.cachet.carp.webservices.deployment.service.ParticipationService
+import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -72,8 +73,23 @@ class StudyDeploymentController(
     }
 
     @PostMapping(value = [DEPLOYMENT_SERVICE])
+    @Operation(
+        description = """
+        The request body should be a serialized DeploymentServiceRequest (string).
+        The response body will also be serialized (string). The request-response mappings are as follows:
+        
+        - CreateStudyDeployment -> StudyDeploymentStatus
+        - RemoveStudyDeployments -> UUID[]
+        - GetStudyDeploymentStatus -> StudyDeploymentStatus
+        - GetStudyDeploymentStatusList -> StudyDeploymentStatus[]
+        - RegisterDevice -> StudyDeploymentStatus
+        - UnregisterDevice -> StudyDeploymentStatus
+        - GetDeviceDeploymentFor -> PrimaryDeviceDeployment
+        - DeviceDeployed -> StudyDeploymentStatus
+        - Stop -> StudyDeploymentStatus
+    """,
+    )
     @RequestBodySwagger(
-        description = "Body: SERIALIZED DeploymentServiceRequest (string). See below for possible request types.",
         content = [
             Content(
                 schema =
@@ -95,7 +111,6 @@ class StudyDeploymentController(
     )
     @ApiResponse(
         responseCode = "200",
-        description = "Returns serialized response (as a string).",
         content = [
             Content(
                 schema =
@@ -125,8 +140,18 @@ class StudyDeploymentController(
     }
 
     @PostMapping(value = [PARTICIPATION_SERVICE])
+    @Operation(
+        description = """
+        The request body should be a serialized ParticipationServiceRequest (string).
+        The response body will also be serialized (string). The request-response mappings are as follows:
+        
+        - GetActiveParticipationInvitations -> ActiveParticipationInvitation[]
+        - GetParticipantData -> ParticipantData
+        - GetParticipantDataList -> ParticipantData[]
+        - SetParticipantData -> ParticipantData
+    """,
+    )
     @RequestBodySwagger(
-        description = "Body: SERIALIZED ParticipationServiceRequest (string). See below for possible request types.",
         content = [
             Content(
                 schema =
@@ -143,7 +168,6 @@ class StudyDeploymentController(
     )
     @ApiResponse(
         responseCode = "200",
-        description = "Returns serialized response (as a string).",
         content = [
             Content(
                 schema =

@@ -24,6 +24,7 @@ import dk.cachet.carp.webservices.study.serdes.RecruitmentRequestSerializer
 import dk.cachet.carp.webservices.study.serdes.StudyRequestSerializer
 import dk.cachet.carp.webservices.study.service.RecruitmentService
 import dk.cachet.carp.webservices.study.service.StudyService
+import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -145,8 +146,21 @@ class StudyController(
     }
 
     @PostMapping(value = [RECRUITMENT_SERVICE])
+    @Operation(
+        description = """
+        The request body should be a serialized RecruitmentServiceRequest (string).
+        The response body will also be serialized (string). The request-response mappings are as follows:
+        
+        - AddParticipantByEmailAddress -> Participant
+        - AddParticipantByUsername -> Participant
+        - GetParticipant -> Participant
+        - GetParticipants -> Participant[]
+        - InviteNewParticipantGroup -> ParticipantGroupStatus
+        - GetParticipantGroupStatusList -> ParticipantGroupStatus[]
+        - StopParticipantGroup -> ParticipantGroupStatus
+    """,
+    )
     @RequestBodySwagger(
-        description = "Body: SERIALIZED RecruitmentServiceRequest (a string). See below for possible request types.",
         content = [
             Content(
                 schema =
@@ -166,7 +180,6 @@ class StudyController(
     )
     @ApiResponse(
         responseCode = "200",
-        description = "Returns serialized response (as a string).",
         content = [
             Content(
                 schema =
@@ -194,8 +207,24 @@ class StudyController(
     }
 
     @PostMapping(value = [STUDY_SERVICE])
+    @Operation(
+        description = """
+        The request body should be a serialized StudyServiceRequest (string).
+        The response body will also be serialized (string). The request-response mappings are as follows:
+        
+        - CreateStudy -> StudyStatus
+        - SetInternalDescription -> StudyStatus
+        - GetStudyDetails -> StudyDetails
+        - GetStudyStatus -> StudyStatus
+        - GetStudiesOverview -> StudyStatus[]
+        - SetInvitation -> StudyStatus
+        - SetProtocol -> StudyStatus
+        - RemoveProtocol -> StudyStatus
+        - GoLive -> StudyStatus
+        - Remove -> Boolean
+    """,
+    )
     @RequestBodySwagger(
-        description = "Body: SERIALIZED StudyServiceRequest (a string). See below for possible request types.",
         content = [
             Content(
                 schema =
@@ -218,7 +247,6 @@ class StudyController(
     )
     @ApiResponse(
         responseCode = "200",
-        description = "Returns serialized response (as a string).",
         content = [
             Content(
                 schema =

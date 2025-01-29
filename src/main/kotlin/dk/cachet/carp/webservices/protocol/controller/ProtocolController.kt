@@ -13,6 +13,7 @@ import dk.cachet.carp.webservices.protocol.serdes.ProtocolFactoryRequestSerializ
 import dk.cachet.carp.webservices.protocol.serdes.ProtocolRequestSerializer
 import dk.cachet.carp.webservices.protocol.service.ProtocolService
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
+import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -64,8 +65,20 @@ class ProtocolController(
     }
 
     @PostMapping(value = [PROTOCOL_SERVICE])
+    @Operation(
+        description = """
+        The request body should be a serialized ProtocolServiceRequest (string).
+        The response body will also be serialized (string). The request-response mappings are as follows:
+        
+        - Add -> Unit
+        - AddVersion -> Unit
+        - UpdateParticipantDataConfiguration -> StudyProtocolSnapshot
+        - GetBy -> StudyProtocolSnapshot
+        - GetAllForOwner -> StudyProtocolSnapshot[]
+        - GetVersionHistoryFor -> ProtocolVersion[]
+    """,
+    )
     @RequestBodySwagger(
-        description = "Body: SERIALIZED ProtocolServiceRequest (string). See below for possible request types.",
         content = [
             Content(
                 schema =
@@ -84,7 +97,6 @@ class ProtocolController(
     )
     @ApiResponse(
         responseCode = "200",
-        description = "Returns serialized response (as a string).",
         content = [
             Content(
                 schema =
@@ -111,8 +123,15 @@ class ProtocolController(
     }
 
     @PostMapping(value = [PROTOCOL_FACTORY_SERVICE])
+    @Operation(
+        description = """
+        The request body should be a serialized ProtocolFactoryServiceRequest (string).
+        The response body will also be serialized (string). The request-response mappings are as follows:
+        
+        - CreateCustomProtocol -> Unit
+    """,
+    )
     @RequestBodySwagger(
-        description = "Body: SERIALIZED ProtocolFactoryServiceRequest (string). See below for possible request types.",
         content = [
             Content(
                 schema =
@@ -126,7 +145,6 @@ class ProtocolController(
     )
     @ApiResponse(
         responseCode = "200",
-        description = "Returns serialized response (as a string).",
         content = [
             Content(
                 schema =

@@ -6,6 +6,7 @@ import dk.cachet.carp.data.infrastructure.DataStreamServiceRequest
 import dk.cachet.carp.webservices.common.input.WS_JSON
 import dk.cachet.carp.webservices.datastream.service.DataStreamService
 import dk.cachet.carp.webservices.datastream.service.impl.decompressGzip
+import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -31,8 +32,19 @@ class DataStreamController(
     }
 
     @PostMapping(value = [DATA_STREAM_SERVICE])
+    @Operation(
+        description = """
+        The request body should be a serialized DataStreamServiceRequest (string).
+        The response body will also be serialized (string). The request-response mappings are as follows:
+        
+        - OpenDataStreams -> Unit
+        - AppendToDataStreams -> Unit
+        - GetDataStream -> DataStreamBatch
+        - CloseDataStreams -> Unit
+        - RemoveDataStreams -> UUID[]
+    """,
+    )
     @RequestBodySwagger(
-        description = "Body: SERIALIZED DataStreamServiceRequest (string). See below for possible request types.",
         content = [
             Content(
                 schema =
@@ -50,7 +62,6 @@ class DataStreamController(
     )
     @ApiResponse(
         responseCode = "200",
-        description = "Returns serialized response (as a string).",
         content = [
             Content(
                 schema =
@@ -75,12 +86,20 @@ class DataStreamController(
         return serializer.serializeResponse(request, ret).let { ResponseEntity.ok(it) }
     }
 
-    @PostMapping(value = [DATA_STREAM_SERVICE_GZIP])
+    @Operation(
+        description = """
+        Same as data-stream-service, but take ByteArray instead of JSON string, the ByteArray should be a compressed DataStreamServiceRequest via Gzip.
+        
+        The request-response mappings are as follows:
+        
+        - OpenDataStreams -> Unit
+        - AppendToDataStreams -> Unit
+        - GetDataStream -> DataStreamBatch
+        - CloseDataStreams -> Unit
+        - RemoveDataStreams -> UUID[]
+    """,
+    )
     @RequestBodySwagger(
-        description =
-            "Same as data-stream-service, but take ByteArray instead of JSON string," +
-                " the ByteArray should be a compressed DataStreamServiceRequest via Gzip. " +
-                "See below for possible request types.",
         content = [
             Content(
                 schema =
@@ -98,7 +117,6 @@ class DataStreamController(
     )
     @ApiResponse(
         responseCode = "200",
-        description = "Returns serialized response (as a string).",
         content = [
             Content(
                 schema =
@@ -114,6 +132,7 @@ class DataStreamController(
             ),
         ],
     )
+    @PostMapping(value = [DATA_STREAM_SERVICE_GZIP])
     suspend fun handleCompressedData(
         @RequestBody data: ByteArray,
     ): ResponseEntity<Any> {
