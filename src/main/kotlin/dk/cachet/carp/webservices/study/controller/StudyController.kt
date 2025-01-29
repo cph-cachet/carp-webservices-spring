@@ -2,9 +2,16 @@ package dk.cachet.carp.webservices.study.controller
 
 import dk.cachet.carp.common.application.EmailAddress
 import dk.cachet.carp.common.application.UUID
+import dk.cachet.carp.studies.application.StudyDetails
+import dk.cachet.carp.studies.application.StudyStatus
+import dk.cachet.carp.studies.application.users.Participant
+import dk.cachet.carp.studies.application.users.ParticipantGroupStatus
 import dk.cachet.carp.studies.infrastructure.RecruitmentServiceRequest
 import dk.cachet.carp.studies.infrastructure.StudyServiceRequest
 import dk.cachet.carp.webservices.account.service.AccountService
+import dk.cachet.carp.webservices.common.configuration.swagger.ListOfParticipant
+import dk.cachet.carp.webservices.common.configuration.swagger.ListOfParticipantGroupStatus
+import dk.cachet.carp.webservices.common.configuration.swagger.ListStudyStatus
 import dk.cachet.carp.webservices.common.constants.PathVariableName
 import dk.cachet.carp.webservices.common.constants.RequestParamName
 import dk.cachet.carp.webservices.common.input.WS_JSON
@@ -22,6 +29,7 @@ import dk.cachet.carp.webservices.study.service.RecruitmentService
 import dk.cachet.carp.webservices.study.service.StudyService
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.responses.ApiResponse
 import jakarta.validation.Valid
 import kotlinx.coroutines.runBlocking
 import org.apache.logging.log4j.LogManager
@@ -159,6 +167,26 @@ class StudyController(
             ),
         ],
     )
+    @ApiResponse(
+        responseCode = "200",
+        description = "Returns serialized response (as a string).",
+        content = [
+            Content(
+                schema =
+                    Schema(
+                        oneOf = [
+                            Participant::class,
+                            Participant::class,
+                            Participant::class,
+                            ListOfParticipant::class,
+                            ParticipantGroupStatus::class,
+                            ListOfParticipantGroupStatus::class,
+                            ParticipantGroupStatus::class,
+                        ],
+                    ),
+            ),
+        ],
+    )
     suspend fun recruitments(
         @RequestBody httpMessage: String,
     ): ResponseEntity<*> {
@@ -186,6 +214,29 @@ class StudyController(
                             StudyServiceRequest.RemoveProtocol::class,
                             StudyServiceRequest.GoLive::class,
                             StudyServiceRequest.Remove::class,
+                        ],
+                    ),
+            ),
+        ],
+    )
+    @ApiResponse(
+        responseCode = "200",
+        description = "Returns serialized response (as a string).",
+        content = [
+            Content(
+                schema =
+                    Schema(
+                        oneOf = [
+                            StudyStatus::class,
+                            StudyStatus::class,
+                            StudyDetails::class,
+                            StudyStatus::class,
+                            ListStudyStatus::class,
+                            StudyStatus::class,
+                            StudyStatus::class,
+                            StudyStatus::class,
+                            StudyStatus::class,
+                            Boolean::class,
                         ],
                     ),
             ),

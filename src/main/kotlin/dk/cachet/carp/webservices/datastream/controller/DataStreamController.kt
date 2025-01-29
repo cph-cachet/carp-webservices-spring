@@ -1,18 +1,21 @@
 package dk.cachet.carp.webservices.datastream.controller
 
+import dk.cachet.carp.data.application.DataStreamBatch
 import dk.cachet.carp.data.infrastructure.DataStreamServiceRequest
+import dk.cachet.carp.webservices.common.configuration.swagger.SetOfUUID
 import dk.cachet.carp.webservices.common.input.WS_JSON
 import dk.cachet.carp.webservices.datastream.service.DataStreamService
 import dk.cachet.carp.webservices.datastream.service.impl.decompressGzip
-import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.responses.ApiResponse
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import io.swagger.v3.oas.annotations.parameters.RequestBody as RequestBodySwagger
 
 @RestController
 class DataStreamController(
@@ -28,7 +31,41 @@ class DataStreamController(
     }
 
     @PostMapping(value = [DATA_STREAM_SERVICE])
-    @ResponseStatus(HttpStatus.OK)
+    @RequestBodySwagger(
+        description = "Body: SERIALIZED DataStreamServiceRequest (string). See below for possible request types.",
+        content = [
+            Content(
+                schema =
+                    Schema(
+                        oneOf = [
+                            DataStreamServiceRequest.OpenDataStreams::class,
+                            DataStreamServiceRequest.AppendToDataStreams::class,
+                            DataStreamServiceRequest.GetDataStream::class,
+                            DataStreamServiceRequest.CloseDataStreams::class,
+                            DataStreamServiceRequest.RemoveDataStreams::class,
+                        ],
+                    ),
+            ),
+        ],
+    )
+    @ApiResponse(
+        responseCode = "200",
+        description = "Returns serialized response (as a string).",
+        content = [
+            Content(
+                schema =
+                    Schema(
+                        oneOf = [
+                            Unit::class,
+                            Unit::class,
+                            DataStreamBatch::class,
+                            Unit::class,
+                            SetOfUUID::class,
+                        ],
+                    ),
+            ),
+        ],
+    )
     suspend fun invoke(
         @RequestBody httpMessage: String,
     ): ResponseEntity<Any> {
@@ -39,12 +76,44 @@ class DataStreamController(
     }
 
     @PostMapping(value = [DATA_STREAM_SERVICE_GZIP])
-    @Operation(
+    @RequestBodySwagger(
         description =
             "Same as data-stream-service, but take ByteArray instead of JSON string," +
-                " the ByteArray should be a compressed DataStreamServiceRequest via Gzip.",
+                " the ByteArray should be a compressed DataStreamServiceRequest via Gzip. " +
+                "See below for possible request types.",
+        content = [
+            Content(
+                schema =
+                    Schema(
+                        oneOf = [
+                            DataStreamServiceRequest.OpenDataStreams::class,
+                            DataStreamServiceRequest.AppendToDataStreams::class,
+                            DataStreamServiceRequest.GetDataStream::class,
+                            DataStreamServiceRequest.CloseDataStreams::class,
+                            DataStreamServiceRequest.RemoveDataStreams::class,
+                        ],
+                    ),
+            ),
+        ],
     )
-    @ResponseStatus(HttpStatus.OK)
+    @ApiResponse(
+        responseCode = "200",
+        description = "Returns serialized response (as a string).",
+        content = [
+            Content(
+                schema =
+                    Schema(
+                        oneOf = [
+                            Unit::class,
+                            Unit::class,
+                            DataStreamBatch::class,
+                            Unit::class,
+                            SetOfUUID::class,
+                        ],
+                    ),
+            ),
+        ],
+    )
     suspend fun handleCompressedData(
         @RequestBody data: ByteArray,
     ): ResponseEntity<Any> {

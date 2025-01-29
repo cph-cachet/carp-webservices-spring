@@ -1,7 +1,10 @@
 package dk.cachet.carp.webservices.protocol.controller
 
+import dk.cachet.carp.protocols.application.StudyProtocolSnapshot
 import dk.cachet.carp.protocols.infrastructure.ProtocolFactoryServiceRequest
 import dk.cachet.carp.protocols.infrastructure.ProtocolServiceRequest
+import dk.cachet.carp.webservices.common.configuration.swagger.ListOfProtocolVersion
+import dk.cachet.carp.webservices.common.configuration.swagger.ListOfStudyProtocolSnapshot
 import dk.cachet.carp.webservices.common.constants.PathVariableName
 import dk.cachet.carp.webservices.common.exception.responses.ResourceNotFoundException
 import dk.cachet.carp.webservices.common.input.WS_JSON
@@ -13,6 +16,7 @@ import dk.cachet.carp.webservices.protocol.service.ProtocolService
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.responses.ApiResponse
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.http.HttpStatus
@@ -79,11 +83,30 @@ class ProtocolController(
             ),
         ],
     )
+    @ApiResponse(
+        responseCode = "200",
+        description = "Returns serialized response (as a string).",
+        content = [
+            Content(
+                schema =
+                    Schema(
+                        oneOf = [
+                            Unit::class,
+                            Unit::class,
+                            StudyProtocolSnapshot::class,
+                            StudyProtocolSnapshot::class,
+                            ListOfStudyProtocolSnapshot::class,
+                            ListOfProtocolVersion::class,
+                        ],
+                    ),
+            ),
+        ],
+    )
     suspend fun protocols(
         @RequestBody httpMessage: String,
     ): ResponseEntity<Any> {
         val request = WS_JSON.decodeFromString(ProtocolServiceRequest.Serializer, httpMessage)
-        LOGGER.info("Start POST: $PROTOCOL_SERVICE -> ${ request::class.simpleName }")
+        LOGGER.info("Start POST: $PROTOCOL_SERVICE -> ${request::class.simpleName}")
         val result = protocolService.core.invoke(request)
         return serializer.serializeResponse(request, result).let { ResponseEntity.ok(it) }
     }
@@ -102,11 +125,25 @@ class ProtocolController(
             ),
         ],
     )
+    @ApiResponse(
+        responseCode = "200",
+        description = "Returns serialized response (as a string).",
+        content = [
+            Content(
+                schema =
+                    Schema(
+                        oneOf = [
+                            Unit::class,
+                        ],
+                    ),
+            ),
+        ],
+    )
     suspend fun protocolFactory(
         @RequestBody httpMessage: String,
     ): ResponseEntity<Any> {
         val request = WS_JSON.decodeFromString(ProtocolFactoryServiceRequest.Serializer, httpMessage)
-        LOGGER.info("Start POST: $PROTOCOL_FACTORY_SERVICE -> ${ request::class.simpleName }")
+        LOGGER.info("Start POST: $PROTOCOL_FACTORY_SERVICE -> ${request::class.simpleName}")
         val result = services.protocolFactoryService.invoke(request)
         return factorySerializer.serializeResponse(request, result).let { ResponseEntity.ok(it) }
     }

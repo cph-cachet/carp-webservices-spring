@@ -1,7 +1,14 @@
 package dk.cachet.carp.webservices.deployment.controller
 
+import dk.cachet.carp.deployments.application.PrimaryDeviceDeployment
+import dk.cachet.carp.deployments.application.StudyDeploymentStatus
+import dk.cachet.carp.deployments.application.users.ParticipantData
 import dk.cachet.carp.deployments.infrastructure.DeploymentServiceRequest
 import dk.cachet.carp.deployments.infrastructure.ParticipationServiceRequest
+import dk.cachet.carp.webservices.common.configuration.swagger.ListOfParticipantData
+import dk.cachet.carp.webservices.common.configuration.swagger.ListStudyDeploymentStatus
+import dk.cachet.carp.webservices.common.configuration.swagger.SetOfActiveParticipationInvitations
+import dk.cachet.carp.webservices.common.configuration.swagger.SetOfUUID
 import dk.cachet.carp.webservices.common.input.WS_JSON
 import dk.cachet.carp.webservices.common.serialisers.ApplicationRequestSerializer
 import dk.cachet.carp.webservices.dataPoint.service.DataPointService
@@ -13,6 +20,7 @@ import dk.cachet.carp.webservices.deployment.service.DeploymentService
 import dk.cachet.carp.webservices.deployment.service.ParticipationService
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.responses.ApiResponse
 import jakarta.validation.Valid
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -25,7 +33,6 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import io.swagger.v3.oas.annotations.parameters.RequestBody as RequestBodySwagger
 
-// todo RPC openapi doc
 @RestController
 class StudyDeploymentController(
     private val deploymentService: DeploymentService,
@@ -88,6 +95,28 @@ class StudyDeploymentController(
             ),
         ],
     )
+    @ApiResponse(
+        responseCode = "200",
+        description = "Returns serialized response (as a string).",
+        content = [
+            Content(
+                schema =
+                    Schema(
+                        oneOf = [
+                            StudyDeploymentStatus::class,
+                            SetOfUUID::class,
+                            StudyDeploymentStatus::class,
+                            ListStudyDeploymentStatus::class,
+                            StudyDeploymentStatus::class,
+                            StudyDeploymentStatus::class,
+                            PrimaryDeviceDeployment::class,
+                            StudyDeploymentStatus::class,
+                            StudyDeploymentStatus::class,
+                        ],
+                    ),
+            ),
+        ],
+    )
     suspend fun deployments(
         @RequestBody httpMessage: String,
     ): ResponseEntity<Any> {
@@ -109,6 +138,23 @@ class StudyDeploymentController(
                             ParticipationServiceRequest.GetParticipantData::class,
                             ParticipationServiceRequest.GetParticipantDataList::class,
                             ParticipationServiceRequest.SetParticipantData::class,
+                        ],
+                    ),
+            ),
+        ],
+    )
+    @ApiResponse(
+        responseCode = "200",
+        description = "Returns serialized response (as a string).",
+        content = [
+            Content(
+                schema =
+                    Schema(
+                        oneOf = [
+                            SetOfActiveParticipationInvitations::class,
+                            ParticipantData::class,
+                            ListOfParticipantData::class,
+                            ParticipantData::class,
                         ],
                     ),
             ),
