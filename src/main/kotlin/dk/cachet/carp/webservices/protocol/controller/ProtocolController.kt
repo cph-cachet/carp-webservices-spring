@@ -1,10 +1,9 @@
 package dk.cachet.carp.webservices.protocol.controller
 
+import dk.cachet.carp.protocols.application.ProtocolVersion
 import dk.cachet.carp.protocols.application.StudyProtocolSnapshot
 import dk.cachet.carp.protocols.infrastructure.ProtocolFactoryServiceRequest
 import dk.cachet.carp.protocols.infrastructure.ProtocolServiceRequest
-import dk.cachet.carp.webservices.common.configuration.swagger.ListOfProtocolVersion
-import dk.cachet.carp.webservices.common.configuration.swagger.ListOfStudyProtocolSnapshot
 import dk.cachet.carp.webservices.common.constants.PathVariableName
 import dk.cachet.carp.webservices.common.exception.responses.ResourceNotFoundException
 import dk.cachet.carp.webservices.common.input.WS_JSON
@@ -95,8 +94,8 @@ class ProtocolController(
                             Unit::class,
                             StudyProtocolSnapshot::class,
                             StudyProtocolSnapshot::class,
-                            ListOfStudyProtocolSnapshot::class,
-                            ListOfProtocolVersion::class,
+                            Array<StudyProtocolSnapshot>::class,
+                            Array<ProtocolVersion>::class,
                         ],
                     ),
             ),

@@ -9,9 +9,6 @@ import dk.cachet.carp.studies.application.users.ParticipantGroupStatus
 import dk.cachet.carp.studies.infrastructure.RecruitmentServiceRequest
 import dk.cachet.carp.studies.infrastructure.StudyServiceRequest
 import dk.cachet.carp.webservices.account.service.AccountService
-import dk.cachet.carp.webservices.common.configuration.swagger.ListOfParticipant
-import dk.cachet.carp.webservices.common.configuration.swagger.ListOfParticipantGroupStatus
-import dk.cachet.carp.webservices.common.configuration.swagger.ListStudyStatus
 import dk.cachet.carp.webservices.common.constants.PathVariableName
 import dk.cachet.carp.webservices.common.constants.RequestParamName
 import dk.cachet.carp.webservices.common.input.WS_JSON
@@ -178,9 +175,9 @@ class StudyController(
                             Participant::class,
                             Participant::class,
                             Participant::class,
-                            ListOfParticipant::class,
+                            Array<Participant>::class,
                             ParticipantGroupStatus::class,
-                            ListOfParticipantGroupStatus::class,
+                            Array<ParticipantGroupStatus>::class,
                             ParticipantGroupStatus::class,
                         ],
                     ),
@@ -231,7 +228,7 @@ class StudyController(
                             StudyStatus::class,
                             StudyDetails::class,
                             StudyStatus::class,
-                            ListStudyStatus::class,
+                            Array<StudyStatus>::class,
                             StudyStatus::class,
                             StudyStatus::class,
                             StudyStatus::class,

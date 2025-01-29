@@ -1,8 +1,8 @@
 package dk.cachet.carp.webservices.datastream.controller
 
+import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.data.application.DataStreamBatch
 import dk.cachet.carp.data.infrastructure.DataStreamServiceRequest
-import dk.cachet.carp.webservices.common.configuration.swagger.SetOfUUID
 import dk.cachet.carp.webservices.common.input.WS_JSON
 import dk.cachet.carp.webservices.datastream.service.DataStreamService
 import dk.cachet.carp.webservices.datastream.service.impl.decompressGzip
@@ -60,7 +60,7 @@ class DataStreamController(
                             Unit::class,
                             DataStreamBatch::class,
                             Unit::class,
-                            SetOfUUID::class,
+                            Array<UUID>::class,
                         ],
                     ),
             ),
@@ -108,7 +108,7 @@ class DataStreamController(
                             Unit::class,
                             DataStreamBatch::class,
                             Unit::class,
-                            SetOfUUID::class,
+                            Array<UUID>::class,
                         ],
                     ),
             ),

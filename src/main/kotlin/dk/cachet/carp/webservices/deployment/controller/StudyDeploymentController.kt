@@ -1,14 +1,12 @@
 package dk.cachet.carp.webservices.deployment.controller
 
+import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.deployments.application.PrimaryDeviceDeployment
 import dk.cachet.carp.deployments.application.StudyDeploymentStatus
+import dk.cachet.carp.deployments.application.users.ActiveParticipationInvitation
 import dk.cachet.carp.deployments.application.users.ParticipantData
 import dk.cachet.carp.deployments.infrastructure.DeploymentServiceRequest
 import dk.cachet.carp.deployments.infrastructure.ParticipationServiceRequest
-import dk.cachet.carp.webservices.common.configuration.swagger.ListOfParticipantData
-import dk.cachet.carp.webservices.common.configuration.swagger.ListStudyDeploymentStatus
-import dk.cachet.carp.webservices.common.configuration.swagger.SetOfActiveParticipationInvitations
-import dk.cachet.carp.webservices.common.configuration.swagger.SetOfUUID
 import dk.cachet.carp.webservices.common.input.WS_JSON
 import dk.cachet.carp.webservices.common.serialisers.ApplicationRequestSerializer
 import dk.cachet.carp.webservices.dataPoint.service.DataPointService
@@ -104,9 +102,9 @@ class StudyDeploymentController(
                     Schema(
                         oneOf = [
                             StudyDeploymentStatus::class,
-                            SetOfUUID::class,
+                            Array<UUID>::class,
                             StudyDeploymentStatus::class,
-                            ListStudyDeploymentStatus::class,
+                            Array<StudyDeploymentStatus>::class,
                             StudyDeploymentStatus::class,
                             StudyDeploymentStatus::class,
                             PrimaryDeviceDeployment::class,
@@ -151,9 +149,9 @@ class StudyDeploymentController(
                 schema =
                     Schema(
                         oneOf = [
-                            SetOfActiveParticipationInvitations::class,
+                            Array<ActiveParticipationInvitation>::class,
                             ParticipantData::class,
-                            ListOfParticipantData::class,
+                            Array<ParticipantData>::class,
                             ParticipantData::class,
                         ],
                     ),
