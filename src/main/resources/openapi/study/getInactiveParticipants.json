@@ -1,6 +1,0 @@
-{
-  "tags": [
-    "study-controller"
-  ],
-  "description": "Get inactive study deployments based on the how many HOURS they have been inactive."
-}

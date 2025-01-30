@@ -2,758 +2,154 @@
   "tags": [
     "study-deployment-controller"
   ],
-  "description": "> `Description`: `RPC` \n\nThis endpoint enables an \"RPC like\" endpoint to create and modify a deployment. \n\n> `Request`: (Http Method: [POST]) https://cans.cachet.dk:443/api/deployments/all\n\nThis request must be authenticated using a HTTP OAuth 2.0 Authentication header.\n\n> `Payload documentation`: https://github.com/cph-cachet/carp.core-kotlin/blob/develop/carp.deployment.core/src/commonMain/kotlin/dk/cachet/carp/deployment/infrastructure/DeploymentServiceRequest.kt\n\n> `Response`:\n\n- This request doesn't return a response body.\n- On failure status code `400` (bad request) is returned.\n- On failure status code `401` (unauthorized) is returned.\n- On failure status code `500` (internal server error) is returned.",
+  "description": "\n        The request body should be a serialized DeploymentServiceRequest (string).\n        The response body will also be serialized (string). The request-response mappings are as follows:\n        \n        - CreateStudyDeployment -\u003E StudyDeploymentStatus\n        - RemoveStudyDeployments -\u003E UUID[]\n        - GetStudyDeploymentStatus -\u003E StudyDeploymentStatus\n        - GetStudyDeploymentStatusList -\u003E StudyDeploymentStatus[]\n        - RegisterDevice -\u003E StudyDeploymentStatus\n        - UnregisterDevice -\u003E StudyDeploymentStatus\n        - GetDeviceDeploymentFor -\u003E PrimaryDeviceDeployment\n        - DeviceDeployed -\u003E StudyDeploymentStatus\n        - Stop -\u003E StudyDeploymentStatus\n    ",
+  "operationId": "deployments",
   "requestBody": {
     "content": {
       "application/json": {
-        "example": {
-          "__type": "dk.cachet.carp.deployments.infrastructure.ParticipationServiceRequest.GetActiveParticipationInvitations",
-          "accountId": "5221c3be-0534-4988-a77d-fa64d4404c39"
+        "schema": {
+          "oneOf": [
+            {
+              "$ref": "#/components/schemas/CreateStudyDeployment"
+            },
+            {
+              "$ref": "#/components/schemas/RemoveStudyDeployments"
+            },
+            {
+              "$ref": "#/components/schemas/GetStudyDeploymentStatus"
+            },
+            {
+              "$ref": "#/components/schemas/GetStudyDeploymentStatusList"
+            },
+            {
+              "$ref": "#/components/schemas/RegisterDevice"
+            },
+            {
+              "$ref": "#/components/schemas/UnregisterDevice"
+            },
+            {
+              "$ref": "#/components/schemas/GetDeviceDeploymentFor"
+            },
+            {
+              "$ref": "#/components/schemas/DeviceDeployed"
+            },
+            {
+              "$ref": "#/components/schemas/Stop"
+            }
+          ]
         }
       }
-    }
+    },
+    "required": true
   },
   "responses": {
-    "200": {
-      "description": "GetStudyDeploymentStatusList",
-      "headers": {
-        "Cache-Control": {
-          "schema": {
-            "type": "string",
-            "example": "no-cache, no-store, max-age=0, must-revalidate"
-          }
-        },
-        "Connection": {
-          "schema": {
-            "type": "string",
-            "example": "keep-alive"
-          }
-        },
-        "Date": {
-          "schema": {
-            "type": "string",
-            "example": "Thu, 21 Jan 2021 14:01:42 GMT"
-          }
-        },
-        "Expires": {
-          "schema": {
-            "type": "string",
-            "example": "0"
-          }
-        },
-        "Keep-Alive": {
-          "schema": {
-            "type": "string",
-            "example": "timeout=60"
-          }
-        },
-        "Pragma": {
-          "schema": {
-            "type": "string",
-            "example": "no-cache"
-          }
-        },
-        "Transfer-Encoding": {
-          "schema": {
-            "type": "string",
-            "example": "chunked"
-          }
-        },
-        "X-Content-Type-Options": {
-          "schema": {
-            "type": "string",
-            "example": "nosniff"
-          }
-        },
-        "X-Frame-Options": {
-          "schema": {
-            "type": "string",
-            "example": "DENY"
-          }
-        },
-        "X-XSS-Protection": {
-          "schema": {
-            "type": "string",
-            "example": "1; mode=block"
-          }
-        }
-      },
+    "400": {
+      "description": "Bad Request",
       "content": {
-        "application/json": {
+        "*/*": {
           "schema": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "__type": {
-                  "type": "string",
-                  "example": "dk.cachet.carp.deployments.application.StudyDeploymentStatus.Invited"
-                },
-                "createdOn": {
-                  "type": "string",
-                  "example": "2022-01-18T11:06:40Z"
-                },
-                "deviceStatusList": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "__type": {
-                        "type": "string",
-                        "example": "dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Unregistered"
-                      },
-                      "canBeDeployed": {
-                        "type": "boolean",
-                        "example": true
-                      },
-                      "device": {
-                        "type": "object",
-                        "properties": {
-                          "__type": {
-                            "type": "string",
-                            "example": "dk.cachet.carp.common.application.devices.Smartphone"
-                          },
-                          "defaultSamplingConfiguration": {
-                            "type": "object",
-                            "properties": {
-                              "dk.cachet.carp.geolocation": {
-                                "type": "object",
-                                "properties": {
-                                  "__type": {
-                                    "type": "string",
-                                    "example": "dk.cachet.carp.common.application.sampling.BatteryAwareSamplingConfiguration"
-                                  },
-                                  "low": {
-                                    "type": "object",
-                                    "properties": {
-                                      "__type": {
-                                        "type": "string",
-                                        "example": "dk.cachet.carp.common.application.sampling.GranularitySamplingConfiguration"
-                                      },
-                                      "granularity": {
-                                        "type": "string",
-                                        "example": "Coarse"
-                                      }
-                                    }
-                                  },
-                                  "normal": {
-                                    "type": "object",
-                                    "properties": {
-                                      "__type": {
-                                        "type": "string",
-                                        "example": "dk.cachet.carp.common.application.sampling.GranularitySamplingConfiguration"
-                                      },
-                                      "granularity": {
-                                        "type": "string",
-                                        "example": "Detailed"
-                                      }
-                                    }
-                                  }
-                                }
-                              }
-                            }
-                          },
-                          "isOptional": {
-                            "type": "boolean",
-                            "example": true
-                          },
-                          "isPrimaryDevice": {
-                            "type": "boolean",
-                            "example": true
-                          },
-                          "roleName": {
-                            "type": "string",
-                            "example": "Participant's phone"
-                          }
-                        }
-                      },
-                      "remainingDevicesToRegisterBeforeDeployment": {
-                        "type": "array",
-                        "items": {},
-                        "example": []
-                      },
-                      "remainingDevicesToRegisterToObtainDeployment": {
-                        "type": "array",
-                        "items": {
-                          "type": "string",
-                          "example": "Participant's phone"
-                        },
-                        "example": [
-                          "Participant's phone"
-                        ]
-                      }
-                    }
-                  },
-                  "example": [
-                    {
-                      "__type": "dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Unregistered",
-                      "canBeDeployed": true,
-                      "device": {
-                        "__type": "dk.cachet.carp.common.application.devices.Smartphone",
-                        "defaultSamplingConfiguration": {
-                          "dk.cachet.carp.geolocation": {
-                            "__type": "dk.cachet.carp.common.application.sampling.BatteryAwareSamplingConfiguration",
-                            "low": {
-                              "__type": "dk.cachet.carp.common.application.sampling.GranularitySamplingConfiguration",
-                              "granularity": "Coarse"
-                            },
-                            "normal": {
-                              "__type": "dk.cachet.carp.common.application.sampling.GranularitySamplingConfiguration",
-                              "granularity": "Detailed"
-                            }
-                          }
-                        },
-                        "isPrimaryDevice": true,
-                        "roleName": "Participant's phone"
-                      },
-                      "remainingDevicesToRegisterBeforeDeployment": [],
-                      "remainingDevicesToRegisterToObtainDeployment": [
-                        "Participant's phone"
-                      ]
-                    },
-                    {
-                      "__type": "dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Registered",
-                      "canBeDeployed": false,
-                      "device": {
-                        "__type": "dk.cachet.carp.common.application.devices.AltBeacon",
-                        "isOptional": true,
-                        "roleName": "Participant's bike"
-                      },
-                      "remainingDevicesToRegisterBeforeDeployment": [],
-                      "remainingDevicesToRegisterToObtainDeployment": []
-                    }
-                  ]
-                },
-                "participantStatusList": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "assignedParticipantRoles": {
-                        "type": "object",
-                        "properties": {
-                          "__type": {
-                            "type": "string",
-                            "example": "dk.cachet.carp.common.application.users.AssignedTo.Roles"
-                          },
-                          "roleNames": {
-                            "type": "array",
-                            "items": {
-                              "type": "string",
-                              "example": "Participant"
-                            },
-                            "example": [
-                              "Participant"
-                            ]
-                          }
-                        }
-                      },
-                      "assignedPrimaryDeviceRoleNames": {
-                        "type": "array",
-                        "items": {
-                          "type": "string",
-                          "example": "Participant's phone"
-                        },
-                        "example": [
-                          "Participant's phone"
-                        ]
-                      },
-                      "participantId": {
-                        "type": "string",
-                        "example": "32880e82-01c9-40cf-a6ed-17ff3348f251"
-                      }
-                    }
-                  },
-                  "example": [
-                    {
-                      "assignedParticipantRoles": {
-                        "__type": "dk.cachet.carp.common.application.users.AssignedTo.Roles",
-                        "roleNames": [
-                          "Participant"
-                        ]
-                      },
-                      "assignedPrimaryDeviceRoleNames": [
-                        "Participant's phone"
-                      ],
-                      "participantId": "32880e82-01c9-40cf-a6ed-17ff3348f251"
-                    }
-                  ]
-                },
-                "startedOn": {
-                  "nullable": true,
-                  "example": null
-                },
-                "studyDeploymentId": {
-                  "type": "string",
-                  "example": "c9cc5317-48da-45f2-958e-58bc07f34681"
-                }
-              }
-            },
-            "example": [
+            "oneOf": [
               {
-                "__type": "dk.cachet.carp.deployments.application.StudyDeploymentStatus.Invited",
-                "createdOn": "2022-01-18T11:06:40Z",
-                "deviceStatusList": [
-                  {
-                    "__type": "dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Unregistered",
-                    "canBeDeployed": true,
-                    "device": {
-                      "__type": "dk.cachet.carp.common.application.devices.Smartphone",
-                      "defaultSamplingConfiguration": {
-                        "dk.cachet.carp.geolocation": {
-                          "__type": "dk.cachet.carp.common.application.sampling.BatteryAwareSamplingConfiguration",
-                          "low": {
-                            "__type": "dk.cachet.carp.common.application.sampling.GranularitySamplingConfiguration",
-                            "granularity": "Coarse"
-                          },
-                          "normal": {
-                            "__type": "dk.cachet.carp.common.application.sampling.GranularitySamplingConfiguration",
-                            "granularity": "Detailed"
-                          }
-                        }
-                      },
-                      "isPrimaryDevice": true,
-                      "roleName": "Participant's phone"
-                    },
-                    "remainingDevicesToRegisterBeforeDeployment": [],
-                    "remainingDevicesToRegisterToObtainDeployment": [
-                      "Participant's phone"
-                    ]
-                  },
-                  {
-                    "__type": "dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Registered",
-                    "canBeDeployed": false,
-                    "device": {
-                      "__type": "dk.cachet.carp.common.application.devices.AltBeacon",
-                      "isOptional": true,
-                      "roleName": "Participant's bike"
-                    },
-                    "remainingDevicesToRegisterBeforeDeployment": [],
-                    "remainingDevicesToRegisterToObtainDeployment": []
-                  }
-                ],
-                "participantStatusList": [
-                  {
-                    "assignedParticipantRoles": {
-                      "__type": "dk.cachet.carp.common.application.users.AssignedTo.Roles",
-                      "roleNames": [
-                        "Participant"
-                      ]
-                    },
-                    "assignedPrimaryDeviceRoleNames": [
-                      "Participant's phone"
-                    ],
-                    "participantId": "32880e82-01c9-40cf-a6ed-17ff3348f251"
-                  }
-                ],
-                "startedOn": null,
-                "studyDeploymentId": "c9cc5317-48da-45f2-958e-58bc07f34681"
+                "$ref": "#/components/schemas/CarpErrorResponse"
+              },
+              {
+                "type": "object"
               }
             ]
-          },
-          "examples": {
-            "GetStudyDeploymentStatusList": {
-              "value": [
-                {
-                  "__type": "dk.cachet.carp.deployments.application.StudyDeploymentStatus.Invited",
-                  "createdOn": "2022-01-18T11:06:40Z",
-                  "deviceStatusList": [
-                    {
-                      "__type": "dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Unregistered",
-                      "canBeDeployed": true,
-                      "device": {
-                        "__type": "dk.cachet.carp.common.application.devices.Smartphone",
-                        "defaultSamplingConfiguration": {
-                          "dk.cachet.carp.geolocation": {
-                            "__type": "dk.cachet.carp.common.application.sampling.BatteryAwareSamplingConfiguration",
-                            "low": {
-                              "__type": "dk.cachet.carp.common.application.sampling.GranularitySamplingConfiguration",
-                              "granularity": "Coarse"
-                            },
-                            "normal": {
-                              "__type": "dk.cachet.carp.common.application.sampling.GranularitySamplingConfiguration",
-                              "granularity": "Detailed"
-                            }
-                          }
-                        },
-                        "isPrimaryDevice": true,
-                        "roleName": "Participant's phone"
-                      },
-                      "remainingDevicesToRegisterBeforeDeployment": [],
-                      "remainingDevicesToRegisterToObtainDeployment": [
-                        "Participant's phone"
-                      ]
-                    },
-                    {
-                      "__type": "dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Registered",
-                      "canBeDeployed": false,
-                      "device": {
-                        "__type": "dk.cachet.carp.common.application.devices.AltBeacon",
-                        "isOptional": true,
-                        "roleName": "Participant's bike"
-                      },
-                      "remainingDevicesToRegisterBeforeDeployment": [],
-                      "remainingDevicesToRegisterToObtainDeployment": []
-                    }
-                  ],
-                  "participantStatusList": [
-                    {
-                      "assignedParticipantRoles": {
-                        "__type": "dk.cachet.carp.common.application.users.AssignedTo.Roles",
-                        "roleNames": [
-                          "Participant"
-                        ]
-                      },
-                      "assignedPrimaryDeviceRoleNames": [
-                        "Participant's phone"
-                      ],
-                      "participantId": "32880e82-01c9-40cf-a6ed-17ff3348f251"
-                    }
-                  ],
-                  "startedOn": null,
-                  "studyDeploymentId": "c9cc5317-48da-45f2-958e-58bc07f34681"
-                }
-              ]
-            }
           }
         }
       }
     },
-    "201": {
-      "description": "CreateStudyDeployment",
-      "headers": {
-        "Cache-Control": {
+    "403": {
+      "description": "Forbidden",
+      "content": {
+        "*/*": {
           "schema": {
-            "type": "string",
-            "example": "no-cache, no-store, max-age=0, must-revalidate"
-          }
-        },
-        "Connection": {
-          "schema": {
-            "type": "string",
-            "example": "keep-alive"
-          }
-        },
-        "Date": {
-          "schema": {
-            "type": "string",
-            "example": "Thu, 21 Jan 2021 13:41:49 GMT"
-          }
-        },
-        "Expires": {
-          "schema": {
-            "type": "string",
-            "example": "0"
-          }
-        },
-        "Keep-Alive": {
-          "schema": {
-            "type": "string",
-            "example": "timeout=60"
-          }
-        },
-        "Pragma": {
-          "schema": {
-            "type": "string",
-            "example": "no-cache"
-          }
-        },
-        "Transfer-Encoding": {
-          "schema": {
-            "type": "string",
-            "example": "chunked"
-          }
-        },
-        "X-Content-Type-Options": {
-          "schema": {
-            "type": "string",
-            "example": "nosniff"
-          }
-        },
-        "X-Frame-Options": {
-          "schema": {
-            "type": "string",
-            "example": "DENY"
-          }
-        },
-        "X-XSS-Protection": {
-          "schema": {
-            "type": "string",
-            "example": "1; mode=block"
+            "$ref": "#/components/schemas/CarpErrorResponse"
           }
         }
-      },
+      }
+    },
+    "405": {
+      "description": "Method Not Allowed",
       "content": {
-        "application/json": {
+        "*/*": {
           "schema": {
-            "type": "object",
-            "properties": {
-              "__type": {
-                "type": "string",
-                "example": "dk.cachet.carp.deployments.application.StudyDeploymentStatus.Invited"
+            "type": "object"
+          }
+        }
+      }
+    },
+    "401": {
+      "description": "Unauthorized",
+      "content": {
+        "*/*": {
+          "schema": {
+            "$ref": "#/components/schemas/CarpErrorResponse"
+          }
+        }
+      }
+    },
+    "404": {
+      "description": "Not Found",
+      "content": {
+        "*/*": {
+          "schema": {
+            "$ref": "#/components/schemas/CarpErrorResponse"
+          }
+        }
+      }
+    },
+    "409": {
+      "description": "Conflict",
+      "content": {
+        "*/*": {
+          "schema": {
+            "$ref": "#/components/schemas/CarpErrorResponse"
+          }
+        }
+      }
+    },
+    "200": {
+      "description": "OK",
+      "content": {
+        "*/*": {
+          "schema": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/StudyDeploymentStatus"
               },
-              "createdOn": {
-                "type": "string",
-                "example": "2022-01-18T11:06:40Z"
-              },
-              "deviceStatusList": {
+              {
                 "type": "array",
                 "items": {
-                  "type": "object",
-                  "properties": {
-                    "__type": {
-                      "type": "string",
-                      "example": "dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Unregistered"
-                    },
-                    "canBeDeployed": {
-                      "type": "boolean",
-                      "example": true
-                    },
-                    "device": {
-                      "type": "object",
-                      "properties": {
-                        "__type": {
-                          "type": "string",
-                          "example": "dk.cachet.carp.common.application.devices.Smartphone"
-                        },
-                        "defaultSamplingConfiguration": {
-                          "type": "object",
-                          "properties": {
-                            "dk.cachet.carp.geolocation": {
-                              "type": "object",
-                              "properties": {
-                                "__type": {
-                                  "type": "string",
-                                  "example": "dk.cachet.carp.common.application.sampling.BatteryAwareSamplingConfiguration"
-                                },
-                                "low": {
-                                  "type": "object",
-                                  "properties": {
-                                    "__type": {
-                                      "type": "string",
-                                      "example": "dk.cachet.carp.common.application.sampling.GranularitySamplingConfiguration"
-                                    },
-                                    "granularity": {
-                                      "type": "string",
-                                      "example": "Coarse"
-                                    }
-                                  }
-                                },
-                                "normal": {
-                                  "type": "object",
-                                  "properties": {
-                                    "__type": {
-                                      "type": "string",
-                                      "example": "dk.cachet.carp.common.application.sampling.GranularitySamplingConfiguration"
-                                    },
-                                    "granularity": {
-                                      "type": "string",
-                                      "example": "Detailed"
-                                    }
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        },
-                        "isOptional": {
-                          "type": "boolean",
-                          "example": true
-                        },
-                        "isPrimaryDevice": {
-                          "type": "boolean",
-                          "example": true
-                        },
-                        "roleName": {
-                          "type": "string",
-                          "example": "Participant's phone"
-                        }
-                      }
-                    },
-                    "remainingDevicesToRegisterBeforeDeployment": {
-                      "type": "array",
-                      "items": {},
-                      "example": []
-                    },
-                    "remainingDevicesToRegisterToObtainDeployment": {
-                      "type": "array",
-                      "items": {
-                        "type": "string",
-                        "example": "Participant's phone"
-                      },
-                      "example": [
-                        "Participant's phone"
-                      ]
-                    }
-                  }
-                },
-                "example": [
-                  {
-                    "__type": "dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Unregistered",
-                    "canBeDeployed": true,
-                    "device": {
-                      "__type": "dk.cachet.carp.common.application.devices.Smartphone",
-                      "defaultSamplingConfiguration": {
-                        "dk.cachet.carp.geolocation": {
-                          "__type": "dk.cachet.carp.common.application.sampling.BatteryAwareSamplingConfiguration",
-                          "low": {
-                            "__type": "dk.cachet.carp.common.application.sampling.GranularitySamplingConfiguration",
-                            "granularity": "Coarse"
-                          },
-                          "normal": {
-                            "__type": "dk.cachet.carp.common.application.sampling.GranularitySamplingConfiguration",
-                            "granularity": "Detailed"
-                          }
-                        }
-                      },
-                      "isPrimaryDevice": true,
-                      "roleName": "Participant's phone"
-                    },
-                    "remainingDevicesToRegisterBeforeDeployment": [],
-                    "remainingDevicesToRegisterToObtainDeployment": [
-                      "Participant's phone"
-                    ]
-                  },
-                  {
-                    "__type": "dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Registered",
-                    "canBeDeployed": false,
-                    "device": {
-                      "__type": "dk.cachet.carp.common.application.devices.AltBeacon",
-                      "isOptional": true,
-                      "roleName": "Participant's bike"
-                    },
-                    "remainingDevicesToRegisterBeforeDeployment": [],
-                    "remainingDevicesToRegisterToObtainDeployment": []
-                  }
-                ]
+                  "$ref": "#/components/schemas/UUID"
+                }
               },
-              "participantStatusList": {
+              {
+                "$ref": "#/components/schemas/StudyDeploymentStatus"
+              },
+              {
                 "type": "array",
                 "items": {
-                  "type": "object",
-                  "properties": {
-                    "assignedParticipantRoles": {
-                      "type": "object",
-                      "properties": {
-                        "__type": {
-                          "type": "string",
-                          "example": "dk.cachet.carp.common.application.users.AssignedTo.Roles"
-                        },
-                        "roleNames": {
-                          "type": "array",
-                          "items": {
-                            "type": "string",
-                            "example": "Participant"
-                          },
-                          "example": [
-                            "Participant"
-                          ]
-                        }
-                      }
-                    },
-                    "assignedPrimaryDeviceRoleNames": {
-                      "type": "array",
-                      "items": {
-                        "type": "string",
-                        "example": "Participant's phone"
-                      },
-                      "example": [
-                        "Participant's phone"
-                      ]
-                    },
-                    "participantId": {
-                      "type": "string",
-                      "example": "32880e82-01c9-40cf-a6ed-17ff3348f251"
-                    }
-                  }
-                },
-                "example": [
-                  {
-                    "assignedParticipantRoles": {
-                      "__type": "dk.cachet.carp.common.application.users.AssignedTo.Roles",
-                      "roleNames": [
-                        "Participant"
-                      ]
-                    },
-                    "assignedPrimaryDeviceRoleNames": [
-                      "Participant's phone"
-                    ],
-                    "participantId": "32880e82-01c9-40cf-a6ed-17ff3348f251"
-                  }
-                ]
+                  "$ref": "#/components/schemas/StudyDeploymentStatus"
+                }
               },
-              "startedOn": {
-                "nullable": true,
-                "example": null
+              {
+                "$ref": "#/components/schemas/StudyDeploymentStatus"
               },
-              "studyDeploymentId": {
-                "type": "string",
-                "example": "c9cc5317-48da-45f2-958e-58bc07f34681"
+              {
+                "$ref": "#/components/schemas/StudyDeploymentStatus"
+              },
+              {
+                "$ref": "#/components/schemas/PrimaryDeviceDeployment"
+              },
+              {
+                "$ref": "#/components/schemas/StudyDeploymentStatus"
+              },
+              {
+                "$ref": "#/components/schemas/StudyDeploymentStatus"
               }
-            }
-          },
-          "examples": {
-            "CreateStudyDeployment": {
-              "value": {
-                "__type": "dk.cachet.carp.deployments.application.StudyDeploymentStatus.Invited",
-                "createdOn": "2022-01-18T11:06:40Z",
-                "deviceStatusList": [
-                  {
-                    "__type": "dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Unregistered",
-                    "canBeDeployed": true,
-                    "device": {
-                      "__type": "dk.cachet.carp.common.application.devices.Smartphone",
-                      "defaultSamplingConfiguration": {
-                        "dk.cachet.carp.geolocation": {
-                          "__type": "dk.cachet.carp.common.application.sampling.BatteryAwareSamplingConfiguration",
-                          "low": {
-                            "__type": "dk.cachet.carp.common.application.sampling.GranularitySamplingConfiguration",
-                            "granularity": "Coarse"
-                          },
-                          "normal": {
-                            "__type": "dk.cachet.carp.common.application.sampling.GranularitySamplingConfiguration",
-                            "granularity": "Detailed"
-                          }
-                        }
-                      },
-                      "isPrimaryDevice": true,
-                      "roleName": "Participant's phone"
-                    },
-                    "remainingDevicesToRegisterBeforeDeployment": [],
-                    "remainingDevicesToRegisterToObtainDeployment": [
-                      "Participant's phone"
-                    ]
-                  },
-                  {
-                    "__type": "dk.cachet.carp.deployments.application.DeviceDeploymentStatus.Registered",
-                    "canBeDeployed": false,
-                    "device": {
-                      "__type": "dk.cachet.carp.common.application.devices.AltBeacon",
-                      "isOptional": true,
-                      "roleName": "Participant's bike"
-                    },
-                    "remainingDevicesToRegisterBeforeDeployment": [],
-                    "remainingDevicesToRegisterToObtainDeployment": []
-                  }
-                ],
-                "participantStatusList": [
-                  {
-                    "assignedParticipantRoles": {
-                      "__type": "dk.cachet.carp.common.application.users.AssignedTo.Roles",
-                      "roleNames": [
-                        "Participant"
-                      ]
-                    },
-                    "assignedPrimaryDeviceRoleNames": [
-                      "Participant's phone"
-                    ],
-                    "participantId": "32880e82-01c9-40cf-a6ed-17ff3348f251"
-                  }
-                ],
-                "startedOn": null,
-                "studyDeploymentId": "c9cc5317-48da-45f2-958e-58bc07f34681"
-              }
-            }
+            ]
           }
         }
       }

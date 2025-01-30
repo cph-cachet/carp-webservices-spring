@@ -2,729 +2,136 @@
   "tags": [
     "protocol-controller"
   ],
-  "description": "> `Description`: `polymorphic` \n\nThis endpoint enables a polymorphic endpoint to create and modify a protocol. \n\n> `Request`: (Http Method: [POST]) https://cans.cachet.dk:443}/api/protocols/all\n\nThis request must be authenticated using a HTTP OAuth 2.0 Authentication header.\n\n> `Response`:\n\n- This request doesn't return a response body.\n- On failure status code `400` (bad request) is returned.\n- On failure status code `401` (unauthorized) is returned.\n- On failure status code `500` (internal server error) is returned.\n For more information, refer to the documentation of [CARP Core](https://github.com/cph-cachet/carp.core-kotlin/blob/develop/docs/carp-protocols.md#protocolservice)",
-  "responses": {
-    "200": {
-      "description": "UpdateParticipantDataConfiguration",
-      "headers": {
-        "Cache-Control": {
-          "schema": {
-            "type": "string",
-            "example": "no-cache, no-store, max-age=0, must-revalidate"
-          }
-        },
-        "Connection": {
-          "schema": {
-            "type": "string",
-            "example": "keep-alive"
-          }
-        },
-        "Date": {
-          "schema": {
-            "type": "string",
-            "example": "Thu, 21 Jan 2021 10:32:46 GMT"
-          }
-        },
-        "Expires": {
-          "schema": {
-            "type": "string",
-            "example": "0"
-          }
-        },
-        "Keep-Alive": {
-          "schema": {
-            "type": "string",
-            "example": "timeout=60"
-          }
-        },
-        "Pragma": {
-          "schema": {
-            "type": "string",
-            "example": "no-cache"
-          }
-        },
-        "Transfer-Encoding": {
-          "schema": {
-            "type": "string",
-            "example": "chunked"
-          }
-        },
-        "X-Content-Type-Options": {
-          "schema": {
-            "type": "string",
-            "example": "nosniff"
-          }
-        },
-        "X-Frame-Options": {
-          "schema": {
-            "type": "string",
-            "example": "DENY"
-          }
-        },
-        "X-XSS-Protection": {
-          "schema": {
-            "type": "string",
-            "example": "1; mode=block"
-          }
+  "description": "\n        The request body should be a serialized ProtocolServiceRequest (string).\n        The response body will also be serialized (string). The request-response mappings are as follows:\n        \n        - Add -\u003E Unit\n        - AddVersion -\u003E Unit\n        - UpdateParticipantDataConfiguration -\u003E StudyProtocolSnapshot\n        - GetBy -\u003E StudyProtocolSnapshot\n        - GetAllForOwner -\u003E StudyProtocolSnapshot[]\n        - GetVersionHistoryFor -\u003E ProtocolVersion[]\n    ",
+  "operationId": "protocols",
+  "requestBody": {
+    "content": {
+      "application/json": {
+        "schema": {
+          "oneOf": [
+            {
+              "$ref": "#/components/schemas/Add"
+            },
+            {
+              "$ref": "#/components/schemas/AddVersion"
+            },
+            {
+              "$ref": "#/components/schemas/UpdateParticipantDataConfiguration"
+            },
+            {
+              "$ref": "#/components/schemas/GetBy"
+            },
+            {
+              "$ref": "#/components/schemas/GetAllForOwner"
+            },
+            {
+              "$ref": "#/components/schemas/GetVersionHistoryFor"
+            }
+          ]
         }
-      },
+      }
+    },
+    "required": true
+  },
+  "responses": {
+    "400": {
+      "description": "Bad Request",
       "content": {
-        "application/json": {
+        "*/*": {
           "schema": {
-            "type": "object",
-            "properties": {
-              "applicationData": {
-                "type": "object",
-                "properties": {
-                  "uiTheme": {
-                    "type": "string",
-                    "example": "black"
-                  }
-                }
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/CarpErrorResponse"
               },
-              "connectedDevices": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "__type": {
-                      "type": "string",
-                      "example": "dk.cachet.carp.common.application.devices.AltBeacon"
-                    },
-                    "isOptional": {
-                      "type": "boolean",
-                      "example": true
-                    },
-                    "roleName": {
-                      "type": "string",
-                      "example": "Participant's bike"
-                    }
-                  }
-                },
-                "example": [
-                  {
-                    "__type": "dk.cachet.carp.common.application.devices.AltBeacon",
-                    "isOptional": true,
-                    "roleName": "Participant's bike"
-                  }
-                ]
-              },
-              "connections": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "connectedToRoleName": {
-                      "type": "string",
-                      "example": "Participant's phone"
-                    },
-                    "roleName": {
-                      "type": "string",
-                      "example": "Participant's bike"
-                    }
-                  }
-                },
-                "example": [
-                  {
-                    "connectedToRoleName": "Participant's phone",
-                    "roleName": "Participant's bike"
-                  }
-                ]
-              },
-              "createdOn": {
-                "type": "string",
-                "example": "2022-01-18T10:56:59Z"
-              },
-              "description": {
-                "type": "string",
-                "example": "Track how much nonmotorized movement participants perform."
-              },
-              "expectedParticipantData": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "assignedTo": {
-                      "type": "object",
-                      "properties": {
-                        "__type": {
-                          "type": "string",
-                          "example": "dk.cachet.carp.common.application.users.AssignedTo.Roles"
-                        },
-                        "roleNames": {
-                          "type": "array",
-                          "items": {
-                            "type": "string",
-                            "example": "Participant"
-                          },
-                          "example": [
-                            "Participant"
-                          ]
-                        }
-                      }
-                    },
-                    "attribute": {
-                      "type": "object",
-                      "properties": {
-                        "__type": {
-                          "type": "string",
-                          "example": "dk.cachet.carp.common.application.users.ParticipantAttribute.DefaultParticipantAttribute"
-                        },
-                        "inputDataType": {
-                          "type": "string",
-                          "example": "dk.cachet.carp.input.sex"
-                        }
-                      }
-                    }
-                  }
-                },
-                "example": [
-                  {
-                    "assignedTo": {
-                      "__type": "dk.cachet.carp.common.application.users.AssignedTo.Roles",
-                      "roleNames": [
-                        "Participant"
-                      ]
-                    },
-                    "attribute": {
-                      "__type": "dk.cachet.carp.common.application.users.ParticipantAttribute.DefaultParticipantAttribute",
-                      "inputDataType": "dk.cachet.carp.input.sex"
-                    }
-                  }
-                ]
-              },
-              "id": {
-                "type": "string",
-                "example": "25fe92a5-0d52-4e37-8d05-31f347d72d3d"
-              },
-              "name": {
-                "type": "string",
-                "example": "Nonmotorized transport study"
-              },
-              "ownerId": {
-                "type": "string",
-                "example": "491f03fc-964b-4783-86a6-a528bbfe4e94"
-              },
-              "participantRoles": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "isOptional": {
-                      "type": "boolean",
-                      "example": false
-                    },
-                    "role": {
-                      "type": "string",
-                      "example": "Participant"
-                    }
-                  }
-                },
-                "example": [
-                  {
-                    "isOptional": false,
-                    "role": "Participant"
-                  }
-                ]
-              },
-              "primaryDevices": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "__type": {
-                      "type": "string",
-                      "example": "dk.cachet.carp.common.application.devices.Smartphone"
-                    },
-                    "defaultSamplingConfiguration": {
-                      "type": "object",
-                      "properties": {
-                        "dk.cachet.carp.geolocation": {
-                          "type": "object",
-                          "properties": {
-                            "__type": {
-                              "type": "string",
-                              "example": "dk.cachet.carp.common.application.sampling.BatteryAwareSamplingConfiguration"
-                            },
-                            "low": {
-                              "type": "object",
-                              "properties": {
-                                "__type": {
-                                  "type": "string",
-                                  "example": "dk.cachet.carp.common.application.sampling.GranularitySamplingConfiguration"
-                                },
-                                "granularity": {
-                                  "type": "string",
-                                  "example": "Coarse"
-                                }
-                              }
-                            },
-                            "normal": {
-                              "type": "object",
-                              "properties": {
-                                "__type": {
-                                  "type": "string",
-                                  "example": "dk.cachet.carp.common.application.sampling.GranularitySamplingConfiguration"
-                                },
-                                "granularity": {
-                                  "type": "string",
-                                  "example": "Detailed"
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                    },
-                    "isPrimaryDevice": {
-                      "type": "boolean",
-                      "example": true
-                    },
-                    "roleName": {
-                      "type": "string",
-                      "example": "Participant's phone"
-                    }
-                  }
-                },
-                "example": [
-                  {
-                    "__type": "dk.cachet.carp.common.application.devices.Smartphone",
-                    "defaultSamplingConfiguration": {
-                      "dk.cachet.carp.geolocation": {
-                        "__type": "dk.cachet.carp.common.application.sampling.BatteryAwareSamplingConfiguration",
-                        "low": {
-                          "__type": "dk.cachet.carp.common.application.sampling.GranularitySamplingConfiguration",
-                          "granularity": "Coarse"
-                        },
-                        "normal": {
-                          "__type": "dk.cachet.carp.common.application.sampling.GranularitySamplingConfiguration",
-                          "granularity": "Detailed"
-                        }
-                      }
-                    },
-                    "isPrimaryDevice": true,
-                    "roleName": "Participant's phone"
-                  }
-                ]
-              },
-              "taskControls": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "control": {
-                      "type": "string",
-                      "example": "Start"
-                    },
-                    "destinationDeviceRoleName": {
-                      "type": "string",
-                      "example": "Participant's phone"
-                    },
-                    "taskName": {
-                      "type": "string",
-                      "example": "Monitor movement"
-                    },
-                    "triggerId": {
-                      "type": "number",
-                      "example": 0
-                    }
-                  }
-                },
-                "example": [
-                  {
-                    "control": "Start",
-                    "destinationDeviceRoleName": "Participant's phone",
-                    "taskName": "Monitor movement",
-                    "triggerId": 0
-                  },
-                  {
-                    "control": "Start",
-                    "destinationDeviceRoleName": "Participant's bike",
-                    "taskName": "Monitor proximity to bike",
-                    "triggerId": 0
-                  }
-                ]
-              },
-              "tasks": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "__type": {
-                      "type": "string",
-                      "example": "dk.cachet.carp.common.application.tasks.BackgroundTask"
-                    },
-                    "description": {
-                      "type": "string",
-                      "example": "Track step count and geolocation for one week."
-                    },
-                    "duration": {
-                      "type": "string",
-                      "example": "PT168H"
-                    },
-                    "measures": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "__type": {
-                            "type": "string",
-                            "example": "dk.cachet.carp.common.application.tasks.Measure.DataStream"
-                          },
-                          "overrideSamplingConfiguration": {
-                            "type": "object",
-                            "properties": {
-                              "__type": {
-                                "type": "string",
-                                "example": "dk.cachet.carp.common.application.sampling.BatteryAwareSamplingConfiguration"
-                              },
-                              "low": {
-                                "type": "object",
-                                "properties": {
-                                  "__type": {
-                                    "type": "string",
-                                    "example": "dk.cachet.carp.common.application.sampling.GranularitySamplingConfiguration"
-                                  },
-                                  "granularity": {
-                                    "type": "string",
-                                    "example": "Coarse"
-                                  }
-                                }
-                              },
-                              "normal": {
-                                "type": "object",
-                                "properties": {
-                                  "__type": {
-                                    "type": "string",
-                                    "example": "dk.cachet.carp.common.application.sampling.GranularitySamplingConfiguration"
-                                  },
-                                  "granularity": {
-                                    "type": "string",
-                                    "example": "Balanced"
-                                  }
-                                }
-                              }
-                            }
-                          },
-                          "type": {
-                            "type": "string",
-                            "example": "dk.cachet.carp.geolocation"
-                          }
-                        }
-                      },
-                      "example": [
-                        {
-                          "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                          "overrideSamplingConfiguration": {
-                            "__type": "dk.cachet.carp.common.application.sampling.BatteryAwareSamplingConfiguration",
-                            "low": {
-                              "__type": "dk.cachet.carp.common.application.sampling.GranularitySamplingConfiguration",
-                              "granularity": "Coarse"
-                            },
-                            "normal": {
-                              "__type": "dk.cachet.carp.common.application.sampling.GranularitySamplingConfiguration",
-                              "granularity": "Balanced"
-                            }
-                          },
-                          "type": "dk.cachet.carp.geolocation"
-                        },
-                        {
-                          "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                          "overrideSamplingConfiguration": {
-                            "__type": "dk.cachet.carp.common.application.sampling.NoOptionsSamplingConfiguration"
-                          },
-                          "type": "dk.cachet.carp.stepcount"
-                        }
-                      ]
-                    },
-                    "name": {
-                      "type": "string",
-                      "example": "Monitor movement"
-                    }
-                  }
-                },
-                "example": [
-                  {
-                    "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-                    "description": "Track step count and geolocation for one week.",
-                    "duration": "PT168H",
-                    "measures": [
-                      {
-                        "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                        "overrideSamplingConfiguration": {
-                          "__type": "dk.cachet.carp.common.application.sampling.BatteryAwareSamplingConfiguration",
-                          "low": {
-                            "__type": "dk.cachet.carp.common.application.sampling.GranularitySamplingConfiguration",
-                            "granularity": "Coarse"
-                          },
-                          "normal": {
-                            "__type": "dk.cachet.carp.common.application.sampling.GranularitySamplingConfiguration",
-                            "granularity": "Balanced"
-                          }
-                        },
-                        "type": "dk.cachet.carp.geolocation"
-                      },
-                      {
-                        "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                        "overrideSamplingConfiguration": {
-                          "__type": "dk.cachet.carp.common.application.sampling.NoOptionsSamplingConfiguration"
-                        },
-                        "type": "dk.cachet.carp.stepcount"
-                      }
-                    ],
-                    "name": "Monitor movement"
-                  },
-                  {
-                    "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-                    "duration": "PT168H",
-                    "measures": [
-                      {
-                        "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                        "overrideSamplingConfiguration": {
-                          "__type": "dk.cachet.carp.common.application.sampling.NoOptionsSamplingConfiguration"
-                        },
-                        "type": "dk.cachet.carp.signalstrength"
-                      }
-                    ],
-                    "name": "Monitor proximity to bike"
-                  }
-                ]
-              },
-              "triggers": {
-                "type": "object",
-                "properties": {
-                  "0": {
-                    "type": "object",
-                    "properties": {
-                      "__type": {
-                        "type": "string",
-                        "example": "dk.cachet.carp.common.application.triggers.ElapsedTimeTrigger"
-                      },
-                      "elapsedTime": {
-                        "type": "string",
-                        "example": "PT0S"
-                      },
-                      "sourceDeviceRoleName": {
-                        "type": "string",
-                        "example": "Participant's phone"
-                      }
-                    }
-                  }
-                }
+              {
+                "type": "object"
               }
-            }
-          },
-          "examples": {
-            "UpdateParticipantDataConfiguration": {
-              "value": {
-                "applicationData": {
-                  "uiTheme": "black"
-                },
-                "connectedDevices": [
-                  {
-                    "__type": "dk.cachet.carp.common.application.devices.AltBeacon",
-                    "isOptional": true,
-                    "roleName": "Participant's bike"
-                  }
-                ],
-                "connections": [
-                  {
-                    "connectedToRoleName": "Participant's phone",
-                    "roleName": "Participant's bike"
-                  }
-                ],
-                "createdOn": "2022-01-18T10:56:59Z",
-                "description": "Track how much nonmotorized movement participants perform.",
-                "expectedParticipantData": [
-                  {
-                    "assignedTo": {
-                      "__type": "dk.cachet.carp.common.application.users.AssignedTo.Roles",
-                      "roleNames": [
-                        "Participant"
-                      ]
-                    },
-                    "attribute": {
-                      "__type": "dk.cachet.carp.common.application.users.ParticipantAttribute.DefaultParticipantAttribute",
-                      "inputDataType": "dk.cachet.carp.input.sex"
-                    }
-                  }
-                ],
-                "id": "25fe92a5-0d52-4e37-8d05-31f347d72d3d",
-                "name": "Nonmotorized transport study",
-                "ownerId": "491f03fc-964b-4783-86a6-a528bbfe4e94",
-                "participantRoles": [
-                  {
-                    "isOptional": false,
-                    "role": "Participant"
-                  }
-                ],
-                "primaryDevices": [
-                  {
-                    "__type": "dk.cachet.carp.common.application.devices.Smartphone",
-                    "defaultSamplingConfiguration": {
-                      "dk.cachet.carp.geolocation": {
-                        "__type": "dk.cachet.carp.common.application.sampling.BatteryAwareSamplingConfiguration",
-                        "low": {
-                          "__type": "dk.cachet.carp.common.application.sampling.GranularitySamplingConfiguration",
-                          "granularity": "Coarse"
-                        },
-                        "normal": {
-                          "__type": "dk.cachet.carp.common.application.sampling.GranularitySamplingConfiguration",
-                          "granularity": "Detailed"
-                        }
-                      }
-                    },
-                    "isPrimaryDevice": true,
-                    "roleName": "Participant's phone"
-                  }
-                ],
-                "taskControls": [
-                  {
-                    "control": "Start",
-                    "destinationDeviceRoleName": "Participant's phone",
-                    "taskName": "Monitor movement",
-                    "triggerId": 0
-                  },
-                  {
-                    "control": "Start",
-                    "destinationDeviceRoleName": "Participant's bike",
-                    "taskName": "Monitor proximity to bike",
-                    "triggerId": 0
-                  }
-                ],
-                "tasks": [
-                  {
-                    "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-                    "description": "Track step count and geolocation for one week.",
-                    "duration": "PT168H",
-                    "measures": [
-                      {
-                        "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                        "overrideSamplingConfiguration": {
-                          "__type": "dk.cachet.carp.common.application.sampling.BatteryAwareSamplingConfiguration",
-                          "low": {
-                            "__type": "dk.cachet.carp.common.application.sampling.GranularitySamplingConfiguration",
-                            "granularity": "Coarse"
-                          },
-                          "normal": {
-                            "__type": "dk.cachet.carp.common.application.sampling.GranularitySamplingConfiguration",
-                            "granularity": "Balanced"
-                          }
-                        },
-                        "type": "dk.cachet.carp.geolocation"
-                      },
-                      {
-                        "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                        "overrideSamplingConfiguration": {
-                          "__type": "dk.cachet.carp.common.application.sampling.NoOptionsSamplingConfiguration"
-                        },
-                        "type": "dk.cachet.carp.stepcount"
-                      }
-                    ],
-                    "name": "Monitor movement"
-                  },
-                  {
-                    "__type": "dk.cachet.carp.common.application.tasks.BackgroundTask",
-                    "duration": "PT168H",
-                    "measures": [
-                      {
-                        "__type": "dk.cachet.carp.common.application.tasks.Measure.DataStream",
-                        "overrideSamplingConfiguration": {
-                          "__type": "dk.cachet.carp.common.application.sampling.NoOptionsSamplingConfiguration"
-                        },
-                        "type": "dk.cachet.carp.signalstrength"
-                      }
-                    ],
-                    "name": "Monitor proximity to bike"
-                  }
-                ],
-                "triggers": {
-                  "0": {
-                    "__type": "dk.cachet.carp.common.application.triggers.ElapsedTimeTrigger",
-                    "elapsedTime": "PT0S",
-                    "sourceDeviceRoleName": "Participant's phone"
-                  }
-                }
-              }
-            }
+            ]
           }
         }
       }
     },
-    "201": {
-      "description": "Add",
-      "headers": {
-        "Cache-Control": {
+    "403": {
+      "description": "Forbidden",
+      "content": {
+        "*/*": {
           "schema": {
-            "type": "string",
-            "example": "no-cache, no-store, max-age=0, must-revalidate"
-          }
-        },
-        "Connection": {
-          "schema": {
-            "type": "string",
-            "example": "keep-alive"
-          }
-        },
-        "Content-Length": {
-          "schema": {
-            "type": "string",
-            "example": "0"
-          }
-        },
-        "Date": {
-          "schema": {
-            "type": "string",
-            "example": "Thu, 21 Jan 2021 09:31:55 GMT"
-          }
-        },
-        "Expires": {
-          "schema": {
-            "type": "string",
-            "example": "0"
-          }
-        },
-        "Keep-Alive": {
-          "schema": {
-            "type": "string",
-            "example": "timeout=60"
-          }
-        },
-        "Pragma": {
-          "schema": {
-            "type": "string",
-            "example": "no-cache"
-          }
-        },
-        "X-Content-Type-Options": {
-          "schema": {
-            "type": "string",
-            "example": "nosniff"
-          }
-        },
-        "X-Frame-Options": {
-          "schema": {
-            "type": "string",
-            "example": "DENY"
-          }
-        },
-        "X-XSS-Protection": {
-          "schema": {
-            "type": "string",
-            "example": "1; mode=block"
+            "$ref": "#/components/schemas/CarpErrorResponse"
           }
         }
-      },
+      }
+    },
+    "405": {
+      "description": "Method Not Allowed",
       "content": {
-        "application/json": {
+        "*/*": {
           "schema": {
-            "type": "object",
-            "properties": {}
-          },
-          "examples": {
-            "Add": {
-              "value": {}
-            }
+            "type": "object"
+          }
+        }
+      }
+    },
+    "401": {
+      "description": "Unauthorized",
+      "content": {
+        "*/*": {
+          "schema": {
+            "$ref": "#/components/schemas/CarpErrorResponse"
+          }
+        }
+      }
+    },
+    "404": {
+      "description": "Not Found",
+      "content": {
+        "*/*": {
+          "schema": {
+            "$ref": "#/components/schemas/CarpErrorResponse"
+          }
+        }
+      }
+    },
+    "409": {
+      "description": "Conflict",
+      "content": {
+        "*/*": {
+          "schema": {
+            "$ref": "#/components/schemas/CarpErrorResponse"
+          }
+        }
+      }
+    },
+    "200": {
+      "description": "OK",
+      "content": {
+        "*/*": {
+          "schema": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Unit"
+              },
+              {
+                "$ref": "#/components/schemas/Unit"
+              },
+              {
+                "$ref": "#/components/schemas/StudyProtocolSnapshot"
+              },
+              {
+                "$ref": "#/components/schemas/StudyProtocolSnapshot"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/StudyProtocolSnapshot"
+                }
+              },
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ProtocolVersion"
+                }
+              }
+            ]
           }
         }
       }

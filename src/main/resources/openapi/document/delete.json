@@ -1,6 +1,0 @@
-{
-  "tags": [
-    "document-controller"
-  ],
-  "description": "> `Description`: `delete one` \n\nThis endpoint allows deleting one document with the given [STUDY_ID] and [DOCUMENT_ID] as the request parameters.\n\n> `Request`: (Http Method: [DELETE]) https://cans.cachet.dk:443/api/studies/{{STUDY_ID}}/documents/{{DOCUMENT_ID}}\n\nThis request must be authenticated using a HTTP OAuth 2.0 Authentication header.\n\n> `Response`:\n\n- This request doesn't return a response body. \n- On failure status code `400` (bad request) is returned.\n- On failure status code `401` (unauthorized) is returned.\n- On failure status code `500` (internal server error) is returned."
-}
