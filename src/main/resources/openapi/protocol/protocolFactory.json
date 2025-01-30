@@ -1,0 +1,104 @@
+{
+  "tags": [
+    "protocol-controller"
+  ],
+  "description": "\n        The request body should be a serialized ProtocolFactoryServiceRequest (string).\n        The response body will also be serialized (string). The request-response mappings are as follows:\n        \n        - CreateCustomProtocol -\u003E Unit\n    ",
+  "operationId": "protocolFactory",
+  "requestBody": {
+    "content": {
+      "application/json": {
+        "schema": {
+          "oneOf": [
+            {
+              "$ref": "#/components/schemas/CreateCustomProtocol"
+            }
+          ]
+        }
+      }
+    },
+    "required": true
+  },
+  "responses": {
+    "400": {
+      "description": "Bad Request",
+      "content": {
+        "*/*": {
+          "schema": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/CarpErrorResponse"
+              },
+              {
+                "type": "object"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "403": {
+      "description": "Forbidden",
+      "content": {
+        "*/*": {
+          "schema": {
+            "$ref": "#/components/schemas/CarpErrorResponse"
+          }
+        }
+      }
+    },
+    "405": {
+      "description": "Method Not Allowed",
+      "content": {
+        "*/*": {
+          "schema": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "401": {
+      "description": "Unauthorized",
+      "content": {
+        "*/*": {
+          "schema": {
+            "$ref": "#/components/schemas/CarpErrorResponse"
+          }
+        }
+      }
+    },
+    "404": {
+      "description": "Not Found",
+      "content": {
+        "*/*": {
+          "schema": {
+            "$ref": "#/components/schemas/CarpErrorResponse"
+          }
+        }
+      }
+    },
+    "409": {
+      "description": "Conflict",
+      "content": {
+        "*/*": {
+          "schema": {
+            "$ref": "#/components/schemas/CarpErrorResponse"
+          }
+        }
+      }
+    },
+    "200": {
+      "description": "OK",
+      "content": {
+        "*/*": {
+          "schema": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Unit"
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

@@ -65,54 +65,7 @@ class ProtocolController(
     }
 
     @PostMapping(value = [PROTOCOL_SERVICE])
-    @Operation(
-        description = """
-        The request body should be a serialized ProtocolServiceRequest (string).
-        The response body will also be serialized (string). The request-response mappings are as follows:
-        
-        - Add -> Unit
-        - AddVersion -> Unit
-        - UpdateParticipantDataConfiguration -> StudyProtocolSnapshot
-        - GetBy -> StudyProtocolSnapshot
-        - GetAllForOwner -> StudyProtocolSnapshot[]
-        - GetVersionHistoryFor -> ProtocolVersion[]
-    """,
-    )
-    @RequestBodySwagger(
-        content = [
-            Content(
-                schema =
-                    Schema(
-                        oneOf = [
-                            ProtocolServiceRequest.Add::class,
-                            ProtocolServiceRequest.AddVersion::class,
-                            ProtocolServiceRequest.UpdateParticipantDataConfiguration::class,
-                            ProtocolServiceRequest.GetBy::class,
-                            ProtocolServiceRequest.GetAllForOwner::class,
-                            ProtocolServiceRequest.GetVersionHistoryFor::class,
-                        ],
-                    ),
-            ),
-        ],
-    )
-    @ApiResponse(
-        responseCode = "200",
-        content = [
-            Content(
-                schema =
-                    Schema(
-                        oneOf = [
-                            Unit::class,
-                            Unit::class,
-                            StudyProtocolSnapshot::class,
-                            StudyProtocolSnapshot::class,
-                            Array<StudyProtocolSnapshot>::class,
-                            Array<ProtocolVersion>::class,
-                        ],
-                    ),
-            ),
-        ],
-    )
+    @Operation(tags = ["protocol/protocols.json"])
     suspend fun protocols(
         @RequestBody httpMessage: String,
     ): ResponseEntity<Any> {
@@ -123,39 +76,7 @@ class ProtocolController(
     }
 
     @PostMapping(value = [PROTOCOL_FACTORY_SERVICE])
-    @Operation(
-        description = """
-        The request body should be a serialized ProtocolFactoryServiceRequest (string).
-        The response body will also be serialized (string). The request-response mappings are as follows:
-        
-        - CreateCustomProtocol -> Unit
-    """,
-    )
-    @RequestBodySwagger(
-        content = [
-            Content(
-                schema =
-                    Schema(
-                        oneOf = [
-                            ProtocolFactoryServiceRequest.CreateCustomProtocol::class,
-                        ],
-                    ),
-            ),
-        ],
-    )
-    @ApiResponse(
-        responseCode = "200",
-        content = [
-            Content(
-                schema =
-                    Schema(
-                        oneOf = [
-                            Unit::class,
-                        ],
-                    ),
-            ),
-        ],
-    )
+    @Operation(tags = ["protocol/protocolFactory.json"])
     suspend fun protocolFactory(
         @RequestBody httpMessage: String,
     ): ResponseEntity<Any> {

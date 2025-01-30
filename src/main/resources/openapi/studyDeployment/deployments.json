@@ -1,0 +1,158 @@
+{
+  "tags": [
+    "study-deployment-controller"
+  ],
+  "description": "\n        The request body should be a serialized DeploymentServiceRequest (string).\n        The response body will also be serialized (string). The request-response mappings are as follows:\n        \n        - CreateStudyDeployment -\u003E StudyDeploymentStatus\n        - RemoveStudyDeployments -\u003E UUID[]\n        - GetStudyDeploymentStatus -\u003E StudyDeploymentStatus\n        - GetStudyDeploymentStatusList -\u003E StudyDeploymentStatus[]\n        - RegisterDevice -\u003E StudyDeploymentStatus\n        - UnregisterDevice -\u003E StudyDeploymentStatus\n        - GetDeviceDeploymentFor -\u003E PrimaryDeviceDeployment\n        - DeviceDeployed -\u003E StudyDeploymentStatus\n        - Stop -\u003E StudyDeploymentStatus\n    ",
+  "operationId": "deployments",
+  "requestBody": {
+    "content": {
+      "application/json": {
+        "schema": {
+          "oneOf": [
+            {
+              "$ref": "#/components/schemas/CreateStudyDeployment"
+            },
+            {
+              "$ref": "#/components/schemas/RemoveStudyDeployments"
+            },
+            {
+              "$ref": "#/components/schemas/GetStudyDeploymentStatus"
+            },
+            {
+              "$ref": "#/components/schemas/GetStudyDeploymentStatusList"
+            },
+            {
+              "$ref": "#/components/schemas/RegisterDevice"
+            },
+            {
+              "$ref": "#/components/schemas/UnregisterDevice"
+            },
+            {
+              "$ref": "#/components/schemas/GetDeviceDeploymentFor"
+            },
+            {
+              "$ref": "#/components/schemas/DeviceDeployed"
+            },
+            {
+              "$ref": "#/components/schemas/Stop"
+            }
+          ]
+        }
+      }
+    },
+    "required": true
+  },
+  "responses": {
+    "400": {
+      "description": "Bad Request",
+      "content": {
+        "*/*": {
+          "schema": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/CarpErrorResponse"
+              },
+              {
+                "type": "object"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "403": {
+      "description": "Forbidden",
+      "content": {
+        "*/*": {
+          "schema": {
+            "$ref": "#/components/schemas/CarpErrorResponse"
+          }
+        }
+      }
+    },
+    "405": {
+      "description": "Method Not Allowed",
+      "content": {
+        "*/*": {
+          "schema": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "401": {
+      "description": "Unauthorized",
+      "content": {
+        "*/*": {
+          "schema": {
+            "$ref": "#/components/schemas/CarpErrorResponse"
+          }
+        }
+      }
+    },
+    "404": {
+      "description": "Not Found",
+      "content": {
+        "*/*": {
+          "schema": {
+            "$ref": "#/components/schemas/CarpErrorResponse"
+          }
+        }
+      }
+    },
+    "409": {
+      "description": "Conflict",
+      "content": {
+        "*/*": {
+          "schema": {
+            "$ref": "#/components/schemas/CarpErrorResponse"
+          }
+        }
+      }
+    },
+    "200": {
+      "description": "OK",
+      "content": {
+        "*/*": {
+          "schema": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/StudyDeploymentStatus"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/UUID"
+                }
+              },
+              {
+                "$ref": "#/components/schemas/StudyDeploymentStatus"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/StudyDeploymentStatus"
+                }
+              },
+              {
+                "$ref": "#/components/schemas/StudyDeploymentStatus"
+              },
+              {
+                "$ref": "#/components/schemas/StudyDeploymentStatus"
+              },
+              {
+                "$ref": "#/components/schemas/PrimaryDeviceDeployment"
+              },
+              {
+                "$ref": "#/components/schemas/StudyDeploymentStatus"
+              },
+              {
+                "$ref": "#/components/schemas/StudyDeploymentStatus"
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

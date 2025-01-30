@@ -73,63 +73,7 @@ class StudyDeploymentController(
     }
 
     @PostMapping(value = [DEPLOYMENT_SERVICE])
-    @Operation(
-        description = """
-        The request body should be a serialized DeploymentServiceRequest (string).
-        The response body will also be serialized (string). The request-response mappings are as follows:
-        
-        - CreateStudyDeployment -> StudyDeploymentStatus
-        - RemoveStudyDeployments -> UUID[]
-        - GetStudyDeploymentStatus -> StudyDeploymentStatus
-        - GetStudyDeploymentStatusList -> StudyDeploymentStatus[]
-        - RegisterDevice -> StudyDeploymentStatus
-        - UnregisterDevice -> StudyDeploymentStatus
-        - GetDeviceDeploymentFor -> PrimaryDeviceDeployment
-        - DeviceDeployed -> StudyDeploymentStatus
-        - Stop -> StudyDeploymentStatus
-    """,
-    )
-    @RequestBodySwagger(
-        content = [
-            Content(
-                schema =
-                    Schema(
-                        oneOf = [
-                            DeploymentServiceRequest.CreateStudyDeployment::class,
-                            DeploymentServiceRequest.RemoveStudyDeployments::class,
-                            DeploymentServiceRequest.GetStudyDeploymentStatus::class,
-                            DeploymentServiceRequest.GetStudyDeploymentStatusList::class,
-                            DeploymentServiceRequest.RegisterDevice::class,
-                            DeploymentServiceRequest.UnregisterDevice::class,
-                            DeploymentServiceRequest.GetDeviceDeploymentFor::class,
-                            DeploymentServiceRequest.DeviceDeployed::class,
-                            DeploymentServiceRequest.Stop::class,
-                        ],
-                    ),
-            ),
-        ],
-    )
-    @ApiResponse(
-        responseCode = "200",
-        content = [
-            Content(
-                schema =
-                    Schema(
-                        oneOf = [
-                            StudyDeploymentStatus::class,
-                            Array<UUID>::class,
-                            StudyDeploymentStatus::class,
-                            Array<StudyDeploymentStatus>::class,
-                            StudyDeploymentStatus::class,
-                            StudyDeploymentStatus::class,
-                            PrimaryDeviceDeployment::class,
-                            StudyDeploymentStatus::class,
-                            StudyDeploymentStatus::class,
-                        ],
-                    ),
-            ),
-        ],
-    )
+    @Operation(tags = ["study/deployments.json"])
     suspend fun deployments(
         @RequestBody httpMessage: String,
     ): ResponseEntity<Any> {
@@ -140,48 +84,7 @@ class StudyDeploymentController(
     }
 
     @PostMapping(value = [PARTICIPATION_SERVICE])
-    @Operation(
-        description = """
-        The request body should be a serialized ParticipationServiceRequest (string).
-        The response body will also be serialized (string). The request-response mappings are as follows:
-        
-        - GetActiveParticipationInvitations -> ActiveParticipationInvitation[]
-        - GetParticipantData -> ParticipantData
-        - GetParticipantDataList -> ParticipantData[]
-        - SetParticipantData -> ParticipantData
-    """,
-    )
-    @RequestBodySwagger(
-        content = [
-            Content(
-                schema =
-                    Schema(
-                        oneOf = [
-                            ParticipationServiceRequest.GetActiveParticipationInvitations::class,
-                            ParticipationServiceRequest.GetParticipantData::class,
-                            ParticipationServiceRequest.GetParticipantDataList::class,
-                            ParticipationServiceRequest.SetParticipantData::class,
-                        ],
-                    ),
-            ),
-        ],
-    )
-    @ApiResponse(
-        responseCode = "200",
-        content = [
-            Content(
-                schema =
-                    Schema(
-                        oneOf = [
-                            Array<ActiveParticipationInvitation>::class,
-                            ParticipantData::class,
-                            Array<ParticipantData>::class,
-                            ParticipantData::class,
-                        ],
-                    ),
-            ),
-        ],
-    )
+    @Operation(tags = ["study/participation.json"])
     suspend fun participation(
         @RequestBody httpMessage: String,
     ): ResponseEntity<Any> {
