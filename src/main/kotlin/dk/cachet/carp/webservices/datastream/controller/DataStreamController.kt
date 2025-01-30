@@ -1,22 +1,16 @@
 package dk.cachet.carp.webservices.datastream.controller
 
-import dk.cachet.carp.common.application.UUID
-import dk.cachet.carp.data.application.DataStreamBatch
 import dk.cachet.carp.data.infrastructure.DataStreamServiceRequest
 import dk.cachet.carp.webservices.common.input.WS_JSON
 import dk.cachet.carp.webservices.datastream.service.DataStreamService
 import dk.cachet.carp.webservices.datastream.service.impl.decompressGzip
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.media.Content
-import io.swagger.v3.oas.annotations.media.Schema
-import io.swagger.v3.oas.annotations.responses.ApiResponse
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
-import io.swagger.v3.oas.annotations.parameters.RequestBody as RequestBodySwagger
 
 @RestController
 class DataStreamController(
@@ -32,7 +26,7 @@ class DataStreamController(
     }
 
     @PostMapping(value = [DATA_STREAM_SERVICE])
-    @Operation(tags = ["dataStream/invoke.json"],)
+    @Operation(tags = ["dataStream/invoke.json"])
     suspend fun invoke(
         @RequestBody httpMessage: String,
     ): ResponseEntity<Any> {
@@ -42,7 +36,7 @@ class DataStreamController(
         return serializer.serializeResponse(request, ret).let { ResponseEntity.ok(it) }
     }
 
-    @Operation(tags = ["dataStream/handleCompressedData.json"],)
+    @Operation(tags = ["dataStream/handleCompressedData.json"])
     @PostMapping(value = [DATA_STREAM_SERVICE_GZIP])
     suspend fun handleCompressedData(
         @RequestBody data: ByteArray,

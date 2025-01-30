@@ -1,7 +1,5 @@
 package dk.cachet.carp.webservices.protocol.controller
 
-import dk.cachet.carp.protocols.application.ProtocolVersion
-import dk.cachet.carp.protocols.application.StudyProtocolSnapshot
 import dk.cachet.carp.protocols.infrastructure.ProtocolFactoryServiceRequest
 import dk.cachet.carp.protocols.infrastructure.ProtocolServiceRequest
 import dk.cachet.carp.webservices.common.constants.PathVariableName
@@ -14,16 +12,12 @@ import dk.cachet.carp.webservices.protocol.serdes.ProtocolRequestSerializer
 import dk.cachet.carp.webservices.protocol.service.ProtocolService
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.media.Content
-import io.swagger.v3.oas.annotations.media.Schema
-import io.swagger.v3.oas.annotations.responses.ApiResponse
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
-import io.swagger.v3.oas.annotations.parameters.RequestBody as RequestBodySwagger
 
 @RestController
 class ProtocolController(

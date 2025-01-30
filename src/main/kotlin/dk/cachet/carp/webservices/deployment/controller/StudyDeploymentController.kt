@@ -1,10 +1,5 @@
 package dk.cachet.carp.webservices.deployment.controller
 
-import dk.cachet.carp.common.application.UUID
-import dk.cachet.carp.deployments.application.PrimaryDeviceDeployment
-import dk.cachet.carp.deployments.application.StudyDeploymentStatus
-import dk.cachet.carp.deployments.application.users.ActiveParticipationInvitation
-import dk.cachet.carp.deployments.application.users.ParticipantData
 import dk.cachet.carp.deployments.infrastructure.DeploymentServiceRequest
 import dk.cachet.carp.deployments.infrastructure.ParticipationServiceRequest
 import dk.cachet.carp.webservices.common.input.WS_JSON
@@ -17,9 +12,6 @@ import dk.cachet.carp.webservices.deployment.serdes.ParticipationRequestSerializ
 import dk.cachet.carp.webservices.deployment.service.DeploymentService
 import dk.cachet.carp.webservices.deployment.service.ParticipationService
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.media.Content
-import io.swagger.v3.oas.annotations.media.Schema
-import io.swagger.v3.oas.annotations.responses.ApiResponse
 import jakarta.validation.Valid
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -30,7 +22,6 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
-import io.swagger.v3.oas.annotations.parameters.RequestBody as RequestBodySwagger
 
 @RestController
 class StudyDeploymentController(

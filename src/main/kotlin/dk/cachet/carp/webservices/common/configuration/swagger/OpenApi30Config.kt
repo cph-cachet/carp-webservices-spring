@@ -14,6 +14,7 @@ import io.swagger.v3.oas.models.media.Schema
 import io.swagger.v3.oas.models.security.SecurityRequirement
 import io.swagger.v3.oas.models.security.SecurityScheme
 import io.swagger.v3.oas.models.servers.Server
+import kotlinx.serialization.KSerializer
 import org.springdoc.core.customizers.OpenApiCustomizer
 import org.springframework.beans.BeanUtils
 import org.springframework.beans.BeanWrapper
@@ -23,13 +24,11 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.io.Resource
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver
-import org.springframework.util.MimeTypeUtils
 import org.springframework.util.StreamUtils
 import org.springframework.util.StringUtils
 import java.nio.charset.Charset
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.collections.HashSet
 
 // https://stackoverflow.com/q/59898874/13179591
 // https://stackoverflow.com/a/73622024/13179591
@@ -75,32 +74,6 @@ class OpenApi30Config(
                     .description(getResourceContent(docResource)),
             )
     }
-
-//    @Bean
-//    fun openApiCustomizer(loadedOperations: Map<String, Operation>): OpenApiCustomizer? {
-//        return OpenApiCustomizer { openAPI: OpenAPI ->
-//            for (path in openAPI.paths.values.stream()) {
-//                val operations = arrayListOf(path.post, path.get, path.put, path.delete)
-//                for (operation in operations) {
-//                    if (operation == null) {
-//                        continue
-//                    }
-//
-//                    val loadedOperation = loadedOperations[operation.tags[0]] ?: continue
-//
-//                    // schema has to be present, otherwise examples will not load on the swagger UI
-//                    val schema = operation.requestBody?.content?.get(MimeTypeUtils.APPLICATION_JSON_VALUE)?.schema
-//
-//                    val ignoredNames = getNullPropertyNames(loadedOperation)
-//                    BeanUtils.copyProperties(loadedOperation, operation, *ignoredNames)
-//
-//                    if (schema != null) {
-//                        operation.requestBody?.content?.get(MimeTypeUtils.APPLICATION_JSON_VALUE)?.schema = schema
-//                    }
-//                }
-//            }
-//        }
-//    }
 
     @Bean
     fun openApiCustomizer(loadedOperations: Map<String, Operation>): OpenApiCustomizer {
@@ -174,6 +147,7 @@ class OpenApi30Config(
         schemas.add(ProtocolServiceRequest.UpdateParticipantDataConfiguration::class.java)
         schemas.add(ProtocolServiceRequest.AddVersion::class.java)
         schemas.add(ApiVersion::class.java)
+        schemas.add(KSerializer::class.java)
 
         for (clazz in schemas) {
             if (openAPI.components.schemas.containsKey(clazz.simpleName)) {
@@ -181,8 +155,37 @@ class OpenApi30Config(
             }
             openAPI.components.addSchemas(
                 clazz.simpleName,
-                ModelConverters.getInstance().readAllAsResolvedSchema(clazz).schema
+                ModelConverters.getInstance().readAllAsResolvedSchema(clazz).schema,
             )
         }
+
+        openAPI.components.addSchemas(
+            "KSerializerUnit",
+            Schema<Any>().apply {
+                type = "object"
+                description = "KSerializer for Unit"
+            },
+        )
+        openAPI.components.addSchemas(
+            "KSerializerStudyProtocolSnapshot",
+            Schema<Any>().apply {
+                type = "object"
+                description = "KSerializer for StudyProtocolSnapshot"
+            },
+        )
+        openAPI.components.addSchemas(
+            "KSerializerListStudyProtocolSnapshot",
+            Schema<Any>().apply {
+                type = "object"
+                description = "KSerializer for List of StudyProtocolSnapshot"
+            },
+        )
+        openAPI.components.addSchemas(
+            "KSerializerListProtocolVersion",
+            Schema<Any>().apply {
+                type = "object"
+                description = "KSerializer for List of ProtocolVersion"
+            },
+        )
     }
 }

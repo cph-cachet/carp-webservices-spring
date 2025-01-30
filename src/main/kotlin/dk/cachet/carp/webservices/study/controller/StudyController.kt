@@ -2,10 +2,6 @@ package dk.cachet.carp.webservices.study.controller
 
 import dk.cachet.carp.common.application.EmailAddress
 import dk.cachet.carp.common.application.UUID
-import dk.cachet.carp.studies.application.StudyDetails
-import dk.cachet.carp.studies.application.StudyStatus
-import dk.cachet.carp.studies.application.users.Participant
-import dk.cachet.carp.studies.application.users.ParticipantGroupStatus
 import dk.cachet.carp.studies.infrastructure.RecruitmentServiceRequest
 import dk.cachet.carp.studies.infrastructure.StudyServiceRequest
 import dk.cachet.carp.webservices.account.service.AccountService
@@ -25,9 +21,6 @@ import dk.cachet.carp.webservices.study.serdes.StudyRequestSerializer
 import dk.cachet.carp.webservices.study.service.RecruitmentService
 import dk.cachet.carp.webservices.study.service.StudyService
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.media.Content
-import io.swagger.v3.oas.annotations.media.Schema
-import io.swagger.v3.oas.annotations.responses.ApiResponse
 import jakarta.validation.Valid
 import kotlinx.coroutines.runBlocking
 import org.apache.logging.log4j.LogManager
@@ -36,7 +29,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
-import io.swagger.v3.oas.annotations.parameters.RequestBody as RequestBodySwagger
 
 @RestController
 class StudyController(
