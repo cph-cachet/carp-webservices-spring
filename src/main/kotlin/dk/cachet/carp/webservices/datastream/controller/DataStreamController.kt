@@ -32,51 +32,7 @@ class DataStreamController(
     }
 
     @PostMapping(value = [DATA_STREAM_SERVICE])
-    @Operation(
-        description = """
-        The request body should be a serialized DataStreamServiceRequest (string).
-        The response body will also be serialized (string). The request-response mappings are as follows:
-        
-        - OpenDataStreams -> Unit
-        - AppendToDataStreams -> Unit
-        - GetDataStream -> DataStreamBatch
-        - CloseDataStreams -> Unit
-        - RemoveDataStreams -> UUID[]
-    """,
-    )
-    @RequestBodySwagger(
-        content = [
-            Content(
-                schema =
-                    Schema(
-                        oneOf = [
-                            DataStreamServiceRequest.OpenDataStreams::class,
-                            DataStreamServiceRequest.AppendToDataStreams::class,
-                            DataStreamServiceRequest.GetDataStream::class,
-                            DataStreamServiceRequest.CloseDataStreams::class,
-                            DataStreamServiceRequest.RemoveDataStreams::class,
-                        ],
-                    ),
-            ),
-        ],
-    )
-    @ApiResponse(
-        responseCode = "200",
-        content = [
-            Content(
-                schema =
-                    Schema(
-                        oneOf = [
-                            Unit::class,
-                            Unit::class,
-                            DataStreamBatch::class,
-                            Unit::class,
-                            Array<UUID>::class,
-                        ],
-                    ),
-            ),
-        ],
-    )
+    @Operation(tags = ["dataStream/invoke.json"],)
     suspend fun invoke(
         @RequestBody httpMessage: String,
     ): ResponseEntity<Any> {
@@ -86,52 +42,7 @@ class DataStreamController(
         return serializer.serializeResponse(request, ret).let { ResponseEntity.ok(it) }
     }
 
-    @Operation(
-        description = """
-        Same as data-stream-service, but take ByteArray instead of JSON string, the ByteArray should be a compressed DataStreamServiceRequest via Gzip.
-        
-        The request-response mappings are as follows:
-        
-        - OpenDataStreams -> Unit
-        - AppendToDataStreams -> Unit
-        - GetDataStream -> DataStreamBatch
-        - CloseDataStreams -> Unit
-        - RemoveDataStreams -> UUID[]
-    """,
-    )
-    @RequestBodySwagger(
-        content = [
-            Content(
-                schema =
-                    Schema(
-                        oneOf = [
-                            DataStreamServiceRequest.OpenDataStreams::class,
-                            DataStreamServiceRequest.AppendToDataStreams::class,
-                            DataStreamServiceRequest.GetDataStream::class,
-                            DataStreamServiceRequest.CloseDataStreams::class,
-                            DataStreamServiceRequest.RemoveDataStreams::class,
-                        ],
-                    ),
-            ),
-        ],
-    )
-    @ApiResponse(
-        responseCode = "200",
-        content = [
-            Content(
-                schema =
-                    Schema(
-                        oneOf = [
-                            Unit::class,
-                            Unit::class,
-                            DataStreamBatch::class,
-                            Unit::class,
-                            Array<UUID>::class,
-                        ],
-                    ),
-            ),
-        ],
-    )
+    @Operation(tags = ["dataStream/handleCompressedData.json"],)
     @PostMapping(value = [DATA_STREAM_SERVICE_GZIP])
     suspend fun handleCompressedData(
         @RequestBody data: ByteArray,

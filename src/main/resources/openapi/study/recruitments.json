@@ -1,0 +1,146 @@
+{
+  "tags": [
+    "study-controller"
+  ],
+  "description": "\n        The request body should be a serialized RecruitmentServiceRequest (string).\n        The response body will also be serialized (string). The request-response mappings are as follows:\n        \n        - AddParticipantByEmailAddress -\u003E Participant\n        - AddParticipantByUsername -\u003E Participant\n        - GetParticipant -\u003E Participant\n        - GetParticipants -\u003E Participant[]\n        - InviteNewParticipantGroup -\u003E ParticipantGroupStatus\n        - GetParticipantGroupStatusList -\u003E ParticipantGroupStatus[]\n        - StopParticipantGroup -\u003E ParticipantGroupStatus\n    ",
+  "operationId": "recruitments",
+  "requestBody": {
+    "content": {
+      "application/json": {
+        "schema": {
+          "oneOf": [
+            {
+              "$ref": "#/components/schemas/AddParticipantByEmailAddress"
+            },
+            {
+              "$ref": "#/components/schemas/AddParticipantByUsername"
+            },
+            {
+              "$ref": "#/components/schemas/GetParticipant"
+            },
+            {
+              "$ref": "#/components/schemas/GetParticipants"
+            },
+            {
+              "$ref": "#/components/schemas/InviteNewParticipantGroup"
+            },
+            {
+              "$ref": "#/components/schemas/GetParticipantGroupStatusList"
+            },
+            {
+              "$ref": "#/components/schemas/StopParticipantGroup"
+            }
+          ]
+        }
+      }
+    },
+    "required": true
+  },
+  "responses": {
+    "400": {
+      "description": "Bad Request",
+      "content": {
+        "*/*": {
+          "schema": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/CarpErrorResponse"
+              },
+              {
+                "type": "object"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "403": {
+      "description": "Forbidden",
+      "content": {
+        "*/*": {
+          "schema": {
+            "$ref": "#/components/schemas/CarpErrorResponse"
+          }
+        }
+      }
+    },
+    "405": {
+      "description": "Method Not Allowed",
+      "content": {
+        "*/*": {
+          "schema": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "401": {
+      "description": "Unauthorized",
+      "content": {
+        "*/*": {
+          "schema": {
+            "$ref": "#/components/schemas/CarpErrorResponse"
+          }
+        }
+      }
+    },
+    "404": {
+      "description": "Not Found",
+      "content": {
+        "*/*": {
+          "schema": {
+            "$ref": "#/components/schemas/CarpErrorResponse"
+          }
+        }
+      }
+    },
+    "409": {
+      "description": "Conflict",
+      "content": {
+        "*/*": {
+          "schema": {
+            "$ref": "#/components/schemas/CarpErrorResponse"
+          }
+        }
+      }
+    },
+    "200": {
+      "description": "OK",
+      "content": {
+        "*/*": {
+          "schema": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Participant"
+              },
+              {
+                "$ref": "#/components/schemas/Participant"
+              },
+              {
+                "$ref": "#/components/schemas/Participant"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Participant"
+                }
+              },
+              {
+                "$ref": "#/components/schemas/ParticipantGroupStatus"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ParticipantGroupStatus"
+                }
+              },
+              {
+                "$ref": "#/components/schemas/ParticipantGroupStatus"
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

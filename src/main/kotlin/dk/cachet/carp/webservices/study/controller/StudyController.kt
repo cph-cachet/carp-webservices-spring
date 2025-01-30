@@ -145,58 +145,8 @@ class StudyController(
         return runBlocking { recruitmentService.getInactiveDeployments(studyId, lastUpdate, offset, limit) }
     }
 
+    @Operation(tags = ["study/recruitments.json"])
     @PostMapping(value = [RECRUITMENT_SERVICE])
-    @Operation(
-        description = """
-        The request body should be a serialized RecruitmentServiceRequest (string).
-        The response body will also be serialized (string). The request-response mappings are as follows:
-        
-        - AddParticipantByEmailAddress -> Participant
-        - AddParticipantByUsername -> Participant
-        - GetParticipant -> Participant
-        - GetParticipants -> Participant[]
-        - InviteNewParticipantGroup -> ParticipantGroupStatus
-        - GetParticipantGroupStatusList -> ParticipantGroupStatus[]
-        - StopParticipantGroup -> ParticipantGroupStatus
-    """,
-    )
-    @RequestBodySwagger(
-        content = [
-            Content(
-                schema =
-                    Schema(
-                        oneOf = [
-                            RecruitmentServiceRequest.AddParticipantByEmailAddress::class,
-                            RecruitmentServiceRequest.AddParticipantByUsername::class,
-                            RecruitmentServiceRequest.GetParticipant::class,
-                            RecruitmentServiceRequest.GetParticipants::class,
-                            RecruitmentServiceRequest.InviteNewParticipantGroup::class,
-                            RecruitmentServiceRequest.GetParticipantGroupStatusList::class,
-                            RecruitmentServiceRequest.StopParticipantGroup::class,
-                        ],
-                    ),
-            ),
-        ],
-    )
-    @ApiResponse(
-        responseCode = "200",
-        content = [
-            Content(
-                schema =
-                    Schema(
-                        oneOf = [
-                            Participant::class,
-                            Participant::class,
-                            Participant::class,
-                            Array<Participant>::class,
-                            ParticipantGroupStatus::class,
-                            Array<ParticipantGroupStatus>::class,
-                            ParticipantGroupStatus::class,
-                        ],
-                    ),
-            ),
-        ],
-    )
     suspend fun recruitments(
         @RequestBody httpMessage: String,
     ): ResponseEntity<*> {
@@ -207,66 +157,7 @@ class StudyController(
     }
 
     @PostMapping(value = [STUDY_SERVICE])
-    @Operation(
-        description = """
-        The request body should be a serialized StudyServiceRequest (string).
-        The response body will also be serialized (string). The request-response mappings are as follows:
-        
-        - CreateStudy -> StudyStatus
-        - SetInternalDescription -> StudyStatus
-        - GetStudyDetails -> StudyDetails
-        - GetStudyStatus -> StudyStatus
-        - GetStudiesOverview -> StudyStatus[]
-        - SetInvitation -> StudyStatus
-        - SetProtocol -> StudyStatus
-        - RemoveProtocol -> StudyStatus
-        - GoLive -> StudyStatus
-        - Remove -> Boolean
-    """,
-    )
-    @RequestBodySwagger(
-        content = [
-            Content(
-                schema =
-                    Schema(
-                        oneOf = [
-                            StudyServiceRequest.CreateStudy::class,
-                            StudyServiceRequest.SetInternalDescription::class,
-                            StudyServiceRequest.GetStudyDetails::class,
-                            StudyServiceRequest.GetStudyStatus::class,
-                            StudyServiceRequest.GetStudiesOverview::class,
-                            StudyServiceRequest.SetInvitation::class,
-                            StudyServiceRequest.SetProtocol::class,
-                            StudyServiceRequest.RemoveProtocol::class,
-                            StudyServiceRequest.GoLive::class,
-                            StudyServiceRequest.Remove::class,
-                        ],
-                    ),
-            ),
-        ],
-    )
-    @ApiResponse(
-        responseCode = "200",
-        content = [
-            Content(
-                schema =
-                    Schema(
-                        oneOf = [
-                            StudyStatus::class,
-                            StudyStatus::class,
-                            StudyDetails::class,
-                            StudyStatus::class,
-                            Array<StudyStatus>::class,
-                            StudyStatus::class,
-                            StudyStatus::class,
-                            StudyStatus::class,
-                            StudyStatus::class,
-                            Boolean::class,
-                        ],
-                    ),
-            ),
-        ],
-    )
+    @Operation(tags = ["study/studies.json"])
     suspend fun studies(
         @RequestBody httpMessage: String,
     ): ResponseEntity<Any> {

@@ -1,0 +1,140 @@
+{
+  "tags": [
+    "protocol-controller"
+  ],
+  "description": "\n        The request body should be a serialized ProtocolServiceRequest (string).\n        The response body will also be serialized (string). The request-response mappings are as follows:\n        \n        - Add -\u003E Unit\n        - AddVersion -\u003E Unit\n        - UpdateParticipantDataConfiguration -\u003E StudyProtocolSnapshot\n        - GetBy -\u003E StudyProtocolSnapshot\n        - GetAllForOwner -\u003E StudyProtocolSnapshot[]\n        - GetVersionHistoryFor -\u003E ProtocolVersion[]\n    ",
+  "operationId": "protocols",
+  "requestBody": {
+    "content": {
+      "application/json": {
+        "schema": {
+          "oneOf": [
+            {
+              "$ref": "#/components/schemas/Add"
+            },
+            {
+              "$ref": "#/components/schemas/AddVersion"
+            },
+            {
+              "$ref": "#/components/schemas/UpdateParticipantDataConfiguration"
+            },
+            {
+              "$ref": "#/components/schemas/GetBy"
+            },
+            {
+              "$ref": "#/components/schemas/GetAllForOwner"
+            },
+            {
+              "$ref": "#/components/schemas/GetVersionHistoryFor"
+            }
+          ]
+        }
+      }
+    },
+    "required": true
+  },
+  "responses": {
+    "400": {
+      "description": "Bad Request",
+      "content": {
+        "*/*": {
+          "schema": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/CarpErrorResponse"
+              },
+              {
+                "type": "object"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "403": {
+      "description": "Forbidden",
+      "content": {
+        "*/*": {
+          "schema": {
+            "$ref": "#/components/schemas/CarpErrorResponse"
+          }
+        }
+      }
+    },
+    "405": {
+      "description": "Method Not Allowed",
+      "content": {
+        "*/*": {
+          "schema": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "401": {
+      "description": "Unauthorized",
+      "content": {
+        "*/*": {
+          "schema": {
+            "$ref": "#/components/schemas/CarpErrorResponse"
+          }
+        }
+      }
+    },
+    "404": {
+      "description": "Not Found",
+      "content": {
+        "*/*": {
+          "schema": {
+            "$ref": "#/components/schemas/CarpErrorResponse"
+          }
+        }
+      }
+    },
+    "409": {
+      "description": "Conflict",
+      "content": {
+        "*/*": {
+          "schema": {
+            "$ref": "#/components/schemas/CarpErrorResponse"
+          }
+        }
+      }
+    },
+    "200": {
+      "description": "OK",
+      "content": {
+        "*/*": {
+          "schema": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Unit"
+              },
+              {
+                "$ref": "#/components/schemas/Unit"
+              },
+              {
+                "$ref": "#/components/schemas/StudyProtocolSnapshot"
+              },
+              {
+                "$ref": "#/components/schemas/StudyProtocolSnapshot"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/StudyProtocolSnapshot"
+                }
+              },
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ProtocolVersion"
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

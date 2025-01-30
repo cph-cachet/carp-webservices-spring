@@ -1,0 +1,161 @@
+{
+  "tags": [
+    "study-controller"
+  ],
+  "description": "\n        The request body should be a serialized StudyServiceRequest (string).\n        The response body will also be serialized (string). The request-response mappings are as follows:\n        \n        - CreateStudy -\u003E StudyStatus\n        - SetInternalDescription -\u003E StudyStatus\n        - GetStudyDetails -\u003E StudyDetails\n        - GetStudyStatus -\u003E StudyStatus\n        - GetStudiesOverview -\u003E StudyStatus[]\n        - SetInvitation -\u003E StudyStatus\n        - SetProtocol -\u003E StudyStatus\n        - RemoveProtocol -\u003E StudyStatus\n        - GoLive -\u003E StudyStatus\n        - Remove -\u003E Boolean\n    ",
+  "operationId": "studies",
+  "requestBody": {
+    "content": {
+      "application/json": {
+        "schema": {
+          "oneOf": [
+            {
+              "$ref": "#/components/schemas/CreateStudy"
+            },
+            {
+              "$ref": "#/components/schemas/SetInternalDescription"
+            },
+            {
+              "$ref": "#/components/schemas/GetStudyDetails"
+            },
+            {
+              "$ref": "#/components/schemas/GetStudyStatus"
+            },
+            {
+              "$ref": "#/components/schemas/GetStudiesOverview"
+            },
+            {
+              "$ref": "#/components/schemas/SetInvitation"
+            },
+            {
+              "$ref": "#/components/schemas/SetProtocol"
+            },
+            {
+              "$ref": "#/components/schemas/RemoveProtocol"
+            },
+            {
+              "$ref": "#/components/schemas/GoLive"
+            },
+            {
+              "$ref": "#/components/schemas/Remove"
+            }
+          ]
+        }
+      }
+    },
+    "required": true
+  },
+  "responses": {
+    "400": {
+      "description": "Bad Request",
+      "content": {
+        "*/*": {
+          "schema": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/CarpErrorResponse"
+              },
+              {
+                "type": "object"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "403": {
+      "description": "Forbidden",
+      "content": {
+        "*/*": {
+          "schema": {
+            "$ref": "#/components/schemas/CarpErrorResponse"
+          }
+        }
+      }
+    },
+    "405": {
+      "description": "Method Not Allowed",
+      "content": {
+        "*/*": {
+          "schema": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "401": {
+      "description": "Unauthorized",
+      "content": {
+        "*/*": {
+          "schema": {
+            "$ref": "#/components/schemas/CarpErrorResponse"
+          }
+        }
+      }
+    },
+    "404": {
+      "description": "Not Found",
+      "content": {
+        "*/*": {
+          "schema": {
+            "$ref": "#/components/schemas/CarpErrorResponse"
+          }
+        }
+      }
+    },
+    "409": {
+      "description": "Conflict",
+      "content": {
+        "*/*": {
+          "schema": {
+            "$ref": "#/components/schemas/CarpErrorResponse"
+          }
+        }
+      }
+    },
+    "200": {
+      "description": "OK",
+      "content": {
+        "*/*": {
+          "schema": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/StudyStatus"
+              },
+              {
+                "$ref": "#/components/schemas/StudyStatus"
+              },
+              {
+                "$ref": "#/components/schemas/StudyDetails"
+              },
+              {
+                "$ref": "#/components/schemas/StudyStatus"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/StudyStatus"
+                }
+              },
+              {
+                "$ref": "#/components/schemas/StudyStatus"
+              },
+              {
+                "$ref": "#/components/schemas/StudyStatus"
+              },
+              {
+                "$ref": "#/components/schemas/StudyStatus"
+              },
+              {
+                "$ref": "#/components/schemas/StudyStatus"
+              },
+              {
+                "type": "boolean"
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}
