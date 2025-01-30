@@ -1,11 +1,8 @@
 package dk.cachet.carp.webservices.common.configuration.swagger
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import dk.cachet.carp.common.application.services.ApiVersion
-import dk.cachet.carp.protocols.application.ProtocolVersion
-import dk.cachet.carp.protocols.infrastructure.ProtocolServiceRequest
+import com.fasterxml.jackson.module.kotlin.readValue
 import dk.cachet.carp.webservices.common.environment.EnvironmentUtil
-import io.swagger.v3.core.converter.ModelConverters
 import io.swagger.v3.oas.models.Components
 import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.Operation
@@ -14,7 +11,6 @@ import io.swagger.v3.oas.models.media.Schema
 import io.swagger.v3.oas.models.security.SecurityRequirement
 import io.swagger.v3.oas.models.security.SecurityScheme
 import io.swagger.v3.oas.models.servers.Server
-import kotlinx.serialization.KSerializer
 import org.springdoc.core.customizers.OpenApiCustomizer
 import org.springframework.beans.BeanUtils
 import org.springframework.beans.BeanWrapper
@@ -103,7 +99,7 @@ class OpenApi30Config(
     @Bean
     fun loadOperationsDocumentation(): Map<String, Operation> {
         val loader = PathMatchingResourcePatternResolver()
-        val resources = loader.getResources("classpath*:$OPENAPI_FOLDER/**/*.json")
+        val resources = loader.getResources("classpath*:$OPENAPI_FOLDER/*/**/*.json")
         val operations = mutableMapOf<String, Operation>()
 
         for (resource in resources) {
@@ -135,57 +131,27 @@ class OpenApi30Config(
     }
 
     private fun generateAdditionalSchemasForOpenApi(openAPI: OpenAPI) {
-        // the json files (resources/openapi/../*.json) reference schemas that might not
-        // been previously automatically generated. If that's the case, we need to add them manually
-        val schemas = mutableSetOf<Class<*>>()
-        schemas.add(ProtocolServiceRequest.Add::class.java)
-        schemas.add(Unit::class.java)
-        schemas.add(ProtocolVersion::class.java)
-        schemas.add(ProtocolServiceRequest.GetVersionHistoryFor::class.java)
-        schemas.add(ProtocolServiceRequest.GetAllForOwner::class.java)
-        schemas.add(ProtocolServiceRequest.GetBy::class.java)
-        schemas.add(ProtocolServiceRequest.UpdateParticipantDataConfiguration::class.java)
-        schemas.add(ProtocolServiceRequest.AddVersion::class.java)
-        schemas.add(ApiVersion::class.java)
-        schemas.add(KSerializer::class.java)
+        val loader = PathMatchingResourcePatternResolver()
+        val schemaJsonFile = loader.getResources("classpath*:$OPENAPI_FOLDER/schemas.json")
 
-        for (clazz in schemas) {
-            if (openAPI.components.schemas.containsKey(clazz.simpleName)) {
-                continue
+        if (schemaJsonFile.any()) {
+            val schemaMap: Map<String, Schema<*>> = objectMapper.readValue(schemaJsonFile[0].inputStream)
+            for ((key, schema) in schemaMap) {
+                if (!openAPI.components.schemas.containsKey(key)) {
+                    openAPI.components.addSchemas(key, schema)
+                }
             }
-            openAPI.components.addSchemas(
-                clazz.simpleName,
-                ModelConverters.getInstance().readAllAsResolvedSchema(clazz).schema,
-            )
+        } else {
+            println("Schema file not found.")
         }
 
-        openAPI.components.addSchemas(
-            "KSerializerUnit",
-            Schema<Any>().apply {
-                type = "object"
-                description = "KSerializer for Unit"
-            },
-        )
-        openAPI.components.addSchemas(
-            "KSerializerStudyProtocolSnapshot",
-            Schema<Any>().apply {
-                type = "object"
-                description = "KSerializer for StudyProtocolSnapshot"
-            },
-        )
-        openAPI.components.addSchemas(
-            "KSerializerListStudyProtocolSnapshot",
-            Schema<Any>().apply {
-                type = "object"
-                description = "KSerializer for List of StudyProtocolSnapshot"
-            },
-        )
-        openAPI.components.addSchemas(
-            "KSerializerListProtocolVersion",
-            Schema<Any>().apply {
-                type = "object"
-                description = "KSerializer for List of ProtocolVersion"
-            },
-        )
+        // the json files (resources/openapi/../*.json) reference schemas that might not
+        // been previously automatically generated. If that's the case, we need to add them manually (e.g. below)
+
+//        openAPI.components.addSchemas(
+//            "AddVersion",
+//            ModelConverters.getInstance()
+//                .readAllAsResolvedSchema(ProtocolServiceRequest.AddVersion::class.java).schema,
+//        )
     }
 }
