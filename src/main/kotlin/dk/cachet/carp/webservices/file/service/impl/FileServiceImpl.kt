@@ -9,7 +9,6 @@ import com.amazonaws.services.s3.model.PutObjectRequest
 import com.fasterxml.jackson.databind.ObjectMapper
 import cz.jirutka.rsql.parser.RSQLParser
 import dk.cachet.carp.common.application.UUID
-import dk.cachet.carp.webservices.account.service.AccountService
 import dk.cachet.carp.webservices.common.configuration.internationalisation.service.MessageBase
 import dk.cachet.carp.webservices.common.exception.responses.ResourceNotFoundException
 import dk.cachet.carp.webservices.common.query.QueryVisitor
@@ -19,41 +18,36 @@ import dk.cachet.carp.webservices.file.repository.FileRepository
 import dk.cachet.carp.webservices.file.service.FileService
 import dk.cachet.carp.webservices.file.service.FileStorage
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
-import dk.cachet.carp.webservices.security.authorization.Claim
 import dk.cachet.carp.webservices.security.authorization.Role
-import dk.cachet.carp.webservices.security.authorization.service.AuthorizationService
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.core.io.Resource
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.StringUtils
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.util.UriComponentsBuilder
+import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
+import java.time.Instant
 
 @Service
 @Transactional
 // Extract S3 methods into a separate service
-@Suppress("LongParameterList")
+@Suppress("LongParameterList", "TooManyFunctions")
 class FileServiceImpl(
     private val fileRepository: FileRepository,
     private val fileStorage: FileStorage,
     private val validateMessages: MessageBase,
     private val s3Client: AmazonS3,
     private val authenticationService: AuthenticationService,
-    private val accountService: AccountService,
-    private val authorizationService: AuthorizationService,
     @Value("\${s3.space.bucket}") private val s3SpaceBucket: String,
     @Value("\${s3.space.endpoint}") private val s3SpaceEndpoint: String,
 ) : FileService, ResourceExporter<File> {
-    private val backgroundWorker = CoroutineScope(Dispatchers.IO)
-
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
     }
@@ -78,10 +72,7 @@ class FileServiceImpl(
                         // Return data relevant to this study.
                         "$query;study_id==$studyId"
                     }
-                val specification =
-                    RSQLParser()
-                        .parse(queryForRole)
-                        .accept(QueryVisitor<File>())
+                val specification = RSQLParser().parse(queryForRole).accept(QueryVisitor<File>())
                 return fileRepository.findAll(specification)
             }
             return fileRepository.findByStudyIdAndCreatedBy(studyId, id.stringRepresentation)
@@ -97,12 +88,15 @@ class FileServiceImpl(
         return optionalFile.get()
     }
 
-    override fun create(
+    @Deprecated("Use -create- instead")
+    override fun createDEPRECATED(
         studyId: String,
         file: MultipartFile,
         metadata: String?,
+        ownerId: UUID,
     ): File {
-        val filename = fileStorage.store(file)
+        val relativePath = Path.of("studies", studyId, "deployments", "unknown")
+        val filename = fileStorage.storeAtPath(file, relativePath)
 
         val saved =
             fileRepository.save(
@@ -110,29 +104,85 @@ class FileServiceImpl(
                 file,
                 filename,
                 metadata?.let { json -> ObjectMapper().readTree(json) },
+                ownerId.toString(),
+                null,
+                relativePath.toString(),
             )
 
-        LOGGER.info("File saved, id = ${saved.id}")
-
-        val identity = authenticationService.getCarpIdentity()
-        backgroundWorker.launch {
-            accountService.grant(identity, setOf(Claim.FileOwner(saved.id)))
-        }
+        LOGGER.info("File saved (deprecated method), id = ${saved.id}")
 
         return saved
     }
 
-    override fun delete(id: Int) {
+    override fun create(
+        studyId: UUID,
+        deploymentId: UUID,
+        ownerId: UUID,
+        file: MultipartFile,
+        metadata: String?,
+    ): File {
+        val relativePath =
+            Path.of("studies", studyId.stringRepresentation, "deployments", deploymentId.stringRepresentation)
+        val filename = fileStorage.storeAtPath(file, relativePath)
+
+        val saved =
+            fileRepository.save(
+                studyId = studyId.stringRepresentation,
+                uploadedFile = file,
+                fileName = filename,
+                metadata = metadata?.let { json -> ObjectMapper().readTree(json) },
+                ownerId = ownerId.stringRepresentation,
+                deploymentId = deploymentId.stringRepresentation,
+                relativePath = relativePath.toString(),
+            )
+
+        LOGGER.info("File saved, id = ${saved.id}")
+
+        return saved
+    }
+
+    override fun download(
+        id: Int,
+        studyId: UUID,
+    ): Pair<Resource, String> {
         val file = getOne(id)
-        fileStorage.deleteFile(file.storageName)
+
+        val fileToDownload =
+            fileStorage.getFileAtPath(
+                file.fileName,
+                Path.of(file.relativePath),
+            )
+
+        return Pair(fileToDownload, file.originalName)
+    }
+
+    override fun delete(
+        id: Int,
+        studyId: UUID,
+    ) {
+        val file = getOne(id)
+
+        fileStorage.deleteFileAtPath(file.fileName, Path.of(file.relativePath))
         fileRepository.delete(file)
 
         LOGGER.info("File deleted, id = $id")
+    }
 
-        val identity = authenticationService.getCarpIdentity()
-        backgroundWorker.launch {
-            accountService.revoke(identity, setOf(Claim.FileOwner(file.id)))
+    @Suppress("MagicNumber")
+    override fun deleteAllOlderThan(days: Int) {
+        val clockNow7DaysAgo = System.currentTimeMillis() - days * 24 * 60 * 60 * 1000
+        val filesToDelete = fileRepository.getAllByUpdatedAtIsBefore(Instant.ofEpochMilli(clockNow7DaysAgo))
+
+        filesToDelete.forEach { file ->
+            fileRepository.delete(file)
+            try {
+                fileStorage.deleteFileAtPath(file.fileName, Path.of(file.relativePath))
+            } catch (e: IOException) {
+                LOGGER.error("Failed to delete file with id = ${file.id}", e)
+            }
         }
+
+        LOGGER.info("All files older than $days days deleted")
     }
 
     override suspend fun deleteAllByStudyId(studyId: String) {
@@ -140,14 +190,9 @@ class FileServiceImpl(
             withContext(Dispatchers.IO) {
                 fileRepository.findByStudyId(studyId)
             }
-        val claimsToRemove = HashSet<Claim>()
-        files.forEach {
-            claimsToRemove.add(Claim.FileOwner(it.id))
-        }
-        authorizationService.revokeClaimsFromAllAccounts(claimsToRemove)
 
         files.forEach { fileRepository.deleteById(it.id) }
-        files.forEach { fileStorage.deleteFile(it.storageName) }
+        files.forEach { fileStorage.deleteFileAtPath(it.fileName, Path.of(it.relativePath)) }
 
         LOGGER.info("All files deleted for study, studyId = $studyId")
     }
@@ -177,16 +222,16 @@ class FileServiceImpl(
         }
 
         s3Client.putObject(
-            PutObjectRequest(s3SpaceBucket, filename, file.inputStream, metadata)
-                .withCannedAcl(CannedAccessControlList.PublicRead),
+            PutObjectRequest(
+                s3SpaceBucket,
+                filename,
+                file.inputStream,
+                metadata,
+            ).withCannedAcl(CannedAccessControlList.PublicRead),
         )
 
-        return UriComponentsBuilder
-            .fromUriString(s3SpaceEndpoint)
-            .pathSegment(s3SpaceBucket)
-            .pathSegment(filename)
-            .build()
-            .toUriString()
+        return UriComponentsBuilder.fromUriString(s3SpaceEndpoint).pathSegment(s3SpaceBucket).pathSegment(filename)
+            .build().toUriString()
     }
 
     override fun deleteImage(url: String) {
@@ -211,11 +256,14 @@ class FileServiceImpl(
         deploymentIds: Set<UUID>,
         target: Path,
     ) = withContext(Dispatchers.IO) {
-        getAll(null, studyId.stringRepresentation)
-            .onEach {
-                val resource = fileStorage.getResource(it.storageName)
-                val copyPath = target.resolve(it.originalName)
-                Files.copy(resource.file.toPath(), copyPath)
-            }
+        getAll(null, studyId.stringRepresentation).onEach {
+            val resource =
+                fileStorage.getResourceAtPath(
+                    it.fileName,
+                    Path.of("studies", studyId.stringRepresentation, "deployments", it.deploymentId ?: "unknown"),
+                )
+            val copyPath = target.resolve(it.originalName)
+            Files.copy(resource.file.toPath(), copyPath)
+        }
     }
 }

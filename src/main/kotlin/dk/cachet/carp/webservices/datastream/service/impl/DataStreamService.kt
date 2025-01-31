@@ -164,6 +164,8 @@ class DataStreamService(
                 LOGGER.info("A new file is created for zipping with name ${path.fileName}.")
             } catch (e: IOException) {
                 LOGGER.error("An error occurred while storing the file ${path.fileName}", e)
+            } catch (e: IllegalArgumentException) {
+                LOGGER.error("An error occurred while storing the file (empty dataStreamList) ${path.fileName}", e)
             }
         }
 

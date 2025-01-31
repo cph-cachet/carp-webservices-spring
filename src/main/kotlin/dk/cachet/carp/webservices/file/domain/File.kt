@@ -18,7 +18,9 @@ data class File(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int = 0,
     @field:NotNull
-    var storageName: String = "",
+    var fileName: String = "", // (storageName)
+    @field:NotNull
+    val relativePath: String = "", // relative path e.g. .../local/{relativePath}/{fileName}
     @field:NotNull
     var originalName: String = "",
     @JdbcTypeCode(SqlTypes.JSON)
@@ -27,4 +29,6 @@ data class File(
     var metadata: JsonNode? = null,
     @field:NotNull
     var studyId: String = "",
+    var ownerId: String? = null,
+    var deploymentId: String? = null,
 ) : Auditable()
