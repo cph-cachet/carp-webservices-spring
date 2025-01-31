@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import org.springframework.stereotype.Repository
 import org.springframework.web.multipart.MultipartFile
+import java.time.Instant
 
 @Repository
 interface FileRepository : JpaRepository<File, Int>, JpaSpecificationExecutor<File>, FileRepositoryCustom {
@@ -16,6 +17,8 @@ interface FileRepository : JpaRepository<File, Int>, JpaSpecificationExecutor<Fi
     ): List<File>
 
     fun findByStudyId(studyId: String): List<File>
+
+    fun getAllByUpdatedAtIsBefore(updatedAtBefore: Instant): MutableList<File>
 }
 
 // TODO: This is not a repository, dont't be mislead by that, it needs to be moved to its own service somewhere else.

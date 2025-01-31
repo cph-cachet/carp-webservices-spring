@@ -13,7 +13,9 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.core.io.Resource
 import org.springframework.stereotype.Service
+import java.io.IOException
 import java.nio.file.Path
+import java.time.Instant
 
 @Service
 class ExportServiceImpl(
@@ -65,6 +67,23 @@ class ExportServiceImpl(
         LOGGER.info("Export with id $exportId has been successfully deleted.")
 
         return studyId
+    }
+
+    @Suppress("MagicNumber")
+    override fun deleteAllOlderThan(days: Int) {
+        val clockNow7DaysAgo = System.currentTimeMillis() - days * 24 * 60 * 60 * 1000
+        val exportsToDelete = exportRepository.getAllByUpdatedAtIsBefore(Instant.ofEpochMilli(clockNow7DaysAgo))
+
+        exportsToDelete.forEach { export: Export ->
+            exportRepository.delete(export)
+            try {
+                fileStorage.deleteFileAtPath(export.fileName, Path.of(export.relativePath))
+            } catch (e: IOException) {
+                LOGGER.error("Failed to delete export with id ${export.id}.", e)
+            }
+        }
+
+        LOGGER.info("Exports older than $days days have been successfully deleted.")
     }
 
     /**
