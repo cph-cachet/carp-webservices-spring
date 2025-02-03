@@ -1,9 +1,17 @@
 import { useState, type FormEventHandler } from "react";
 import { useConstCallback } from "keycloakify/tools/useConstCallback";
 import type { PageProps } from "keycloakify/login/pages/PageProps";
-import { Checkbox, FormControlLabel, FormGroup, IconButton, InputAdornment } from "@mui/material";
+import {
+  Checkbox,
+  FormControlLabel,
+  FormGroup,
+  IconButton,
+  InputAdornment,
+} from "@mui/material";
 import * as yup from "yup";
 import { useFormik } from "formik";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import CarpInput from "../../components/CarpInput";
 import { AuthInfoText } from "../../components/Layout/PublicPageLayout/AuthPageLayout/styles";
 import StyledLink from "../../components/StyledLink";
@@ -14,8 +22,6 @@ import GoogleLogo from "../../assets/images/logo-google.png";
 import PasskeyLogo from "../../assets/images/logo-passkey.png";
 import type { KcContext } from "../kcContext";
 import type { I18n } from "../i18n";
-import Visibility from '@mui/icons-material/Visibility';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import BannerRegister from "../../components/Layout/PublicPageLayout/BannerRegister";
 import {
   LoginAdditionalActions,
@@ -90,11 +96,10 @@ const Login = (
       displayWide={realm.password && social.providers !== undefined}
       headerNode={msg("doLogIn")}
       infoNode={
-        <>
-          {realm.registrationAllowed && !registrationDisabled && (
-            <BannerRegister registerUrl={url.registrationUrl} msgStr={msgStr} />
-          )}
-        </>
+        realm.registrationAllowed &&
+        !registrationDisabled && (
+          <BannerRegister registerUrl={url.registrationUrl} msgStr={msgStr} />
+        )
       }
     >
       {realm.password && (
@@ -106,6 +111,7 @@ const Login = (
         >
           {!usernameHidden &&
             (() => {
+              // eslint-disable-next-line no-nested-ternary
               const label = !realm.loginWithEmailAllowed
                 ? "username"
                 : realm.registrationEmailAsUsername
@@ -135,14 +141,15 @@ const Login = (
             formikConfig={formik}
             autoComplete="current-password section-blue"
             variant="outlined"
-            InputProps={{
+            InputProp={{
               endAdornment: (
                 <InputAdornment position="end">
                   <IconButton
                     aria-label="toggle password visibility"
                     onClick={() => setShowPassword(!showPassword)}
-                    edge="end">
-                    {showPassword ? <VisibilityOff/> : <Visibility />}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
                   </IconButton>
                 </InputAdornment>
               ),
@@ -154,6 +161,7 @@ const Login = (
                 <FormControlLabel
                   control={
                     <Checkbox
+                      // eslint-disable-next-line react/jsx-props-no-spreading
                       {...(login.rememberMe
                         ? {
                             checked: true,

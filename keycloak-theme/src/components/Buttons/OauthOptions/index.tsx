@@ -2,7 +2,7 @@ import {
   LoginOauthOptionButton,
   LoginOauthOptionText,
   StyledOption,
-} from './style';
+} from "./style";
 
 type Props = {
   logoSrc: string;

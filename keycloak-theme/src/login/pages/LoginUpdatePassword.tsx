@@ -3,8 +3,8 @@ import { useConstCallback } from "keycloakify/tools/useConstCallback";
 import { useFormik } from "formik";
 import { useGetClassName } from "keycloakify/login/lib/useGetClassName";
 import type { PageProps } from "keycloakify/login/pages/PageProps";
-import BannerLogin from "../../components/Layout/PublicPageLayout/BannerLogin";
 import * as yup from "yup";
+import BannerLogin from "../../components/Layout/PublicPageLayout/BannerLogin";
 import AuthActionButton from "../../components/Buttons/AuthActionButton";
 import type { I18n } from "../i18n";
 import type { KcContext } from "../kcContext";
@@ -31,11 +31,11 @@ const LoginUpdatePassword = (
     "password-new": yup
       .string()
       .min(8, msgStr("passwordMinLength"))
-      .required(msgStr('passwordRequired')),
+      .required(msgStr("passwordRequired")),
     "password-confirm": yup
       .string()
-      .min(8, msgStr('passwordMinLength'))
-      .required(msgStr('passwordRequired'))
+      .min(8, msgStr("passwordMinLength"))
+      .required(msgStr("passwordRequired"))
       .oneOf([yup.ref("password-new"), null], msgStr("passwordsDontMatch")),
   });
 
@@ -110,16 +110,14 @@ const LoginUpdatePassword = (
             <div className={getClassName("kcFormOptionsWrapperClass")}>
               {isAppInitiatedAction && (
                 <div className="checkbox">
-                  <label>
-                    <input
-                      type="checkbox"
-                      id="logout-sessions"
-                      name="logout-sessions"
-                      value="on"
-                      checked
-                    />
-                    {msgStr("logoutOtherSessions")}
-                  </label>
+                  <input
+                    type="checkbox"
+                    id="logout-sessions"
+                    name="logout-sessions"
+                    value="on"
+                    checked
+                  />
+                  {msgStr("logoutOtherSessions")}
                 </div>
               )}
             </div>

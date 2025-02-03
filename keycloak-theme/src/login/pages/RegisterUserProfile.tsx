@@ -8,12 +8,12 @@ import type { KcContext } from "../kcContext";
 import { UserProfileFormFields } from "./shared/UserProfileFormFields";
 import AuthActionButton from "../../components/Buttons/AuthActionButton";
 
-export default function RegisterUserProfile(
+const RegisterUserProfile = (
   props: PageProps<
     Extract<KcContext, { pageId: "register-user-profile.ftl" }>,
     I18n
   >,
-) {
+) => {
   const [isLoading, setIsLoading] = useState(false);
   const { kcContext, i18n, doUseDefaultCss, Template, classes } = props;
 
@@ -41,7 +41,7 @@ export default function RegisterUserProfile(
     <Template
       {...{ kcContext, i18n, doUseDefaultCss, classes }}
       displayMessage={messagesPerField.exists("global")}
-      displayRequiredFields={true}
+      displayRequiredFields
       headerNode={msg("registerTitle")}
     >
       <form
@@ -77,4 +77,6 @@ export default function RegisterUserProfile(
       </form>
     </Template>
   );
-}
+};
+
+export default RegisterUserProfile;

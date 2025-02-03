@@ -3,19 +3,19 @@ import { useState, type FormEventHandler } from "react";
 import { useGetClassName } from "keycloakify/login/lib/useGetClassName";
 import type { PageProps } from "keycloakify/login/pages/PageProps";
 import { clsx } from "keycloakify/tools/clsx";
-import type { I18n } from "../i18n";
-import type { KcContext } from "../kcContext";
 import * as yup from "yup";
 import { useFormik } from "formik";
+import type { I18n } from "../i18n";
+import type { KcContext } from "../kcContext";
 import CarpInput from "../../components/CarpInput";
 import AuthActionButton from "../../components/Buttons/AuthActionButton";
 
-export default function LoginUpdateProfile(
+const LoginUpdateProfile = (
   props: PageProps<
     Extract<KcContext, { pageId: "login-update-profile.ftl" }>,
     I18n
   >,
-) {
+) => {
   const [isLoading, setIsLoading] = useState(false);
   const { kcContext, i18n, doUseDefaultCss, Template, classes } = props;
 
@@ -170,4 +170,6 @@ export default function LoginUpdateProfile(
       </form>
     </Template>
   );
-}
+};
+
+export default LoginUpdateProfile;

@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 import { Box, Typography } from "@mui/material";
 import type { PageProps } from "keycloakify/login/pages/PageProps";
 import { assert } from "keycloakify/tools/assert";
@@ -5,9 +6,9 @@ import type { I18n } from "../i18n";
 import type { KcContext } from "../kcContext";
 import CarpButton from "../../components/Buttons/AuthActionButton/styles";
 
-export default function Info(
+const Info = (
   props: PageProps<Extract<KcContext, { pageId: "info.ftl" }>, I18n>,
-) {
+) => {
   const { kcContext, i18n, doUseDefaultCss, Template, classes } = props;
 
   const { msgStr } = i18n;
@@ -33,9 +34,9 @@ export default function Info(
       displayMessage={false}
       headerNode={
         messageHeader !== undefined ? (
-          <>{messageHeader}</>
+          <Typography variant="h1">{messageHeader}</Typography>
         ) : (
-          <>{message.summary}</>
+          <Typography variant="h1">{message.summary}</Typography>
         )
       }
     >
@@ -72,4 +73,6 @@ export default function Info(
       </div>
     </Template>
   );
-}
+};
+
+export default Info;
