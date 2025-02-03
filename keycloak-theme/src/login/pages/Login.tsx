@@ -1,7 +1,7 @@
 import { useState, type FormEventHandler } from "react";
 import { useConstCallback } from "keycloakify/tools/useConstCallback";
 import type { PageProps } from "keycloakify/login/pages/PageProps";
-import { Checkbox, FormControlLabel, FormGroup } from "@mui/material";
+import { Checkbox, FormControlLabel, FormGroup, IconButton, InputAdornment } from "@mui/material";
 import * as yup from "yup";
 import { useFormik } from "formik";
 import CarpInput from "../../components/CarpInput";
@@ -14,6 +14,8 @@ import GoogleLogo from "../../assets/images/logo-google.png";
 import PasskeyLogo from "../../assets/images/logo-passkey.png";
 import type { KcContext } from "../kcContext";
 import type { I18n } from "../i18n";
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import BannerRegister from "../../components/Layout/PublicPageLayout/BannerRegister";
 import {
   LoginAdditionalActions,
@@ -78,6 +80,7 @@ const Login = (
   });
 
   const [staySignedIn, setStaySignedIn] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const toggleSignedIn = () => setStaySignedIn(!staySignedIn);
 
   return (
@@ -128,10 +131,22 @@ const Login = (
           <CarpInput
             name="password"
             label={msgStr("password")}
-            type="password"
+            type={showPassword ? "text" : "password"}
             formikConfig={formik}
             autoComplete="current-password section-blue"
             variant="outlined"
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={() => setShowPassword(!showPassword)}
+                    edge="end">
+                    {showPassword ? <VisibilityOff/> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
           <LoginAdditionalActions>
             {realm.rememberMe && !usernameHidden && (

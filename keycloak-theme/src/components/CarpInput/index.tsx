@@ -1,4 +1,4 @@
-import { InputLabelProps } from '@mui/material';
+import { InputLabelProps, InputProps } from '@mui/material';
 import * as React from 'react';
 
 import { FormikProps } from 'formik';
@@ -19,6 +19,7 @@ interface Props {
   rows?: number;
   variant?: 'standard' | 'filled' | 'outlined';
   inputLabelProps?: InputLabelProps;
+  InputProps?: Partial<InputProps>;
 }
 
 const CarpInput = ({
@@ -31,6 +32,7 @@ const CarpInput = ({
   rows,
   variant,
   inputLabelProps,
+  InputProps
 }: Props) => {
   const [isAutoFilled, setIsAutoFilled] = useState(false);
 
@@ -68,6 +70,7 @@ const CarpInput = ({
         shrink: isAutoFilled || formikConfig.values[name] !== '',
         ...inputLabelProps,
       }}
+      InputProps={InputProps}
     />
   );
 };
