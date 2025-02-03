@@ -4,13 +4,19 @@ import { clsx } from "keycloakify/tools/clsx";
 import { usePrepareTemplate } from "keycloakify/lib/usePrepareTemplate";
 import { type TemplateProps } from "keycloakify/login/TemplateProps";
 import { useGetClassName } from "keycloakify/login/lib/useGetClassName";
+import {
+  Alert,
+  FormControl,
+  MenuItem,
+  Select,
+  Typography,
+} from "@mui/material";
+import LanguageIcon from "@mui/icons-material/Language";
 import AuthPageLayout from "../components/Layout/PublicPageLayout/AuthPageLayout";
-import { Alert, FormControl, MenuItem, Select, Typography } from "@mui/material";
 import type { KcContext } from "./kcContext";
 import type { I18n } from "./i18n";
 import PublicPageLayout from "../components/Layout/PublicPageLayout";
-import { BootstrapInput } from "../components/BootstrapInput";
-import LanguageIcon from "@mui/icons-material/Language";
+import BootstrapInput from "../components/BootstrapInput";
 
 export const Template = (props: TemplateProps<KcContext, I18n>) => {
   const {
@@ -58,9 +64,18 @@ export const Template = (props: TemplateProps<KcContext, I18n>) => {
                 input={<BootstrapInput />}
                 renderValue={(selected) => {
                   return (
-                    <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 8}}>
-                      <LanguageIcon sx={{strokeWidth: 0.8, stroke: "#fff"}}/>
-                      <Typography >{getLanguageLabel(selected as string)}</Typography>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        alignItems: "center",
+                        gap: 8,
+                      }}
+                    >
+                      <LanguageIcon sx={{ strokeWidth: 0.8, stroke: "#fff" }} />
+                      <Typography>
+                        {getLanguageLabel(selected as string)}
+                      </Typography>
                     </div>
                   );
                 }}

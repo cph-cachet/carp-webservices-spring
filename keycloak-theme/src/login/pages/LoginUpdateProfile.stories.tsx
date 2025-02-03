@@ -1,7 +1,7 @@
-//This is to show that you can create stories for pages that you haven't overloaded.
+// This is to show that you can create stories for pages that you haven't overloaded.
 
 import { Meta, StoryObj } from "@storybook/react";
-import { createPageStory } from "../createPageStory";
+import createPageStory from "../createPageStory";
 
 const { PageStory } = createPageStory({
   pageId: "login-update-profile.ftl",
@@ -20,5 +20,7 @@ export const Default: Story = {
 };
 
 export const Danish: Story = {
-  render: () => <PageStory kcContext={{locale: {currentLanguageTag: 'da'}}}/>,
+  render: () => (
+    <PageStory kcContext={{ locale: { currentLanguageTag: "da" } }} />
+  ),
 };
