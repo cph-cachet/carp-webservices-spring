@@ -13,6 +13,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Nested
+import java.nio.file.Path
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 
@@ -33,15 +34,15 @@ class ExportServiceTest {
             val existingEntry =
                 Export(
                     id = id,
-                    studyId = studyId,
                     status = ExportStatus.AVAILABLE,
+                    studyId = studyId,
                 )
 
             val newEntry =
                 Export(
                     id = id,
-                    studyId = studyId,
                     status = ExportStatus.IN_PROGRESS,
+                    studyId = studyId,
                 )
 
             every { command.entry } returns newEntry
@@ -59,8 +60,8 @@ class ExportServiceTest {
             val entry =
                 Export(
                     id = UUID.randomUUID().stringRepresentation,
-                    studyId = UUID.randomUUID().stringRepresentation,
                     status = ExportStatus.IN_PROGRESS,
+                    studyId = UUID.randomUUID().stringRepresentation,
                 )
 
             every { command.entry } returns entry
@@ -86,8 +87,8 @@ class ExportServiceTest {
             val entry =
                 Export(
                     id = id.stringRepresentation,
-                    studyId = studyId.stringRepresentation,
                     status = ExportStatus.IN_PROGRESS,
+                    studyId = studyId.stringRepresentation,
                 )
 
             every { repository.findByIdAndStudyId(any(), any()) } returns entry
@@ -121,19 +122,19 @@ class ExportServiceTest {
             val entry =
                 Export(
                     id = id.stringRepresentation,
-                    studyId = studyId.stringRepresentation,
                     status = ExportStatus.AVAILABLE,
+                    studyId = studyId.stringRepresentation,
                 )
 
             every { repository.findByIdAndStudyId(any(), any()) } returns entry
             every { repository.delete(entry) } answers { nothing }
-            every { fileStorage.deleteFile(entry.fileName) } returns true
+            every { fileStorage.deleteFileAtPath(entry.fileName, any()) } returns true
 
             val sut = ExportServiceImpl(repository, invoker, fileStorage)
             sut.deleteExport(id, studyId)
 
             verify { repository.delete(entry) }
-            verify { fileStorage.deleteFile(entry.fileName) }
+            verify { fileStorage.deleteFileAtPath(entry.fileName, any<Path>()) }
         }
     }
 }
