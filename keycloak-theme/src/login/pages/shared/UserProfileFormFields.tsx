@@ -1,12 +1,12 @@
-import type { ClassKey } from 'keycloakify/login/TemplateProps';
-import type { Attribute } from 'keycloakify/login/kcContext/KcContext';
-import { useFormValidation } from 'keycloakify/login/lib/useFormValidation';
-import { Fragment, useEffect } from 'react';
-import CarpInputNoFormik from '../../../components/CarpInputNoFormik';
-import type { I18n } from '../../i18n';
+import type { ClassKey } from "keycloakify/login/TemplateProps";
+import type { Attribute } from "keycloakify/login/kcContext/KcContext";
+import { useFormValidation } from "keycloakify/login/lib/useFormValidation";
+import { Fragment, JSX, useEffect } from "react";
+import CarpInputNoFormik from "../../../components/CarpInputNoFormik";
+import type { I18n } from "../../i18n";
 
 export type UserProfileFormFieldsProps = {
-  kcContext: Parameters<typeof useFormValidation>[0]['kcContext'];
+  kcContext: Parameters<typeof useFormValidation>[0]["kcContext"];
   i18n: I18n;
   getClassName: (classKey: ClassKey) => string;
   onIsFormSubmittableValueChange: (isFormSubmittable: boolean) => void;
@@ -46,9 +46,10 @@ export const UserProfileFormFields = (props: UserProfileFormFieldsProps) => {
           fieldStateByAttributeName[attribute.name];
 
         return (
+          // eslint-disable-next-line react/no-array-index-key
           <Fragment key={i}>
             {BeforeField && <BeforeField attribute={attribute} />}
-            <div className={getClassName('kcInputWrapperClass')}>
+            <div className={getClassName("kcInputWrapperClass")}>
               {(() => {
                 const { options } = attribute.validators;
 
@@ -59,21 +60,21 @@ export const UserProfileFormFields = (props: UserProfileFormFieldsProps) => {
                       name={attribute.name}
                       onChange={(event) =>
                         formValidationDispatch({
-                          action: 'update value',
+                          action: "update value",
                           name: attribute.name,
                           newValue: event.target.value,
                         })
                       }
                       onBlur={() =>
                         formValidationDispatch({
-                          action: 'focus lost',
+                          action: "focus lost",
                           name: attribute.name,
                         })
                       }
                       value={value}
                     >
                       <option value="" selected disabled hidden>
-                        {msg('selectAnOption')}
+                        {msg("selectAnOption")}
                       </option>
                       {options.options.map((option) => (
                         <option key={option} value={option}>
@@ -88,15 +89,15 @@ export const UserProfileFormFields = (props: UserProfileFormFieldsProps) => {
                   <CarpInputNoFormik
                     type={(() => {
                       switch (attribute.name) {
-                        case 'password-confirm':
-                        case 'password':
-                          return 'password';
+                        case "password-confirm":
+                        case "password":
+                          return "password";
                         default:
-                          return 'text';
+                          return "text";
                       }
                     })()}
                     label={
-                      (advancedMsgStr(attribute.displayName) as string) ?? ''
+                      (advancedMsgStr(attribute.displayName) as string) ?? ""
                     }
                     id={attribute.name}
                     variant="outlined"
@@ -105,14 +106,14 @@ export const UserProfileFormFields = (props: UserProfileFormFieldsProps) => {
                     required={attribute.required}
                     onChange={(event) =>
                       formValidationDispatch({
-                        action: 'update value',
+                        action: "update value",
                         name: attribute.name,
                         newValue: event.target.value,
                       })
                     }
                     onBlur={() =>
                       formValidationDispatch({
-                        action: 'focus lost',
+                        action: "focus lost",
                         name: attribute.name,
                       })
                     }
@@ -131,17 +132,17 @@ export const UserProfileFormFields = (props: UserProfileFormFieldsProps) => {
                       <style>{`#${divId} > span: { display: block; }`}</style>
                       <span
                         id={divId}
-                        className={getClassName('kcInputErrorMessageClass')}
+                        className={getClassName("kcInputErrorMessageClass")}
                         style={{
                           position:
                             displayableErrors.length === 1
-                              ? 'absolute'
+                              ? "absolute"
                               : undefined,
                         }}
                         aria-live="polite"
                       >
                         {displayableErrors.map(
-                          ({ errorMessage }) => errorMessage
+                          ({ errorMessage }) => errorMessage,
                         )}
                       </span>
                     </>

@@ -12,7 +12,7 @@ const classes: PageProps<any, any>["classes"] = {
   kcBodyClass: "my-root-account-class",
 };
 
-export default function KcApp(props: { kcContext: KcContext }) {
+const KcApp = (props: { kcContext: KcContext }) => {
   const { kcContext } = props;
 
   const i18n = useI18n({ kcContext });
@@ -44,4 +44,6 @@ export default function KcApp(props: { kcContext: KcContext }) {
       })()}
     </Suspense>
   );
-}
+};
+
+export default KcApp;

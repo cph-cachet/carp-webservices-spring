@@ -1,5 +1,5 @@
-import { ReactNode } from 'react';
-import { AuthCenter, AuthContainer, AuthTitle } from './styles';
+import { ReactNode } from "react";
+import { AuthCenter, AuthContainer, AuthTitle } from "./styles";
 
 type Props = {
   children: ReactNode;

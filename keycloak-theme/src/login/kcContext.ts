@@ -1,14 +1,14 @@
-import { createGetKcContext } from 'keycloakify/login';
+import { createGetKcContext } from "keycloakify/login";
 
 export type KcContextExtension =
   // WARNING: It's important to keep in sync the extraThemeProperties declared in the package.json and this type definition.
-  | { pageId: 'login.ftl'; extraThemeProperties: { foo: string } }
+  | { pageId: "login.ftl"; extraThemeProperties: { foo: string } }
   // NOTE: register.ftl is deprecated in favor of register-user-profile.ftl
   // but let's say we use it anyway and have this plugin enabled: https://github.com/micedre/keycloak-mail-whitelisting
   // keycloak-mail-whitelisting define the non standard ftl global authorizedMailDomains, we declare it here.
-  | { pageId: 'register.ftl'; authorizedMailDomains: string[] };
+  | { pageId: "register.ftl"; authorizedMailDomains: string[] };
 
-//NOTE: In most of the cases you do not need to overload the KcContext, you can
+// NOTE: In most of the cases you do not need to overload the KcContext, you can
 // just call createGetKcContext(...) without type arguments.
 // You want to overload the KcContext only if:
 // - You have custom plugins that add some values to the context (like https://github.com/micedre/keycloak-mail-whitelisting that adds authorizedMailDomains)
@@ -16,76 +16,76 @@ export type KcContextExtension =
 export const { getKcContext } = createGetKcContext<KcContextExtension>({
   mockData: [
     {
-      pageId: 'login.ftl',
+      pageId: "login.ftl",
       // locale: {
       //   //When we test the login page we do it in french
       //   currentLanguageTag: 'da',
       // },
-      //Uncomment the following line for hiding the Alert message
-      //"message": undefined
-      //Uncomment the following line for showing an Error message
-      //message: { type: "error", summary: "This is an error" }
+      // Uncomment the following line for hiding the Alert message
+      // "message": undefined
+      // Uncomment the following line for showing an Error message
+      // message: { type: "error", summary: "This is an error" }
     },
     {
-      //NOTE: You will either use register.ftl (legacy) or register-user-profile.ftl, not both
-      pageId: 'register-user-profile.ftl',
+      // NOTE: You will either use register.ftl (legacy) or register-user-profile.ftl, not both
+      pageId: "register-user-profile.ftl",
       profile: {
         attributes: [
           {
             validators: {
               pattern: {
-                pattern: '^[a-zA-Z0-9]+$',
-                'ignore.empty.value': true,
+                pattern: "^[a-zA-Z0-9]+$",
+                "ignore.empty.value": true,
                 // eslint-disable-next-line no-template-curly-in-string
-                'error-message': '${alphanumericalCharsOnly}',
+                "error-message": "${alphanumericalCharsOnly}",
               },
             },
-            //NOTE: To override the default mock value
+            // NOTE: To override the default mock value
             value: undefined,
-            name: 'username',
+            name: "username",
           },
           {
             validators: {
               options: {
                 options: [
-                  'male',
-                  'female',
-                  'non-binary',
-                  'transgender',
-                  'intersex',
-                  'non_communicated',
+                  "male",
+                  "female",
+                  "non-binary",
+                  "transgender",
+                  "intersex",
+                  "non_communicated",
                 ],
               },
             },
             // eslint-disable-next-line no-template-curly-in-string
-            displayName: '${gender}',
+            displayName: "${gender}",
             annotations: {},
             required: true,
             groupAnnotations: {},
             readOnly: false,
-            name: 'gender',
+            name: "gender",
           },
         ],
       },
     },
     {
-      pageId: 'register.ftl',
+      pageId: "register.ftl",
       authorizedMailDomains: [
-        'example.com',
-        'another-example.com',
-        '*.yet-another-example.com',
-        '*.example.com',
-        'hello-world.com',
+        "example.com",
+        "another-example.com",
+        "*.yet-another-example.com",
+        "*.example.com",
+        "hello-world.com",
       ],
       // Simulate we got an error with the email field
       messagesPerField: {
         printIfExists: <T>(fieldName: string, className: T) => {
           console.log({ fieldName });
-          return fieldName === 'email' ? className : undefined;
+          return fieldName === "email" ? className : undefined;
         },
-        existsError: (fieldName: string) => fieldName === 'email',
+        existsError: (fieldName: string) => fieldName === "email",
         get: (fieldName: string) => `Fake error for ${fieldName}`,
-        exists: (fieldName: string) => fieldName === 'email',
+        exists: (fieldName: string) => fieldName === "email",
       },
     },
   ],
@@ -93,9 +93,9 @@ export const { getKcContext } = createGetKcContext<KcContextExtension>({
 
 export const { kcContext } = getKcContext({
   // Uncomment to test the login page for development.
-  //mockPageId: "login.ftl",
+  // mockPageId: "login.ftl",
 });
 
 export type KcContext = NonNullable<
-  ReturnType<typeof getKcContext>['kcContext']
+  ReturnType<typeof getKcContext>["kcContext"]
 >;

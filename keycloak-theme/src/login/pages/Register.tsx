@@ -4,12 +4,12 @@ import { useConstCallback } from "keycloakify/tools/useConstCallback";
 import { useFormik } from "formik";
 import { useGetClassName } from "keycloakify/login/lib/useGetClassName";
 import type { PageProps } from "keycloakify/login/pages/PageProps";
+import * as yup from "yup";
 import AuthActionButton from "../../components/Buttons/AuthActionButton";
 import CarpInput from "../../components/CarpInput";
 import { AuthInfoText } from "../../components/Layout/PublicPageLayout/AuthPageLayout/styles";
 import BannerLogin from "../../components/Layout/PublicPageLayout/BannerLogin";
 import StyledLink from "../../components/StyledLink";
-import * as yup from "yup";
 import type { I18n } from "../i18n";
 import type { KcContext } from "../kcContext";
 

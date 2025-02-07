@@ -24,8 +24,8 @@ const CustomizedSnackbar = ({
     }
     setSnackbarState({
       snackbarOpen: false,
-      snackbarType: snackbarType,
-      snackbarMessage: snackbarMessage,
+      snackbarType,
+      snackbarMessage,
     });
   };
 
