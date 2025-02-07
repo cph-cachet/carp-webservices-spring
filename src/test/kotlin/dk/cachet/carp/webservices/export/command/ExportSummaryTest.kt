@@ -23,11 +23,11 @@ class ExportSummaryTest {
             runTest {
                 val entry =
                     Export(
-                        studyId = UUID.randomUUID().stringRepresentation,
                         fileName = "fileName",
+                        studyId = UUID.randomUUID().stringRepresentation,
                     )
 
-                every { fileUtil.resolveFileStorage(any()) } returns mockk()
+                every { fileUtil.resolveFileStoragePathForFilenameAndRelativePath(any(), any()) } returns mockk()
                 every { fileUtil.zipDirectory(any(), any()) } throws FileStorageException("Failed to zip.")
                 every { fileUtil.deleteFile(any()) } answers { nothing }
                 coEvery { resourceExporter.exportStudyData(any(), any(), any(), any()) } answers { nothing }
@@ -42,11 +42,11 @@ class ExportSummaryTest {
             runTest {
                 val entry =
                     Export(
-                        studyId = UUID.randomUUID().stringRepresentation,
                         fileName = "fileName",
+                        studyId = UUID.randomUUID().stringRepresentation,
                     )
 
-                every { fileUtil.resolveFileStorage(any()) } returns mockk()
+                every { fileUtil.resolveFileStoragePathForFilenameAndRelativePath(any(), any()) } returns mockk()
                 every { fileUtil.zipDirectory(any(), any()) } answers { nothing }
                 every { fileUtil.deleteFile(any()) } answers { nothing }
                 coEvery { resourceExporter.exportStudyData(any(), any(), any(), any()) } answers { nothing }

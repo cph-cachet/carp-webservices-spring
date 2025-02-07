@@ -8,24 +8,25 @@ import { assert } from "keycloakify/tools/assert";
 import type { KcContext } from "./kcContext";
 import type { I18n } from "./i18n";
 
-export default function Template(props: TemplateProps<KcContext, I18n>) {
+const Template = (props: TemplateProps<KcContext, I18n>) => {
   const { kcContext, i18n, doUseDefaultCss, active, classes, children } = props;
 
   const { getClassName } = useGetClassName({ doUseDefaultCss, classes });
 
-  const { msg, changeLocale, labelBySupportedLanguageTag, currentLanguageTag } = i18n;
+  const { msg, changeLocale, labelBySupportedLanguageTag, currentLanguageTag } =
+    i18n;
 
   const { locale, url, features, realm, message, referrer } = kcContext;
 
   const { isReady } = usePrepareTemplate({
-    "doFetchDefaultThemeResources": doUseDefaultCss,
-    "styles": [
+    doFetchDefaultThemeResources: doUseDefaultCss,
+    styles: [
       `${url.resourcesCommonPath}/node_modules/patternfly/dist/css/patternfly.min.css`,
       `${url.resourcesCommonPath}/node_modules/patternfly/dist/css/patternfly-additions.min.css`,
-      `${url.resourcesPath}/css/account.css`
+      `${url.resourcesPath}/css/account.css`,
     ],
-    "htmlClassName": undefined,
-    "bodyClassName": clsx("admin-console", "user", getClassName("kcBodyClass"))
+    htmlClassName: undefined,
+    bodyClassName: clsx("admin-console", "user", getClassName("kcBodyClass")),
   });
 
   if (!isReady) {
@@ -44,26 +45,31 @@ export default function Template(props: TemplateProps<KcContext, I18n>) {
           <div className="navbar-collapse navbar-collapse-1">
             <div className="container">
               <ul className="nav navbar-nav navbar-utility">
-                {realm.internationalizationEnabled && (assert(locale !== undefined), true) && locale.supported.length > 1 && (
-                  <li>
-                    <div className="kc-dropdown" id="kc-locale-dropdown">
-                      {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-                      <a href="#" id="kc-current-locale-link">
-                        {labelBySupportedLanguageTag[currentLanguageTag]}
-                      </a>
-                      <ul>
-                        {locale.supported.map(({ languageTag }) => (
-                          <li key={languageTag} className="kc-dropdown-item">
-                            {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-                            <a href="#" onClick={() => changeLocale(languageTag)}>
-                              {labelBySupportedLanguageTag[languageTag]}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </li>
-                )}
+                {realm.internationalizationEnabled &&
+                  (assert(locale !== undefined), true) &&
+                  locale.supported.length > 1 && (
+                    <li>
+                      <div className="kc-dropdown" id="kc-locale-dropdown">
+                        {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+                        <a href="#" id="kc-current-locale-link">
+                          {labelBySupportedLanguageTag[currentLanguageTag]}
+                        </a>
+                        <ul>
+                          {locale.supported.map(({ languageTag }) => (
+                            <li key={languageTag} className="kc-dropdown-item">
+                              {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+                              <a
+                                href="#"
+                                onClick={() => changeLocale(languageTag)}
+                              >
+                                {labelBySupportedLanguageTag[languageTag]}
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </li>
+                  )}
                 {referrer?.url && (
                   <li>
                     <a href={referrer.url} id="referrer">
@@ -121,8 +127,12 @@ export default function Template(props: TemplateProps<KcContext, I18n>) {
         <div className="col-sm-9 content-area">
           {message !== undefined && (
             <div className={clsx("alert", `alert-${message.type}`)}>
-              {message.type === "success" && <span className="pficon pficon-ok" />}
-              {message.type === "error" && <span className="pficon pficon-error-circle-o" />}
+              {message.type === "success" && (
+                <span className="pficon pficon-ok" />
+              )}
+              {message.type === "error" && (
+                <span className="pficon pficon-error-circle-o" />
+              )}
               <span className="kc-feedback-text">{message.summary}</span>
             </div>
           )}
@@ -132,4 +142,6 @@ export default function Template(props: TemplateProps<KcContext, I18n>) {
       </div>
     </>
   );
-}
+};
+
+export default Template;

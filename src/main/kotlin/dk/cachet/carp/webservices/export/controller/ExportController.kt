@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.server.ResponseStatusException
 
 @RestController
 @RequestMapping(EXPORT_BASE)
@@ -43,6 +44,15 @@ class ExportController(
         @RequestBody request: SummaryRequest,
     ): Export {
         LOGGER.info("Start POST: $EXPORT_BASE$SUMMARIES")
+
+        try {
+            require(request.deploymentIds.isNullOrEmpty() || request.deploymentIds.size == 1) {
+                "We only support exporting an entire study or a single deployment," +
+                    " (deploymentsIds.size should be less than 2)."
+            }
+        } catch (e: IllegalArgumentException) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, e.message, e)
+        }
 
         val command = exportCommandFactory.createExportSummary(studyId, request.deploymentIds)
 
