@@ -41,6 +41,28 @@ class StudyDeploymentController(
         const val DEPLOYMENT_STATISTICS = "/api/deployment-service/statistics"
     }
 
+    @PostMapping(value = [DEPLOYMENT_SERVICE])
+    @Operation(tags = ["studyDeployment/deployments.json"])
+    suspend fun deployments(
+        @RequestBody httpMessage: String,
+    ): ResponseEntity<Any> {
+        val request = deploymentSerializer.deserializeRequest(DeploymentServiceRequest.Serializer, httpMessage)
+        LOGGER.info("Start POST: $DEPLOYMENT_SERVICE -> ${ request::class.simpleName }")
+        val result = deploymentService.core.invoke(request)
+        return deploymentSerializer.serializeResponse(request, result).let { ResponseEntity.ok(it) }
+    }
+
+    @PostMapping(value = [PARTICIPATION_SERVICE])
+    @Operation(tags = ["studyDeployment/participation.json"])
+    suspend fun participation(
+        @RequestBody httpMessage: String,
+    ): ResponseEntity<Any> {
+        val request = WS_JSON.decodeFromString(ParticipationServiceRequest.Serializer, httpMessage)
+        LOGGER.info("Start POST: $PARTICIPATION_SERVICE -> ${ request::class.simpleName }")
+        val result = participationService.core.invoke(request)
+        return participationSerializer.serializeResponse(request, result).let { ResponseEntity.ok(it) }
+    }
+
     /**
      * Statistics endpoint is disabled, due to a refactor of the authorization
      * services with clear service boundaries. Also, none of the current clients
@@ -61,27 +83,5 @@ class StudyDeploymentController(
     ): DeploymentStatisticsResponseDto {
         LOGGER.info("Start POST: /api/deployment-service/statistics")
         return dataPointService.getStatistics(request.deploymentIds)
-    }
-
-    @PostMapping(value = [DEPLOYMENT_SERVICE])
-    @Operation(tags = ["study/deployments.json"])
-    suspend fun deployments(
-        @RequestBody httpMessage: String,
-    ): ResponseEntity<Any> {
-        val request = deploymentSerializer.deserializeRequest(DeploymentServiceRequest.Serializer, httpMessage)
-        LOGGER.info("Start POST: $DEPLOYMENT_SERVICE -> ${ request::class.simpleName }")
-        val result = deploymentService.core.invoke(request)
-        return deploymentSerializer.serializeResponse(request, result).let { ResponseEntity.ok(it) }
-    }
-
-    @PostMapping(value = [PARTICIPATION_SERVICE])
-    @Operation(tags = ["study/participation.json"])
-    suspend fun participation(
-        @RequestBody httpMessage: String,
-    ): ResponseEntity<Any> {
-        val request = WS_JSON.decodeFromString(ParticipationServiceRequest.Serializer, httpMessage)
-        LOGGER.info("Start POST: $PARTICIPATION_SERVICE -> ${ request::class.simpleName }")
-        val result = participationService.core.invoke(request)
-        return participationSerializer.serializeResponse(request, result).let { ResponseEntity.ok(it) }
     }
 }
