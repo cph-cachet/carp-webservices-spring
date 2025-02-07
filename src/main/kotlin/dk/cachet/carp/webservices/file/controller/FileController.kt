@@ -6,8 +6,6 @@ import dk.cachet.carp.webservices.common.constants.RequestParamName
 import dk.cachet.carp.webservices.file.domain.File
 import dk.cachet.carp.webservices.file.service.FileService
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
-import dk.cachet.carp.webservices.file.service.FileStorage
-import io.swagger.v3.oas.annotations.Operation
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.core.io.Resource
