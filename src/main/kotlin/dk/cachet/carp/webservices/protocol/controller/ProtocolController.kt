@@ -14,6 +14,7 @@ import dk.cachet.carp.webservices.security.authentication.service.Authentication
 import io.swagger.v3.oas.annotations.Operation
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
@@ -36,31 +37,9 @@ class ProtocolController(
         const val GET_PROTOCOLS_OVERVIEW = "/api/protocols-overview"
     }
 
-    @PostMapping(value = [PROTOCOL_SERVICE])
-    @Operation(tags = ["protocol/protocols.json"])
-    suspend fun protocols(
-        @RequestBody httpMessage: String,
-    ): ResponseEntity<Any> {
-        val request = WS_JSON.decodeFromString(ProtocolServiceRequest.Serializer, httpMessage)
-        LOGGER.info("Start POST: $PROTOCOL_SERVICE -> ${ request::class.simpleName }")
-        val result = protocolService.core.invoke(request)
-        return serializer.serializeResponse(request, result).let { ResponseEntity.ok(it) }
-    }
-
-    @PostMapping(value = [PROTOCOL_FACTORY_SERVICE])
-    @Operation(tags = ["protocol/protocolFactory.json"])
-    suspend fun protocolFactory(
-        @RequestBody httpMessage: String,
-    ): ResponseEntity<Any> {
-        val request = WS_JSON.decodeFromString(ProtocolFactoryServiceRequest.Serializer, httpMessage)
-        LOGGER.info("Start POST: $PROTOCOL_FACTORY_SERVICE -> ${ request::class.simpleName }")
-        val result = services.protocolFactoryService.invoke(request)
-        return factorySerializer.serializeResponse(request, result).let { ResponseEntity.ok(it) }
-    }
-
     @GetMapping(value = [GET_PROTOCOL_OVERVIEW])
     @PreAuthorize("hasRole('RESEARCHER')")
-    @Operation(tags = ["protocol/getLatestProtocolById.json"])
+    @ResponseStatus(HttpStatus.OK)
     suspend fun getSingleProtocolOverview(
         @PathVariable(PathVariableName.PROTOCOL_ID) protocolId: String,
     ): String {
@@ -73,8 +52,31 @@ class ProtocolController(
 
     @GetMapping(value = [GET_PROTOCOLS_OVERVIEW])
     @PreAuthorize("hasRole('RESEARCHER')")
+    @ResponseStatus(HttpStatus.OK)
     suspend fun getProtocolsOverview(): List<ProtocolOverview> {
         LOGGER.info("Start GET: /api/protocols")
         return protocolService.getProtocolsOverview(authenticationService.getId())
+    }
+
+    @PostMapping(value = [PROTOCOL_SERVICE])
+    @Operation(tags = ["protocol/protocols.json"])
+    suspend fun protocols(
+        @RequestBody httpMessage: String,
+    ): ResponseEntity<Any> {
+        val request = WS_JSON.decodeFromString(ProtocolServiceRequest.Serializer, httpMessage)
+        LOGGER.info("Start POST: $PROTOCOL_SERVICE -> ${request::class.simpleName}")
+        val result = protocolService.core.invoke(request)
+        return serializer.serializeResponse(request, result).let { ResponseEntity.ok(it) }
+    }
+
+    @PostMapping(value = [PROTOCOL_FACTORY_SERVICE])
+    @Operation(tags = ["protocol/protocolFactory.json"])
+    suspend fun protocolFactory(
+        @RequestBody httpMessage: String,
+    ): ResponseEntity<Any> {
+        val request = WS_JSON.decodeFromString(ProtocolFactoryServiceRequest.Serializer, httpMessage)
+        LOGGER.info("Start POST: $PROTOCOL_FACTORY_SERVICE -> ${request::class.simpleName}")
+        val result = services.protocolFactoryService.invoke(request)
+        return factorySerializer.serializeResponse(request, result).let { ResponseEntity.ok(it) }
     }
 }
