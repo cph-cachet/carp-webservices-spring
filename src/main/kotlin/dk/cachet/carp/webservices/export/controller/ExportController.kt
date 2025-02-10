@@ -8,6 +8,7 @@ import dk.cachet.carp.webservices.export.domain.Export
 import dk.cachet.carp.webservices.export.domain.dto.SummaryRequest
 import dk.cachet.carp.webservices.export.service.ExportService
 import dk.cachet.carp.webservices.study.domain.AnonymousParticipantRequest
+import io.swagger.v3.oas.annotations.Operation
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.core.io.Resource
@@ -85,6 +86,8 @@ class ExportController(
 
     @GetMapping(DOWNLOAD)
     @PreAuthorize("canManageStudy( #studyId )")
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(description = "Download the export file.")
     fun download(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @PathVariable(PathVariableName.EXPORT_ID) exportId: UUID,
