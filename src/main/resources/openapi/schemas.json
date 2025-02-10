@@ -1,0 +1,4145 @@
+{
+  "CarpErrorResponse": {
+    "required": [
+      "exception",
+      "message",
+      "path",
+      "statusCode"
+    ],
+    "type": "object",
+    "properties": {
+      "statusCode": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "exception": {
+        "type": "string"
+      },
+      "message": {
+        "type": "string"
+      },
+      "path": {
+        "type": "string"
+      }
+    }
+  },
+  "JsonNode": {
+    "type": "object"
+  },
+  "UpdateDocumentRequestDto": {
+    "required": [
+      "data",
+      "name"
+    ],
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string"
+      },
+      "data": {
+        "$ref": "#/components/schemas/JsonNode"
+      }
+    }
+  },
+  "Document": {
+    "required": [
+      "collection_id",
+      "id",
+      "name"
+    ],
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "name": {
+        "type": "string"
+      },
+      "collection_id": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "data": {
+        "$ref": "#/components/schemas/JsonNode"
+      },
+      "created_by": {
+        "type": "string"
+      },
+      "created_at": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "updated_by": {
+        "type": "string"
+      },
+      "updated_at": {
+        "type": "string",
+        "format": "date-time"
+      }
+    }
+  },
+  "CollectionUpdateRequestDto": {
+    "required": [
+      "name"
+    ],
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string"
+      }
+    }
+  },
+  "Collection": {
+    "required": [
+      "id",
+      "name",
+      "study_id"
+    ],
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "name": {
+        "type": "string"
+      },
+      "study_id": {
+        "type": "string"
+      },
+      "study_deployment_id": {
+        "type": "string"
+      },
+      "document_id": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "documents": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Document"
+        }
+      },
+      "created_by": {
+        "type": "string"
+      },
+      "created_at": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "updated_by": {
+        "type": "string"
+      },
+      "updated_at": {
+        "type": "string",
+        "format": "date-time"
+      }
+    }
+  },
+  "ApiVersion": {
+    "required": [
+      "major",
+      "minor"
+    ],
+    "type": "object",
+    "properties": {
+      "major": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "minor": {
+        "type": "integer",
+        "format": "int32"
+      }
+    }
+  },
+  "BOOLEAN": {
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/PrimitiveKind"
+      }
+    ]
+  },
+  "BYTE": {
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/PrimitiveKind"
+      }
+    ]
+  },
+  "CHAR": {
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/PrimitiveKind"
+      }
+    ]
+  },
+  "CLASS": {
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/StructureKind"
+      }
+    ]
+  },
+  "CONTEXTUAL": {
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/SerialKind"
+      }
+    ]
+  },
+  "CreateStudy": {
+    "required": [
+      "apiVersion",
+      "name",
+      "ownerId",
+      "responseSerializer"
+    ],
+    "type": "object",
+    "properties": {
+      "ownerId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "name": {
+        "type": "string"
+      },
+      "description": {
+        "type": "string"
+      },
+      "invitation": {
+        "$ref": "#/components/schemas/StudyInvitation"
+      },
+      "apiVersion": {
+        "$ref": "#/components/schemas/ApiVersion"
+      },
+      "responseSerializer": {
+        "$ref": "#/components/schemas/KSerializerStudyStatus"
+      }
+    }
+  },
+  "DOUBLE": {
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/PrimitiveKind"
+      }
+    ]
+  },
+  "ENUM": {
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/SerialKind"
+      }
+    ]
+  },
+  "FLOAT": {
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/PrimitiveKind"
+      }
+    ]
+  },
+  "INT": {
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/PrimitiveKind"
+      }
+    ]
+  },
+  "KSerializerStudyStatus": {
+    "required": [
+      "descriptor"
+    ],
+    "type": "object",
+    "properties": {
+      "descriptor": {
+        "$ref": "#/components/schemas/SerialDescriptor"
+      }
+    }
+  },
+  "LIST": {
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/StructureKind"
+      }
+    ]
+  },
+  "LONG": {
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/PrimitiveKind"
+      }
+    ]
+  },
+  "MAP": {
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/StructureKind"
+      }
+    ]
+  },
+  "OBJECT": {
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/StructureKind"
+      }
+    ]
+  },
+  "OPEN": {
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/PolymorphicKind"
+      }
+    ]
+  },
+  "PolymorphicKind": {
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/SerialKind"
+      }
+    ]
+  },
+  "PrimitiveKind": {
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/SerialKind"
+      }
+    ]
+  },
+  "SEALED": {
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/PolymorphicKind"
+      }
+    ]
+  },
+  "SHORT": {
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/PrimitiveKind"
+      }
+    ]
+  },
+  "STRING": {
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/PrimitiveKind"
+      }
+    ]
+  },
+  "SerialDescriptor": {
+    "required": [
+      "annotations",
+      "elementsCount",
+      "isInline",
+      "isNullable",
+      "kind",
+      "serialName"
+    ],
+    "type": "object",
+    "properties": {
+      "annotations": {
+        "type": "array",
+        "items": {
+          "type": "object"
+        }
+      },
+      "serialName": {
+        "type": "string"
+      },
+      "elementsCount": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "isInline": {
+        "type": "boolean"
+      },
+      "kind": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/CONTEXTUAL"
+          },
+          {
+            "$ref": "#/components/schemas/ENUM"
+          },
+          {
+            "$ref": "#/components/schemas/PolymorphicKind"
+          },
+          {
+            "$ref": "#/components/schemas/PrimitiveKind"
+          },
+          {
+            "$ref": "#/components/schemas/StructureKind"
+          },
+          {
+            "$ref": "#/components/schemas/OPEN"
+          },
+          {
+            "$ref": "#/components/schemas/SEALED"
+          },
+          {
+            "$ref": "#/components/schemas/BOOLEAN"
+          },
+          {
+            "$ref": "#/components/schemas/BYTE"
+          },
+          {
+            "$ref": "#/components/schemas/CHAR"
+          },
+          {
+            "$ref": "#/components/schemas/DOUBLE"
+          },
+          {
+            "$ref": "#/components/schemas/FLOAT"
+          },
+          {
+            "$ref": "#/components/schemas/INT"
+          },
+          {
+            "$ref": "#/components/schemas/LONG"
+          },
+          {
+            "$ref": "#/components/schemas/SHORT"
+          },
+          {
+            "$ref": "#/components/schemas/STRING"
+          },
+          {
+            "$ref": "#/components/schemas/CLASS"
+          },
+          {
+            "$ref": "#/components/schemas/LIST"
+          },
+          {
+            "$ref": "#/components/schemas/MAP"
+          },
+          {
+            "$ref": "#/components/schemas/OBJECT"
+          }
+        ]
+      },
+      "isNullable": {
+        "type": "boolean"
+      }
+    }
+  },
+  "SerialKind": {
+    "type": "object"
+  },
+  "StructureKind": {
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/SerialKind"
+      }
+    ]
+  },
+  "StudyInvitation": {
+    "required": [
+      "name"
+    ],
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string"
+      },
+      "description": {
+        "type": "string"
+      },
+      "applicationData": {
+        "type": "string"
+      }
+    }
+  },
+  "UUID": {
+    "required": [
+      "stringRepresentation"
+    ],
+    "type": "object",
+    "properties": {
+      "stringRepresentation": {
+        "type": "string"
+      }
+    }
+  },
+  "SetInternalDescription": {
+    "required": [
+      "apiVersion",
+      "name",
+      "responseSerializer",
+      "studyId"
+    ],
+    "type": "object",
+    "properties": {
+      "studyId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "name": {
+        "type": "string"
+      },
+      "description": {
+        "type": "string"
+      },
+      "apiVersion": {
+        "$ref": "#/components/schemas/ApiVersion"
+      },
+      "responseSerializer": {
+        "$ref": "#/components/schemas/KSerializerStudyStatus"
+      }
+    }
+  },
+  "GetStudyDetails": {
+    "required": [
+      "apiVersion",
+      "responseSerializer",
+      "studyId"
+    ],
+    "type": "object",
+    "properties": {
+      "studyId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "apiVersion": {
+        "$ref": "#/components/schemas/ApiVersion"
+      },
+      "responseSerializer": {
+        "$ref": "#/components/schemas/KSerializerStudyDetails"
+      }
+    }
+  },
+  "KSerializerStudyDetails": {
+    "required": [
+      "descriptor"
+    ],
+    "type": "object",
+    "properties": {
+      "descriptor": {
+        "$ref": "#/components/schemas/SerialDescriptor"
+      }
+    }
+  },
+  "GetStudyStatus": {
+    "required": [
+      "apiVersion",
+      "responseSerializer",
+      "studyId"
+    ],
+    "type": "object",
+    "properties": {
+      "studyId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "apiVersion": {
+        "$ref": "#/components/schemas/ApiVersion"
+      },
+      "responseSerializer": {
+        "$ref": "#/components/schemas/KSerializerStudyStatus"
+      }
+    }
+  },
+  "GetStudiesOverview": {
+    "required": [
+      "apiVersion",
+      "ownerId",
+      "responseSerializer"
+    ],
+    "type": "object",
+    "properties": {
+      "ownerId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "apiVersion": {
+        "$ref": "#/components/schemas/ApiVersion"
+      },
+      "responseSerializer": {
+        "$ref": "#/components/schemas/KSerializerListStudyStatus"
+      }
+    }
+  },
+  "KSerializerListStudyStatus": {
+    "required": [
+      "descriptor"
+    ],
+    "type": "object",
+    "properties": {
+      "descriptor": {
+        "$ref": "#/components/schemas/SerialDescriptor"
+      }
+    }
+  },
+  "SetInvitation": {
+    "required": [
+      "apiVersion",
+      "invitation",
+      "responseSerializer",
+      "studyId"
+    ],
+    "type": "object",
+    "properties": {
+      "studyId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "invitation": {
+        "$ref": "#/components/schemas/StudyInvitation"
+      },
+      "apiVersion": {
+        "$ref": "#/components/schemas/ApiVersion"
+      },
+      "responseSerializer": {
+        "$ref": "#/components/schemas/KSerializerStudyStatus"
+      }
+    }
+  },
+  "All": {
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/AssignedTo"
+      }
+    ]
+  },
+  "AssignedTo": {
+    "type": "object"
+  },
+  "CustomParticipantAttribute": {
+    "required": [
+      "input",
+      "inputDataType"
+    ],
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/ParticipantAttribute"
+      },
+      {
+        "type": "object",
+        "properties": {
+          "input": {
+            "$ref": "#/components/schemas/InputElementObject"
+          }
+        }
+      }
+    ]
+  },
+  "DataStream": {
+    "required": [
+      "type"
+    ],
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/Measure"
+      },
+      {
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/NamespacedId"
+          },
+          "overrideSamplingConfiguration": {
+            "$ref": "#/components/schemas/SamplingConfiguration"
+          }
+        }
+      }
+    ]
+  },
+  "DataTypeMetaData": {
+    "required": [
+      "displayName",
+      "timeType",
+      "type"
+    ],
+    "type": "object",
+    "properties": {
+      "type": {
+        "$ref": "#/components/schemas/NamespacedId"
+      },
+      "displayName": {
+        "type": "string"
+      },
+      "timeType": {
+        "type": "string",
+        "enum": [
+          "POINT",
+          "TIME_SPAN"
+        ]
+      }
+    }
+  },
+  "DataTypeSamplingSchemeObject": {
+    "required": [
+      "dataType",
+      "default"
+    ],
+    "type": "object",
+    "properties": {
+      "dataType": {
+        "$ref": "#/components/schemas/DataTypeMetaData"
+      },
+      "default": {
+        "$ref": "#/components/schemas/SamplingConfiguration"
+      }
+    }
+  },
+  "DefaultParticipantAttribute": {
+    "required": [
+      "inputDataType"
+    ],
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/ParticipantAttribute"
+      }
+    ]
+  },
+  "DeviceConfigurationObjectObject": {
+    "required": [
+      "dataTypeSamplingSchemes",
+      "defaultSamplingConfiguration",
+      "isOptional",
+      "registrationClass",
+      "roleName",
+      "supportedDataTypes"
+    ],
+    "type": "object",
+    "properties": {
+      "defaultSamplingConfiguration": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "isOptional": {
+        "type": "boolean"
+      },
+      "supportedDataTypes": {
+        "uniqueItems": true,
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NamespacedId"
+        }
+      },
+      "dataTypeSamplingSchemes": {
+        "required": [
+          "entries",
+          "isEmpty",
+          "keyOf",
+          "keys",
+          "size",
+          "values"
+        ],
+        "type": "object",
+        "properties": {
+          "keyOf": {
+            "$ref": "#/components/schemas/Function1DataTypeSamplingSchemeObjectNamespacedId"
+          },
+          "isEmpty": {
+            "type": "boolean"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "entries": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "$ref": "#/components/schemas/DataTypeSamplingSchemeObject"
+                },
+                "key": {
+                  "$ref": "#/components/schemas/NamespacedId"
+                }
+              }
+            }
+          },
+          "keys": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NamespacedId"
+            }
+          },
+          "values": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DataTypeSamplingSchemeObject"
+            }
+          }
+        },
+        "additionalProperties": true
+      },
+      "registrationClass": {
+        "$ref": "#/components/schemas/KClassObject"
+      },
+      "roleName": {
+        "type": "string"
+      }
+    }
+  },
+  "DeviceConnection": {
+    "required": [
+      "connectedToRoleName",
+      "roleName"
+    ],
+    "type": "object",
+    "properties": {
+      "roleName": {
+        "type": "string"
+      },
+      "connectedToRoleName": {
+        "type": "string"
+      }
+    }
+  },
+  "ExpectedParticipantData": {
+    "required": [
+      "assignedTo",
+      "attribute",
+      "inputDataType"
+    ],
+    "type": "object",
+    "properties": {
+      "attribute": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/CustomParticipantAttribute"
+          },
+          {
+            "$ref": "#/components/schemas/DefaultParticipantAttribute"
+          }
+        ]
+      },
+      "assignedTo": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/All"
+          },
+          {
+            "$ref": "#/components/schemas/Roles"
+          }
+        ]
+      },
+      "inputDataType": {
+        "$ref": "#/components/schemas/NamespacedId"
+      }
+    }
+  },
+  "Function1DataTypeSamplingSchemeObjectNamespacedId": {
+    "type": "object"
+  },
+  "InputElementObject": {
+    "required": [
+      "dataClass",
+      "prompt"
+    ],
+    "type": "object",
+    "properties": {
+      "dataClass": {
+        "$ref": "#/components/schemas/KClassObject"
+      },
+      "prompt": {
+        "type": "string"
+      }
+    }
+  },
+  "Instant": {
+    "required": [
+      "epochSeconds",
+      "nanosecondsOfSecond",
+      "value$kotlinx_datetime"
+    ],
+    "type": "object",
+    "properties": {
+      "value": {
+        "type": "string",
+        "format": "date-time",
+        "writeOnly": true
+      },
+      "epochSeconds": {
+        "type": "integer",
+        "format": "int64"
+      },
+      "value$kotlinx_datetime": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "nanosecondsOfSecond": {
+        "type": "integer",
+        "format": "int32"
+      }
+    }
+  },
+  "KCallableObject": {
+    "required": [
+      "annotations",
+      "isAbstract",
+      "isFinal",
+      "isOpen",
+      "isSuspend",
+      "name",
+      "parameters",
+      "returnType",
+      "typeParameters"
+    ],
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string"
+      },
+      "typeParameters": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/KTypeParameter"
+        }
+      },
+      "returnType": {
+        "$ref": "#/components/schemas/KType"
+      },
+      "isOpen": {
+        "type": "boolean"
+      },
+      "parameters": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/KParameter"
+        }
+      },
+      "isFinal": {
+        "type": "boolean"
+      },
+      "isAbstract": {
+        "type": "boolean"
+      },
+      "visibility": {
+        "type": "string",
+        "enum": [
+          "PUBLIC",
+          "PROTECTED",
+          "INTERNAL",
+          "PRIVATE"
+        ]
+      },
+      "isSuspend": {
+        "type": "boolean"
+      },
+      "annotations": {
+        "type": "array",
+        "items": {
+          "type": "object"
+        }
+      }
+    }
+  },
+  "KClassObject": {
+    "required": [
+      "annotations",
+      "constructors",
+      "isAbstract",
+      "isCompanion",
+      "isData",
+      "isFinal",
+      "isFun",
+      "isInner",
+      "isOpen",
+      "isSealed",
+      "isValue",
+      "members",
+      "nestedClasses",
+      "sealedSubclasses",
+      "supertypes",
+      "typeParameters"
+    ],
+    "type": "object",
+    "properties": {
+      "typeParameters": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/KTypeParameter"
+        }
+      },
+      "simpleName": {
+        "type": "string"
+      },
+      "isOpen": {
+        "type": "boolean"
+      },
+      "constructors": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/KFunctionObject"
+        }
+      },
+      "isSealed": {
+        "type": "boolean"
+      },
+      "isFinal": {
+        "type": "boolean"
+      },
+      "isAbstract": {
+        "type": "boolean"
+      },
+      "members": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/KCallableObject"
+        }
+      },
+      "nestedClasses": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/KClassObject"
+        }
+      },
+      "supertypes": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/KType"
+        }
+      },
+      "sealedSubclasses": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/KClassObject"
+        }
+      },
+      "isCompanion": {
+        "type": "boolean"
+      },
+      "visibility": {
+        "type": "string",
+        "enum": [
+          "PUBLIC",
+          "PROTECTED",
+          "INTERNAL",
+          "PRIVATE"
+        ]
+      },
+      "isData": {
+        "type": "boolean"
+      },
+      "isInner": {
+        "type": "boolean"
+      },
+      "isFun": {
+        "type": "boolean"
+      },
+      "qualifiedName": {
+        "type": "string"
+      },
+      "objectInstance": {
+        "type": "object"
+      },
+      "isValue": {
+        "type": "boolean"
+      },
+      "annotations": {
+        "type": "array",
+        "items": {
+          "type": "object"
+        }
+      }
+    }
+  },
+  "KClassifier": {
+    "type": "object"
+  },
+  "KFunctionObject": {
+    "required": [
+      "annotations",
+      "isAbstract",
+      "isExternal",
+      "isFinal",
+      "isInfix",
+      "isInline",
+      "isOpen",
+      "isOperator",
+      "isSuspend",
+      "name",
+      "parameters",
+      "returnType",
+      "typeParameters"
+    ],
+    "type": "object",
+    "properties": {
+      "isInline": {
+        "type": "boolean"
+      },
+      "isSuspend": {
+        "type": "boolean"
+      },
+      "isOperator": {
+        "type": "boolean"
+      },
+      "isInfix": {
+        "type": "boolean"
+      },
+      "isExternal": {
+        "type": "boolean"
+      },
+      "name": {
+        "type": "string"
+      },
+      "typeParameters": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/KTypeParameter"
+        }
+      },
+      "returnType": {
+        "$ref": "#/components/schemas/KType"
+      },
+      "isOpen": {
+        "type": "boolean"
+      },
+      "parameters": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/KParameter"
+        }
+      },
+      "isFinal": {
+        "type": "boolean"
+      },
+      "isAbstract": {
+        "type": "boolean"
+      },
+      "visibility": {
+        "type": "string",
+        "enum": [
+          "PUBLIC",
+          "PROTECTED",
+          "INTERNAL",
+          "PRIVATE"
+        ]
+      },
+      "annotations": {
+        "type": "array",
+        "items": {
+          "type": "object"
+        }
+      }
+    }
+  },
+  "KParameter": {
+    "required": [
+      "annotations",
+      "index",
+      "isOptional",
+      "isVararg",
+      "kind",
+      "type"
+    ],
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string"
+      },
+      "type": {
+        "$ref": "#/components/schemas/KType"
+      },
+      "index": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "isVararg": {
+        "type": "boolean"
+      },
+      "kind": {
+        "type": "string",
+        "enum": [
+          "INSTANCE",
+          "EXTENSION_RECEIVER",
+          "VALUE"
+        ]
+      },
+      "isOptional": {
+        "type": "boolean"
+      },
+      "annotations": {
+        "type": "array",
+        "items": {
+          "type": "object"
+        }
+      }
+    }
+  },
+  "KType": {
+    "required": [
+      "annotations",
+      "arguments",
+      "isMarkedNullable"
+    ],
+    "type": "object",
+    "properties": {
+      "classifier": {
+        "$ref": "#/components/schemas/KClassifier"
+      },
+      "arguments": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/KTypeProjection"
+        }
+      },
+      "isMarkedNullable": {
+        "type": "boolean"
+      },
+      "annotations": {
+        "type": "array",
+        "items": {
+          "type": "object"
+        }
+      }
+    }
+  },
+  "KTypeParameter": {
+    "required": [
+      "isReified",
+      "name",
+      "upperBounds",
+      "variance"
+    ],
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string"
+      },
+      "variance": {
+        "type": "string",
+        "enum": [
+          "INVARIANT",
+          "IN",
+          "OUT"
+        ]
+      },
+      "isReified": {
+        "type": "boolean"
+      },
+      "upperBounds": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/KType"
+        }
+      }
+    }
+  },
+  "KTypeProjection": {
+    "type": "object",
+    "properties": {
+      "variance": {
+        "type": "string",
+        "enum": [
+          "INVARIANT",
+          "IN",
+          "OUT"
+        ]
+      },
+      "type": {
+        "$ref": "#/components/schemas/KType"
+      }
+    }
+  },
+  "Measure": {
+    "type": "object"
+  },
+  "NamespacedId": {
+    "required": [
+      "name",
+      "namespace"
+    ],
+    "type": "object",
+    "properties": {
+      "namespace": {
+        "type": "string"
+      },
+      "name": {
+        "type": "string"
+      }
+    }
+  },
+  "ParticipantAttribute": {
+    "required": [
+      "inputDataType"
+    ],
+    "type": "object",
+    "properties": {
+      "inputDataType": {
+        "$ref": "#/components/schemas/NamespacedId"
+      }
+    }
+  },
+  "ParticipantRole": {
+    "required": [
+      "isOptional",
+      "role"
+    ],
+    "type": "object",
+    "properties": {
+      "role": {
+        "type": "string"
+      },
+      "isOptional": {
+        "type": "boolean"
+      }
+    }
+  },
+  "PrimaryDeviceConfigurationObjectObject": {
+    "required": [
+      "dataTypeSamplingSchemes",
+      "defaultSamplingConfiguration",
+      "isOptional",
+      "isPrimaryDevice$carp_common",
+      "registrationClass",
+      "roleName",
+      "supportedDataTypes"
+    ],
+    "type": "object",
+    "properties": {
+      "isPrimaryDevice$carp_common": {
+        "type": "boolean"
+      },
+      "defaultSamplingConfiguration": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "isOptional": {
+        "type": "boolean"
+      },
+      "supportedDataTypes": {
+        "uniqueItems": true,
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NamespacedId"
+        }
+      },
+      "dataTypeSamplingSchemes": {
+        "required": [
+          "entries",
+          "isEmpty",
+          "keyOf",
+          "keys",
+          "size",
+          "values"
+        ],
+        "type": "object",
+        "properties": {
+          "keyOf": {
+            "$ref": "#/components/schemas/Function1DataTypeSamplingSchemeObjectNamespacedId"
+          },
+          "isEmpty": {
+            "type": "boolean"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "entries": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "$ref": "#/components/schemas/DataTypeSamplingSchemeObject"
+                },
+                "key": {
+                  "$ref": "#/components/schemas/NamespacedId"
+                }
+              }
+            }
+          },
+          "keys": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NamespacedId"
+            }
+          },
+          "values": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DataTypeSamplingSchemeObject"
+            }
+          }
+        },
+        "additionalProperties": true
+      },
+      "registrationClass": {
+        "$ref": "#/components/schemas/KClassObject"
+      },
+      "roleName": {
+        "type": "string"
+      }
+    }
+  },
+  "Roles": {
+    "required": [
+      "roleNames"
+    ],
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/AssignedTo"
+      },
+      {
+        "type": "object",
+        "properties": {
+          "roleNames": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    ]
+  },
+  "SamplingConfiguration": {
+    "type": "object"
+  },
+  "SetProtocol": {
+    "required": [
+      "apiVersion",
+      "protocol",
+      "responseSerializer",
+      "studyId"
+    ],
+    "type": "object",
+    "properties": {
+      "studyId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "protocol": {
+        "$ref": "#/components/schemas/StudyProtocolSnapshot"
+      },
+      "apiVersion": {
+        "$ref": "#/components/schemas/ApiVersion"
+      },
+      "responseSerializer": {
+        "$ref": "#/components/schemas/KSerializerStudyStatus"
+      }
+    }
+  },
+  "StudyProtocolSnapshot": {
+    "required": [
+      "assignedDevices",
+      "connectedDevices",
+      "connections",
+      "createdOn",
+      "expectedParticipantData",
+      "id",
+      "name",
+      "ownerId",
+      "participantRoles",
+      "primaryDevices",
+      "taskControls",
+      "tasks",
+      "triggers",
+      "version"
+    ],
+    "type": "object",
+    "properties": {
+      "id": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "createdOn": {
+        "$ref": "#/components/schemas/Instant"
+      },
+      "version": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "ownerId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "name": {
+        "type": "string"
+      },
+      "description": {
+        "type": "string"
+      },
+      "primaryDevices": {
+        "uniqueItems": true,
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/PrimaryDeviceConfigurationObjectObject"
+        }
+      },
+      "connectedDevices": {
+        "uniqueItems": true,
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/DeviceConfigurationObjectObject"
+        }
+      },
+      "connections": {
+        "uniqueItems": true,
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/DeviceConnection"
+        }
+      },
+      "tasks": {
+        "uniqueItems": true,
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/TaskConfigurationObject"
+        }
+      },
+      "triggers": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "taskControls": {
+        "uniqueItems": true,
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/TaskControl"
+        }
+      },
+      "participantRoles": {
+        "uniqueItems": true,
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ParticipantRole"
+        }
+      },
+      "assignedDevices": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "expectedParticipantData": {
+        "uniqueItems": true,
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ExpectedParticipantData"
+        }
+      },
+      "applicationData": {
+        "type": "string"
+      }
+    }
+  },
+  "TaskConfigurationObject": {
+    "required": [
+      "measures",
+      "name"
+    ],
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string"
+      },
+      "measures": {
+        "type": "array",
+        "items": {
+          "oneOf": [
+            {
+              "$ref": "#/components/schemas/DataStream"
+            },
+            {
+              "$ref": "#/components/schemas/TriggerData"
+            }
+          ]
+        }
+      },
+      "description": {
+        "type": "string"
+      }
+    }
+  },
+  "TaskControl": {
+    "required": [
+      "control",
+      "destinationDeviceRoleName",
+      "taskName",
+      "triggerId"
+    ],
+    "type": "object",
+    "properties": {
+      "triggerId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "taskName": {
+        "type": "string"
+      },
+      "destinationDeviceRoleName": {
+        "type": "string"
+      },
+      "control": {
+        "type": "string",
+        "enum": [
+          "Start",
+          "Stop"
+        ]
+      }
+    }
+  },
+  "TriggerConfigurationObject": {
+    "required": [
+      "requiresPrimaryDevice",
+      "sourceDeviceRoleName"
+    ],
+    "type": "object",
+    "properties": {
+      "requiresPrimaryDevice": {
+        "type": "boolean"
+      },
+      "sourceDeviceRoleName": {
+        "type": "string"
+      }
+    }
+  },
+  "TriggerData": {
+    "required": [
+      "triggerId"
+    ],
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/Measure"
+      },
+      {
+        "type": "object",
+        "properties": {
+          "triggerId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      }
+    ]
+  },
+  "RemoveProtocol": {
+    "required": [
+      "apiVersion",
+      "responseSerializer",
+      "studyId"
+    ],
+    "type": "object",
+    "properties": {
+      "studyId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "apiVersion": {
+        "$ref": "#/components/schemas/ApiVersion"
+      },
+      "responseSerializer": {
+        "$ref": "#/components/schemas/KSerializerStudyStatus"
+      }
+    }
+  },
+  "GoLive": {
+    "required": [
+      "apiVersion",
+      "responseSerializer",
+      "studyId"
+    ],
+    "type": "object",
+    "properties": {
+      "studyId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "apiVersion": {
+        "$ref": "#/components/schemas/ApiVersion"
+      },
+      "responseSerializer": {
+        "$ref": "#/components/schemas/KSerializerStudyStatus"
+      }
+    }
+  },
+  "KSerializerBoolean": {
+    "required": [
+      "descriptor"
+    ],
+    "type": "object",
+    "properties": {
+      "descriptor": {
+        "$ref": "#/components/schemas/SerialDescriptor"
+      }
+    }
+  },
+  "Remove": {
+    "required": [
+      "apiVersion",
+      "responseSerializer",
+      "studyId"
+    ],
+    "type": "object",
+    "properties": {
+      "studyId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "apiVersion": {
+        "$ref": "#/components/schemas/ApiVersion"
+      },
+      "responseSerializer": {
+        "$ref": "#/components/schemas/KSerializerBoolean"
+      }
+    }
+  },
+  "StudyStatus": {
+    "required": [
+      "canDeployToParticipants",
+      "canSetInvitation",
+      "canSetStudyProtocol",
+      "createdOn",
+      "name",
+      "studyId"
+    ],
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string"
+      },
+      "studyProtocolId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "createdOn": {
+        "$ref": "#/components/schemas/Instant"
+      },
+      "canSetInvitation": {
+        "type": "boolean"
+      },
+      "canSetStudyProtocol": {
+        "type": "boolean"
+      },
+      "canDeployToParticipants": {
+        "type": "boolean"
+      },
+      "studyId": {
+        "$ref": "#/components/schemas/UUID"
+      }
+    }
+  },
+  "StudyDetails": {
+    "required": [
+      "createdOn",
+      "invitation",
+      "name",
+      "ownerId",
+      "studyId"
+    ],
+    "type": "object",
+    "properties": {
+      "studyId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "ownerId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "name": {
+        "type": "string"
+      },
+      "createdOn": {
+        "$ref": "#/components/schemas/Instant"
+      },
+      "description": {
+        "type": "string"
+      },
+      "invitation": {
+        "$ref": "#/components/schemas/StudyInvitation"
+      },
+      "protocolSnapshot": {
+        "$ref": "#/components/schemas/StudyProtocolSnapshot"
+      }
+    }
+  },
+  "AddParticipantsRequestDto": {
+    "required": [
+      "emails"
+    ],
+    "type": "object",
+    "properties": {
+      "emails": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "File": {
+    "required": [
+      "id",
+      "original_name",
+      "storage_name",
+      "study_id"
+    ],
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "storage_name": {
+        "type": "string"
+      },
+      "original_name": {
+        "type": "string"
+      },
+      "metadata": {
+        "$ref": "#/components/schemas/JsonNode"
+      },
+      "study_id": {
+        "type": "string"
+      },
+      "created_by": {
+        "type": "string"
+      },
+      "created_at": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "updated_by": {
+        "type": "string"
+      },
+      "updated_at": {
+        "type": "string",
+        "format": "date-time"
+      }
+    }
+  },
+  "SummaryRequest": {
+    "type": "object",
+    "properties": {
+      "deploymentIds": {
+        "uniqueItems": true,
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/UUID"
+        }
+      }
+    }
+  },
+  "Export": {
+    "required": [
+      "file_name",
+      "id",
+      "status",
+      "study_id",
+      "type"
+    ],
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string"
+      },
+      "file_name": {
+        "type": "string"
+      },
+      "status": {
+        "type": "string",
+        "enum": [
+          "UNKNOWN",
+          "IN_PROGRESS",
+          "AVAILABLE",
+          "ERROR",
+          "EXPIRED"
+        ]
+      },
+      "study_id": {
+        "type": "string"
+      },
+      "type": {
+        "type": "string",
+        "enum": [
+          "UNKNOWN",
+          "STUDY_DATA",
+          "DEPLOYMENT_DATA",
+          "ANONYMOUS_PARTICIPANTS"
+        ]
+      },
+      "created_by": {
+        "type": "string"
+      },
+      "created_at": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "updated_by": {
+        "type": "string"
+      },
+      "updated_at": {
+        "type": "string",
+        "format": "date-time"
+      }
+    }
+  },
+  "AnonymousParticipantRequest": {
+    "required": [
+      "amountOfAccounts",
+      "expirationSeconds",
+      "participantRoleName",
+      "redirectUri"
+    ],
+    "type": "object",
+    "properties": {
+      "amountOfAccounts": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "expirationSeconds": {
+        "type": "integer",
+        "format": "int64"
+      },
+      "redirectUri": {
+        "type": "string"
+      },
+      "participantRoleName": {
+        "type": "string"
+      }
+    }
+  },
+  "CreateDocumentRequestDto": {
+    "required": [
+      "collectionId",
+      "name"
+    ],
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string"
+      },
+      "collectionId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "collections": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Collection"
+        }
+      },
+      "data": {
+        "$ref": "#/components/schemas/JsonNode"
+      }
+    }
+  },
+  "CollectionCreateRequestDto": {
+    "required": [
+      "name"
+    ],
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string"
+      },
+      "deploymentId": {
+        "type": "string"
+      }
+    }
+  },
+  "AddParticipantByEmailAddress": {
+    "required": [
+      "apiVersion",
+      "email",
+      "responseSerializer",
+      "studyId"
+    ],
+    "type": "object",
+    "properties": {
+      "studyId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "email": {
+        "$ref": "#/components/schemas/EmailAddress"
+      },
+      "apiVersion": {
+        "$ref": "#/components/schemas/ApiVersion"
+      },
+      "responseSerializer": {
+        "$ref": "#/components/schemas/KSerializerParticipant"
+      }
+    }
+  },
+  "EmailAddress": {
+    "required": [
+      "address"
+    ],
+    "type": "object",
+    "properties": {
+      "address": {
+        "type": "string"
+      }
+    }
+  },
+  "KSerializerParticipant": {
+    "required": [
+      "descriptor"
+    ],
+    "type": "object",
+    "properties": {
+      "descriptor": {
+        "$ref": "#/components/schemas/SerialDescriptor"
+      }
+    }
+  },
+  "AddParticipantByUsername": {
+    "required": [
+      "apiVersion",
+      "responseSerializer",
+      "studyId",
+      "username"
+    ],
+    "type": "object",
+    "properties": {
+      "studyId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "username": {
+        "$ref": "#/components/schemas/Username"
+      },
+      "apiVersion": {
+        "$ref": "#/components/schemas/ApiVersion"
+      },
+      "responseSerializer": {
+        "$ref": "#/components/schemas/KSerializerParticipant"
+      }
+    }
+  },
+  "Username": {
+    "required": [
+      "name"
+    ],
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string"
+      }
+    }
+  },
+  "GetParticipant": {
+    "required": [
+      "apiVersion",
+      "participantId",
+      "responseSerializer",
+      "studyId"
+    ],
+    "type": "object",
+    "properties": {
+      "studyId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "participantId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "apiVersion": {
+        "$ref": "#/components/schemas/ApiVersion"
+      },
+      "responseSerializer": {
+        "$ref": "#/components/schemas/KSerializerParticipant"
+      }
+    }
+  },
+  "GetParticipants": {
+    "required": [
+      "apiVersion",
+      "responseSerializer",
+      "studyId"
+    ],
+    "type": "object",
+    "properties": {
+      "studyId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "apiVersion": {
+        "$ref": "#/components/schemas/ApiVersion"
+      },
+      "responseSerializer": {
+        "$ref": "#/components/schemas/KSerializerListParticipant"
+      }
+    }
+  },
+  "KSerializerListParticipant": {
+    "required": [
+      "descriptor"
+    ],
+    "type": "object",
+    "properties": {
+      "descriptor": {
+        "$ref": "#/components/schemas/SerialDescriptor"
+      }
+    }
+  },
+  "AssignedParticipantRoles": {
+    "required": [
+      "assignedRoles",
+      "participantId"
+    ],
+    "type": "object",
+    "properties": {
+      "participantId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "assignedRoles": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/All"
+          },
+          {
+            "$ref": "#/components/schemas/Roles"
+          }
+        ]
+      }
+    }
+  },
+  "InviteNewParticipantGroup": {
+    "required": [
+      "apiVersion",
+      "group",
+      "responseSerializer",
+      "studyId"
+    ],
+    "type": "object",
+    "properties": {
+      "studyId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "group": {
+        "uniqueItems": true,
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/AssignedParticipantRoles"
+        }
+      },
+      "apiVersion": {
+        "$ref": "#/components/schemas/ApiVersion"
+      },
+      "responseSerializer": {
+        "$ref": "#/components/schemas/KSerializerParticipantGroupStatus"
+      }
+    }
+  },
+  "KSerializerParticipantGroupStatus": {
+    "required": [
+      "descriptor"
+    ],
+    "type": "object",
+    "properties": {
+      "descriptor": {
+        "$ref": "#/components/schemas/SerialDescriptor"
+      }
+    }
+  },
+  "GetParticipantGroupStatusList": {
+    "required": [
+      "apiVersion",
+      "responseSerializer",
+      "studyId"
+    ],
+    "type": "object",
+    "properties": {
+      "studyId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "apiVersion": {
+        "$ref": "#/components/schemas/ApiVersion"
+      },
+      "responseSerializer": {
+        "$ref": "#/components/schemas/KSerializerListParticipantGroupStatus"
+      }
+    }
+  },
+  "KSerializerListParticipantGroupStatus": {
+    "required": [
+      "descriptor"
+    ],
+    "type": "object",
+    "properties": {
+      "descriptor": {
+        "$ref": "#/components/schemas/SerialDescriptor"
+      }
+    }
+  },
+  "StopParticipantGroup": {
+    "required": [
+      "apiVersion",
+      "groupId",
+      "responseSerializer",
+      "studyId"
+    ],
+    "type": "object",
+    "properties": {
+      "studyId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "groupId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "apiVersion": {
+        "$ref": "#/components/schemas/ApiVersion"
+      },
+      "responseSerializer": {
+        "$ref": "#/components/schemas/KSerializerParticipantGroupStatus"
+      }
+    }
+  },
+  "AccountIdentity": {
+    "type": "object"
+  },
+  "Participant": {
+    "required": [
+      "accountIdentity",
+      "id"
+    ],
+    "type": "object",
+    "properties": {
+      "accountIdentity": {
+        "$ref": "#/components/schemas/AccountIdentity"
+      },
+      "id": {
+        "$ref": "#/components/schemas/UUID"
+      }
+    }
+  },
+  "Deployed": {
+    "required": [
+      "canBeDeployed",
+      "canObtainDeviceDeployment",
+      "device"
+    ],
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/DeviceDeploymentStatus"
+      }
+    ]
+  },
+  "DeployingDevices": {
+    "required": [
+      "createdOn",
+      "deviceStatusList",
+      "participantStatusList",
+      "remainingDevicesReadyToDeploy",
+      "remainingDevicesToRegister",
+      "studyDeploymentId"
+    ],
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/StudyDeploymentStatus"
+      }
+    ]
+  },
+  "DeviceDeploymentStatus": {
+    "required": [
+      "canBeDeployed",
+      "canObtainDeviceDeployment",
+      "device"
+    ],
+    "type": "object",
+    "properties": {
+      "canObtainDeviceDeployment": {
+        "type": "boolean"
+      },
+      "canBeDeployed": {
+        "type": "boolean"
+      },
+      "device": {
+        "$ref": "#/components/schemas/DeviceConfigurationObjectObject"
+      }
+    }
+  },
+  "InDeployment": {
+    "required": [
+      "id",
+      "invitedOn",
+      "participants",
+      "studyDeploymentStatus"
+    ],
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/ParticipantGroupStatus"
+      },
+      {
+        "type": "object",
+        "properties": {
+          "studyDeploymentStatus": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DeployingDevices"
+              },
+              {
+                "$ref": "#/components/schemas/Invited"
+              },
+              {
+                "$ref": "#/components/schemas/Running"
+              },
+              {
+                "$ref": "#/components/schemas/Stopped"
+              }
+            ]
+          },
+          "invitedOn": {
+            "$ref": "#/components/schemas/Instant"
+          }
+        }
+      },
+      {
+        "$ref": "#/components/schemas/Claim"
+      },
+      {
+        "type": "object",
+        "properties": {
+          "deploymentId": {
+            "$ref": "#/components/schemas/UUID"
+          },
+          "value": {
+            "type": "string"
+          }
+        }
+      }
+    ]
+  },
+  "Invited": {
+    "required": [
+      "createdOn",
+      "deviceStatusList",
+      "participantStatusList",
+      "remainingDevicesReadyToDeploy",
+      "remainingDevicesToRegister",
+      "studyDeploymentId"
+    ],
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/StudyDeploymentStatus"
+      }
+    ]
+  },
+  "NeedsRedeployment": {
+    "required": [
+      "canBeDeployed",
+      "canObtainDeviceDeployment",
+      "device",
+      "isReadyForDeployment",
+      "remainingDevicesToRegisterBeforeDeployment",
+      "remainingDevicesToRegisterToObtainDeployment"
+    ],
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/NotDeployed"
+      }
+    ]
+  },
+  "NotDeployed": {
+    "required": [
+      "canBeDeployed",
+      "canObtainDeviceDeployment",
+      "device",
+      "isReadyForDeployment",
+      "remainingDevicesToRegisterBeforeDeployment",
+      "remainingDevicesToRegisterToObtainDeployment"
+    ],
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/DeviceDeploymentStatus"
+      },
+      {
+        "type": "object",
+        "properties": {
+          "isReadyForDeployment": {
+            "type": "boolean"
+          },
+          "remainingDevicesToRegisterToObtainDeployment": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "remainingDevicesToRegisterBeforeDeployment": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    ]
+  },
+  "ParticipantGroupStatus": {
+    "required": [
+      "id",
+      "participants"
+    ],
+    "type": "object",
+    "properties": {
+      "id": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "participants": {
+        "uniqueItems": true,
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Participant"
+        }
+      }
+    }
+  },
+  "ParticipantStatus": {
+    "required": [
+      "assignedParticipantRoles",
+      "assignedPrimaryDeviceRoleNames",
+      "participantId"
+    ],
+    "type": "object",
+    "properties": {
+      "participantId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "assignedParticipantRoles": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/All"
+          },
+          {
+            "$ref": "#/components/schemas/Roles"
+          }
+        ]
+      },
+      "assignedPrimaryDeviceRoleNames": {
+        "uniqueItems": true,
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "Registered": {
+    "required": [
+      "canBeDeployed",
+      "canObtainDeviceDeployment",
+      "device",
+      "isReadyForDeployment",
+      "remainingDevicesToRegisterBeforeDeployment",
+      "remainingDevicesToRegisterToObtainDeployment"
+    ],
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/NotDeployed"
+      }
+    ]
+  },
+  "Running": {
+    "required": [
+      "createdOn",
+      "deviceStatusList",
+      "participantStatusList",
+      "remainingDevicesReadyToDeploy",
+      "remainingDevicesToRegister",
+      "startedOn",
+      "studyDeploymentId"
+    ],
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/StudyDeploymentStatus"
+      }
+    ]
+  },
+  "Stopped": {
+    "required": [
+      "createdOn",
+      "deviceStatusList",
+      "participantStatusList",
+      "remainingDevicesReadyToDeploy",
+      "remainingDevicesToRegister",
+      "stoppedOn",
+      "studyDeploymentId"
+    ],
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/StudyDeploymentStatus"
+      },
+      {
+        "type": "object",
+        "properties": {
+          "stoppedOn": {
+            "$ref": "#/components/schemas/Instant"
+          }
+        }
+      }
+    ]
+  },
+  "StudyDeploymentStatus": {
+    "required": [
+      "createdOn",
+      "deviceStatusList",
+      "participantStatusList",
+      "remainingDevicesReadyToDeploy",
+      "remainingDevicesToRegister",
+      "studyDeploymentId"
+    ],
+    "type": "object",
+    "properties": {
+      "remainingDevicesToRegister": {
+        "uniqueItems": true,
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/DeviceConfigurationObjectObject"
+        }
+      },
+      "remainingDevicesReadyToDeploy": {
+        "uniqueItems": true,
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/PrimaryDeviceConfigurationObjectObject"
+        }
+      },
+      "studyDeploymentId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "deviceStatusList": {
+        "type": "array",
+        "items": {
+          "oneOf": [
+            {
+              "$ref": "#/components/schemas/Deployed"
+            },
+            {
+              "$ref": "#/components/schemas/NotDeployed"
+            },
+            {
+              "$ref": "#/components/schemas/NeedsRedeployment"
+            },
+            {
+              "$ref": "#/components/schemas/Registered"
+            },
+            {
+              "$ref": "#/components/schemas/Unregistered"
+            }
+          ]
+        }
+      },
+      "participantStatusList": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ParticipantStatus"
+        }
+      },
+      "createdOn": {
+        "$ref": "#/components/schemas/Instant"
+      },
+      "startedOn": {
+        "$ref": "#/components/schemas/Instant"
+      }
+    }
+  },
+  "Unregistered": {
+    "required": [
+      "canBeDeployed",
+      "canObtainDeviceDeployment",
+      "device",
+      "isReadyForDeployment",
+      "remainingDevicesToRegisterBeforeDeployment",
+      "remainingDevicesToRegisterToObtainDeployment"
+    ],
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/NotDeployed"
+      }
+    ]
+  },
+  "Add": {
+    "required": [
+      "apiVersion",
+      "protocol",
+      "responseSerializer",
+      "versionTag"
+    ],
+    "type": "object",
+    "properties": {
+      "protocol": {
+        "$ref": "#/components/schemas/StudyProtocolSnapshot"
+      },
+      "versionTag": {
+        "type": "string"
+      },
+      "apiVersion": {
+        "$ref": "#/components/schemas/ApiVersion"
+      },
+      "responseSerializer": {
+        "$ref": "#/components/schemas/KSerializerUnit"
+      }
+    }
+  },
+  "KSerializerUnit": {
+    "required": [
+      "descriptor"
+    ],
+    "type": "object",
+    "properties": {
+      "descriptor": {
+        "$ref": "#/components/schemas/SerialDescriptor"
+      }
+    }
+  },
+  "AddVersion": {
+    "required": [
+      "apiVersion",
+      "protocol",
+      "responseSerializer",
+      "versionTag"
+    ],
+    "type": "object",
+    "properties": {
+      "protocol": {
+        "$ref": "#/components/schemas/StudyProtocolSnapshot"
+      },
+      "versionTag": {
+        "type": "string"
+      },
+      "apiVersion": {
+        "$ref": "#/components/schemas/ApiVersion"
+      },
+      "responseSerializer": {
+        "$ref": "#/components/schemas/KSerializerUnit"
+      }
+    }
+  },
+  "KSerializerStudyProtocolSnapshot": {
+    "required": [
+      "descriptor"
+    ],
+    "type": "object",
+    "properties": {
+      "descriptor": {
+        "$ref": "#/components/schemas/SerialDescriptor"
+      }
+    }
+  },
+  "UpdateParticipantDataConfiguration": {
+    "required": [
+      "apiVersion",
+      "expectedParticipantData",
+      "protocolId",
+      "responseSerializer",
+      "versionTag"
+    ],
+    "type": "object",
+    "properties": {
+      "protocolId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "versionTag": {
+        "type": "string"
+      },
+      "expectedParticipantData": {
+        "uniqueItems": true,
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ExpectedParticipantData"
+        }
+      },
+      "apiVersion": {
+        "$ref": "#/components/schemas/ApiVersion"
+      },
+      "responseSerializer": {
+        "$ref": "#/components/schemas/KSerializerStudyProtocolSnapshot"
+      }
+    }
+  },
+  "GetBy": {
+    "required": [
+      "apiVersion",
+      "protocolId",
+      "responseSerializer"
+    ],
+    "type": "object",
+    "properties": {
+      "protocolId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "versionTag": {
+        "type": "string"
+      },
+      "apiVersion": {
+        "$ref": "#/components/schemas/ApiVersion"
+      },
+      "responseSerializer": {
+        "$ref": "#/components/schemas/KSerializerStudyProtocolSnapshot"
+      }
+    }
+  },
+  "GetAllForOwner": {
+    "required": [
+      "apiVersion",
+      "ownerId",
+      "responseSerializer"
+    ],
+    "type": "object",
+    "properties": {
+      "ownerId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "apiVersion": {
+        "$ref": "#/components/schemas/ApiVersion"
+      },
+      "responseSerializer": {
+        "$ref": "#/components/schemas/KSerializerListStudyProtocolSnapshot"
+      }
+    }
+  },
+  "KSerializerListStudyProtocolSnapshot": {
+    "required": [
+      "descriptor"
+    ],
+    "type": "object",
+    "properties": {
+      "descriptor": {
+        "$ref": "#/components/schemas/SerialDescriptor"
+      }
+    }
+  },
+  "GetVersionHistoryFor": {
+    "required": [
+      "apiVersion",
+      "protocolId",
+      "responseSerializer"
+    ],
+    "type": "object",
+    "properties": {
+      "protocolId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "apiVersion": {
+        "$ref": "#/components/schemas/ApiVersion"
+      },
+      "responseSerializer": {
+        "$ref": "#/components/schemas/KSerializerListProtocolVersion"
+      }
+    }
+  },
+  "KSerializerListProtocolVersion": {
+    "required": [
+      "descriptor"
+    ],
+    "type": "object",
+    "properties": {
+      "descriptor": {
+        "$ref": "#/components/schemas/SerialDescriptor"
+      }
+    }
+  },
+  "Unit": {
+    "type": "object"
+  },
+  "ProtocolVersion": {
+    "required": [
+      "date",
+      "tag"
+    ],
+    "type": "object",
+    "properties": {
+      "tag": {
+        "type": "string"
+      },
+      "date": {
+        "$ref": "#/components/schemas/Instant"
+      }
+    }
+  },
+  "CreateCustomProtocol": {
+    "required": [
+      "apiVersion",
+      "customProtocol",
+      "name",
+      "ownerId",
+      "responseSerializer"
+    ],
+    "type": "object",
+    "properties": {
+      "ownerId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "name": {
+        "type": "string"
+      },
+      "customProtocol": {
+        "type": "string"
+      },
+      "description": {
+        "type": "string"
+      },
+      "apiVersion": {
+        "$ref": "#/components/schemas/ApiVersion"
+      },
+      "responseSerializer": {
+        "$ref": "#/components/schemas/KSerializerStudyProtocolSnapshot"
+      }
+    }
+  },
+  "GetActiveParticipationInvitations": {
+    "required": [
+      "accountId",
+      "apiVersion",
+      "responseSerializer"
+    ],
+    "type": "object",
+    "properties": {
+      "accountId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "apiVersion": {
+        "$ref": "#/components/schemas/ApiVersion"
+      },
+      "responseSerializer": {
+        "$ref": "#/components/schemas/KSerializerSetActiveParticipationInvitation"
+      }
+    }
+  },
+  "KSerializerSetActiveParticipationInvitation": {
+    "required": [
+      "descriptor"
+    ],
+    "type": "object",
+    "properties": {
+      "descriptor": {
+        "$ref": "#/components/schemas/SerialDescriptor"
+      }
+    }
+  },
+  "GetParticipantData": {
+    "required": [
+      "apiVersion",
+      "responseSerializer",
+      "studyDeploymentId"
+    ],
+    "type": "object",
+    "properties": {
+      "studyDeploymentId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "apiVersion": {
+        "$ref": "#/components/schemas/ApiVersion"
+      },
+      "responseSerializer": {
+        "$ref": "#/components/schemas/KSerializerParticipantData"
+      }
+    }
+  },
+  "KSerializerParticipantData": {
+    "required": [
+      "descriptor"
+    ],
+    "type": "object",
+    "properties": {
+      "descriptor": {
+        "$ref": "#/components/schemas/SerialDescriptor"
+      }
+    }
+  },
+  "GetParticipantDataList": {
+    "required": [
+      "apiVersion",
+      "responseSerializer",
+      "studyDeploymentIds"
+    ],
+    "type": "object",
+    "properties": {
+      "studyDeploymentIds": {
+        "uniqueItems": true,
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/UUID"
+        }
+      },
+      "apiVersion": {
+        "$ref": "#/components/schemas/ApiVersion"
+      },
+      "responseSerializer": {
+        "$ref": "#/components/schemas/KSerializerListParticipantData"
+      }
+    }
+  },
+  "KSerializerListParticipantData": {
+    "required": [
+      "descriptor"
+    ],
+    "type": "object",
+    "properties": {
+      "descriptor": {
+        "$ref": "#/components/schemas/SerialDescriptor"
+      }
+    }
+  },
+  "Data": {
+    "type": "object"
+  },
+  "SetParticipantData": {
+    "required": [
+      "apiVersion",
+      "data",
+      "responseSerializer",
+      "studyDeploymentId"
+    ],
+    "type": "object",
+    "properties": {
+      "studyDeploymentId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "data": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "inputByParticipantRole": {
+        "type": "string"
+      },
+      "apiVersion": {
+        "$ref": "#/components/schemas/ApiVersion"
+      },
+      "responseSerializer": {
+        "$ref": "#/components/schemas/KSerializerParticipantData"
+      }
+    }
+  },
+  "ActiveParticipationInvitation": {
+    "required": [
+      "assignedDevices",
+      "invitation",
+      "participation"
+    ],
+    "type": "object",
+    "properties": {
+      "participation": {
+        "$ref": "#/components/schemas/Participation"
+      },
+      "invitation": {
+        "$ref": "#/components/schemas/StudyInvitation"
+      },
+      "assignedDevices": {
+        "uniqueItems": true,
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/AssignedPrimaryDevice"
+        }
+      }
+    }
+  },
+  "AssignedPrimaryDevice": {
+    "required": [
+      "device"
+    ],
+    "type": "object",
+    "properties": {
+      "device": {
+        "$ref": "#/components/schemas/PrimaryDeviceConfigurationObjectObject"
+      },
+      "registration": {
+        "$ref": "#/components/schemas/DeviceRegistration"
+      }
+    }
+  },
+  "DeviceRegistration": {
+    "required": [
+      "deviceId",
+      "registrationCreatedOn"
+    ],
+    "type": "object",
+    "properties": {
+      "registrationCreatedOn": {
+        "$ref": "#/components/schemas/Instant"
+      },
+      "deviceDisplayName": {
+        "type": "string"
+      },
+      "deviceId": {
+        "type": "string"
+      }
+    }
+  },
+  "Participation": {
+    "required": [
+      "assignedRoles",
+      "participantId",
+      "studyDeploymentId"
+    ],
+    "type": "object",
+    "properties": {
+      "studyDeploymentId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "assignedRoles": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/All"
+          },
+          {
+            "$ref": "#/components/schemas/Roles"
+          }
+        ]
+      },
+      "participantId": {
+        "$ref": "#/components/schemas/UUID"
+      }
+    }
+  },
+  "ParticipantData": {
+    "required": [
+      "common",
+      "roles",
+      "studyDeploymentId"
+    ],
+    "type": "object",
+    "properties": {
+      "studyDeploymentId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "common": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "roles": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/RoleData"
+        }
+      }
+    }
+  },
+  "RoleData": {
+    "required": [
+      "data",
+      "roleName"
+    ],
+    "type": "object",
+    "properties": {
+      "roleName": {
+        "type": "string"
+      },
+      "data": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    }
+  },
+  "GenericEmailRequestDto": {
+    "required": [
+      "cc",
+      "message",
+      "recipient",
+      "subject"
+    ],
+    "type": "object",
+    "properties": {
+      "recipient": {
+        "type": "string"
+      },
+      "subject": {
+        "type": "string"
+      },
+      "message": {
+        "type": "string"
+      },
+      "cc": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "CreateDataPointRequestDto": {
+    "required": [
+      "carp_body",
+      "carp_header"
+    ],
+    "type": "object",
+    "properties": {
+      "carp_header": {
+        "$ref": "#/components/schemas/DataPointHeaderDto"
+      },
+      "carp_body": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "storage_name": {
+        "type": "string"
+      }
+    }
+  },
+  "DataPointHeaderDto": {
+    "required": [
+      "data_format",
+      "end_time",
+      "start_time",
+      "study_id",
+      "upload_time",
+      "user_id"
+    ],
+    "type": "object",
+    "properties": {
+      "study_id": {
+        "type": "string"
+      },
+      "user_id": {
+        "type": "string"
+      },
+      "data_format": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "trigger_id": {
+        "type": "string"
+      },
+      "device_role_name": {
+        "type": "string"
+      },
+      "upload_time": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "start_time": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "end_time": {
+        "type": "string",
+        "format": "date-time"
+      }
+    }
+  },
+  "DataPoint": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "deployment_id": {
+        "type": "string"
+      },
+      "carp_header": {
+        "$ref": "#/components/schemas/DataPointHeaderDto"
+      },
+      "carp_body": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "storage_name": {
+        "type": "string"
+      },
+      "created_by": {
+        "type": "string"
+      },
+      "created_at": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "updated_by": {
+        "type": "string"
+      },
+      "updated_at": {
+        "type": "string",
+        "format": "date-time"
+      }
+    }
+  },
+  "ConsentDocument": {
+    "required": [
+      "id"
+    ],
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "deployment_id": {
+        "type": "string"
+      },
+      "data": {
+        "$ref": "#/components/schemas/JsonNode"
+      },
+      "created_by": {
+        "type": "string"
+      },
+      "created_at": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "updated_by": {
+        "type": "string"
+      },
+      "updated_at": {
+        "type": "string",
+        "format": "date-time"
+      }
+    }
+  },
+  "CreateStudyDeployment": {
+    "required": [
+      "apiVersion",
+      "connectedDevicePreregistrations",
+      "id",
+      "invitations",
+      "protocol",
+      "responseSerializer"
+    ],
+    "type": "object",
+    "properties": {
+      "id": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "protocol": {
+        "$ref": "#/components/schemas/StudyProtocolSnapshot"
+      },
+      "invitations": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ParticipantInvitation"
+        }
+      },
+      "connectedDevicePreregistrations": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "apiVersion": {
+        "$ref": "#/components/schemas/ApiVersion"
+      },
+      "responseSerializer": {
+        "$ref": "#/components/schemas/KSerializerStudyDeploymentStatus"
+      }
+    }
+  },
+  "KSerializerStudyDeploymentStatus": {
+    "required": [
+      "descriptor"
+    ],
+    "type": "object",
+    "properties": {
+      "descriptor": {
+        "$ref": "#/components/schemas/SerialDescriptor"
+      }
+    }
+  },
+  "ParticipantInvitation": {
+    "required": [
+      "assignedRoles",
+      "identity",
+      "invitation",
+      "participantId"
+    ],
+    "type": "object",
+    "properties": {
+      "participantId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "assignedRoles": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/All"
+          },
+          {
+            "$ref": "#/components/schemas/Roles"
+          }
+        ]
+      },
+      "identity": {
+        "$ref": "#/components/schemas/AccountIdentity"
+      },
+      "invitation": {
+        "$ref": "#/components/schemas/StudyInvitation"
+      }
+    }
+  },
+  "KSerializerSetUUID": {
+    "required": [
+      "descriptor"
+    ],
+    "type": "object",
+    "properties": {
+      "descriptor": {
+        "$ref": "#/components/schemas/SerialDescriptor"
+      }
+    }
+  },
+  "RemoveStudyDeployments": {
+    "required": [
+      "apiVersion",
+      "responseSerializer",
+      "studyDeploymentIds"
+    ],
+    "type": "object",
+    "properties": {
+      "studyDeploymentIds": {
+        "uniqueItems": true,
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/UUID"
+        }
+      },
+      "apiVersion": {
+        "$ref": "#/components/schemas/ApiVersion"
+      },
+      "responseSerializer": {
+        "$ref": "#/components/schemas/KSerializerSetUUID"
+      }
+    }
+  },
+  "GetStudyDeploymentStatus": {
+    "required": [
+      "apiVersion",
+      "responseSerializer",
+      "studyDeploymentId"
+    ],
+    "type": "object",
+    "properties": {
+      "studyDeploymentId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "apiVersion": {
+        "$ref": "#/components/schemas/ApiVersion"
+      },
+      "responseSerializer": {
+        "$ref": "#/components/schemas/KSerializerStudyDeploymentStatus"
+      }
+    }
+  },
+  "GetStudyDeploymentStatusList": {
+    "required": [
+      "apiVersion",
+      "responseSerializer",
+      "studyDeploymentIds"
+    ],
+    "type": "object",
+    "properties": {
+      "studyDeploymentIds": {
+        "uniqueItems": true,
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/UUID"
+        }
+      },
+      "apiVersion": {
+        "$ref": "#/components/schemas/ApiVersion"
+      },
+      "responseSerializer": {
+        "$ref": "#/components/schemas/KSerializerListStudyDeploymentStatus"
+      }
+    }
+  },
+  "KSerializerListStudyDeploymentStatus": {
+    "required": [
+      "descriptor"
+    ],
+    "type": "object",
+    "properties": {
+      "descriptor": {
+        "$ref": "#/components/schemas/SerialDescriptor"
+      }
+    }
+  },
+  "RegisterDevice": {
+    "required": [
+      "apiVersion",
+      "deviceRoleName",
+      "registration",
+      "responseSerializer",
+      "studyDeploymentId"
+    ],
+    "type": "object",
+    "properties": {
+      "studyDeploymentId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "deviceRoleName": {
+        "type": "string"
+      },
+      "registration": {
+        "$ref": "#/components/schemas/DeviceRegistration"
+      },
+      "apiVersion": {
+        "$ref": "#/components/schemas/ApiVersion"
+      },
+      "responseSerializer": {
+        "$ref": "#/components/schemas/KSerializerStudyDeploymentStatus"
+      }
+    }
+  },
+  "UnregisterDevice": {
+    "required": [
+      "apiVersion",
+      "deviceRoleName",
+      "responseSerializer",
+      "studyDeploymentId"
+    ],
+    "type": "object",
+    "properties": {
+      "studyDeploymentId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "deviceRoleName": {
+        "type": "string"
+      },
+      "apiVersion": {
+        "$ref": "#/components/schemas/ApiVersion"
+      },
+      "responseSerializer": {
+        "$ref": "#/components/schemas/KSerializerStudyDeploymentStatus"
+      }
+    }
+  },
+  "GetDeviceDeploymentFor": {
+    "required": [
+      "apiVersion",
+      "primaryDeviceRoleName",
+      "responseSerializer",
+      "studyDeploymentId"
+    ],
+    "type": "object",
+    "properties": {
+      "studyDeploymentId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "primaryDeviceRoleName": {
+        "type": "string"
+      },
+      "apiVersion": {
+        "$ref": "#/components/schemas/ApiVersion"
+      },
+      "responseSerializer": {
+        "$ref": "#/components/schemas/KSerializerPrimaryDeviceDeployment"
+      }
+    }
+  },
+  "KSerializerPrimaryDeviceDeployment": {
+    "required": [
+      "descriptor"
+    ],
+    "type": "object",
+    "properties": {
+      "descriptor": {
+        "$ref": "#/components/schemas/SerialDescriptor"
+      }
+    }
+  },
+  "DeviceDeployed": {
+    "required": [
+      "apiVersion",
+      "deviceDeploymentLastUpdatedOn",
+      "primaryDeviceRoleName",
+      "responseSerializer",
+      "studyDeploymentId"
+    ],
+    "type": "object",
+    "properties": {
+      "studyDeploymentId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "primaryDeviceRoleName": {
+        "type": "string"
+      },
+      "deviceDeploymentLastUpdatedOn": {
+        "$ref": "#/components/schemas/Instant"
+      },
+      "apiVersion": {
+        "$ref": "#/components/schemas/ApiVersion"
+      },
+      "responseSerializer": {
+        "$ref": "#/components/schemas/KSerializerStudyDeploymentStatus"
+      }
+    }
+  },
+  "Stop": {
+    "required": [
+      "apiVersion",
+      "responseSerializer",
+      "studyDeploymentId"
+    ],
+    "type": "object",
+    "properties": {
+      "studyDeploymentId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "apiVersion": {
+        "$ref": "#/components/schemas/ApiVersion"
+      },
+      "responseSerializer": {
+        "$ref": "#/components/schemas/KSerializerStudyDeploymentStatus"
+      }
+    }
+  },
+  "PrimaryDeviceDeployment": {
+    "required": [
+      "connectedDeviceRegistrations",
+      "connectedDevices",
+      "deviceConfiguration",
+      "expectedParticipantData",
+      "lastUpdatedOn",
+      "registration",
+      "runtimeDeviceInfo",
+      "taskControls",
+      "tasks",
+      "triggers"
+    ],
+    "type": "object",
+    "properties": {
+      "deviceConfiguration": {
+        "$ref": "#/components/schemas/PrimaryDeviceConfigurationObjectObject"
+      },
+      "registration": {
+        "$ref": "#/components/schemas/DeviceRegistration"
+      },
+      "connectedDevices": {
+        "uniqueItems": true,
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/DeviceConfigurationObjectObject"
+        }
+      },
+      "connectedDeviceRegistrations": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "tasks": {
+        "uniqueItems": true,
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/TaskConfigurationObject"
+        }
+      },
+      "triggers": {
+        "type": "object",
+          "additionalProperties": true
+      },
+      "taskControls": {
+        "uniqueItems": true,
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/TaskControl"
+        }
+      },
+      "expectedParticipantData": {
+        "uniqueItems": true,
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ExpectedParticipantData"
+        }
+      },
+      "applicationData": {
+        "type": "string"
+      },
+      "lastUpdatedOn": {
+        "$ref": "#/components/schemas/Instant"
+      },
+      "runtimeDeviceInfo": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/RuntimeDeviceInfo"
+        }
+      }
+    }
+  },
+  "RuntimeDeviceInfo": {
+    "required": [
+      "configuration",
+      "defaultSamplingConfiguration",
+      "isConnectedDevice",
+      "tasks"
+    ],
+    "type": "object",
+    "properties": {
+      "configuration": {
+        "$ref": "#/components/schemas/DeviceConfigurationObjectObject"
+      },
+      "isConnectedDevice": {
+        "type": "boolean"
+      },
+      "registration": {
+        "$ref": "#/components/schemas/DeviceRegistration"
+      },
+      "defaultSamplingConfiguration": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "tasks": {
+        "uniqueItems": true,
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/TaskConfigurationObject"
+        }
+      }
+    }
+  },
+  "DeploymentStatisticsRequestDto": {
+    "required": [
+      "deploymentIds"
+    ],
+    "type": "object",
+    "properties": {
+      "deploymentIds": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "DeploymentStatisticsResponseDto": {
+    "required": [
+      "statistics"
+    ],
+    "type": "object",
+    "properties": {
+      "statistics": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    }
+  },
+  "StatisticsDto": {
+    "required": [
+      "count",
+      "uploads"
+    ],
+    "type": "object",
+    "properties": {
+      "count": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "uploads": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    }
+  },
+  "DataStreamId": {
+    "required": [
+      "dataType",
+      "deviceRoleName",
+      "studyDeploymentId"
+    ],
+    "type": "object",
+    "properties": {
+      "studyDeploymentId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "deviceRoleName": {
+        "type": "string"
+      },
+      "dataType": {
+        "$ref": "#/components/schemas/NamespacedId"
+      }
+    }
+  },
+  "DataStreamsConfiguration": {
+    "required": [
+      "expectedDataStreamIds",
+      "expectedDataStreams",
+      "studyDeploymentId"
+    ],
+    "type": "object",
+    "properties": {
+      "studyDeploymentId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "expectedDataStreams": {
+        "uniqueItems": true,
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ExpectedDataStream"
+        }
+      },
+      "expectedDataStreamIds": {
+        "uniqueItems": true,
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/DataStreamId"
+        }
+      }
+    }
+  },
+  "ExpectedDataStream": {
+    "required": [
+      "dataType",
+      "deviceRoleName"
+    ],
+    "type": "object",
+    "properties": {
+      "deviceRoleName": {
+        "type": "string"
+      },
+      "dataType": {
+        "$ref": "#/components/schemas/NamespacedId"
+      }
+    }
+  },
+  "OpenDataStreams": {
+    "required": [
+      "apiVersion",
+      "configuration",
+      "responseSerializer"
+    ],
+    "type": "object",
+    "properties": {
+      "configuration": {
+        "$ref": "#/components/schemas/DataStreamsConfiguration"
+      },
+      "apiVersion": {
+        "$ref": "#/components/schemas/ApiVersion"
+      },
+      "responseSerializer": {
+        "$ref": "#/components/schemas/KSerializerUnit"
+      }
+    }
+  },
+  "AppendToDataStreams": {
+    "required": [
+      "apiVersion",
+      "batch",
+      "responseSerializer",
+      "studyDeploymentId"
+    ],
+    "type": "object",
+    "properties": {
+      "studyDeploymentId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "batch": {
+        "$ref": "#/components/schemas/DataStreamBatch"
+      },
+      "apiVersion": {
+        "$ref": "#/components/schemas/ApiVersion"
+      },
+      "responseSerializer": {
+        "$ref": "#/components/schemas/KSerializerUnit"
+      }
+    }
+  },
+  "DataStreamBatch": {
+    "required": [
+      "isEmpty",
+      "sequences"
+    ],
+    "type": "object",
+    "properties": {
+      "isEmpty": {
+        "type": "boolean"
+      },
+      "sequences": {
+        "$ref": "#/components/schemas/SequenceDataStreamSequenceObject"
+      }
+    }
+  },
+  "SequenceDataStreamSequenceObject": {
+    "type": "object"
+  },
+  "DataStreamBatchSerializer": {
+    "required": [
+      "descriptor"
+    ],
+    "type": "object",
+    "properties": {
+      "descriptor": {
+        "$ref": "#/components/schemas/SerialDescriptor"
+      }
+    }
+  },
+  "GetDataStream": {
+    "required": [
+      "apiVersion",
+      "dataStream",
+      "fromSequenceId",
+      "responseSerializer"
+    ],
+    "type": "object",
+    "properties": {
+      "dataStream": {
+        "$ref": "#/components/schemas/DataStreamId"
+      },
+      "fromSequenceId": {
+        "type": "integer",
+        "format": "int64"
+      },
+      "toSequenceIdInclusive": {
+        "type": "integer",
+        "format": "int64"
+      },
+      "apiVersion": {
+        "$ref": "#/components/schemas/ApiVersion"
+      },
+      "responseSerializer": {
+        "$ref": "#/components/schemas/DataStreamBatchSerializer"
+      }
+    }
+  },
+  "CloseDataStreams": {
+    "required": [
+      "apiVersion",
+      "responseSerializer",
+      "studyDeploymentIds"
+    ],
+    "type": "object",
+    "properties": {
+      "studyDeploymentIds": {
+        "uniqueItems": true,
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/UUID"
+        }
+      },
+      "apiVersion": {
+        "$ref": "#/components/schemas/ApiVersion"
+      },
+      "responseSerializer": {
+        "$ref": "#/components/schemas/KSerializerUnit"
+      }
+    }
+  },
+  "RemoveDataStreams": {
+    "required": [
+      "apiVersion",
+      "responseSerializer",
+      "studyDeploymentIds"
+    ],
+    "type": "object",
+    "properties": {
+      "studyDeploymentIds": {
+        "uniqueItems": true,
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/UUID"
+        }
+      },
+      "apiVersion": {
+        "$ref": "#/components/schemas/ApiVersion"
+      },
+      "responseSerializer": {
+        "$ref": "#/components/schemas/KSerializerSetUUID"
+      }
+    }
+  },
+  "AccountRequest": {
+    "required": [
+      "emailAddress",
+      "role"
+    ],
+    "type": "object",
+    "properties": {
+      "emailAddress": {
+        "type": "string"
+      },
+      "role": {
+        "type": "string",
+        "enum": [
+          "UNKNOWN",
+          "PARTICIPANT",
+          "RESEARCHER",
+          "CARP_ADMIN",
+          "SYSTEM_ADMIN"
+        ]
+      }
+    }
+  },
+  "Account": {
+    "required": [
+      "identity"
+    ],
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string"
+      },
+      "username": {
+        "type": "string"
+      },
+      "firstName": {
+        "type": "string"
+      },
+      "lastName": {
+        "type": "string"
+      },
+      "email": {
+        "type": "string"
+      },
+      "role": {
+        "type": "string",
+        "enum": [
+          "UNKNOWN",
+          "PARTICIPANT",
+          "RESEARCHER",
+          "CARP_ADMIN",
+          "SYSTEM_ADMIN"
+        ]
+      },
+      "carpClaims": {
+        "uniqueItems": true,
+        "type": "array",
+        "items": {
+          "oneOf": [
+            {
+              "$ref": "#/components/schemas/CollectionOwner"
+            },
+            {
+              "$ref": "#/components/schemas/FileOwner"
+            },
+            {
+              "$ref": "#/components/schemas/InDeployment"
+            },
+            {
+              "$ref": "#/components/schemas/ManageStudy"
+            },
+            {
+              "$ref": "#/components/schemas/ProtocolOwner"
+            },
+            {
+              "$ref": "#/components/schemas/VirtualClaim"
+            },
+            {
+              "$ref": "#/components/schemas/ManageDeployment"
+            }
+          ]
+        }
+      },
+      "fullName": {
+        "type": "string"
+      },
+      "identity": {
+        "$ref": "#/components/schemas/AccountIdentity"
+      }
+    }
+  },
+  "Claim": {
+    "required": [
+      "value"
+    ],
+    "type": "object",
+    "properties": {
+      "value": {
+        "type": "object"
+      }
+    }
+  },
+  "CollectionOwner": {
+    "required": [
+      "collectionId",
+      "value"
+    ],
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/Claim"
+      },
+      {
+        "type": "object",
+        "properties": {
+          "collectionId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "value": {
+            "type": "string"
+          }
+        }
+      }
+    ]
+  },
+  "FileOwner": {
+    "required": [
+      "fileId",
+      "value"
+    ],
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/Claim"
+      },
+      {
+        "type": "object",
+        "properties": {
+          "fileId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "value": {
+            "type": "string"
+          }
+        }
+      }
+    ]
+  },
+  "ManageDeployment": {
+    "required": [
+      "deploymentId"
+    ],
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/VirtualClaim"
+      },
+      {
+        "type": "object",
+        "properties": {
+          "deploymentId": {
+            "$ref": "#/components/schemas/UUID"
+          }
+        }
+      }
+    ]
+  },
+  "ManageStudy": {
+    "required": [
+      "studyId",
+      "value"
+    ],
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/Claim"
+      },
+      {
+        "type": "object",
+        "properties": {
+          "studyId": {
+            "$ref": "#/components/schemas/UUID"
+          },
+          "value": {
+            "type": "string"
+          }
+        }
+      }
+    ]
+  },
+  "ProtocolOwner": {
+    "required": [
+      "protocolId",
+      "value"
+    ],
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/Claim"
+      },
+      {
+        "type": "object",
+        "properties": {
+          "protocolId": {
+            "$ref": "#/components/schemas/UUID"
+          },
+          "value": {
+            "type": "string"
+          }
+        }
+      }
+    ]
+  },
+  "VirtualClaim": {
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/Claim"
+      }
+    ]
+  },
+  "InactiveDeploymentInfo": {
+    "required": [
+      "deploymentId"
+    ],
+    "type": "object",
+    "properties": {
+      "deploymentId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "dateOfLastDataUpload": {
+        "$ref": "#/components/schemas/Instant"
+      }
+    }
+  },
+  "StudyOverview": {
+    "required": [
+      "canDeployToParticipants",
+      "canSetInvitation",
+      "canSetStudyProtocol",
+      "createdOn",
+      "name",
+      "studyId"
+    ],
+    "type": "object",
+    "properties": {
+      "studyId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "name": {
+        "type": "string"
+      },
+      "createdOn": {
+        "$ref": "#/components/schemas/Instant"
+      },
+      "studyProtocolId": {
+        "$ref": "#/components/schemas/UUID"
+      },
+      "canSetInvitation": {
+        "type": "boolean"
+      },
+      "canSetStudyProtocol": {
+        "type": "boolean"
+      },
+      "canDeployToParticipants": {
+        "type": "boolean"
+      },
+      "description": {
+        "type": "string"
+      },
+      "createdBy": {
+        "type": "string"
+      }
+    }
+  },
+  "ProtocolOverview": {
+    "required": [
+      "snapshot",
+      "versionTag"
+    ],
+    "type": "object",
+    "properties": {
+      "ownerName": {
+        "type": "string"
+      },
+      "firstVersionCreatedDate": {
+        "$ref": "#/components/schemas/Instant"
+      },
+      "lastVersionCreatedDate": {
+        "$ref": "#/components/schemas/Instant"
+      },
+      "versionTag": {
+        "type": "string"
+      },
+      "snapshot": {
+        "$ref": "#/components/schemas/StudyProtocolSnapshot"
+      }
+    }
+  }
+}

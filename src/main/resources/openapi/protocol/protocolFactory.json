@@ -2,129 +2,100 @@
   "tags": [
     "protocol-controller"
   ],
-  "description": "\n For more information, refer to the documentation of [CARP Core](https://github.com/cph-cachet/carp.core-kotlin/blob/develop/docs/carp-protocols.md#protocolfactoryservice)",
+  "description": "\n        The request body should be a serialized ProtocolFactoryServiceRequest (string).\n        The response body will also be serialized (string). The request-response mappings are as follows:\n        \n        - CreateCustomProtocol -\u003E Unit\n    ",
+  "operationId": "protocolFactory",
+  "requestBody": {
+    "content": {
+      "application/json": {
+        "schema": {
+          "oneOf": [
+            {
+              "$ref": "#/components/schemas/CreateCustomProtocol"
+            }
+          ]
+        }
+      }
+    },
+    "required": true
+  },
   "responses": {
-    "200": {
-      "description": "CreateCustomProtocol",
-      "headers": {
-        "Cache-Control": {
+    "400": {
+      "description": "Bad Request",
+      "content": {
+        "*/*": {
           "schema": {
-            "type": "string",
-            "example": "no-cache, no-store, max-age=0, must-revalidate"
-          }
-        },
-        "Connection": {
-          "schema": {
-            "type": "string",
-            "example": "keep-alive"
-          }
-        },
-        "Date": {
-          "schema": {
-            "type": "string",
-            "example": "Thu, 14 Jan 2021 10:39:17 GMT"
-          }
-        },
-        "Expires": {
-          "schema": {
-            "type": "string",
-            "example": "0"
-          }
-        },
-        "Keep-Alive": {
-          "schema": {
-            "type": "string",
-            "example": "timeout=60"
-          }
-        },
-        "Pragma": {
-          "schema": {
-            "type": "string",
-            "example": "no-cache"
-          }
-        },
-        "Transfer-Encoding": {
-          "schema": {
-            "type": "string",
-            "example": "chunked"
-          }
-        },
-        "X-Content-Type-Options": {
-          "schema": {
-            "type": "string",
-            "example": "nosniff"
-          }
-        },
-        "X-Frame-Options": {
-          "schema": {
-            "type": "string",
-            "example": "DENY"
-          }
-        },
-        "X-XSS-Protection": {
-          "schema": {
-            "type": "string",
-            "example": "1; mode=block"
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/CarpErrorResponse"
+              },
+              {
+                "type": "object"
+              }
+            ]
           }
         }
-      },
+      }
+    },
+    "403": {
+      "description": "Forbidden",
       "content": {
-        "application/json": {
+        "*/*": {
           "schema": {
-            "type": "object",
-            "properties": {
-              "__type": {
-                "type": "string",
-                "example": "dk.cachet.carp.studies.application.StudyStatus.Configuring"
-              },
-              "canDeployToParticipants": {
-                "type": "boolean",
-                "example": false
-              },
-              "canGoLive": {
-                "type": "boolean",
-                "example": false
-              },
-              "canSetInvitation": {
-                "type": "boolean",
-                "example": true
-              },
-              "canSetStudyProtocol": {
-                "type": "boolean",
-                "example": true
-              },
-              "createdOn": {
-                "type": "string",
-                "example": "2022-01-18T11:03:20Z"
-              },
-              "name": {
-                "type": "string",
-                "example": "Copenhagen transportation study"
-              },
-              "studyId": {
-                "type": "string",
-                "example": "791fd191-4279-482f-9ef5-5b4508efd959"
-              },
-              "studyProtocolId": {
-                "nullable": true,
-                "example": null
+            "$ref": "#/components/schemas/CarpErrorResponse"
+          }
+        }
+      }
+    },
+    "405": {
+      "description": "Method Not Allowed",
+      "content": {
+        "*/*": {
+          "schema": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "401": {
+      "description": "Unauthorized",
+      "content": {
+        "*/*": {
+          "schema": {
+            "$ref": "#/components/schemas/CarpErrorResponse"
+          }
+        }
+      }
+    },
+    "404": {
+      "description": "Not Found",
+      "content": {
+        "*/*": {
+          "schema": {
+            "$ref": "#/components/schemas/CarpErrorResponse"
+          }
+        }
+      }
+    },
+    "409": {
+      "description": "Conflict",
+      "content": {
+        "*/*": {
+          "schema": {
+            "$ref": "#/components/schemas/CarpErrorResponse"
+          }
+        }
+      }
+    },
+    "200": {
+      "description": "OK",
+      "content": {
+        "*/*": {
+          "schema": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Unit"
               }
-            }
-          },
-          "examples": {
-            "CreateCustomProtocol": {
-              "value": {
-                "__type": "dk.cachet.carp.studies.application.StudyStatus.Configuring",
-                "canDeployToParticipants": false,
-                "canGoLive": false,
-                "canSetInvitation": true,
-                "canSetStudyProtocol": true,
-                "createdOn": "2022-01-18T11:03:20Z",
-                "name": "Copenhagen transportation study",
-                "studyId": "791fd191-4279-482f-9ef5-5b4508efd959",
-                "studyProtocolId": null
-              }
-            }
+            ]
           }
         }
       }
