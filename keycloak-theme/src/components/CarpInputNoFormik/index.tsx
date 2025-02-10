@@ -1,8 +1,8 @@
-import { InputLabelProps } from '@mui/material';
-import * as React from 'react';
+import { InputLabelProps } from "@mui/material";
+import * as React from "react";
 
-import { useState } from 'react';
-import StyledInput from './styles';
+import { useState } from "react";
+import StyledInput from "./styles";
 
 interface FormikConfigProps {
   [key: string]: string;
@@ -17,7 +17,7 @@ interface Props {
   placeholder?: string;
   autoComplete?: string;
   rows?: number;
-  variant?: 'standard' | 'filled' | 'outlined';
+  variant?: "standard" | "filled" | "outlined";
   inputLabelProps?: InputLabelProps;
   disabled?: boolean;
   required?: boolean;
@@ -44,12 +44,12 @@ const CarpInputNoFormik = ({
   const [isAutoFilled, setIsAutoFilled] = useState(false);
 
   const handleAnimationStart = (
-    event: React.AnimationEvent<HTMLInputElement>
+    event: React.AnimationEvent<HTMLInputElement>,
   ) => {
-    if (event.animationName === 'mui-auto-fill') {
+    if (event.animationName === "mui-auto-fill") {
       setIsAutoFilled(true);
-      const input = document.getElementById('myTextField');
-      if (input) input.dispatchEvent(new Event('blur'));
+      const input = document.getElementById("myTextField");
+      if (input) input.dispatchEvent(new Event("blur"));
     }
   };
   return (
@@ -57,7 +57,7 @@ const CarpInputNoFormik = ({
       name={name as string}
       label={label}
       inputProps={{
-        'data-testid': rows ? 'single-line-input' : 'multi-line-input',
+        "data-testid": rows ? "single-line-input" : "multi-line-input",
         onAnimationStart: handleAnimationStart,
       }}
       id={id || (name as string)}
@@ -67,13 +67,13 @@ const CarpInputNoFormik = ({
       onBlur={onBlur}
       fullWidth
       type={type}
-      variant={variant || 'standard'}
+      variant={variant || "standard"}
       autoComplete={autoComplete}
       rows={rows}
       multiline={!!rows}
       disabled={disabled}
       InputLabelProps={{
-        shrink: isAutoFilled || name !== '',
+        shrink: isAutoFilled || name !== "",
         ...inputLabelProps,
       }}
       required={required}

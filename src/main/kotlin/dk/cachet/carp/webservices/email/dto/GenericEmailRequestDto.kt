@@ -7,6 +7,6 @@ import jakarta.validation.constraints.NotBlank
 data class GenericEmailRequestDto(
     @field:Email val recipient: String,
     @field:NotBlank val subject: String,
-    @field:NotBlank val message: String, // (the actual email content)
+    @field:NotBlank val message: String,
     @field:Valid val cc: List<@Email String> = listOf(),
 )

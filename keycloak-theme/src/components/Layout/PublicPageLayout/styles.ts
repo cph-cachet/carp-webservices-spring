@@ -1,5 +1,5 @@
-import Logo from "../../../components/Logo";
 import { Typography } from "@mui/material";
+import Logo from "../../Logo";
 import { styled } from "../../../utils/theme";
 
 export const PublicPageBanner = styled("div")(({ theme }) => ({

@@ -2,6 +2,7 @@
   "tags": [
     "consent-document-controller"
   ],
+  "deprecated": true,
   "description": "> `Description`: `create one` \n\nThis endpoint creates a new consent document with the given [DEPLOYMENT_STUDY_ID].\n> `Request`: (Http Method: [POST]) https://cans.cachet.dk:443/api/deployments/{{DEPLOYMENT_STUDY_ID}}/consent-documents\n\nThis request must be authenticated using a HTTP OAuth 2.0 Authentication header.\n\n> `Response`:\n\n- On success, a JSON object is returned with a created consent document.\n- On failure status code `400` (bad request) is returned.\n- On failure status code `401` (unauthorized) is returned.\n- On failure status code `500` (internal server error) is returned.\n",
   "requestBody": {
     "content": {

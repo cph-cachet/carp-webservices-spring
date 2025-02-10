@@ -1,0 +1,29 @@
+{
+  "root": true,
+  "env": { "browser": true, "es2020": true },
+  "extends": ["@carp-dk/eslint-config", "plugin:storybook/recommended"],
+  "ignorePatterns": ["dist/", ".eslintrc"],
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["react-refresh"],
+  "parserOptions": {
+    "project": "./keycloak-theme/tsconfig.json",
+    "sourceType": "module"
+  },
+  "rules": {
+    "react-refresh/only-export-components": [
+      "warn",
+      { "allowConstantExport": true }
+    ],
+    "react-hooks/exhaustive-deps": "off",
+    "@typescript-eslint/no-redeclare": "off",
+    "no-labels": "off"
+  },
+  "overrides": [
+    {
+      "files": ["**/*.stories.*"],
+      "rules": {
+        "import/no-anonymous-default-export": "off"
+      }
+    }
+  ]
+}

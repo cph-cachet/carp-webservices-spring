@@ -1,5 +1,5 @@
-import { CircularProgress } from '@mui/material';
-import CarpButton from './styles';
+import { CircularProgress } from "@mui/material";
+import CarpButton from "./styles";
 
 type Props = {
   text: string;
