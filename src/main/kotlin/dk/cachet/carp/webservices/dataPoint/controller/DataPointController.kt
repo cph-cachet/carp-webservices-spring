@@ -18,7 +18,6 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 
-// todo should we delete?
 @Deprecated("Data Point is deprecated, use DataStream instead.")
 @RestController
 @RequestMapping(value = [DATA_POINT_BASE])
@@ -95,6 +94,11 @@ class DataPointController(private val dataPointService: DataPointService) {
         dataPointService.delete(dataPointId)
     }
 
+    /**
+     * Returns the total number of data points for the given deployment.
+     * In the request parameters, a `query` parameter can be used to filter the data.
+     * It accepts standard RSQL queries like the `getAll` endpoint. Can also be null.
+     */
     @GetMapping(value = [COUNT])
     @PreAuthorize("canManageDeployment(#deploymentId) or isInDeployment(#deploymentId)")
     @ResponseStatus(HttpStatus.OK)

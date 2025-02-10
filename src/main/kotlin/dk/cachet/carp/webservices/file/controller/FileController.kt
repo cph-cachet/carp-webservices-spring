@@ -6,6 +6,7 @@ import dk.cachet.carp.webservices.common.constants.RequestParamName
 import dk.cachet.carp.webservices.file.domain.File
 import dk.cachet.carp.webservices.file.service.FileService
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
+import io.swagger.v3.oas.annotations.Operation
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.core.io.Resource
@@ -62,6 +63,7 @@ class FileController(private val fileService: FileService, private val authentic
     @ResponseBody
     @PreAuthorize("canManageStudy(#studyId) or @fileControllerAuthorizer.isFileOwner(#id)")
     @ResponseStatus(HttpStatus.OK)
+    @Operation(description = "Ensure the JWT token is refreshed, before accessing this endpoint.")
     fun download(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @PathVariable(PathVariableName.FILE_ID) id: Int,
