@@ -32,7 +32,7 @@ class FileController(private val fileService: FileService, private val authentic
     }
 
     @GetMapping(FILE_ID)
-    @Operation(tags = ["file/getOne.json"])
+    @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("canManageStudy(#studyId) or @fileControllerAuthorizer.isFileOwner(#fileId)")
     fun getOne(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
@@ -43,8 +43,8 @@ class FileController(private val fileService: FileService, private val authentic
     }
 
     @GetMapping(FILE_BASE)
-    @Operation(tags = ["file/getAll.json"])
     @PreAuthorize("canManageStudy(#studyId)")
+    @ResponseStatus(HttpStatus.OK)
     fun getAll(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @RequestParam(RequestParamName.QUERY) query: String?,
@@ -61,8 +61,9 @@ class FileController(private val fileService: FileService, private val authentic
         value = [DOWNLOAD],
     )
     @ResponseBody
-    @Operation(tags = ["file/download.json"])
     @PreAuthorize("canManageStudy(#studyId) or @fileControllerAuthorizer.isFileOwner(#id)")
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(description = "Ensure the JWT token is refreshed, before accessing this endpoint.")
     fun download(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @PathVariable(PathVariableName.FILE_ID) id: Int,
@@ -84,7 +85,6 @@ class FileController(private val fileService: FileService, private val authentic
         produces = [MediaType.APPLICATION_JSON_VALUE],
         value = [FILE_BASE],
     )
-    @Operation(tags = ["file/create_deprecated.json"])
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
     @Deprecated("Use the other -create- method instead.")
@@ -107,7 +107,6 @@ class FileController(private val fileService: FileService, private val authentic
         produces = [MediaType.APPLICATION_JSON_VALUE],
         value = [CREATE],
     )
-    @Operation(tags = ["file/create.json"])
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
     fun create(
@@ -123,7 +122,6 @@ class FileController(private val fileService: FileService, private val authentic
     }
 
     @DeleteMapping(FILE_ID)
-    @Operation(tags = ["file/delete.json"])
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("canManageStudy(#studyId) or @fileControllerAuthorizer.isFileOwner(#fileId)")
     fun delete(
@@ -135,7 +133,6 @@ class FileController(private val fileService: FileService, private val authentic
     }
 
     @PostMapping(UPLOAD_IMAGE)
-    @Operation(tags = ["file/uploadImage.json"])
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
     fun uploadS3(

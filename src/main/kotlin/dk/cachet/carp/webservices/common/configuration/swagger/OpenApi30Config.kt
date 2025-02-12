@@ -1,11 +1,13 @@
 package dk.cachet.carp.webservices.common.configuration.swagger
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import dk.cachet.carp.webservices.common.environment.EnvironmentUtil
 import io.swagger.v3.oas.models.Components
 import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.Operation
 import io.swagger.v3.oas.models.info.Info
+import io.swagger.v3.oas.models.media.Schema
 import io.swagger.v3.oas.models.security.SecurityRequirement
 import io.swagger.v3.oas.models.security.SecurityScheme
 import io.swagger.v3.oas.models.servers.Server
@@ -18,7 +20,6 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.io.Resource
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver
-import org.springframework.util.MimeTypeUtils
 import org.springframework.util.StreamUtils
 import org.springframework.util.StringUtils
 import java.nio.charset.Charset
@@ -71,35 +72,34 @@ class OpenApi30Config(
     }
 
     @Bean
-    fun openApiCustomizer(loadedOperations: Map<String, Operation>): OpenApiCustomizer? {
+    fun openApiCustomizer(loadedOperations: Map<String, Operation>): OpenApiCustomizer {
         return OpenApiCustomizer { openAPI: OpenAPI ->
-            for (path in openAPI.paths.values.stream()) {
-                val operations = arrayListOf(path.post, path.get, path.put, path.delete)
+            for (path in openAPI.paths.values) {
+                val operations = listOf(path.post, path.get, path.put, path.delete)
+
                 for (operation in operations) {
-                    if (operation == null) {
-                        continue
-                    }
+                    if (operation == null) continue
 
                     val loadedOperation = loadedOperations[operation.tags[0]] ?: continue
 
-                    // schema has to be present, otherwise examples will not load on the swagger UI
-                    val schema = operation.requestBody?.content?.get(MimeTypeUtils.APPLICATION_JSON_VALUE)?.schema
+                    BeanUtils.copyProperties(loadedOperation, operation)
 
-                    val ignoredNames = getNullPropertyNames(loadedOperation)
-                    BeanUtils.copyProperties(loadedOperation, operation, *ignoredNames)
-
-                    if (schema != null) {
-                        operation.requestBody?.content?.get(MimeTypeUtils.APPLICATION_JSON_VALUE)?.schema = schema
-                    }
+                    // Documentation json files under `resources/openapi/../*.json` overwrites generated content from
+                    // annotations in the controllers
+                    operation.requestBody = loadedOperation.requestBody
+                    operation.responses = loadedOperation.responses
+                    operation.parameters = loadedOperation.parameters
                 }
             }
+
+            generateAdditionalSchemasForOpenApi(openAPI)
         }
     }
 
     @Bean
     fun loadOperationsDocumentation(): Map<String, Operation> {
         val loader = PathMatchingResourcePatternResolver()
-        val resources = loader.getResources("classpath*:$OPENAPI_FOLDER/**/*.json")
+        val resources = loader.getResources("classpath*:$OPENAPI_FOLDER/*/**/*.json")
         val operations = mutableMapOf<String, Operation>()
 
         for (resource in resources) {
@@ -128,5 +128,31 @@ class OpenApi30Config(
 
     private fun getResourceContent(resource: Resource): String {
         return StreamUtils.copyToString(resource.inputStream, Charset.defaultCharset())
+    }
+
+    private fun generateAdditionalSchemasForOpenApi(openAPI: OpenAPI) {
+        val loader = PathMatchingResourcePatternResolver()
+        val schemaJsonFile = loader.getResources("classpath*:$OPENAPI_FOLDER/schemas.json")
+
+        if (schemaJsonFile.any()) {
+            val schemaMap: Map<String, Schema<*>> = objectMapper.readValue(schemaJsonFile[0].inputStream)
+            for ((key, schema) in schemaMap) {
+                if (!openAPI.components.schemas.containsKey(key)) {
+                    openAPI.components.addSchemas(key, schema)
+                }
+            }
+        } else {
+            println("Schema file not found.")
+        }
+
+        // the json files (resources/openapi/../*.json) reference schemas that might not
+        // been previously automatically generated.
+        // If that's the case, we need to add them manually (e.g. below)
+
+        //        openAPI.components.addSchemas(
+        //            "AddVersion",
+        //            ModelConverters.getInstance()
+        //                .readAllAsResolvedSchema(ProtocolServiceRequest.AddVersion::class.java).schema,
+        //        )
     }
 }
