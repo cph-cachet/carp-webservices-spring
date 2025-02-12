@@ -7,6 +7,7 @@ import dk.cachet.carp.webservices.security.authentication.oauth2.issuers.keycloa
 import dk.cachet.carp.webservices.security.authorization.Claim
 import dk.cachet.carp.webservices.security.authorization.Role
 
+@Suppress("TooManyFunctions")
 interface IssuerFacade {
     suspend fun createAccount(account: Account): Account
 

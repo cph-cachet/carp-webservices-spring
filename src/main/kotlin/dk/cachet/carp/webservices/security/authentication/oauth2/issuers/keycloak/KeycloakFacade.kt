@@ -262,13 +262,14 @@ class KeycloakFacade(
         val token = authenticate().accessToken
 
         LOGGER.debug("Getting redirect URIs for client.")
-        
-        val clientRepresentations = adminClient.get().uri("/clients")
-            .headers {
-                it.setBearerAuth(token!!)
-            }
-            .retrieve()
-            .awaitBody<List<Map<String, Any>>>()
+
+        val clientRepresentations =
+            adminClient.get().uri("/clients")
+                .headers {
+                    it.setBearerAuth(token!!)
+                }
+                .retrieve()
+                .awaitBody<List<Map<String, Any>>>()
 
         val wsClientRepresentation = clientRepresentations.first { it["clientId"] == clientId }
 
