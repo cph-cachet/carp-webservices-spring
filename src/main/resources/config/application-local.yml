@@ -256,6 +256,12 @@ storage:
       enabled: true
       days: 90
 
+cleanup:
+  files:
+    retention-days: "${FILES_RETENTION_DAYS:7}"
+  exports:
+    retention-days: "${EXPORTS_RETENTION_DAYS:7}"
+
 environment:
   url: "${CAWS_URL}"
   portalUrl: "${CAWS_PORTAL_URL}"
