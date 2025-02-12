@@ -38,4 +38,6 @@ interface IssuerFacade {
         redirectUri: String?,
         expirationSeconds: Long?,
     ): String
+
+    suspend fun getRedirectUrisForClient(): List<String>
 }

@@ -258,6 +258,23 @@ class KeycloakFacade(
         return magicLinkResponse.link
     }
 
+    override suspend fun getRedirectUrisForClient(): List<String> {
+        val token = authenticate().accessToken
+
+        LOGGER.debug("Getting redirect URIs for client.")
+        
+        val clientRepresentations = adminClient.get().uri("/clients")
+            .headers {
+                it.setBearerAuth(token!!)
+            }
+            .retrieve()
+            .awaitBody<List<Map<String, Any>>>()
+
+        val wsClientRepresentation = clientRepresentations.first { it["clientId"] == clientId }
+
+        return wsClientRepresentation["redirectUris"] as? List<String> ?: emptyList()
+    }
+
     private suspend fun queryAll(query: String): List<Account> {
         val token = authenticate().accessToken
 
