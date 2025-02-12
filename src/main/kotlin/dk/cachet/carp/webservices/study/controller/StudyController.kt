@@ -25,6 +25,7 @@ import jakarta.validation.Valid
 import kotlinx.coroutines.runBlocking
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
@@ -55,7 +56,7 @@ class StudyController(
 
     @PostMapping(value = [ADD_RESEARCHER])
     @PreAuthorize("canManageStudy(#studyId)")
-    @Operation(tags = ["study/addResearcher.json"])
+    @ResponseStatus(HttpStatus.OK)
     suspend fun addResearcher(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @RequestParam(RequestParamName.EMAIL) email: String,
@@ -66,7 +67,7 @@ class StudyController(
 
     @GetMapping(value = [GET_PARTICIPANTS_ACCOUNTS])
     @PreAuthorize("canManageStudy(#studyId)")
-    @Operation(tags = ["study/getParticipantsAccounts.json"])
+    @ResponseStatus(HttpStatus.OK)
     suspend fun getParticipantAccounts(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @RequestParam(name = RequestParamName.OFFSET, required = false, defaultValue = "0") offset: Int,
@@ -78,7 +79,7 @@ class StudyController(
 
     @GetMapping(value = [RESEARCHERS])
     @PreAuthorize("canManageStudy(#studyId)")
-    @Operation(tags = ["study/getResearchers.json"])
+    @ResponseStatus(HttpStatus.OK)
     suspend fun getResearchers(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
     ): List<Account> {
@@ -88,7 +89,7 @@ class StudyController(
 
     @GetMapping(value = [GET_PARTICIPANT_GROUP_STATUS])
     @PreAuthorize("canManageStudy(#studyId)")
-    @Operation(tags = ["study/getParticipantGroupStatus.json"])
+    @ResponseStatus(HttpStatus.OK)
     suspend fun getParticipantGroupStatus(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
     ): String {
@@ -99,42 +100,22 @@ class StudyController(
 
     @DeleteMapping(value = [RESEARCHERS])
     @PreAuthorize("canManageStudy(#studyId)")
-    @Operation(tags = ["study/removeResearchers.json"])
+    @ResponseStatus(HttpStatus.OK)
     suspend fun removeResearcher(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @RequestParam(RequestParamName.EMAIL) email: String,
     ): Boolean = recruitmentService.removeResearcher(studyId, email)
 
     @GetMapping(value = [GET_STUDIES_OVERVIEW])
+    @ResponseStatus(HttpStatus.OK)
     suspend fun getStudiesOverview(): List<StudyOverview> {
         LOGGER.info("Start POST: /api/studies/studies-overview")
         return studyService.getStudiesOverview(authenticationService.getId())
     }
 
-    @PostMapping(value = [STUDY_SERVICE])
-    @Operation(tags = ["study/studies.json"])
-    suspend fun studies(
-        @RequestBody httpMessage: String,
-    ): ResponseEntity<Any> {
-        val request = studySerializer.deserializeRequest(StudyServiceRequest.Serializer, httpMessage)
-        LOGGER.info("Start POST: $STUDY_SERVICE -> ${ request::class.simpleName }")
-        val result = studyService.core.invoke(request)
-        return studySerializer.serializeResponse(request, result).let { ResponseEntity.ok(it) }
-    }
-
-    @PostMapping(value = [RECRUITMENT_SERVICE])
-    @Operation(tags = ["study/recruitments.json"])
-    suspend fun recruitments(
-        @RequestBody httpMessage: String,
-    ): ResponseEntity<*> {
-        val request = recruitmentSerializer.deserializeRequest(RecruitmentServiceRequest.Serializer, httpMessage)
-        LOGGER.info("Start POST: $RECRUITMENT_SERVICE -> ${ request::class.simpleName }")
-        val result = recruitmentService.core.invoke(request)
-        return recruitmentSerializer.serializeResponse(request, result).let { ResponseEntity.ok(it) }
-    }
-
     @PostMapping(value = [ADD_PARTICIPANTS])
     @PreAuthorize("canManageStudy(#studyId)")
+    @ResponseStatus(HttpStatus.OK)
     suspend fun addParticipants(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @Valid @RequestBody request: AddParticipantsRequestDto,
@@ -150,7 +131,7 @@ class StudyController(
      */
     @GetMapping(value = [GET_INACTIVE_DEPLOYMENTS])
     @PreAuthorize("canManageStudy(#studyId)")
-    @Operation(tags = ["study/getInactiveParticipants.json"])
+    @ResponseStatus(HttpStatus.OK)
     suspend fun getInactiveParticipants(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @RequestParam(name = RequestParamName.OFFSET, required = false, defaultValue = "0") offset: Int,
@@ -159,5 +140,27 @@ class StudyController(
     ): List<InactiveDeploymentInfo> {
         LOGGER.info("Start GET: /api/studies/$studyId/participants/inactive")
         return runBlocking { recruitmentService.getInactiveDeployments(studyId, lastUpdate, offset, limit) }
+    }
+
+    @Operation(tags = ["study/recruitments.json"])
+    @PostMapping(value = [RECRUITMENT_SERVICE])
+    suspend fun recruitments(
+        @RequestBody httpMessage: String,
+    ): ResponseEntity<*> {
+        val request = recruitmentSerializer.deserializeRequest(RecruitmentServiceRequest.Serializer, httpMessage)
+        LOGGER.info("Start POST: $RECRUITMENT_SERVICE -> ${request::class.simpleName}")
+        val result = recruitmentService.core.invoke(request)
+        return recruitmentSerializer.serializeResponse(request, result).let { ResponseEntity.ok(it) }
+    }
+
+    @PostMapping(value = [STUDY_SERVICE])
+    @Operation(tags = ["study/studies.json"])
+    suspend fun studies(
+        @RequestBody httpMessage: String,
+    ): ResponseEntity<Any> {
+        val request = studySerializer.deserializeRequest(StudyServiceRequest.Serializer, httpMessage)
+        LOGGER.info("Start POST: $STUDY_SERVICE -> ${request::class.simpleName}")
+        val result = studyService.core.invoke(request)
+        return studySerializer.serializeResponse(request, result).let { ResponseEntity.ok(it) }
     }
 }

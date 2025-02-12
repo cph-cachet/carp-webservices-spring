@@ -2,254 +2,157 @@
   "tags": [
     "study-controller"
   ],
-  "description": "For more information, refer to the documentation of [CARP Core](https://github.com/cph-cachet/carp.core-kotlin/blob/develop/docs/carp-studies.md#studyservice)",
-  "responses": {
-    "200": {
-      "description": "SetInvitation",
-      "headers": {
-        "Cache-Control": {
-          "schema": {
-            "type": "string",
-            "example": "no-cache, no-store, max-age=0, must-revalidate"
-          }
-        },
-        "Connection": {
-          "schema": {
-            "type": "string",
-            "example": "keep-alive"
-          }
-        },
-        "Date": {
-          "schema": {
-            "type": "string",
-            "example": "Thu, 14 Jan 2021 09:39:38 GMT"
-          }
-        },
-        "Expires": {
-          "schema": {
-            "type": "string",
-            "example": "0"
-          }
-        },
-        "Keep-Alive": {
-          "schema": {
-            "type": "string",
-            "example": "timeout=60"
-          }
-        },
-        "Pragma": {
-          "schema": {
-            "type": "string",
-            "example": "no-cache"
-          }
-        },
-        "Transfer-Encoding": {
-          "schema": {
-            "type": "string",
-            "example": "chunked"
-          }
-        },
-        "X-Content-Type-Options": {
-          "schema": {
-            "type": "string",
-            "example": "nosniff"
-          }
-        },
-        "X-Frame-Options": {
-          "schema": {
-            "type": "string",
-            "example": "DENY"
-          }
-        },
-        "X-XSS-Protection": {
-          "schema": {
-            "type": "string",
-            "example": "1; mode=block"
-          }
+  "description": "\n        The request body should be a serialized StudyServiceRequest (string).\n        The response body will also be serialized (string). The request-response mappings are as follows:\n        \n        - CreateStudy -\u003E StudyStatus\n        - SetInternalDescription -\u003E StudyStatus\n        - GetStudyDetails -\u003E StudyDetails\n        - GetStudyStatus -\u003E StudyStatus\n        - GetStudiesOverview -\u003E StudyStatus[]\n        - SetInvitation -\u003E StudyStatus\n        - SetProtocol -\u003E StudyStatus\n        - RemoveProtocol -\u003E StudyStatus\n        - GoLive -\u003E StudyStatus\n        - Remove -\u003E Boolean\n    ",
+  "operationId": "studies",
+  "requestBody": {
+    "content": {
+      "application/json": {
+        "schema": {
+          "oneOf": [
+            {
+              "$ref": "#/components/schemas/CreateStudy"
+            },
+            {
+              "$ref": "#/components/schemas/SetInternalDescription"
+            },
+            {
+              "$ref": "#/components/schemas/GetStudyDetails"
+            },
+            {
+              "$ref": "#/components/schemas/GetStudyStatus"
+            },
+            {
+              "$ref": "#/components/schemas/GetStudiesOverview"
+            },
+            {
+              "$ref": "#/components/schemas/SetInvitation"
+            },
+            {
+              "$ref": "#/components/schemas/SetProtocol"
+            },
+            {
+              "$ref": "#/components/schemas/RemoveProtocol"
+            },
+            {
+              "$ref": "#/components/schemas/GoLive"
+            },
+            {
+              "$ref": "#/components/schemas/Remove"
+            }
+          ]
         }
-      },
+      }
+    },
+    "required": true
+  },
+  "responses": {
+    "400": {
+      "description": "Bad Request",
       "content": {
-        "application/json": {
+        "*/*": {
           "schema": {
-            "type": "object",
-            "properties": {
-              "__type": {
-                "type": "string",
-                "example": "dk.cachet.carp.studies.application.StudyStatus.Configuring"
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/CarpErrorResponse"
               },
-              "canDeployToParticipants": {
-                "type": "boolean",
-                "example": false
-              },
-              "canGoLive": {
-                "type": "boolean",
-                "example": false
-              },
-              "canSetInvitation": {
-                "type": "boolean",
-                "example": true
-              },
-              "canSetStudyProtocol": {
-                "type": "boolean",
-                "example": true
-              },
-              "createdOn": {
-                "type": "string",
-                "example": "2022-01-18T11:03:20Z"
-              },
-              "name": {
-                "type": "string",
-                "example": "Copenhagen transportation study"
-              },
-              "studyId": {
-                "type": "string",
-                "example": "791fd191-4279-482f-9ef5-5b4508efd959"
-              },
-              "studyProtocolId": {
-                "nullable": true,
-                "example": null
+              {
+                "type": "object"
               }
-            }
-          },
-          "examples": {
-            "SetInvitation": {
-              "value": {
-                "__type": "dk.cachet.carp.studies.application.StudyStatus.Configuring",
-                "canDeployToParticipants": false,
-                "canGoLive": false,
-                "canSetInvitation": true,
-                "canSetStudyProtocol": true,
-                "createdOn": "2022-01-18T11:03:20Z",
-                "name": "Copenhagen transportation study",
-                "studyId": "791fd191-4279-482f-9ef5-5b4508efd959",
-                "studyProtocolId": null
-              }
-            }
+            ]
           }
         }
       }
     },
-    "201": {
-      "description": "CreateStudy",
-      "headers": {
-        "Cache-Control": {
+    "403": {
+      "description": "Forbidden",
+      "content": {
+        "*/*": {
           "schema": {
-            "type": "string",
-            "example": "no-cache, no-store, max-age=0, must-revalidate"
-          }
-        },
-        "Connection": {
-          "schema": {
-            "type": "string",
-            "example": "keep-alive"
-          }
-        },
-        "Date": {
-          "schema": {
-            "type": "string",
-            "example": "Thu, 14 Jan 2021 09:35:22 GMT"
-          }
-        },
-        "Expires": {
-          "schema": {
-            "type": "string",
-            "example": "0"
-          }
-        },
-        "Keep-Alive": {
-          "schema": {
-            "type": "string",
-            "example": "timeout=60"
-          }
-        },
-        "Pragma": {
-          "schema": {
-            "type": "string",
-            "example": "no-cache"
-          }
-        },
-        "Transfer-Encoding": {
-          "schema": {
-            "type": "string",
-            "example": "chunked"
-          }
-        },
-        "X-Content-Type-Options": {
-          "schema": {
-            "type": "string",
-            "example": "nosniff"
-          }
-        },
-        "X-Frame-Options": {
-          "schema": {
-            "type": "string",
-            "example": "DENY"
-          }
-        },
-        "X-XSS-Protection": {
-          "schema": {
-            "type": "string",
-            "example": "1; mode=block"
+            "$ref": "#/components/schemas/CarpErrorResponse"
           }
         }
-      },
+      }
+    },
+    "405": {
+      "description": "Method Not Allowed",
       "content": {
-        "application/json": {
+        "*/*": {
           "schema": {
-            "type": "object",
-            "properties": {
-              "__type": {
-                "type": "string",
-                "example": "dk.cachet.carp.studies.application.StudyStatus.Configuring"
+            "type": "object"
+          }
+        }
+      }
+    },
+    "401": {
+      "description": "Unauthorized",
+      "content": {
+        "*/*": {
+          "schema": {
+            "$ref": "#/components/schemas/CarpErrorResponse"
+          }
+        }
+      }
+    },
+    "404": {
+      "description": "Not Found",
+      "content": {
+        "*/*": {
+          "schema": {
+            "$ref": "#/components/schemas/CarpErrorResponse"
+          }
+        }
+      }
+    },
+    "409": {
+      "description": "Conflict",
+      "content": {
+        "*/*": {
+          "schema": {
+            "$ref": "#/components/schemas/CarpErrorResponse"
+          }
+        }
+      }
+    },
+    "200": {
+      "description": "OK",
+      "content": {
+        "*/*": {
+          "schema": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/StudyStatus"
               },
-              "canDeployToParticipants": {
-                "type": "boolean",
-                "example": false
+              {
+                "$ref": "#/components/schemas/StudyStatus"
               },
-              "canGoLive": {
-                "type": "boolean",
-                "example": false
+              {
+                "$ref": "#/components/schemas/StudyDetails"
               },
-              "canSetInvitation": {
-                "type": "boolean",
-                "example": true
+              {
+                "$ref": "#/components/schemas/StudyStatus"
               },
-              "canSetStudyProtocol": {
-                "type": "boolean",
-                "example": true
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/StudyStatus"
+                }
               },
-              "createdOn": {
-                "type": "string",
-                "example": "2022-01-18T11:03:20Z"
+              {
+                "$ref": "#/components/schemas/StudyStatus"
               },
-              "name": {
-                "type": "string",
-                "example": "Copenhagen transportation study"
+              {
+                "$ref": "#/components/schemas/StudyStatus"
               },
-              "studyId": {
-                "type": "string",
-                "example": "791fd191-4279-482f-9ef5-5b4508efd959"
+              {
+                "$ref": "#/components/schemas/StudyStatus"
               },
-              "studyProtocolId": {
-                "nullable": true,
-                "example": null
+              {
+                "$ref": "#/components/schemas/StudyStatus"
+              },
+              {
+                "type": "boolean"
               }
-            }
-          },
-          "examples": {
-            "CreateStudy": {
-              "value": {
-                "__type": "dk.cachet.carp.studies.application.StudyStatus.Configuring",
-                "canDeployToParticipants": false,
-                "canGoLive": false,
-                "canSetInvitation": true,
-                "canSetStudyProtocol": true,
-                "createdOn": "2022-01-18T11:03:20Z",
-                "name": "Copenhagen transportation study",
-                "studyId": "791fd191-4279-482f-9ef5-5b4508efd959",
-                "studyProtocolId": null
-              }
-            }
+            ]
           }
         }
       }

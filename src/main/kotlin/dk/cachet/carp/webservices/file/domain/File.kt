@@ -17,10 +17,12 @@ data class File(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int = 0,
+    // (storageName)
     @field:NotNull
-    var fileName: String = "", // (storageName)
+    var fileName: String = "",
+    // relative path e.g. .../local/{relativePath}/{fileName}
     @field:NotNull
-    val relativePath: String = "", // relative path e.g. .../local/{relativePath}/{fileName}
+    val relativePath: String = "",
     @field:NotNull
     var originalName: String = "",
     @JdbcTypeCode(SqlTypes.JSON)
