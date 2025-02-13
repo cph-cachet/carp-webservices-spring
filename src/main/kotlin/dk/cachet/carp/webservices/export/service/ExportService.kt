@@ -19,4 +19,6 @@ interface ExportService {
         studyId: UUID,
         exportId: UUID,
     ): UUID
+
+    fun deleteAllOlderThan(days: Int)
 }
