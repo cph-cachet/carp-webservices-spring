@@ -17,6 +17,8 @@ interface FileService {
         studyId: UUID,
     )
 
+    fun deleteAllOlderThan(days: Int)
+
     suspend fun deleteAllByStudyId(studyId: String)
 
     /** The [createDEPRECATED] interface for creating a file. */
