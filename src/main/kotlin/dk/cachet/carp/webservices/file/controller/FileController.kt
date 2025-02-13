@@ -28,7 +28,6 @@ class FileController(private val fileService: FileService, private val authentic
         const val UPLOAD_IMAGE = "/api/studies/{${PathVariableName.STUDY_ID}}/images"
         const val DOWNLOAD = "$FILE_BASE/{${PathVariableName.FILE_ID}}/download"
         const val FILE_ID = "$FILE_BASE/{${PathVariableName.FILE_ID}}"
-        const val CREATE = "$FILE_BASE/{${PathVariableName.DEPLOYMENT_ID}}"
     }
 
     @GetMapping(FILE_ID)
@@ -87,38 +86,21 @@ class FileController(private val fileService: FileService, private val authentic
     )
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
-    @Deprecated("Use the other -create- method instead.")
-    fun createDEPRICATED(
+    fun create(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @RequestParam(RequestParamName.METADATA, required = false) metadata: String?,
+        // todo change to required = true after https://github.com/cph-cachet/carp-webservices-spring/issues/209
+        @RequestParam(RequestParamName.DEPLOYMENT_ID, required = false) deploymentId: UUID?,
         @RequestPart file: MultipartFile,
     ): File {
         LOGGER.info("Start POST: /api/studies/$studyId/files")
         val ownerId = authenticationService.getId()
 
-        return fileService.createDEPRECATED(studyId.stringRepresentation, file, metadata, ownerId)
-    }
-
-    @PostMapping(
-        consumes = [
-            MediaType.MULTIPART_FORM_DATA_VALUE,
-            MediaType.APPLICATION_OCTET_STREAM_VALUE,
-        ],
-        produces = [MediaType.APPLICATION_JSON_VALUE],
-        value = [CREATE],
-    )
-    @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
-    fun create(
-        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
-        @PathVariable(PathVariableName.DEPLOYMENT_ID) deploymentId: UUID,
-        @RequestParam(RequestParamName.METADATA, required = false) metadata: String?,
-        @RequestPart file: MultipartFile,
-    ): File {
-        LOGGER.info("Start POST: /api/studies/$studyId/files/$deploymentId")
-        val ownerId = authenticationService.getId()
-
-        return fileService.create(studyId, deploymentId, ownerId, file, metadata)
+        if (deploymentId == null) {
+            return fileService.createDEPRECATED(studyId.stringRepresentation, file, metadata, ownerId)
+        } else {
+            return fileService.create(studyId, deploymentId, ownerId, file, metadata)
+        }
     }
 
     @DeleteMapping(FILE_ID)
