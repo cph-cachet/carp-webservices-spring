@@ -30,10 +30,8 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.StringUtils
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.util.UriComponentsBuilder
-import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
-import java.time.Instant
 
 @Service
 @Transactional
@@ -166,23 +164,6 @@ class FileServiceImpl(
         fileRepository.delete(file)
 
         LOGGER.info("File deleted, id = $id")
-    }
-
-    @Suppress("MagicNumber")
-    override fun deleteAllOlderThan(days: Int) {
-        val clockNow7DaysAgo = System.currentTimeMillis() - days * 24 * 60 * 60 * 1000
-        val filesToDelete = fileRepository.getAllByUpdatedAtIsBefore(Instant.ofEpochMilli(clockNow7DaysAgo))
-
-        filesToDelete.forEach { file ->
-            fileRepository.delete(file)
-            try {
-                fileStorage.deleteFileAtPath(file.fileName, Path.of(file.relativePath))
-            } catch (e: IOException) {
-                LOGGER.error("Failed to delete file with id = ${file.id}", e)
-            }
-        }
-
-        LOGGER.info("All files older than $days days deleted")
     }
 
     override suspend fun deleteAllByStudyId(studyId: String) {
