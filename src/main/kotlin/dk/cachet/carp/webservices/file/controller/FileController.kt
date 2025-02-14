@@ -5,7 +5,7 @@ import dk.cachet.carp.webservices.common.constants.PathVariableName
 import dk.cachet.carp.webservices.common.constants.RequestParamName
 import dk.cachet.carp.webservices.file.domain.File
 import dk.cachet.carp.webservices.file.service.FileService
-import dk.cachet.carp.webservices.file.service.FileStorage
+import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
 import io.swagger.v3.oas.annotations.Operation
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 
 @RestController
-class FileController(private val fileStorage: FileStorage, private val fileService: FileService) {
+class FileController(private val fileService: FileService, private val authenticationService: AuthenticationService) {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
 
@@ -28,28 +28,29 @@ class FileController(private val fileStorage: FileStorage, private val fileServi
         const val UPLOAD_IMAGE = "/api/studies/{${PathVariableName.STUDY_ID}}/images"
         const val DOWNLOAD = "$FILE_BASE/{${PathVariableName.FILE_ID}}/download"
         const val FILE_ID = "$FILE_BASE/{${PathVariableName.FILE_ID}}"
-    }
-
-    @GetMapping(FILE_BASE)
-    @Operation(tags = ["file/getAll.json"])
-    @PreAuthorize("canManageStudy(#studyId)")
-    fun getAll(
-        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
-        @RequestParam(RequestParamName.QUERY) query: String?,
-    ): List<File> {
-        LOGGER.info("Start GET: /api/studies/$studyId/files")
-        return fileService.getAll(query, studyId.stringRepresentation)
+        const val CREATE = "$FILE_BASE/{${PathVariableName.DEPLOYMENT_ID}}"
     }
 
     @GetMapping(FILE_ID)
-    @Operation(tags = ["file/getOne.json"])
-    @PreAuthorize("canManageStudy(#studyId) or isFileOwner(#fileId)")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("canManageStudy(#studyId) or @fileControllerAuthorizer.isFileOwner(#fileId)")
     fun getOne(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @PathVariable(PathVariableName.FILE_ID) fileId: Int,
     ): File {
         LOGGER.info("Start GET: /api/studies/$studyId/files/$fileId")
         return fileService.getOne(fileId)
+    }
+
+    @GetMapping(FILE_BASE)
+    @PreAuthorize("canManageStudy(#studyId)")
+    @ResponseStatus(HttpStatus.OK)
+    fun getAll(
+        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
+        @RequestParam(RequestParamName.QUERY) query: String?,
+    ): List<File> {
+        LOGGER.info("Start GET: /api/studies/$studyId/files")
+        return fileService.getAll(query, studyId.stringRepresentation)
     }
 
     @GetMapping(
@@ -60,19 +61,20 @@ class FileController(private val fileStorage: FileStorage, private val fileServi
         value = [DOWNLOAD],
     )
     @ResponseBody
-    @Operation(tags = ["file/download.json"])
-    @PreAuthorize("canManageStudy(#studyId) or isFileOwner(#id)")
+    @PreAuthorize("canManageStudy(#studyId) or @fileControllerAuthorizer.isFileOwner(#id)")
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(description = "Ensure the JWT token is refreshed, before accessing this endpoint.")
     fun download(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @PathVariable(PathVariableName.FILE_ID) id: Int,
     ): ResponseEntity<Resource> {
         LOGGER.info("Start GET: /api/studies/$studyId/files/$id/download")
-        val file = fileService.getOne(id)
-        val fileToDownload = fileStorage.getFile(file.storageName)
+        val (fileToDownload, originalFilename) = fileService.download(id, studyId)
+
         return ResponseEntity.ok().header(
             HttpHeaders.CONTENT_DISPOSITION,
-            "attachment; filename=\"" + file.originalName + "\"",
-        ).body<Resource>(fileToDownload)
+            "attachment; filename=\"$originalFilename\"",
+        ).body(fileToDownload)
     }
 
     @PostMapping(
@@ -83,32 +85,54 @@ class FileController(private val fileStorage: FileStorage, private val fileServi
         produces = [MediaType.APPLICATION_JSON_VALUE],
         value = [FILE_BASE],
     )
-    @Operation(tags = ["file/create.json"])
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
-    fun create(
+    @Deprecated("Use the other -create- method instead.")
+    fun createDEPRICATED(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @RequestParam(RequestParamName.METADATA, required = false) metadata: String?,
         @RequestPart file: MultipartFile,
     ): File {
         LOGGER.info("Start POST: /api/studies/$studyId/files")
-        return fileService.create(studyId.stringRepresentation, file, metadata)
+        val ownerId = authenticationService.getId()
+
+        return fileService.createDEPRECATED(studyId.stringRepresentation, file, metadata, ownerId)
+    }
+
+    @PostMapping(
+        consumes = [
+            MediaType.MULTIPART_FORM_DATA_VALUE,
+            MediaType.APPLICATION_OCTET_STREAM_VALUE,
+        ],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+        value = [CREATE],
+    )
+    @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
+    fun create(
+        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
+        @PathVariable(PathVariableName.DEPLOYMENT_ID) deploymentId: UUID,
+        @RequestParam(RequestParamName.METADATA, required = false) metadata: String?,
+        @RequestPart file: MultipartFile,
+    ): File {
+        LOGGER.info("Start POST: /api/studies/$studyId/files/$deploymentId")
+        val ownerId = authenticationService.getId()
+
+        return fileService.create(studyId, deploymentId, ownerId, file, metadata)
     }
 
     @DeleteMapping(FILE_ID)
-    @Operation(tags = ["file/delete.json"])
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("canManageStudy(#studyId) or isFileOwner(#fileId)")
+    @PreAuthorize("canManageStudy(#studyId) or @fileControllerAuthorizer.isFileOwner(#fileId)")
     fun delete(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @PathVariable(PathVariableName.FILE_ID) fileId: Int,
     ) {
         LOGGER.info("Start DELETE: /api/studies/$studyId/files/$fileId")
-        fileService.delete(fileId)
+        fileService.delete(fileId, studyId)
     }
 
     @PostMapping(UPLOAD_IMAGE)
-    @Operation(tags = ["file/uploadImage.json"])
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
     fun uploadS3(

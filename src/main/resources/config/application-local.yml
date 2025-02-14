@@ -155,6 +155,7 @@ springdoc:
     path: /doc/v3/api-docs
   swagger-ui:
     path: /doc/
+    default-model-rendering: model
 
 rabbit:
   data-point:
@@ -255,6 +256,10 @@ storage:
     expiration:
       enabled: true
       days: 90
+
+cleanup:
+  exports:
+    retention-days: "${EXPORTS_RETENTION_DAYS:7}"
 
 environment:
   url: "${CAWS_URL}"

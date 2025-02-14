@@ -1,5 +1,4 @@
 package dk.cachet.carp.webservices.file.util
-
 import dk.cachet.carp.webservices.common.exception.file.FileStorageException
 import org.apache.commons.io.FileUtils
 import org.apache.logging.log4j.LogManager
@@ -32,6 +31,20 @@ class FileUtil(
     fun resolveFileStorage(fileName: String): Path {
         val rootFolder: Path? = Paths.get(filePath.toString()).toAbsolutePath().normalize()
         return storageDirectory.resolve(removeRootPrefix(rootFolder.toString()) + "/" + fileName)
+    }
+
+    fun resolveFileStoragePathForFilenameAndRelativePath(
+        fileName: String,
+        relativePath: Path,
+    ): Path {
+        val rootFolder: Path? = Paths.get(filePath.toString()).toAbsolutePath().normalize()
+        val path =
+            storageDirectory.resolve(
+                removeRootPrefix(rootFolder.toString()) + "/" + relativePath + "/" + fileName,
+            )
+        isDirectoryOrElseCreate(path.parent)
+
+        return path
     }
 
     fun isDirectoryOrElseCreate(storagePath: Path?): Path {

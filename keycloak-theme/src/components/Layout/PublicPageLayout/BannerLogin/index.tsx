@@ -1,7 +1,7 @@
-import StyledLink from '../../../../components/StyledLink';
-import { BannerActionText } from '../styles';
+import StyledLink from "../../../StyledLink";
+import { BannerActionText } from "../styles";
 
-type Props = { loginUrl: string, msgStr: (key: string) => string};
+type Props = { loginUrl: string; msgStr: (key: string) => string };
 
 const BannerLogin = ({ loginUrl, msgStr }: Props) => {
   return (

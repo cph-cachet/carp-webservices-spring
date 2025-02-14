@@ -1,14 +1,14 @@
-import StyledLink from "../../../../components/StyledLink";
+import StyledLink from "../../../StyledLink";
 import { BannerActionText } from "../styles";
 
-type Props = { registerUrl: string, msgStr: (str: string) => string };
+type Props = { registerUrl: string; msgStr: (str: string) => string };
 
 const BannerRegister = ({ registerUrl, msgStr }: Props) => {
   return (
     <BannerActionText>
       {msgStr("newToCarp")}
       <StyledLink to={registerUrl} isBold>
-        {msgStr('doRegister')}
+        {msgStr("doRegister")}
       </StyledLink>
     </BannerActionText>
   );

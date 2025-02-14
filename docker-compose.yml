@@ -26,7 +26,7 @@ x-keycloak-prod-commands: &keycloak-prod-commands
 # Apply the following configuration if hosting behind a reverse proxy
 #    - "--hostname-url=${KC_URL}"
 #    - "--hostname-admin-url=${KC_URL}"
-#    - "--proxy edge
+#    - "--proxy edge"
 
 services:
   carp-ws:
@@ -85,7 +85,7 @@ services:
       - "POSTGRES_PASSWORD=${ADMIN_PASSWORD}"
       - PGDATA=/var/lib/postgresql/data
     hostname: "carp-postgres-${PROFILE}"
-    image: postgres:latest
+    image: postgres:16.6
     profiles:
       - production
       - staging

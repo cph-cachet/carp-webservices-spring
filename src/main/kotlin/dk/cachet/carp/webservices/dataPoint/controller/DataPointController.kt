@@ -8,7 +8,6 @@ import dk.cachet.carp.webservices.dataPoint.controller.DataPointController.Compa
 import dk.cachet.carp.webservices.dataPoint.domain.DataPoint
 import dk.cachet.carp.webservices.dataPoint.dto.CreateDataPointRequestDto
 import dk.cachet.carp.webservices.dataPoint.service.DataPointService
-import io.swagger.v3.oas.annotations.Operation
 import jakarta.validation.Valid
 import kotlinx.coroutines.runBlocking
 import org.apache.logging.log4j.LogManager
@@ -38,7 +37,7 @@ class DataPointController(private val dataPointService: DataPointService) {
 
     @GetMapping
     @PreAuthorize("canManageDeployment(#deploymentId) or isInDeployment(#deploymentId)")
-    @Operation(tags = ["dataPoint/getAll.json"])
+    @ResponseStatus(HttpStatus.OK)
     fun getAll(
         @RequestParam(RequestParamName.PAGE, required = false) page: Int?,
         @RequestParam(RequestParamName.QUERY, required = false) query: String?,
@@ -52,7 +51,7 @@ class DataPointController(private val dataPointService: DataPointService) {
 
     @GetMapping(value = [GET_DATAPOINT_BY_ID])
     @PreAuthorize("canManageDeployment(#deploymentId) or isInDeployment(#deploymentId)")
-    @Operation(tags = ["dataPoint/getOne.json"])
+    @ResponseStatus(HttpStatus.OK)
     fun getOne(
         @PathVariable(PathVariableName.DEPLOYMENT_ID) deploymentId: UUID,
         @PathVariable(PathVariableName.DATA_POINT_ID) dataPointId: Int,
@@ -64,7 +63,6 @@ class DataPointController(private val dataPointService: DataPointService) {
     @PostMapping
     @PreAuthorize("isInDeployment(#deploymentId)")
     @ResponseStatus(HttpStatus.CREATED)
-    @Operation(tags = ["dataPoint/create.json"])
     fun create(
         @PathVariable(PathVariableName.DEPLOYMENT_ID) deploymentId: UUID,
         @RequestPart file: MultipartFile?,
@@ -76,7 +74,7 @@ class DataPointController(private val dataPointService: DataPointService) {
 
     @PostMapping(value = [BATCH])
     @PreAuthorize("isInDeployment(#deploymentId)")
-    @Operation(tags = ["dataPoint/createMany.json"])
+    @ResponseStatus(HttpStatus.OK)
     fun createMany(
         @PathVariable(PathVariableName.DEPLOYMENT_ID) deploymentId: UUID,
         @RequestPart file: MultipartFile,
@@ -87,7 +85,7 @@ class DataPointController(private val dataPointService: DataPointService) {
 
     @DeleteMapping(value = [GET_DATAPOINT_BY_ID])
     @PreAuthorize("canManageDeployment(#deploymentId) or isInDeploymentOfStudy(#deploymentId)")
-    @Operation(tags = ["dataPoint/delete.json"])
+    @ResponseStatus(HttpStatus.OK)
     fun delete(
         @PathVariable(PathVariableName.DEPLOYMENT_ID) deploymentId: UUID,
         @PathVariable(PathVariableName.DATA_POINT_ID) dataPointId: Int,
@@ -96,9 +94,14 @@ class DataPointController(private val dataPointService: DataPointService) {
         dataPointService.delete(dataPointId)
     }
 
+    /**
+     * Returns the total number of data points for the given deployment.
+     * In the request parameters, a `query` parameter can be used to filter the data.
+     * It accepts standard RSQL queries like the `getAll` endpoint. Can also be null.
+     */
     @GetMapping(value = [COUNT])
     @PreAuthorize("canManageDeployment(#deploymentId) or isInDeployment(#deploymentId)")
-    @Operation(tags = ["dataPoint/count.json"])
+    @ResponseStatus(HttpStatus.OK)
     fun count(
         @RequestParam(RequestParamName.QUERY, required = false) query: String?,
         @PathVariable(PathVariableName.DEPLOYMENT_ID, required = true) deploymentId: UUID,

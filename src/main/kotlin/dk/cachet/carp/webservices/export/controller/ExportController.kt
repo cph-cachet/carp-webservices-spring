@@ -8,6 +8,7 @@ import dk.cachet.carp.webservices.export.domain.Export
 import dk.cachet.carp.webservices.export.domain.dto.SummaryRequest
 import dk.cachet.carp.webservices.export.service.ExportService
 import dk.cachet.carp.webservices.study.domain.AnonymousParticipantRequest
+import io.swagger.v3.oas.annotations.Operation
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.core.io.Resource
@@ -16,6 +17,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.server.ResponseStatusException
 
 @RestController
 @RequestMapping(EXPORT_BASE)
@@ -42,6 +44,15 @@ class ExportController(
         @RequestBody request: SummaryRequest,
     ): Export {
         LOGGER.info("Start POST: $EXPORT_BASE$SUMMARIES")
+
+        try {
+            require(request.deploymentIds.isNullOrEmpty() || request.deploymentIds.size == 1) {
+                "We only support exporting an entire study or a single deployment," +
+                    " (deploymentsIds.size should be less than 2)."
+            }
+        } catch (e: IllegalArgumentException) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, e.message, e)
+        }
 
         val command = exportCommandFactory.createExportSummary(studyId, request.deploymentIds)
 
@@ -75,6 +86,8 @@ class ExportController(
 
     @GetMapping(DOWNLOAD)
     @PreAuthorize("canManageStudy( #studyId )")
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(description = "Download the export file.")
     fun download(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @PathVariable(PathVariableName.EXPORT_ID) exportId: UUID,
