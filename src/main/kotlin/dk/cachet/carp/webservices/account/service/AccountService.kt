@@ -45,4 +45,6 @@ interface AccountService {
         expirationSeconds: Long?,
         redirectUri: String?,
     ): Pair<UsernameAccountIdentity, String>
+
+    suspend fun getRedirectUris(): List<String>
 }
