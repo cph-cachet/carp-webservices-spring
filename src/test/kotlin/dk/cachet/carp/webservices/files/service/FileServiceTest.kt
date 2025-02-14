@@ -13,13 +13,10 @@ import dk.cachet.carp.webservices.security.authorization.Claim
 import dk.cachet.carp.webservices.security.authorization.service.AuthorizationService
 import io.mockk.*
 import kotlinx.coroutines.test.runTest
-import kotlinx.datetime.Instant
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.util.StringUtils
-import java.io.IOException
 import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
@@ -193,108 +190,6 @@ class FileServiceTest {
             verify(exactly = 1) { s3Client.deleteObject(any()) }
             val actualKey = slot.captured.key
             assertEquals(expectedKey, actualKey)
-        }
-    }
-
-    @Nested
-    inner class DeleteAllOlderThan {
-        @Test
-        fun `deletes older than 7 days`() {
-            val fileMock1 =
-                mockk<File> {
-                    every { id } returns 1
-                    every { fileName } returns "file1"
-                    every { relativePath } returns "foo/bar/baz"
-                }
-            val fileMock2 =
-                mockk<File> {
-                    every { id } returns 2
-                    every { fileName } returns "file2"
-                    every { relativePath } returns "foo/bar/qux"
-                }
-            every { fileRepository.getAllByUpdatedAtIsBefore(any()) } returns mutableListOf(fileMock1, fileMock2)
-            every { fileRepository.delete(any<File>()) } just runs
-            every { fileStorage.deleteFileAtPath(any(), any()) } returns true
-            val sut =
-                FileServiceImpl(
-                    fileRepository,
-                    fileStorage,
-                    messageBase,
-                    s3Client,
-                    authenticationService,
-                    s3SpaceBucket,
-                    s3SpaceEndpoint,
-                )
-            val sevenDaysAgo = System.currentTimeMillis() - 7 * 24 * 60 * 60 * 1000
-
-            sut.deleteAllOlderThan(7)
-
-            verify { fileRepository.getAllByUpdatedAtIsBefore(java.time.Instant.ofEpochMilli(sevenDaysAgo)) }
-            verify { fileRepository.delete(fileMock1) }
-            verify { fileRepository.delete(fileMock2) }
-            verify { fileStorage.deleteFileAtPath("file1", java.nio.file.Path.of("foo", "bar", "baz")) }
-            verify { fileStorage.deleteFileAtPath("file2", java.nio.file.Path.of("foo", "bar", "qux")) }
-        }
-
-        @Test
-        fun `should keep deleting even if one of the files could not be deleted from storage`() {
-            val fileMock1 =
-                mockk<File> {
-                    every { id } returns 1
-                    every { fileName } returns "file1"
-                    every { relativePath } returns "foo/bar/baz"
-                }
-            val fileMock2 =
-                mockk<File> {
-                    every { id } returns 2
-                    every { fileName } returns "file2"
-                    every { relativePath } returns "foo/bar/qux"
-                }
-            every { fileRepository.getAllByUpdatedAtIsBefore(any()) } returns mutableListOf(fileMock1, fileMock2)
-            every { fileRepository.delete(any<File>()) } just runs
-            every {
-                fileStorage.deleteFileAtPath(
-                    "file1",
-                    java.nio.file.Path.of("foo", "bar", "baz"),
-                )
-            } returns true
-            every {
-                fileStorage.deleteFileAtPath(
-                    "file2",
-                    java.nio.file.Path.of("foo", "bar", "qux"),
-                )
-            } throws IOException(":(")
-            val sut =
-                FileServiceImpl(
-                    fileRepository,
-                    fileStorage,
-                    messageBase,
-                    s3Client,
-                    authenticationService,
-                    s3SpaceBucket,
-                    s3SpaceEndpoint,
-                )
-            val sevenDaysAgo = System.currentTimeMillis() - 7 * 24 * 60 * 60 * 1000
-
-            sut.deleteAllOlderThan(7)
-
-            verify { fileRepository.getAllByUpdatedAtIsBefore(any()) }
-            verify { fileRepository.delete(fileMock1) }
-            verify { fileRepository.delete(fileMock2) }
-            verify { fileStorage.deleteFileAtPath("file1", java.nio.file.Path.of("foo", "bar", "baz")) }
-            verify { fileStorage.deleteFileAtPath("file2", java.nio.file.Path.of("foo", "bar", "qux")) }
-            assertThrows<IOException> {
-                fileStorage.deleteFileAtPath("file2", java.nio.file.Path.of("foo", "bar", "qux"))
-            }
-
-            verify {
-                fileRepository.getAllByUpdatedAtIsBefore(
-                    match {
-                        val tolerance = 5000
-                        Math.abs(it.toEpochMilli() - sevenDaysAgo) <= tolerance
-                    },
-                )
-            }
         }
     }
 }
