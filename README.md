@@ -96,6 +96,7 @@ Follow these steps to deploy CAWS:
        - `manage-users`
        - `view-users`
        - `query-users`
+       - `view-clients`
      - Note: this client is used by Spring to communicate with keycloak for managing accounts; if your application relies on a client that authorizes via the Keycloak service, you will need to create it depending on your application's requirements
    - Under `Users` add a new Admin user and assign the `system-admin` role to it. This user will be used to invite the first researcher. Can be deactivated afterward.
    - Under `Realm settings` -> `Email` configure the email settings. This is used to send out invitations to researchers/participants. The same email server can be used as the one specified in the [configuration file](src/main/resources/config/application-local.yml).
