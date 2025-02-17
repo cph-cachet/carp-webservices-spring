@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.assertThrows
 import kotlin.test.Test
 
-
 class AccountIdentitySerializerTest {
     private val validationMessage: MessageBase = mockk<MessageBase>()
     private val jsonGenerator = mockk<JsonGenerator>()
@@ -24,11 +23,16 @@ class AccountIdentitySerializerTest {
             every { jsonGenerator.writeRawValue(any<String>()) } returns Unit
             every { validationMessage.get(any()) } returns "err"
 
-            val sut = AccountIdentitySerializer(validationMessage);
+            val sut = AccountIdentitySerializer(validationMessage)
 
             sut.serialize(accountIdentity, jsonGenerator, null)
 
-            verify { jsonGenerator.writeRawValue("{\"__type\":\"dk.cachet.carp.common.application.users.EmailAccountIdentity\",\"emailAddress\":\"test@dtu.dk\"}") }
+            verify {
+                jsonGenerator.writeRawValue(
+                    "{\"__type\":\"dk.cachet.carp.common.application.users.EmailAccountIdentity\"," +
+                        "\"emailAddress\":\"test@dtu.dk\"}",
+                )
+            }
             verify(exactly = 0) { validationMessage.get(any()) }
         }
 

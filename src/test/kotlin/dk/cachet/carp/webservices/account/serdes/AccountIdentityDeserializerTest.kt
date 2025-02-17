@@ -17,13 +17,15 @@ class AccountIdentityDeserializerTest {
     inner class Deserialize {
         @Test
         fun `should deserialize valid JSON`() {
-            val validJsonString = "{\"__type\":\"dk.cachet.carp.common.application.users.EmailAccountIdentity\",\"emailAddress\":\"test@dtu.dk\"}"
+            val validJsonString =
+                "{\"__type\":\"dk.cachet.carp.common.application.users.EmailAccountIdentity\"," +
+                    "\"emailAddress\":\"test@dtu.dk\"}"
             every { jsonParser.codec.readTree<TreeNode>(jsonParser).toString() } returns validJsonString
             val sut = AccountIdentityDeserializer(validationMessage)
 
             val result = sut.deserialize(jsonParser, null)
 
-            val expectedAccountIdentity = AccountIdentity.fromEmailAddress("test@dtu.dk");
+            val expectedAccountIdentity = AccountIdentity.fromEmailAddress("test@dtu.dk")
             assertEquals(expectedAccountIdentity, result)
         }
 
@@ -43,7 +45,8 @@ class AccountIdentityDeserializerTest {
 
         @Test
         fun `should throw SerializationException if failed to retrieve json string`() {
-            every { jsonParser.codec.readTree<TreeNode>(jsonParser).toString() } throws RuntimeException("Forced failure")
+            every { jsonParser.codec.readTree<TreeNode>(jsonParser).toString() } throws
+                RuntimeException("Forced failure")
             every { validationMessage.get(any()) } returns "err"
             val sut = AccountIdentityDeserializer(validationMessage)
 
@@ -56,7 +59,9 @@ class AccountIdentityDeserializerTest {
 
         @Test
         fun `should throw SerializationException if failed to `() {
-            val invalidJsonString = "{\"__type\":\"dk.cachet!.carp.common.application.users.EmailAccountIdentity\",\"emailAddress\":\"test@dtu.dk\"}"
+            val invalidJsonString =
+                "{\"__type\":\"dk.cachet!.carp.common.application.users.EmailAccountIdentity\"," +
+                    "\"emailAddress\":\"test@dtu.dk\"}"
 
             every { jsonParser.codec.readTree<TreeNode>(jsonParser).toString() } returns invalidJsonString
             every { validationMessage.get(any()) } returns "err"

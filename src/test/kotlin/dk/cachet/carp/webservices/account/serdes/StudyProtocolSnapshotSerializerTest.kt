@@ -21,13 +21,14 @@ class StudyProtocolSnapshotSerializerTest {
     inner class Serialize {
         @Test
         fun `should serialize a StudyProtocolSnapshot`() {
-            val studyProtocolSnapshot = StudyProtocolSnapshot(
-                id = UUID.randomUUID(),
-                createdOn = Clock.System.now(),
-                version = 1,
-                ownerId = UUID.randomUUID(),
-                name = "name",
-            )
+            val studyProtocolSnapshot =
+                StudyProtocolSnapshot(
+                    id = UUID.randomUUID(),
+                    createdOn = Clock.System.now(),
+                    version = 1,
+                    ownerId = UUID.randomUUID(),
+                    name = "name",
+                )
             every { validationMessages.get(any()) } returns "err"
             every { jsonGenerator.writeRawValue(any<String>()) } returns Unit
 
@@ -36,7 +37,10 @@ class StudyProtocolSnapshotSerializerTest {
             sut.serialize(studyProtocolSnapshot, jsonGenerator, null)
 
             val expectedString =
-                """{"id":"${studyProtocolSnapshot.id}","createdOn":"${studyProtocolSnapshot.createdOn}","version":${studyProtocolSnapshot.version},"ownerId":"${studyProtocolSnapshot.ownerId}","name":"${studyProtocolSnapshot.name}"}"""
+                """{"id":"${studyProtocolSnapshot.id}","createdOn":"${studyProtocolSnapshot.createdOn}",
+                    |"version":${studyProtocolSnapshot.version},"ownerId":"${studyProtocolSnapshot.ownerId}",
+                    |"name":"${studyProtocolSnapshot.name}"}
+                """.trimMargin()
             verify { jsonGenerator.writeRawValue(expectedString) }
         }
 

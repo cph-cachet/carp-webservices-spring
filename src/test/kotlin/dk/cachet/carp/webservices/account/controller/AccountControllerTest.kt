@@ -106,11 +106,12 @@ class AccountControllerTest {
                 coEvery { accountService.hasRoleByEmail(any(), any()) } returns mockk()
                 val accountRequest = AccountRequest("address@domain.org", AccountRole.PARTICIPANT)
 
-                val resultActions: ResultActions = mockMvc.perform(
-                    post(endpoint)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(accountRequest)),
-                )
+                val resultActions: ResultActions =
+                    mockMvc.perform(
+                        post(endpoint)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(accountRequest)),
+                    )
 
                 resultActions.andExpect(status().isOk)
             }
@@ -121,11 +122,12 @@ class AccountControllerTest {
                 val accountRequest = AccountRequest("address@domain.org", AccountRole.PARTICIPANT)
                 coEvery { accountService.hasRoleByEmail(any(), any()) } returns false
 
-                val resultActions: ResultActions = mockMvc.perform(
-                    post(endpoint)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(accountRequest)),
-                )
+                val resultActions: ResultActions =
+                    mockMvc.perform(
+                        post(endpoint)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(accountRequest)),
+                    )
 
                 assertEquals(resultActions.andReturn().asyncResult.toString(), "<404 NOT_FOUND Not Found,[]>")
             }

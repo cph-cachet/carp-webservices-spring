@@ -315,10 +315,11 @@ class AccountServiceImplTest {
         fun `should throw if there is any VirtualClaims`() =
             runTest {
                 val accountIdentity = mockk<AccountIdentity>()
-                val claims = setOf(
-                    Claim.FileOwner(1),
-                    Claim.ManageDeployment(UUID.randomUUID()) // <- VirtualClaim
-                )
+                val claims =
+                    setOf(
+                        Claim.FileOwner(1),
+                        Claim.ManageDeployment(UUID.randomUUID()),
+                    )
                 val sut = AccountServiceImpl(issuerFacade)
 
                 assertFailsWith<UnsupportedOperationException> {
@@ -344,10 +345,11 @@ class AccountServiceImplTest {
             runTest {
                 val accountIdentity = mockk<AccountIdentity>()
                 val claims = setOf(Claim.FileOwner(1), Claim.FileOwner(2))
-                val account = Account(
-                    id = "id",
-                    carpClaims = emptySet()
-                )
+                val account =
+                    Account(
+                        id = "id",
+                        carpClaims = emptySet(),
+                    )
                 coEvery { issuerFacade.getAccount(any<AccountIdentity>()) } returns account
                 coEvery { issuerFacade.updateAccount(account) } returns account
                 val sut = AccountServiceImpl(issuerFacade)
@@ -364,10 +366,11 @@ class AccountServiceImplTest {
             runTest {
                 val accountIdentity = mockk<AccountIdentity>()
                 val claims = setOf(Claim.FileOwner(1), Claim.FileOwner(2))
-                val account = Account(
-                    id = "id",
-                    carpClaims = setOf(Claim.FileOwner(3))
-                )
+                val account =
+                    Account(
+                        id = "id",
+                        carpClaims = setOf(Claim.FileOwner(3)),
+                    )
                 coEvery { issuerFacade.getAccount(any<AccountIdentity>()) } returns account
                 coEvery { issuerFacade.updateAccount(account) } returns account
                 val sut = AccountServiceImpl(issuerFacade)
@@ -381,15 +384,16 @@ class AccountServiceImplTest {
     }
 
     @Nested
-    inner class Revoke{
+    inner class Revoke {
         @Test
         fun `should throw if there is any VirtualClaims`() =
             runTest {
                 val accountIdentity = mockk<AccountIdentity>()
-                val claims = setOf(
-                    Claim.FileOwner(1),
-                    Claim.ManageDeployment(UUID.randomUUID()) // <- VirtualClaim
-                )
+                val claims =
+                    setOf(
+                        Claim.FileOwner(1),
+                        Claim.ManageDeployment(UUID.randomUUID()),
+                    )
                 val sut = AccountServiceImpl(issuerFacade)
 
                 assertFailsWith<UnsupportedOperationException> {
@@ -415,10 +419,11 @@ class AccountServiceImplTest {
             runTest {
                 val accountIdentity = mockk<AccountIdentity>()
                 val claims = setOf(Claim.FileOwner(1), Claim.FileOwner(2))
-                val account = Account(
-                    id = "id",
-                    carpClaims = setOf(Claim.FileOwner(1), Claim.FileOwner(2), Claim.FileOwner(3))
-                )
+                val account =
+                    Account(
+                        id = "id",
+                        carpClaims = setOf(Claim.FileOwner(1), Claim.FileOwner(2), Claim.FileOwner(3)),
+                    )
                 coEvery { issuerFacade.getAccount(any<AccountIdentity>()) } returns account
                 coEvery { issuerFacade.updateAccount(account) } returns account
                 val sut = AccountServiceImpl(issuerFacade)
@@ -435,10 +440,11 @@ class AccountServiceImplTest {
             runTest {
                 val accountIdentity = mockk<AccountIdentity>()
                 val claims = setOf(Claim.FileOwner(1), Claim.FileOwner(2))
-                val account = Account(
-                    id = "id",
-                    carpClaims = emptySet()
-                )
+                val account =
+                    Account(
+                        id = "id",
+                        carpClaims = emptySet(),
+                    )
                 coEvery { issuerFacade.getAccount(any<AccountIdentity>()) } returns account
                 coEvery { issuerFacade.updateAccount(account) } returns account
                 val sut = AccountServiceImpl(issuerFacade)
