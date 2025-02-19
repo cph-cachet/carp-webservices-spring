@@ -1,20 +1,20 @@
 package dk.cachet.carp.webservices.datastream.controller
 
+import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.data.infrastructure.DataStreamServiceDecorator
 import dk.cachet.carp.data.infrastructure.DataStreamServiceRequest
-import dk.cachet.carp.webservices.datastream.service.DataStreamService
-import io.mockk.*
-import org.junit.jupiter.api.Nested
-import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.setup.MockMvcBuilders
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
-import kotlin.test.*
-import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.webservices.common.input.WS_JSON
+import dk.cachet.carp.webservices.datastream.service.DataStreamService
 import dk.cachet.carp.webservices.datastream.service.impl.compressData
+import io.mockk.*
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.Nested
 import org.springframework.http.MediaType
+import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import org.springframework.test.web.servlet.setup.MockMvcBuilders
+import kotlin.test.*
 
 class DataStreamControllerTest {
     private val dataStreamService: DataStreamService = mockk()
