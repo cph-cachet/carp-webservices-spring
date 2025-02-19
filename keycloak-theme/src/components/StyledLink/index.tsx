@@ -1,5 +1,5 @@
-import { ReactNode } from 'react';
-import StyledStyledLink from './styles';
+import { ReactNode } from "react";
+import StyledStyledLink from "./styles";
 
 type Props = {
   children: ReactNode;
@@ -9,7 +9,7 @@ type Props = {
 
 const StyledLink = ({ children, to, isBold }: Props) => {
   return (
-    <StyledStyledLink href={to} isBold={isBold} target='_blank'>
+    <StyledStyledLink href={to} isBold={isBold} target="_blank">
       {children}
     </StyledStyledLink>
   );

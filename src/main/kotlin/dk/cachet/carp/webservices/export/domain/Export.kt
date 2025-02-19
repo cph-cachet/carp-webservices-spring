@@ -19,6 +19,7 @@ data class Export(
     var status: ExportStatus = ExportStatus.UNKNOWN,
     var studyId: String = "",
     var type: ExportType = ExportType.UNKNOWN,
+    var relativePath: String = "",
 ) : Auditable()
 
 enum class ExportStatus {

@@ -6,7 +6,7 @@ const CarpButton = styled(Button)(({ theme }) => ({
   width: "100%",
   minHeight: 48,
   textTransform: "none",
-  textAlign: 'center',
+  textAlign: "center",
   fontSize: theme.typography.h2_web.fontSize,
   lineHeight: theme.typography.h2_web.lineHeight,
   fontWeight: theme.typography.h2_web.fontWeight,

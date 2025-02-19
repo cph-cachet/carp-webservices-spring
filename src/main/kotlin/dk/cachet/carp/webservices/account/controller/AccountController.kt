@@ -26,6 +26,7 @@ class AccountController(private val accountService: AccountService) {
         const val INVITE = "/invite"
         const val ROLE = "/role"
         const val ACCOUNT = "/{${PathVariableName.ACCOUNT_ID}}"
+        const val REDIRECT_URIS = "/redirect-uris"
     }
 
     @PostMapping(INVITE)
@@ -39,7 +40,6 @@ class AccountController(private val accountService: AccountService) {
     }
 
     @PostMapping(ROLE)
-    @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('RESEARCHER') and hasRole(#request.role)")
     suspend fun role(
         @Valid @RequestBody request: AccountRequest,
@@ -61,5 +61,13 @@ class AccountController(private val accountService: AccountService) {
     ): Account? {
         LOGGER.info("Start GET: $ACCOUNT_BASE$ACCOUNT")
         return accountService.findByUUID(accountId)
+    }
+
+    @GetMapping(REDIRECT_URIS)
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('RESEARCHER')")
+    suspend fun redirectUris(): List<String> {
+        LOGGER.info("Start GET: $ACCOUNT_BASE$REDIRECT_URIS")
+        return accountService.getRedirectUris()
     }
 }

@@ -1,5 +1,5 @@
 /// <reference types="react-scripts" />
-declare module '*.md' {
+declare module "*.md" {
   const src: string;
   export default src;
 }

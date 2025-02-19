@@ -1,5 +1,5 @@
-import { SnackbarType } from '../components/Snackbar';
-import { createContext, ReactNode, useContext, useState } from 'react';
+import { createContext, ReactNode, useContext, useState } from "react";
+import { SnackbarType } from "../components/Snackbar";
 
 type ProviderProps = {
   children: ReactNode;
@@ -21,13 +21,13 @@ export const useSnackbar = (): SnackbarContextType => {
 export const SnackbarProvider = ({ children }: ProviderProps) => {
   const [snackbarState, setSnackbarState] = useState<SnackbarType>({
     snackbarOpen: false,
-    snackbarType: 'error',
-    snackbarMessage: 'Unexpected error',
+    snackbarType: "error",
+    snackbarMessage: "Unexpected error",
   });
   const setSnackbarSuccess = (message: string) => {
     setSnackbarState({
       snackbarOpen: true,
-      snackbarType: 'success',
+      snackbarType: "success",
       snackbarMessage: message,
     });
   };
@@ -35,7 +35,7 @@ export const SnackbarProvider = ({ children }: ProviderProps) => {
   const setSnackbarError = (message: string) => {
     setSnackbarState({
       snackbarOpen: true,
-      snackbarType: 'error',
+      snackbarType: "error",
       snackbarMessage: message,
     });
   };

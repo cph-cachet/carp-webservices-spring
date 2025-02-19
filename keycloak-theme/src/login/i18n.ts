@@ -24,7 +24,8 @@ export const { useI18n } = createUseI18n({
     emailOrUsernameRequired: "Username or email is required",
     firstNameRequired: "First name is required",
     lastNameRequired: "Last name is required",
-    forgotPasswordInfo: "Enter your email address. If an account is found, a password reset link will be sent to your email.",
+    forgotPasswordInfo:
+      "Enter your email address. If an account is found, a password reset link will be sent to your email.",
     passwordMinLength: "Password must be at least 8 characters long",
     passwordRequired: "Password is required",
     passwordsDontMatch: "Passwords don't match",
@@ -50,7 +51,8 @@ export const { useI18n } = createUseI18n({
     emailOrUsernameRequired: "Brugernavn eller e-mail er påkrævet",
     firstNameRequired: "Fornavn er påkrævet",
     lastNameRequired: "Efternavn er påkrævet",
-    forgotPasswordInfo: "Indtast din e-mailadresse. Hvis en konto findes, sendes et link til nulstilling af adgangskode til din e-mail.",
+    forgotPasswordInfo:
+      "Indtast din e-mailadresse. Hvis en konto findes, sendes et link til nulstilling af adgangskode til din e-mail.",
     passwordMinLength: "Adgangskoden skal være mindst 8 tegn lang",
     passwordRequired: "Adgangskode er påkrævet",
     passwordsDontMatch: "Adgangskoderne matcher ikke",

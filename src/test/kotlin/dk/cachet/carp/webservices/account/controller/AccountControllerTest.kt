@@ -10,12 +10,14 @@ import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Nested
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import dk.cachet.carp.webservices.security.authorization.Role as AccountRole
 
 class AccountControllerTest {
@@ -104,12 +106,30 @@ class AccountControllerTest {
                 coEvery { accountService.hasRoleByEmail(any(), any()) } returns mockk()
                 val accountRequest = AccountRequest("address@domain.org", AccountRole.PARTICIPANT)
 
-                mockMvc.perform(
-                    post(endpoint)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(accountRequest)),
-                )
-                    .andExpect(status().isOk)
+                val resultActions: ResultActions =
+                    mockMvc.perform(
+                        post(endpoint)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(accountRequest)),
+                    )
+
+                resultActions.andExpect(status().isOk)
+            }
+
+        @Test
+        fun `should return 404 if role is not found`() =
+            runTest {
+                val accountRequest = AccountRequest("address@domain.org", AccountRole.PARTICIPANT)
+                coEvery { accountService.hasRoleByEmail(any(), any()) } returns false
+
+                val resultActions: ResultActions =
+                    mockMvc.perform(
+                        post(endpoint)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(accountRequest)),
+                    )
+
+                assertEquals(resultActions.andReturn().asyncResult.toString(), "<404 NOT_FOUND Not Found,[]>")
             }
     }
 

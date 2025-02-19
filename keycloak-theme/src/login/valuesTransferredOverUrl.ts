@@ -2,81 +2,13 @@ import {
   addParamToUrl,
   retrieveParamFromUrl,
   updateSearchBarUrl,
-} from 'powerhooks/tools/urlSearchParams';
-import { capitalize } from 'tsafe/capitalize';
-import { kcContext } from './kcContext';
+} from "powerhooks/tools/urlSearchParams";
+import { capitalize } from "tsafe/capitalize";
+import { kcContext } from "./kcContext";
 
-export const { foo, addFooToQueryParams } = (() => {
-  const queryParamName = 'foo';
-
-  type Type = { foo: number };
-
-  const value = (() => {
-    const unparsedValue = read({ queryParamName });
-
-    if (unparsedValue === undefined) {
-      return undefined;
-    }
-
-    return JSON.parse(unparsedValue) as Type;
-  })();
-
-  function addToUrlQueryParams(params: { url: string; value: Type }): string {
-    const { url, value } = params;
-
-    return addParamToUrl({
-      url,
-      name: queryParamName,
-      value: JSON.stringify(value),
-    }).newUrl;
-  }
-
-  const out = {
-    [queryParamName]: value,
-    [`add${capitalize(queryParamName)}ToQueryParams` as const]:
-      addToUrlQueryParams,
-  } as const;
-
-  return out;
-})();
-
-export const { bar, addBarToQueryParams } = (() => {
-  const queryParamName = 'bar';
-
-  type Type = string;
-
-  const value = (() => {
-    const unparsedValue = read({ queryParamName });
-
-    if (unparsedValue === undefined) {
-      return undefined;
-    }
-
-    return JSON.parse(unparsedValue) as Type;
-  })();
-
-  function addToUrlQueryParams(params: { url: string; value: Type }): string {
-    const { url, value } = params;
-
-    return addParamToUrl({
-      url,
-      name: queryParamName,
-      value: JSON.stringify(value),
-    }).newUrl;
-  }
-
-  const out = {
-    [queryParamName]: value,
-    [`add${capitalize(queryParamName)}ToQueryParams` as const]:
-      addToUrlQueryParams,
-  } as const;
-
-  return out;
-})();
-
-function read(params: { queryParamName: string }): string | undefined {
-  if (kcContext === undefined || process.env.NODE_ENV !== 'production') {
-    //NOTE: We do something only if we are really in Keycloak
+const read = (params: { queryParamName: string }): string | undefined => {
+  if (kcContext === undefined || process.env.NODE_ENV !== "production") {
+    // NOTE: We do something only if we are really in Keycloak
     return undefined;
   }
 
@@ -101,14 +33,88 @@ function read(params: { queryParamName: string }): string | undefined {
     return serializedValue;
   }
 
-  //Reading from local storage
+  // Reading from local storage
   const serializedValue = localStorage.getItem(queryParamName);
 
   if (serializedValue === null) {
     throw new Error(
-      `Missing ${queryParamName} in URL when redirecting to login page`
+      `Missing ${queryParamName} in URL when redirecting to login page`,
     );
   }
 
   return serializedValue;
-}
+};
+
+export const { foo, addFooToQueryParams } = (() => {
+  const queryParamName = "foo";
+
+  type Type = { foo: number };
+
+  const value = (() => {
+    const unparsedValue = read({ queryParamName });
+
+    if (unparsedValue === undefined) {
+      return undefined;
+    }
+
+    return JSON.parse(unparsedValue) as Type;
+  })();
+
+  const addToUrlQueryParams = (params: {
+    url: string;
+    value: Type;
+  }): string => {
+    const { url, value: v } = params;
+
+    return addParamToUrl({
+      url,
+      name: queryParamName,
+      value: JSON.stringify(v),
+    }).newUrl;
+  };
+
+  const out = {
+    [queryParamName]: value,
+    [`add${capitalize(queryParamName)}ToQueryParams` as const]:
+      addToUrlQueryParams,
+  } as const;
+
+  return out;
+})();
+
+export const { bar, addBarToQueryParams } = (() => {
+  const queryParamName = "bar";
+
+  type Type = string;
+
+  const value = (() => {
+    const unparsedValue = read({ queryParamName });
+
+    if (unparsedValue === undefined) {
+      return undefined;
+    }
+
+    return JSON.parse(unparsedValue) as Type;
+  })();
+
+  const addToUrlQueryParams = (params: {
+    url: string;
+    value: Type;
+  }): string => {
+    const { url, value: v } = params;
+
+    return addParamToUrl({
+      url,
+      name: queryParamName,
+      value: JSON.stringify(v),
+    }).newUrl;
+  };
+
+  const out = {
+    [queryParamName]: value,
+    [`add${capitalize(queryParamName)}ToQueryParams` as const]:
+      addToUrlQueryParams,
+  } as const;
+
+  return out;
+})();

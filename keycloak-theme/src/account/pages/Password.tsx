@@ -1,19 +1,19 @@
-import { useGetClassName } from 'keycloakify/account/lib/useGetClassName';
-import type { PageProps } from 'keycloakify/account/pages/PageProps';
-import { clsx } from 'keycloakify/tools/clsx';
-import type { I18n } from '../i18n';
-import type { KcContext } from '../kcContext';
+import { useGetClassName } from "keycloakify/account/lib/useGetClassName";
+import type { PageProps } from "keycloakify/account/pages/PageProps";
+import { clsx } from "keycloakify/tools/clsx";
+import type { I18n } from "../i18n";
+import type { KcContext } from "../kcContext";
 
-export default function LogoutConfirm(
-  props: PageProps<Extract<KcContext, { pageId: 'password.ftl' }>, I18n>
-) {
+const LogoutConfirm = (
+  props: PageProps<Extract<KcContext, { pageId: "password.ftl" }>, I18n>,
+) => {
   const { kcContext, i18n, doUseDefaultCss, Template, classes } = props;
 
   const { getClassName } = useGetClassName({
     doUseDefaultCss,
     classes: {
       ...classes,
-      kcBodyClass: clsx(classes?.kcBodyClass, 'password'),
+      kcBodyClass: clsx(classes?.kcBodyClass, "password"),
     },
   });
 
@@ -28,10 +28,10 @@ export default function LogoutConfirm(
     >
       <div className="row">
         <div className="col-md-10">
-          <h2>{msg('changePasswordHtmlTitle')}</h2>
+          <h2>{msg("changePasswordHtmlTitle")}</h2>
         </div>
         <div className="col-md-2 subtitle">
-          <span className="subtitle">{msg('allFieldsRequired')}</span>
+          <span className="subtitle">{msg("allFieldsRequired")}</span>
         </div>
       </div>
 
@@ -40,17 +40,17 @@ export default function LogoutConfirm(
           type="text"
           id="username"
           name="username"
-          value={account.username ?? ''}
+          value={account.username ?? ""}
           autoComplete="username"
           readOnly
-          style={{ display: 'none' }}
+          style={{ display: "none" }}
         />
 
         {password.passwordSet && (
           <div className="form-group">
             <div className="col-sm-2 col-md-2">
               <label htmlFor="password" className="control-label">
-                {msg('password')}
+                {msg("password")}
               </label>
             </div>
 
@@ -60,7 +60,6 @@ export default function LogoutConfirm(
                 className="form-control"
                 id="password"
                 name="password"
-                autoFocus
                 autoComplete="current-password"
               />
             </div>
@@ -77,7 +76,7 @@ export default function LogoutConfirm(
         <div className="form-group">
           <div className="col-sm-2 col-md-2">
             <label htmlFor="password-new" className="control-label">
-              {msg('passwordNew')}
+              {msg("passwordNew")}
             </label>
           </div>
 
@@ -98,7 +97,7 @@ export default function LogoutConfirm(
               htmlFor="password-confirm"
               className="control-label two-lines"
             >
-              {msg('passwordConfirm')}
+              {msg("passwordConfirm")}
             </label>
           </div>
 
@@ -122,14 +121,14 @@ export default function LogoutConfirm(
               <button
                 type="submit"
                 className={clsx(
-                  getClassName('kcButtonClass'),
-                  getClassName('kcButtonPrimaryClass'),
-                  getClassName('kcButtonLargeClass')
+                  getClassName("kcButtonClass"),
+                  getClassName("kcButtonPrimaryClass"),
+                  getClassName("kcButtonLargeClass"),
                 )}
                 name="submitAction"
                 value="Save"
               >
-                {msg('doSave')}
+                {msg("doSave")}
               </button>
             </div>
           </div>
@@ -137,4 +136,6 @@ export default function LogoutConfirm(
       </form>
     </Template>
   );
-}
+};
+
+export default LogoutConfirm;

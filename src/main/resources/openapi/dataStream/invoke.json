@@ -1,0 +1,131 @@
+{
+  "tags": [
+    "data-stream-controller"
+  ],
+  "description": "\n        The request body should be a serialized DataStreamServiceRequest (string).\n        The response body will also be serialized (string). The request-response mappings are as follows:\n        \n        - OpenDataStreams -\u003E Unit\n        - AppendToDataStreams -\u003E Unit\n        - GetDataStream -\u003E DataStreamBatch\n        - CloseDataStreams -\u003E Unit\n        - RemoveDataStreams -\u003E UUID[]\n    ",
+  "operationId": "invoke",
+  "requestBody": {
+    "content": {
+      "application/json": {
+        "schema": {
+          "oneOf": [
+            {
+              "$ref": "#/components/schemas/OpenDataStreams"
+            },
+            {
+              "$ref": "#/components/schemas/AppendToDataStreams"
+            },
+            {
+              "$ref": "#/components/schemas/GetDataStream"
+            },
+            {
+              "$ref": "#/components/schemas/CloseDataStreams"
+            },
+            {
+              "$ref": "#/components/schemas/RemoveDataStreams"
+            }
+          ]
+        }
+      }
+    },
+    "required": true
+  },
+  "responses": {
+    "400": {
+      "description": "Bad Request",
+      "content": {
+        "*/*": {
+          "schema": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/CarpErrorResponse"
+              },
+              {
+                "type": "object"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "403": {
+      "description": "Forbidden",
+      "content": {
+        "*/*": {
+          "schema": {
+            "$ref": "#/components/schemas/CarpErrorResponse"
+          }
+        }
+      }
+    },
+    "405": {
+      "description": "Method Not Allowed",
+      "content": {
+        "*/*": {
+          "schema": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "401": {
+      "description": "Unauthorized",
+      "content": {
+        "*/*": {
+          "schema": {
+            "$ref": "#/components/schemas/CarpErrorResponse"
+          }
+        }
+      }
+    },
+    "404": {
+      "description": "Not Found",
+      "content": {
+        "*/*": {
+          "schema": {
+            "$ref": "#/components/schemas/CarpErrorResponse"
+          }
+        }
+      }
+    },
+    "409": {
+      "description": "Conflict",
+      "content": {
+        "*/*": {
+          "schema": {
+            "$ref": "#/components/schemas/CarpErrorResponse"
+          }
+        }
+      }
+    },
+    "200": {
+      "description": "OK",
+      "content": {
+        "*/*": {
+          "schema": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Unit"
+              },
+              {
+                "$ref": "#/components/schemas/Unit"
+              },
+              {
+                "$ref": "#/components/schemas/DataStreamBatch"
+              },
+              {
+                "$ref": "#/components/schemas/Unit"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/UUID"
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}
