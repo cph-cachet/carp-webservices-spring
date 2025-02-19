@@ -31,7 +31,7 @@ class DataStreamControllerTest {
 
     @Nested
     inner class Invoke {
-        val url_path = "/api/data-stream-service"
+        val urlPath = "/api/data-stream-service"
 
         @Test
         fun `should invoke`() {
@@ -43,7 +43,7 @@ class DataStreamControllerTest {
                 coEvery { core.closeDataStreams(any()) } returns Unit
 
                 mockMvc.perform(
-                    post(url_path).contentType(MediaType.APPLICATION_JSON).content(serializedRequest),
+                    post(urlPath).contentType(MediaType.APPLICATION_JSON).content(serializedRequest),
                 ).andExpect(status().isOk)
 
                 coVerify { core.closeDataStreams(mockUuids) }
@@ -53,7 +53,7 @@ class DataStreamControllerTest {
 
     @Nested
     inner class HandleCompressedData {
-        val url_path = "/api/data-stream-service-zip"
+        val urlPath = "/api/data-stream-service-zip"
 
         @Test
         fun `should invoke`() {
@@ -66,7 +66,7 @@ class DataStreamControllerTest {
                 coEvery { core.closeDataStreams(any()) } returns Unit
 
                 mockMvc.perform(
-                    post(url_path).contentType(MediaType.APPLICATION_OCTET_STREAM).content(compressedData),
+                    post(urlPath).contentType(MediaType.APPLICATION_OCTET_STREAM).content(compressedData),
                 ).andExpect(status().isOk)
 
                 coVerify { core.closeDataStreams(mockUuids) }

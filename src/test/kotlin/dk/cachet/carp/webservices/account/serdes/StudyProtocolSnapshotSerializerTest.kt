@@ -37,10 +37,9 @@ class StudyProtocolSnapshotSerializerTest {
             sut.serialize(studyProtocolSnapshot, jsonGenerator, null)
 
             val expectedString =
-                """{"id":"${studyProtocolSnapshot.id}","createdOn":"${studyProtocolSnapshot.createdOn}",
-                    |"version":${studyProtocolSnapshot.version},"ownerId":"${studyProtocolSnapshot.ownerId}",
-                    |"name":"${studyProtocolSnapshot.name}"}
-                """.trimMargin()
+                """{"id":"${studyProtocolSnapshot.id}","createdOn":"${studyProtocolSnapshot
+                    .createdOn}","version":${studyProtocolSnapshot.version},"ownerId":"${studyProtocolSnapshot
+                    .ownerId}","name":"${studyProtocolSnapshot.name}"}"""
             verify { jsonGenerator.writeRawValue(expectedString) }
         }
 
