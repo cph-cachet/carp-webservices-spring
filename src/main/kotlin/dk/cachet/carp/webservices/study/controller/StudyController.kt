@@ -70,8 +70,8 @@ class StudyController(
     @ResponseStatus(HttpStatus.OK)
     suspend fun getParticipantAccounts(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
-        @RequestParam(name = RequestParamName.OFFSET, required = false, defaultValue = "0") offset: Int,
-        @RequestParam(name = RequestParamName.LIMIT, required = false, defaultValue = "-1") limit: Int,
+        @RequestParam(name = RequestParamName.OFFSET, required = false) offset: Int?,
+        @RequestParam(name = RequestParamName.LIMIT, required = false) limit: Int?,
     ): List<Account> {
         LOGGER.info("Start GET: /api/studies/$studyId/participants/accounts")
         return recruitmentService.getParticipants(studyId, offset, limit)

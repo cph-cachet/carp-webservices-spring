@@ -1,5 +1,6 @@
 package dk.cachet.carp.webservices.study.repository
 
+import dk.cachet.carp.webservices.security.authentication.domain.Account
 import dk.cachet.carp.webservices.study.domain.Recruitment
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
@@ -19,4 +20,24 @@ interface RecruitmentRepository : JpaRepository<Recruitment, Int> {
         value = "DELETE FROM recruitments WHERE snapshot->>'studyId' = ?1",
     )
     fun deleteByStudyId(studyId: String)
+
+    @Query(
+        value = """
+            SELECT jsonb_agg(elem) AS participants_with_limit_and_offset
+            FROM (
+                SELECT elem
+                FROM public.recruitments, 
+                     jsonb_array_elements(snapshot->'participants') WITH ORDINALITY arr(elem, idx)
+                WHERE snapshot->>'studyId' = :studyId
+                ORDER BY idx
+                LIMIT :limit OFFSET :offset
+            ) subquery
+        """,
+        nativeQuery = true
+    )
+    fun findParticipantsByStudyIdWithPagination(
+        studyId: String,
+        offset: Int?,
+        limit: Int?
+    ): String?
 }
