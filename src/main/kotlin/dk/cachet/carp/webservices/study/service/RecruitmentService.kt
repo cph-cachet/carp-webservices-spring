@@ -23,6 +23,7 @@ interface RecruitmentService {
         studyId: UUID,
         offset: Int?,
         limit: Int?,
+        search: String?,
     ): List<Account>
 
     suspend fun getInactiveDeployments(

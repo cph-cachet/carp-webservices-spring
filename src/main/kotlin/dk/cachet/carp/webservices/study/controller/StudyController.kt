@@ -72,9 +72,10 @@ class StudyController(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @RequestParam(name = RequestParamName.OFFSET, required = false) offset: Int?,
         @RequestParam(name = RequestParamName.LIMIT, required = false) limit: Int?,
+        @RequestParam(name = RequestParamName.SEARCH, required = false) search: String?,
     ): List<Account> {
         LOGGER.info("Start GET: /api/studies/$studyId/participants/accounts")
-        return recruitmentService.getParticipants(studyId, offset, limit)
+        return recruitmentService.getParticipants(studyId, offset, limit, search)
     }
 
     @GetMapping(value = [RESEARCHERS])

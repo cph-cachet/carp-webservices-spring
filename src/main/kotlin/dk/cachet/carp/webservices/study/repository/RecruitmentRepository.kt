@@ -29,6 +29,11 @@ interface RecruitmentRepository : JpaRepository<Recruitment, Int> {
                 FROM public.recruitments, 
                      jsonb_array_elements(snapshot->'participants') WITH ORDINALITY arr(elem, idx)
                 WHERE snapshot->>'studyId' = :studyId
+                AND (
+                    :search IS NULL 
+                    OR elem->'accountIdentity'->>'username' ILIKE '%' || :search || '%'
+                    OR elem->'accountIdentity'->>'emailAddress' ILIKE '%' || :search || '%'
+                )
                 ORDER BY idx
                 LIMIT :limit OFFSET :offset
             ) subquery
@@ -38,6 +43,7 @@ interface RecruitmentRepository : JpaRepository<Recruitment, Int> {
     fun findParticipantsByStudyIdWithPagination(
         studyId: String,
         offset: Int?,
-        limit: Int?
+        limit: Int?,
+        search: String?,
     ): String?
 }
