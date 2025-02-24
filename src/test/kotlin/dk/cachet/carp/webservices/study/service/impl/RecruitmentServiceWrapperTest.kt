@@ -25,7 +25,7 @@ import kotlin.test.*
 class RecruitmentServiceWrapperTest {
     private val accountService: AccountService = mockk()
     private val dataStreamService: DataStreamService = mockk()
-    private val objectMapper : ObjectMapper = mockk()
+    private val objectMapper: ObjectMapper = mockk()
     private val recruitmentRepository: RecruitmentRepository = mockk()
     val services: CoreServiceContainer =
         mockk<CoreServiceContainer> {
@@ -49,13 +49,14 @@ class RecruitmentServiceWrapperTest {
                 coEvery { accountService.invite(ofType<EmailAccountIdentity>(), Role.RESEARCHER) } returns mockAccount
                 coEvery { accountService.grant(ofType<EmailAccountIdentity>(), any()) } returns mockAccount
 
-                val sut = RecruitmentServiceWrapper(
-                    accountService,
-                    dataStreamService,
-                    recruitmentRepository,
-                    objectMapper,
-                    services
-                )
+                val sut =
+                    RecruitmentServiceWrapper(
+                        accountService,
+                        dataStreamService,
+                        recruitmentRepository,
+                        objectMapper,
+                        services,
+                    )
 
                 sut.inviteResearcher(mockStudyId, mockEmail)
 
@@ -80,13 +81,14 @@ class RecruitmentServiceWrapperTest {
                 coEvery { accountService.invite(ofType<EmailAccountIdentity>(), Role.RESEARCHER) } returns mockAccount
                 coEvery { accountService.grant(ofType<EmailAccountIdentity>(), any()) } returns mockAccount
 
-                val sut = RecruitmentServiceWrapper(
-                    accountService,
-                    dataStreamService,
-                    recruitmentRepository,
-                    objectMapper,
-                    services
-                )
+                val sut =
+                    RecruitmentServiceWrapper(
+                        accountService,
+                        dataStreamService,
+                        recruitmentRepository,
+                        objectMapper,
+                        services,
+                    )
 
                 sut.inviteResearcher(mockStudyId, mockEmail)
 
@@ -111,13 +113,14 @@ class RecruitmentServiceWrapperTest {
                 coEvery { accountService.invite(ofType<EmailAccountIdentity>(), Role.RESEARCHER) } returns mockAccount
                 coEvery { accountService.grant(ofType<EmailAccountIdentity>(), any()) } returns mockAccount
 
-                val sut = RecruitmentServiceWrapper(
-                    accountService,
-                    dataStreamService,
-                    recruitmentRepository,
-                    objectMapper,
-                    services
-                )
+                val sut =
+                    RecruitmentServiceWrapper(
+                        accountService,
+                        dataStreamService,
+                        recruitmentRepository,
+                        objectMapper,
+                        services,
+                    )
 
                 assertFailsWith<NullPointerException> {
                     sut.inviteResearcher(mockStudyId, mockEmail)
@@ -143,14 +146,14 @@ class RecruitmentServiceWrapperTest {
                 coEvery { accountService.invite(ofType<EmailAccountIdentity>(), Role.RESEARCHER) } returns mockAccount
                 coEvery { accountService.grant(ofType<EmailAccountIdentity>(), any()) } returns mockAccount
 
-                val sut = RecruitmentServiceWrapper(
-                    accountService,
-                    dataStreamService,
-                    recruitmentRepository,
-                    objectMapper,
-                    services
-                )
-
+                val sut =
+                    RecruitmentServiceWrapper(
+                        accountService,
+                        dataStreamService,
+                        recruitmentRepository,
+                        objectMapper,
+                        services,
+                    )
 
                 sut.inviteResearcher(mockStudyId, mockEmail)
 
@@ -176,14 +179,14 @@ class RecruitmentServiceWrapperTest {
 
                 coEvery { accountService.revoke(ofType<EmailAccountIdentity>(), any()) } returns mockAccount
 
-                val sut = RecruitmentServiceWrapper(
-                    accountService,
-                    dataStreamService,
-                    recruitmentRepository,
-                    objectMapper,
-                    services
-                )
-
+                val sut =
+                    RecruitmentServiceWrapper(
+                        accountService,
+                        dataStreamService,
+                        recruitmentRepository,
+                        objectMapper,
+                        services,
+                    )
 
                 val result = sut.removeResearcher(mockStudyId, mockEmail)
 
@@ -204,14 +207,14 @@ class RecruitmentServiceWrapperTest {
 
                 coEvery { accountService.revoke(ofType<EmailAccountIdentity>(), any()) } returns mockAccount
 
-                val sut = RecruitmentServiceWrapper(
-                    accountService,
-                    dataStreamService,
-                    recruitmentRepository,
-                    objectMapper,
-                    services
-                )
-
+                val sut =
+                    RecruitmentServiceWrapper(
+                        accountService,
+                        dataStreamService,
+                        recruitmentRepository,
+                        objectMapper,
+                        services,
+                    )
 
                 val result = sut.removeResearcher(mockStudyId, mockEmail)
 
@@ -247,21 +250,24 @@ class RecruitmentServiceWrapperTest {
                         mockStudyId.stringRepresentation,
                         null,
                         null,
-                        null
+                        null,
                     )
                 } returns serializedMockParticipants
-                coEvery { objectMapper.readValue(serializedMockParticipants, ofType<TypeReference<List<Participant>>>())} returns mockParticipants
+                coEvery {
+                    objectMapper.readValue(serializedMockParticipants, ofType<TypeReference<List<Participant>>>())
+                } returns mockParticipants
                 coEvery { accountService.findByAccountIdentity(ai1) } returns a1
                 coEvery { accountService.findByAccountIdentity(ai2) } returns a2
                 coEvery { accountService.findByAccountIdentity(ai3) } returns a3
 
-                val sut = RecruitmentServiceWrapper(
-                    accountService,
-                    dataStreamService,
-                    recruitmentRepository,
-                    objectMapper,
-                    services
-                )
+                val sut =
+                    RecruitmentServiceWrapper(
+                        accountService,
+                        dataStreamService,
+                        recruitmentRepository,
+                        objectMapper,
+                        services,
+                    )
 
                 val result = sut.getParticipants(mockStudyId, null, null, null)
 
@@ -292,19 +298,27 @@ class RecruitmentServiceWrapperTest {
                 val mockParticipants = listOf(p1, p2, p3)
                 val serializedMockParticipants = "serialized listOf(p1, p2, p3)"
 
-                coEvery { recruitmentRepository.findParticipantsByStudyIdWithPagination(mockStudyId.stringRepresentation, null, null, null) } returns serializedMockParticipants
-                coEvery { objectMapper.readValue(serializedMockParticipants, ofType<TypeReference<List<Participant>>>())} returns mockParticipants
+                coEvery {
+                    recruitmentRepository.findParticipantsByStudyIdWithPagination(
+                        mockStudyId.stringRepresentation,
+                        null, null, null,
+                    )
+                } returns serializedMockParticipants
+                coEvery {
+                    objectMapper.readValue(serializedMockParticipants, ofType<TypeReference<List<Participant>>>())
+                } returns mockParticipants
                 coEvery { accountService.findByAccountIdentity(ai1) } returns a1
                 coEvery { accountService.findByAccountIdentity(ai2) } returns null
                 coEvery { accountService.findByAccountIdentity(ai3) } returns a3
 
-                val sut = RecruitmentServiceWrapper(
-                    accountService,
-                    dataStreamService,
-                    recruitmentRepository,
-                    objectMapper,
-                    services
-                )
+                val sut =
+                    RecruitmentServiceWrapper(
+                        accountService,
+                        dataStreamService,
+                        recruitmentRepository,
+                        objectMapper,
+                        services,
+                    )
 
                 val result = sut.getParticipants(mockStudyId, null, null, null)
 
@@ -352,14 +366,14 @@ class RecruitmentServiceWrapperTest {
                 coEvery { dataStreamService.getLatestUpdatedAt(mockSdId1) } returns mockInstant1
                 coEvery { dataStreamService.getLatestUpdatedAt(mockSdId2) } returns mockInstant2
 
-                val sut = RecruitmentServiceWrapper(
-                    accountService,
-                    dataStreamService,
-                    recruitmentRepository,
-                    objectMapper,
-                    services
-                )
-
+                val sut =
+                    RecruitmentServiceWrapper(
+                        accountService,
+                        dataStreamService,
+                        recruitmentRepository,
+                        objectMapper,
+                        services,
+                    )
 
                 val result = sut.getInactiveDeployments(mockStudyId, 0, 0, 0)
 
@@ -383,14 +397,14 @@ class RecruitmentServiceWrapperTest {
                     services.recruitmentService.getParticipantGroupStatusList(mockStudyId)
                 } returns mockParticipantGroupStatusList
 
-                val sut = RecruitmentServiceWrapper(
-                    accountService,
-                    dataStreamService,
-                    recruitmentRepository,
-                    objectMapper,
-                    services
-                )
-
+                val sut =
+                    RecruitmentServiceWrapper(
+                        accountService,
+                        dataStreamService,
+                        recruitmentRepository,
+                        objectMapper,
+                        services,
+                    )
 
                 val result = sut.getInactiveDeployments(mockStudyId, 0, 0, 0)
                 assertEquals(0, result.size)
@@ -420,14 +434,14 @@ class RecruitmentServiceWrapperTest {
 
                 coEvery { dataStreamService.getLatestUpdatedAt(mockSdId1) } returns mockInstant1
 
-                val sut = RecruitmentServiceWrapper(
-                    accountService,
-                    dataStreamService,
-                    recruitmentRepository,
-                    objectMapper,
-                    services
-                )
-
+                val sut =
+                    RecruitmentServiceWrapper(
+                        accountService,
+                        dataStreamService,
+                        recruitmentRepository,
+                        objectMapper,
+                        services,
+                    )
 
                 val result = sut.getInactiveDeployments(mockStudyId, 0, 0, 0)
                 assertEquals(0, result.size)
@@ -457,14 +471,14 @@ class RecruitmentServiceWrapperTest {
 
                 coEvery { dataStreamService.getLatestUpdatedAt(mockSdId1) } returns mockInstant1
 
-                val sut = RecruitmentServiceWrapper(
-                    accountService,
-                    dataStreamService,
-                    recruitmentRepository,
-                    objectMapper,
-                    services
-                )
-
+                val sut =
+                    RecruitmentServiceWrapper(
+                        accountService,
+                        dataStreamService,
+                        recruitmentRepository,
+                        objectMapper,
+                        services,
+                    )
 
                 val result = sut.getInactiveDeployments(mockStudyId, 1, 0, 0)
                 assertEquals(0, result.size)
@@ -492,14 +506,14 @@ class RecruitmentServiceWrapperTest {
                 } returns mockParticipantGroupStatusList
                 coEvery { dataStreamService.getLatestUpdatedAt(mockSdId1) } returns mockInstant1
 
-                val sut = RecruitmentServiceWrapper(
-                    accountService,
-                    dataStreamService,
-                    recruitmentRepository,
-                    objectMapper,
-                    services
-                )
-
+                val sut =
+                    RecruitmentServiceWrapper(
+                        accountService,
+                        dataStreamService,
+                        recruitmentRepository,
+                        objectMapper,
+                        services,
+                    )
 
                 val result = sut.getInactiveDeployments(mockStudyId, 0, 0, 0)
                 assertEquals(0, result.size)
@@ -540,14 +554,14 @@ class RecruitmentServiceWrapperTest {
                 coEvery { dataStreamService.getLatestUpdatedAt(mockSdId1) } returns mockInstant1
                 coEvery { dataStreamService.getLatestUpdatedAt(mockSdId2) } returns mockInstant2
 
-                val sut = RecruitmentServiceWrapper(
-                    accountService,
-                    dataStreamService,
-                    recruitmentRepository,
-                    objectMapper,
-                    services
-                )
-
+                val sut =
+                    RecruitmentServiceWrapper(
+                        accountService,
+                        dataStreamService,
+                        recruitmentRepository,
+                        objectMapper,
+                        services,
+                    )
 
                 val result = sut.getInactiveDeployments(mockStudyId, 0, 0, 0)
 
@@ -591,14 +605,14 @@ class RecruitmentServiceWrapperTest {
                 coEvery { dataStreamService.getLatestUpdatedAt(mockSdId1) } returns mockInstant1
                 coEvery { dataStreamService.getLatestUpdatedAt(mockSdId2) } returns mockInstant2
 
-                val sut = RecruitmentServiceWrapper(
-                    accountService,
-                    dataStreamService,
-                    recruitmentRepository,
-                    objectMapper,
-                    services
-                )
-
+                val sut =
+                    RecruitmentServiceWrapper(
+                        accountService,
+                        dataStreamService,
+                        recruitmentRepository,
+                        objectMapper,
+                        services,
+                    )
 
                 val result = sut.getInactiveDeployments(mockStudyId, 0, 1, 1)
 
@@ -626,19 +640,28 @@ class RecruitmentServiceWrapperTest {
                 val a2 = Account(email = ai2.emailAddress.address, id = UUID.randomUUID().stringRepresentation)
 
                 val mockParticipants = listOf(p1, p2)
+                val serializedMockParticipants = "serialized listOf(p1, p2)"
 
-                coEvery { services.recruitmentService.getParticipants(mockStudyId) } returns mockParticipants
+                coEvery {
+                    objectMapper.readValue(serializedMockParticipants, ofType<TypeReference<List<Participant>>>())
+                } returns mockParticipants
+                coEvery {
+                    recruitmentRepository.findParticipantsByStudyIdWithPagination(
+                        mockStudyId.stringRepresentation,
+                        any(), any(), any(),
+                    )
+                } returns serializedMockParticipants
                 coEvery { accountService.findByAccountIdentity(ai1) } returns a1
                 coEvery { accountService.findByAccountIdentity(ai2) } returns a2
 
-                val sut = RecruitmentServiceWrapper(
-                    accountService,
-                    dataStreamService,
-                    recruitmentRepository,
-                    objectMapper,
-                    services
-                )
-
+                val sut =
+                    RecruitmentServiceWrapper(
+                        accountService,
+                        dataStreamService,
+                        recruitmentRepository,
+                        objectMapper,
+                        services,
+                    )
 
                 val result = sut.isParticipant(mockStudyId, mockAccountId)
 
@@ -662,19 +685,28 @@ class RecruitmentServiceWrapperTest {
                 val a2 = Account(email = ai2.emailAddress.address, id = UUID.randomUUID().stringRepresentation)
 
                 val mockParticipants = listOf(p1, p2)
+                val serializedMockParticipants = "serialized listOf(p1, p2)"
 
-                coEvery { services.recruitmentService.getParticipants(mockStudyId) } returns mockParticipants
+                coEvery {
+                    objectMapper.readValue(serializedMockParticipants, ofType<TypeReference<List<Participant>>>())
+                } returns mockParticipants
+                coEvery {
+                    recruitmentRepository.findParticipantsByStudyIdWithPagination(
+                        mockStudyId.stringRepresentation,
+                        any(), any(), any(),
+                    )
+                } returns serializedMockParticipants
                 coEvery { accountService.findByAccountIdentity(ai1) } returns a1
                 coEvery { accountService.findByAccountIdentity(ai2) } returns a2
 
-                val sut = RecruitmentServiceWrapper(
-                    accountService,
-                    dataStreamService,
-                    recruitmentRepository,
-                    objectMapper,
-                    services
-                )
-
+                val sut =
+                    RecruitmentServiceWrapper(
+                        accountService,
+                        dataStreamService,
+                        recruitmentRepository,
+                        objectMapper,
+                        services,
+                    )
 
                 val result = sut.isParticipant(mockStudyId, mockAccountId)
 
@@ -710,14 +742,14 @@ class RecruitmentServiceWrapperTest {
                 } returns mockParticipantGroupStatusList
                 coEvery { dataStreamService.getLatestUpdatedAt(any()) } returns Instant.fromEpochSeconds(0)
 
-                val sut = RecruitmentServiceWrapper(
-                    accountService,
-                    dataStreamService,
-                    recruitmentRepository,
-                    objectMapper,
-                    services
-                )
-
+                val sut =
+                    RecruitmentServiceWrapper(
+                        accountService,
+                        dataStreamService,
+                        recruitmentRepository,
+                        objectMapper,
+                        services,
+                    )
 
                 val result = sut.getParticipantGroupsStatus(mockStudyId)
 
@@ -754,14 +786,14 @@ class RecruitmentServiceWrapperTest {
                 } returns mockParticipantGroupStatusList
                 coEvery { dataStreamService.getLatestUpdatedAt(any()) } returns Instant.fromEpochSeconds(0)
 
-                val sut = RecruitmentServiceWrapper(
-                    accountService,
-                    dataStreamService,
-                    recruitmentRepository,
-                    objectMapper,
-                    services
-                )
-
+                val sut =
+                    RecruitmentServiceWrapper(
+                        accountService,
+                        dataStreamService,
+                        recruitmentRepository,
+                        objectMapper,
+                        services,
+                    )
 
                 val result = sut.getParticipantGroupsStatus(mockStudyId)
 
@@ -785,14 +817,14 @@ class RecruitmentServiceWrapperTest {
 
                 coEvery { services.recruitmentService.getParticipantGroupStatusList(mockStudyId) } returns pgsList
 
-                val sut = RecruitmentServiceWrapper(
-                    accountService,
-                    dataStreamService,
-                    recruitmentRepository,
-                    objectMapper,
-                    services
-                )
-
+                val sut =
+                    RecruitmentServiceWrapper(
+                        accountService,
+                        dataStreamService,
+                        recruitmentRepository,
+                        objectMapper,
+                        services,
+                    )
 
                 val result = sut.getParticipantGroupsStatus(mockStudyId)
 

@@ -83,11 +83,21 @@ class RecruitmentServiceWrapper(
         search: String?,
     ): List<Account> =
         withContext(Dispatchers.IO + SecurityCoroutineContext()) {
-            val serializedParticipants = recruitmentRepository.findParticipantsByStudyIdWithPagination(studyId.stringRepresentation, offset, limit, search)
+            val serializedParticipants =
+                recruitmentRepository.findParticipantsByStudyIdWithPagination(
+                    studyId.stringRepresentation,
+                    offset,
+                    limit,
+                    search,
+                )
 
             if (serializedParticipants.isNullOrEmpty()) return@withContext emptyList()
 
-            val participants = objectMapper.readValue(serializedParticipants, object : TypeReference<List<Participant>>() {})
+            val participants =
+                objectMapper.readValue(
+                    serializedParticipants,
+                    object : TypeReference<List<Participant>>() {},
+                )
 
             val accounts = arrayListOf<Account>()
             for (participant in participants) {

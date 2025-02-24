@@ -1,6 +1,5 @@
 package dk.cachet.carp.webservices.study.repository
 
-import dk.cachet.carp.webservices.security.authentication.domain.Account
 import dk.cachet.carp.webservices.study.domain.Recruitment
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
@@ -38,7 +37,7 @@ interface RecruitmentRepository : JpaRepository<Recruitment, Int> {
                 LIMIT :limit OFFSET :offset
             ) subquery
         """,
-        nativeQuery = true
+        nativeQuery = true,
     )
     fun findParticipantsByStudyIdWithPagination(
         studyId: String,
