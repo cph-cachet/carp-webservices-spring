@@ -146,7 +146,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webflux")
 
     // GSON Library
-    implementation("com.google.code.gson:gson:2.10.1")
+    implementation("com.google.code.gson:gson:${property("gsonVersion")}")
 
     // Apache Commons Compress
     implementation("org.apache.commons:commons-compress:${property("commonsCompressVersion")}")
