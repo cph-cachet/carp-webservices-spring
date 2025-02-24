@@ -50,7 +50,12 @@ class CoreStudyRepositoryTest {
                         ownerId = mockUUID2,
                         name = "name",
                         description = "description",
-                        invitation = StudyInvitation("name", "description", UUID.randomUUID().stringRepresentation),
+                        invitation =
+                            StudyInvitation(
+                                "name",
+                                "description",
+                                UUID.randomUUID().stringRepresentation,
+                            ),
                         protocolSnapshot = null,
                         isLive = false,
                     )
@@ -486,7 +491,12 @@ class CoreStudyRepositoryTest {
                         ownerId = mockUUID1,
                         name = "name",
                         description = "description",
-                        invitation = StudyInvitation("name", "description", UUID.randomUUID().stringRepresentation),
+                        invitation =
+                            StudyInvitation(
+                                "name",
+                                "description",
+                                UUID.randomUUID().stringRepresentation,
+                            ),
                         protocolSnapshot = null,
                         isLive = false,
                     )
@@ -521,7 +531,10 @@ class CoreStudyRepositoryTest {
                     studyRepository.save(
                         match {
                             val snapshot = WS_JSON.decodeFromString(StudySnapshot.serializer(), it.snapshot.toString())
-                            snapshot.id == mockStudySnapshot.id && snapshot.ownerId == mockStudySnapshot.ownerId && snapshot.name == mockStudySnapshot.name && snapshot.description == mockStudySnapshot.description && snapshot.invitation.name == mockStudySnapshot.invitation.name
+                            snapshot.id == mockStudySnapshot.id && snapshot.ownerId == mockStudySnapshot.ownerId &&
+                                snapshot.name == mockStudySnapshot.name &&
+                                snapshot.description == mockStudySnapshot.description &&
+                                snapshot.invitation.name == mockStudySnapshot.invitation.name
                         },
                     )
                 }
@@ -544,7 +557,12 @@ class CoreStudyRepositoryTest {
                     ownerId = mockUUID,
                     name = "name",
                     description = "description",
-                    invitation = StudyInvitation("name", "description", UUID.randomUUID().stringRepresentation),
+                    invitation =
+                        StudyInvitation(
+                            "name",
+                            "description",
+                            UUID.randomUUID().stringRepresentation,
+                        ),
                     protocolSnapshot = null,
                     isLive = false,
                 )
@@ -557,7 +575,12 @@ class CoreStudyRepositoryTest {
                     ownerId = mockUUID,
                     name = "name",
                     description = "description",
-                    invitation = StudyInvitation("name", "description", UUID.randomUUID().stringRepresentation),
+                    invitation =
+                        StudyInvitation(
+                            "name",
+                            "description",
+                            UUID.randomUUID().stringRepresentation,
+                        ),
                     protocolSnapshot = null,
                     isLive = false,
                 )
@@ -574,7 +597,12 @@ class CoreStudyRepositoryTest {
                 }
 
             every {
-                studyRepository.findAllByStudyIds(listOf(mockUUID1.stringRepresentation, mockUUID2.stringRepresentation))
+                studyRepository.findAllByStudyIds(
+                    listOf(
+                        mockUUID1.stringRepresentation,
+                        mockUUID2.stringRepresentation,
+                    ),
+                )
             } returns listOf(study1, study2)
 
             val coreStudyRepository =
