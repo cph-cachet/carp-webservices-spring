@@ -36,7 +36,7 @@ import java.nio.file.Path
 @Service
 @Transactional
 // Extract S3 methods into a separate service
-@Suppress("LongParameterList")
+@Suppress("LongParameterList", "TooManyFunctions")
 class FileServiceImpl(
     private val fileRepository: FileRepository,
     private val fileStorage: FileStorage,

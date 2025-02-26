@@ -114,7 +114,7 @@ dependencies {
 //    implementation("org.springframework.cloud:spring-cloud-starter-bootstrap:${property("springCloudStarterVersion")}")
 
     // SPRINGDOC
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:${property("springdocVersion")}")
 
     // RSQL
     implementation("cz.jirutka.rsql:rsql-parser:${property("rsqlParserVersion")}")
