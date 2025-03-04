@@ -272,8 +272,7 @@ class KeycloakFacade(
                 .awaitBody<List<Map<String, Any>>>()
 
         val wsClientRepresentation = clientRepresentations.first { it["clientId"] == clientId }
-
-        return wsClientRepresentation["redirectUris"] as? List<String> ?: emptyList()
+        return (wsClientRepresentation["redirectUris"] as? List<*>)?.filterIsInstance<String>() ?: emptyList()
     }
 
     private suspend fun queryAll(query: String): List<Account> {
