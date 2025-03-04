@@ -116,7 +116,8 @@ class FileController(private val fileService: FileService, private val authentic
 
     @PostMapping(UPLOAD_IMAGE)
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
+//    @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
+    @PreAuthorize("permitAll()")
     fun uploadS3(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @RequestParam(RequestParamName.IMAGE, required = true) image: MultipartFile,

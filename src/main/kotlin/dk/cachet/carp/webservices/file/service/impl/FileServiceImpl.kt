@@ -1,11 +1,5 @@
 package dk.cachet.carp.webservices.file.service.impl
 
-import com.amazonaws.services.s3.AmazonS3
-import com.amazonaws.services.s3.AmazonS3URI
-import com.amazonaws.services.s3.model.CannedAccessControlList
-import com.amazonaws.services.s3.model.DeleteObjectRequest
-import com.amazonaws.services.s3.model.ObjectMetadata
-import com.amazonaws.services.s3.model.PutObjectRequest
 import com.fasterxml.jackson.databind.ObjectMapper
 import cz.jirutka.rsql.parser.RSQLParser
 import dk.cachet.carp.common.application.UUID
@@ -30,6 +24,12 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.StringUtils
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.util.UriComponentsBuilder
+import software.amazon.awssdk.core.sync.RequestBody
+import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest
+import software.amazon.awssdk.services.s3.model.GetBucketAclRequest
+import software.amazon.awssdk.services.s3.model.ObjectCannedACL
+import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import java.nio.file.Files
 import java.nio.file.Path
 
@@ -41,7 +41,7 @@ class FileServiceImpl(
     private val fileRepository: FileRepository,
     private val fileStorage: FileStorage,
     private val validateMessages: MessageBase,
-    private val s3Client: AmazonS3,
+    private val s3Client: S3Client,
     private val authenticationService: AuthenticationService,
     @Value("\${s3.space.bucket}") private val s3SpaceBucket: String,
     @Value("\${s3.space.endpoint}") private val s3SpaceEndpoint: String,
@@ -195,39 +195,41 @@ class FileServiceImpl(
         val extension = StringUtils.getFilenameExtension(file.originalFilename)
         val filename = "${UUID.randomUUID().stringRepresentation}.$extension"
 
-        val metadata = ObjectMetadata()
-        metadata.contentLength = file.inputStream.available().toLong()
+        val metadata = mutableMapOf<String, String>()
+        metadata["Content-Length"] = file.size.toString()
 
         if (!file.contentType.isNullOrEmpty()) {
-            metadata.contentType = file.contentType
+            metadata["Content-Type"] = file.contentType!!
         }
 
-        s3Client.putObject(
-            PutObjectRequest(
-                s3SpaceBucket,
-                filename,
-                file.inputStream,
-                metadata,
-            ).withCannedAcl(CannedAccessControlList.PublicRead),
-        )
+
+        val rey: GetBucketAclRequest = GetBucketAclRequest.builder().bucket(s3SpaceBucket).build()
+
+        val request = PutObjectRequest.builder()
+            .bucket(s3SpaceBucket)
+            .key(filename)
+            .metadata(metadata)
+            .acl(ObjectCannedACL.PUBLIC_READ)
+            .ifNoneMatch("*")
+            .build()
+
+        s3Client.putObject(request, RequestBody.fromInputStream(file.inputStream, file.size))
 
         return UriComponentsBuilder.fromUriString(s3SpaceEndpoint).pathSegment(s3SpaceBucket).pathSegment(filename)
             .build().toUriString()
     }
 
     override fun deleteImage(url: String) {
-        val uri: AmazonS3URI
-        try {
-            uri = AmazonS3URI(url.replaceBefore(s3SpaceBucket, ""))
-            LOGGER.info("Deleting s3 resource with uri: $url")
-        } catch (e: IllegalArgumentException) {
-            LOGGER.warn("Ignoring deletion of malformed s3 uri: $url", e)
-            return
-        }
+        val key = url.replaceBefore("$s3SpaceBucket/", "")
 
-        s3Client.deleteObject(
-            DeleteObjectRequest(s3SpaceBucket, uri.key),
-        )
+        LOGGER.info("Deleting s3 resource with uri: $url")
+
+        val deleteRequest = DeleteObjectRequest.builder()
+            .bucket(s3SpaceBucket)
+            .key(key)
+            .build()
+
+        s3Client.deleteObject(deleteRequest)
     }
 
     override val dataFileName = "files.json"
