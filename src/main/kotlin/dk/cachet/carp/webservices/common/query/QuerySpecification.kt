@@ -4,6 +4,7 @@ import cz.jirutka.rsql.parser.ast.ComparisonOperator
 import cz.jirutka.rsql.parser.ast.RSQLOperators
 import jakarta.persistence.criteria.*
 import org.springframework.data.jpa.domain.Specification
+import org.springframework.lang.Nullable
 import java.time.Instant
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
@@ -67,7 +68,7 @@ class QuerySpecification<T>(
     @Suppress("LongMethod", "CyclomaticComplexMethod")
     override fun toPredicate(
         root: Root<T>,
-        query: CriteriaQuery<*>,
+        @Nullable query: CriteriaQuery<*>?,
         builder: CriteriaBuilder,
     ): Predicate? {
         // If this is a nested query, explode the string into its constituent parts and build an Expression.
