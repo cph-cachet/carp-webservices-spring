@@ -14,39 +14,18 @@ import java.net.URI
 class S3Config(
     @Value("\${s3.space.key}") private val key: String,
     @Value("\${s3.space.secret}") private val secret: String,
-    @Value("\${s3.space.endpoint}") private val endpoint: String,
-    @Value("\${s3.space.region}") private val region: String,
+    @Value("\${s3.space.endpoint}") private val endpoint: String, // without bucketname in front
 ) {
     @Bean
     fun s3Client(): S3Client {
         val credentials = AwsBasicCredentials.create(key, secret)
+        val region = "us-east-1" // required by DigitalOcean for some setup
 
         return S3Client.builder()
             .endpointOverride(URI.create(endpoint))
             .region(Region.of(region))
             .credentialsProvider(StaticCredentialsProvider.create(credentials))
-            .serviceConfiguration(S3Configuration.builder().pathStyleAccessEnabled(true).build())
-//            .overrideConfiguration { config ->
-//                config.putAdvancedOption(SdkAdvancedClientOption.SIGNER, AwsS3V4Signer.create()) // Enforce SigV4
-//            }
-//            .forcePathStyle(true)
+            .serviceConfiguration(S3Configuration.builder().pathStyleAccessEnabled(false).build())
             .build()
-
-
-//        return S3Client.builder()
-//            .endpointOverride(URI.create(endpoint))  // Required for DigitalOcean
-//            .region(Region.of(region))
-//            .credentialsProvider(StaticCredentialsProvider.create(credentials))
-//            .serviceConfiguration(
-//                S3Configuration.builder()
-//                    .pathStyleAccessEnabled(true)  // DigitalOcean requires path-style URLs
-//                    .checksumValidationEnabled(false) // Avoid checksum issues with non-AWS providers
-//                    .build()
-//            )
-//            .forcePathStyle(true) // Ensures path-style requests
-//            .overrideConfiguration { config ->
-//                config.putAdvancedOption(SdkAdvancedClientOption.SIGNER, AwsS3V4Signer.create()) // Enforce SigV4
-//            }
-//            .build()
     }
 }
