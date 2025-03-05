@@ -163,7 +163,7 @@ class FileServiceTest {
             every { s3Client.deleteObject(any<DeleteObjectRequest>()) } returns mockk()
             val url =
                 "https://carp-dev.fra1.digitaloceanspaces.com/studies/c424c83d-9e33-4482-b8ff-5ecc095a6de2/" +
-                        "59a66f4a-6bd4-4800-82f7-d89504672f9e.png"
+                    "59a66f4a-6bd4-4800-82f7-d89504672f9e.png"
             val sut =
                 FileServiceImpl(
                     fileRepository,

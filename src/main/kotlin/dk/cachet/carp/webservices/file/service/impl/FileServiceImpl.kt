@@ -41,7 +41,7 @@ class FileServiceImpl(
     private val validateMessages: MessageBase,
     private val s3Client: S3Client,
     private val authenticationService: AuthenticationService,
-    @Value("\${s3.space.bucket}") private val s3SpaceBucket: String, //no slashes in bucketname allowed
+    @Value("\${s3.space.bucket}") private val s3SpaceBucket: String, // no slashes in bucketname allowed
     @Value("\${s3.space.endpoint}") private val s3SpaceEndpoint: String,
 ) : FileService, ResourceExporter<File> {
     companion object {
