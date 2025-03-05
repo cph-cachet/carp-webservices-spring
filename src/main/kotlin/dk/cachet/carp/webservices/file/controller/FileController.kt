@@ -116,13 +116,12 @@ class FileController(private val fileService: FileService, private val authentic
 
     @PostMapping(UPLOAD_IMAGE)
     @ResponseStatus(HttpStatus.CREATED)
-//    @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
-    @PreAuthorize("permitAll()")
+    @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
     fun uploadS3(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @RequestParam(RequestParamName.IMAGE, required = true) image: MultipartFile,
     ): String {
         LOGGER.info("Start PUT: /api/studies/$studyId/images")
-        return fileService.uploadImage(image)
+        return fileService.uploadImage(image, studyId.stringRepresentation)
     }
 }

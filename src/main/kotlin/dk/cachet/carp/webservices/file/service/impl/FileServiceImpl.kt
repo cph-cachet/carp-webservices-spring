@@ -23,11 +23,9 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.StringUtils
 import org.springframework.web.multipart.MultipartFile
-import org.springframework.web.util.UriComponentsBuilder
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest
-import software.amazon.awssdk.services.s3.model.GetBucketAclRequest
 import software.amazon.awssdk.services.s3.model.ObjectCannedACL
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import java.nio.file.Files
@@ -43,7 +41,7 @@ class FileServiceImpl(
     private val validateMessages: MessageBase,
     private val s3Client: S3Client,
     private val authenticationService: AuthenticationService,
-    @Value("\${s3.space.bucket}") private val s3SpaceBucket: String,
+    @Value("\${s3.space.bucket}") private val s3SpaceBucket: String, //no slashes in bucketname allowed
     @Value("\${s3.space.endpoint}") private val s3SpaceEndpoint: String,
 ) : FileService, ResourceExporter<File> {
     companion object {
@@ -191,43 +189,44 @@ class FileServiceImpl(
      * @param file The [file] is the file that needs to be uploaded
      * @return The url where you can access the content
      */
-    override fun uploadImage(file: MultipartFile): String {
-        val extension = StringUtils.getFilenameExtension(file.originalFilename)
-        val filename = "${UUID.randomUUID().stringRepresentation}.$extension"
+    override fun uploadImage(
+        file: MultipartFile,
+        studyId: String,
+    ): String {
+        val fileExtension = StringUtils.getFilenameExtension(file.originalFilename)
+        val key = "studies/$studyId/${UUID.randomUUID().stringRepresentation}.$fileExtension"
+        val fileMetadata = mutableMapOf<String, String>()
 
-        val metadata = mutableMapOf<String, String>()
-        metadata["Content-Length"] = file.size.toString()
+        fileMetadata["Content-Length"] = file.size.toString()
 
         if (!file.contentType.isNullOrEmpty()) {
-            metadata["Content-Type"] = file.contentType!!
+            fileMetadata["Content-Type"] = file.contentType!!
         }
 
-
-        val rey: GetBucketAclRequest = GetBucketAclRequest.builder().bucket(s3SpaceBucket).build()
-
-        val request = PutObjectRequest.builder()
-            .bucket(s3SpaceBucket)
-            .key(filename)
-            .metadata(metadata)
-            .acl(ObjectCannedACL.PUBLIC_READ)
-            .ifNoneMatch("*")
-            .build()
+        val request =
+            PutObjectRequest.builder()
+                .bucket(s3SpaceBucket)
+                .key(key)
+                .metadata(fileMetadata)
+                .acl(ObjectCannedACL.PUBLIC_READ)
+                .ifNoneMatch("*")
+                .build()
 
         s3Client.putObject(request, RequestBody.fromInputStream(file.inputStream, file.size))
 
-        return UriComponentsBuilder.fromUriString(s3SpaceEndpoint).pathSegment(s3SpaceBucket).pathSegment(filename)
-            .build().toUriString()
+        return "https://$s3SpaceBucket.${s3SpaceEndpoint.removePrefix("https://")}/$key"
     }
 
     override fun deleteImage(url: String) {
-        val key = url.replaceBefore("$s3SpaceBucket/", "")
+        val key = url.substringAfter("${s3SpaceEndpoint.removePrefix("https://")}/", "")
 
         LOGGER.info("Deleting s3 resource with uri: $url")
 
-        val deleteRequest = DeleteObjectRequest.builder()
-            .bucket(s3SpaceBucket)
-            .key(key)
-            .build()
+        val deleteRequest =
+            DeleteObjectRequest.builder()
+                .bucket(s3SpaceBucket)
+                .key(key)
+                .build()
 
         s3Client.deleteObject(deleteRequest)
     }

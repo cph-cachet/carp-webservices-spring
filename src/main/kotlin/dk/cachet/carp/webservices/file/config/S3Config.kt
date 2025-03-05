@@ -14,7 +14,9 @@ import java.net.URI
 class S3Config(
     @Value("\${s3.space.key}") private val key: String,
     @Value("\${s3.space.secret}") private val secret: String,
-    @Value("\${s3.space.endpoint}") private val endpoint: String, // without bucketname in front
+    @Value(
+        "\${s3.space.endpoint}",
+    ) private val endpoint: String, // without bucketname in front e.g. https://fra1.digitaloceanspaces.com
 ) {
     @Bean
     fun s3Client(): S3Client {
