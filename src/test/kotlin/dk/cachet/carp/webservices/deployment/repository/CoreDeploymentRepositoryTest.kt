@@ -79,11 +79,11 @@ class CoreDeploymentRepositoryTest {
             primaryDevice.put("__type", "dk.cachet.carp.common.application.devices.WebBrowser")
             primaryDevice.put("roleName", "ICAT Web Browser")
             primaryDevice.put("isPrimaryDevice", true)
-            primaryDevice.put("defaultSamplingConfiguration", om.createObjectNode())
+            primaryDevice.set<ObjectNode>("defaultSamplingConfiguration", om.createObjectNode())
 
             studyProtocolSnapshot.putArray("primaryDevices").add(primaryDevice)
 
-            studyDeployment.put("studyProtocolSnapshot", studyProtocolSnapshot)
+            studyDeployment.set<ObjectNode>("studyProtocolSnapshot", studyProtocolSnapshot)
 
             return studyDeployment
         }

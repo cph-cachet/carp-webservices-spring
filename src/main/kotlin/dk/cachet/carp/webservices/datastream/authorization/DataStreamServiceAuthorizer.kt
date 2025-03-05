@@ -20,9 +20,9 @@ class DataStreamServiceAuthorizer(
             is DataStreamServiceRequest.GetDataStream ->
                 auth.require(Claim.InDeployment(dataStream.studyDeploymentId))
             is DataStreamServiceRequest.CloseDataStreams ->
-                auth.require(studyDeploymentIds.map { Claim.ManageDeployment(it) }.toSet())
+                auth.require(studyDeploymentIds.map { Claim.InDeployment(it) }.toSet())
             is DataStreamServiceRequest.RemoveDataStreams ->
-                auth.require(studyDeploymentIds.map { Claim.ManageDeployment(it) }.toSet())
+                auth.require(studyDeploymentIds.map { Claim.InDeployment(it) }.toSet())
         }
 
     override suspend fun DataStreamServiceRequest<*>.changeClaimsOnSuccess(result: Any?) =
