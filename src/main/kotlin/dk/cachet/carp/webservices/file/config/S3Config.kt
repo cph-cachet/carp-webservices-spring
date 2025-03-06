@@ -14,6 +14,7 @@ import java.net.URI
 class S3Config(
     @Value("\${s3.space.key}") private val key: String,
     @Value("\${s3.space.secret}") private val secret: String,
+    @Value("\${s3.space.region}") private val region: String,
     @Value(
         "\${s3.space.endpoint}",
     ) private val endpoint: String, // without bucketname in front e.g. https://fra1.digitaloceanspaces.com
@@ -21,7 +22,6 @@ class S3Config(
     @Bean
     fun s3Client(): S3Client {
         val credentials = AwsBasicCredentials.create(key, secret)
-        val region = "us-east-1" // required by DigitalOcean for some setup
 
         return S3Client.builder()
             .endpointOverride(URI.create(endpoint))

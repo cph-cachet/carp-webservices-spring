@@ -205,6 +205,7 @@ s3:
     secret: "${S3_SECRET}"
     endpoint: "${S3_ENDPOINT}"
     bucket: "${S3_BUCKET}"
+    region: "${S3_REGION}"
 
 management:
   endpoints:
