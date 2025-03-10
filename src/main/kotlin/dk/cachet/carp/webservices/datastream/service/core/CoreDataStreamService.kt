@@ -73,6 +73,10 @@ class CoreDataStreamService(
             },
         ) { "The batch contains a sequence with a data stream which wasn't configured for this study deployment." }
 
+        check(
+            !configOptional.get().closed,
+        ) { "Data streams for study deployment with ID ${studyDeploymentId.stringRepresentation} have been closed." }
+
         val dataStreams = MutableDataStreamBatchDecorator()
 
         // appending sequences to batch
