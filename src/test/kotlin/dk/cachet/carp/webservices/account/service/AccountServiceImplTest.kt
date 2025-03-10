@@ -8,14 +8,13 @@ import dk.cachet.carp.webservices.account.service.impl.AccountServiceImpl
 import dk.cachet.carp.webservices.security.authentication.domain.Account
 import dk.cachet.carp.webservices.security.authentication.oauth2.IssuerFacade
 import dk.cachet.carp.webservices.security.authentication.oauth2.issuers.keycloak.domain.RequiredActions
+import dk.cachet.carp.webservices.security.authorization.Claim
 import dk.cachet.carp.webservices.security.authorization.Role
 import io.mockk.*
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Nested
 import org.springframework.web.reactive.function.client.WebClientResponseException
-import kotlin.test.Test
-import kotlin.test.assertFailsWith
-import kotlin.test.expect
+import kotlin.test.*
 
 class AccountServiceImplTest {
     private val issuerFacade: IssuerFacade = mockk()
@@ -202,6 +201,36 @@ class AccountServiceImplTest {
     }
 
     @Nested
+    inner class FindAllByClaim {
+        @Test
+        fun `should return accounts by role`() =
+            runTest {
+                val claim = mockk<Claim>()
+                val mockAccounts = listOf(mockk<Account>())
+                coEvery { issuerFacade.getAllByClaim(any()) } returns mockAccounts
+                val sut = AccountServiceImpl(issuerFacade)
+
+                val result = sut.findAllByClaim(claim)
+
+                coVerify(exactly = 1) { issuerFacade.getAllByClaim(claim) }
+                expect(mockAccounts) { result }
+            }
+
+        @Test
+        fun `should return empty collection if an exception occurs`() =
+            runTest {
+                val claim = mockk<Claim>()
+                coEvery { issuerFacade.getAllByClaim(any()) } throws Exception()
+                val sut = AccountServiceImpl(issuerFacade)
+
+                val result = sut.findAllByClaim(claim)
+
+                coVerify(exactly = 1) { issuerFacade.getAllByClaim(claim) }
+                expect(emptyList()) { result }
+            }
+    }
+
+    @Nested
     inner class HasRoleByEmail {
         @Test
         fun `should relay the task to issuerFacade`() =
@@ -277,6 +306,173 @@ class AccountServiceImplTest {
 
                 coVerify(exactly = 1) { issuerFacade.getAccount(accountIdentity) }
                 coVerify(exactly = 1) { issuerFacade.addRole(mockAccount, role) }
+            }
+    }
+
+    @Nested
+    inner class Grant {
+        @Test
+        fun `should throw if there is any VirtualClaims`() =
+            runTest {
+                val accountIdentity = mockk<AccountIdentity>()
+                val claims =
+                    setOf(
+                        Claim.FileOwner(1),
+                        Claim.ManageDeployment(UUID.randomUUID()),
+                    )
+                val sut = AccountServiceImpl(issuerFacade)
+
+                assertFailsWith<UnsupportedOperationException> {
+                    sut.grant(accountIdentity, claims)
+                }
+            }
+
+        @Test
+        fun `should throw if any of the returned accounts is null`() =
+            runTest {
+                val accountIdentity = mockk<AccountIdentity>()
+                val claims = setOf(Claim.FileOwner(1))
+                coEvery { issuerFacade.getAccount(any<AccountIdentity>()) } returns null
+                val sut = AccountServiceImpl(issuerFacade)
+
+                assertFailsWith<IllegalArgumentException> {
+                    sut.grant(accountIdentity, claims)
+                }
+            }
+
+        @Test
+        fun `should grant the claims to the account and return the updated account 1`() =
+            runTest {
+                val accountIdentity = mockk<AccountIdentity>()
+                val claims = setOf(Claim.FileOwner(1), Claim.FileOwner(2))
+                val account =
+                    Account(
+                        id = "id",
+                        carpClaims = emptySet(),
+                    )
+                coEvery { issuerFacade.getAccount(any<AccountIdentity>()) } returns account
+                coEvery { issuerFacade.updateAccount(account) } returns account
+                val sut = AccountServiceImpl(issuerFacade)
+
+                val result = sut.grant(accountIdentity, claims)
+
+                coVerify(exactly = 1) { issuerFacade.getAccount(accountIdentity) }
+                assertEquals(account.carpClaims, claims)
+                assertEquals(result.carpClaims?.size, 2)
+            }
+
+        @Test
+        fun `should grant the claims to the account and return the updated account 2`() =
+            runTest {
+                val accountIdentity = mockk<AccountIdentity>()
+                val claims = setOf(Claim.FileOwner(1), Claim.FileOwner(2))
+                val account =
+                    Account(
+                        id = "id",
+                        carpClaims = setOf(Claim.FileOwner(3)),
+                    )
+                coEvery { issuerFacade.getAccount(any<AccountIdentity>()) } returns account
+                coEvery { issuerFacade.updateAccount(account) } returns account
+                val sut = AccountServiceImpl(issuerFacade)
+
+                val result = sut.grant(accountIdentity, claims)
+
+                coVerify(exactly = 1) { issuerFacade.getAccount(accountIdentity) }
+                assertEquals(account.carpClaims, setOf(Claim.FileOwner(3), Claim.FileOwner(1), Claim.FileOwner(2)))
+                assertEquals(result.carpClaims?.size, 3)
+            }
+    }
+
+    @Nested
+    inner class Revoke {
+        @Test
+        fun `should throw if there is any VirtualClaims`() =
+            runTest {
+                val accountIdentity = mockk<AccountIdentity>()
+                val claims =
+                    setOf(
+                        Claim.FileOwner(1),
+                        Claim.ManageDeployment(UUID.randomUUID()),
+                    )
+                val sut = AccountServiceImpl(issuerFacade)
+
+                assertFailsWith<UnsupportedOperationException> {
+                    sut.revoke(accountIdentity, claims)
+                }
+            }
+
+        @Test
+        fun `should throw if any of the returned accounts is null`() =
+            runTest {
+                val accountIdentity = mockk<AccountIdentity>()
+                val claims = setOf(Claim.FileOwner(1))
+                coEvery { issuerFacade.getAccount(any<AccountIdentity>()) } returns null
+                val sut = AccountServiceImpl(issuerFacade)
+
+                assertFailsWith<IllegalArgumentException> {
+                    sut.revoke(accountIdentity, claims)
+                }
+            }
+
+        @Test
+        fun `should revoke the claims from the account and return the updated account 1`() =
+            runTest {
+                val accountIdentity = mockk<AccountIdentity>()
+                val claims = setOf(Claim.FileOwner(1), Claim.FileOwner(2))
+                val account =
+                    Account(
+                        id = "id",
+                        carpClaims = setOf(Claim.FileOwner(1), Claim.FileOwner(2), Claim.FileOwner(3)),
+                    )
+                coEvery { issuerFacade.getAccount(any<AccountIdentity>()) } returns account
+                coEvery { issuerFacade.updateAccount(account) } returns account
+                val sut = AccountServiceImpl(issuerFacade)
+
+                val result = sut.revoke(accountIdentity, claims)
+
+                coVerify(exactly = 1) { issuerFacade.getAccount(accountIdentity) }
+                assertEquals(account.carpClaims, setOf(Claim.FileOwner(3)))
+                assertEquals(result.carpClaims?.size, 1)
+            }
+
+        @Test
+        fun `should revoke the claims from the account and return the updated account 2`() =
+            runTest {
+                val accountIdentity = mockk<AccountIdentity>()
+                val claims = setOf(Claim.FileOwner(1), Claim.FileOwner(2))
+                val account =
+                    Account(
+                        id = "id",
+                        carpClaims = emptySet(),
+                    )
+                coEvery { issuerFacade.getAccount(any<AccountIdentity>()) } returns account
+                coEvery { issuerFacade.updateAccount(account) } returns account
+                val sut = AccountServiceImpl(issuerFacade)
+
+                val result = sut.revoke(accountIdentity, claims)
+
+                coVerify(exactly = 1) { issuerFacade.getAccount(accountIdentity) }
+                assertEquals(account.carpClaims, emptySet())
+                assertEquals(result.carpClaims?.size, 0)
+            }
+    }
+
+    @Nested
+    inner class GenerateAnonymousAccount {
+        @Test
+        fun `should return a pair of UsernameAccountIdentity and a password`() =
+            runTest {
+                val expirationSeconds = 3600L
+                val redirectUri = "http://localhost:8080"
+                val account = mockk<Account>()
+                coEvery { issuerFacade.createAccount(any()) } returns account
+                coEvery { issuerFacade.recoverAccount(account, redirectUri, expirationSeconds) } returns "foo"
+                val sut = AccountServiceImpl(issuerFacade)
+
+                val result = sut.generateAnonymousAccount(expirationSeconds, redirectUri)
+
+                coVerify(exactly = 1) { issuerFacade.createAccount(any()) }
+                assertTrue { result.first.username.toString().length == UUID.randomUUID().stringRepresentation.length }
             }
     }
 }
