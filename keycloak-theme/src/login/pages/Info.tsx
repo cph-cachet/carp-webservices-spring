@@ -3,19 +3,19 @@ import { Box, Typography } from "@mui/material";
 import type { PageProps } from "keycloakify/login/pages/PageProps";
 import { assert } from "keycloakify/tools/assert";
 import type { I18n } from "../i18n";
-import type { KcContext } from "../kcContext";
+import type { KcContext } from "../KcContext";
 import CarpButton from "../../components/Buttons/AuthActionButton/styles";
 
 const Info = (
-  props: PageProps<Extract<KcContext, { pageId: "info.ftl" }>, I18n>,
+  props: PageProps<Extract<KcContext, { pageId: "info.ftl" }>, I18n>
 ) => {
   const { kcContext, i18n, doUseDefaultCss, Template, classes } = props;
 
-  const { msgStr } = i18n;
+  const { advancedMsgStr, msgStr } = i18n;
 
   assert(
     kcContext.message !== undefined,
-    "No message in kcContext.message, there will always be a message in production context, add it in your mock",
+    "No message in kcContext.message, there will always be a message in production context, add it in your mock"
   );
 
   const {
@@ -33,10 +33,20 @@ const Info = (
       {...{ kcContext, i18n, doUseDefaultCss, classes }}
       displayMessage={false}
       headerNode={
-        messageHeader !== undefined ? (
-          <Typography variant="h1">{messageHeader}</Typography>
+        messageHeader !== "<Message header>" ? (
+          <>{messageHeader}</> // ✅ Apply translation
+        ) : message?.summary ? (
+          <>
+              {message.type === "info"
+                ? ("Information")
+                : message.type === "warning"
+                ? "Warning"
+                : message.type === "error"
+                ? "Error"
+                : "Notification"}
+          </>
         ) : (
-          <Typography variant="h1">{message.summary}</Typography>
+          <Typography variant="h2">Info</Typography>
         )
       }
     >
@@ -47,7 +57,7 @@ const Info = (
             <b>
               {requiredActions
                 .map((requiredAction) =>
-                  msgStr(`requiredAction.${requiredAction}` as const),
+                  advancedMsgStr(`requiredAction.${requiredAction}` as const)
                 )
                 .join(", ")}
             </b>
