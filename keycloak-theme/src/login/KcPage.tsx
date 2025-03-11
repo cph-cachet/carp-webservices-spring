@@ -53,8 +53,6 @@ export default function KcPage(props: { kcContext: KcContext }) {
                     classes={classes}
                     Template={Template}
                     doUseDefaultCss={false}
-                    // UserProfileFormFields={UserProfileFormFields}
-                    // doMakeUserConfirmPassword={doMakeUserConfirmPassword}
                   />
                 );
               case "login-update-profile.ftl":
@@ -118,57 +116,3 @@ export default function KcPage(props: { kcContext: KcContext }) {
 }
 
 const classes = {} satisfies { [key in ClassKey]?: string };
-
-/*
- * Examples assuming i18n.currentLanguageTag === "en":
- * i18n.msg("access-denied") === <span>Access denied</span>
- * i18n.msg("foo") === <span>foo in English</span>
- */
-
-// export default function KcPage(props: KcPageProps) {
-//   const { kcContext, ...rest } = props;
-//   return (
-//     <Suspense>
-//       <StyledEngineProvider injectFirst>
-//         <ThemeProvider theme={themeInstance}>
-//           <CssBaseline />
-//           {(() => {
-//             switch (kcContext.pageId) {
-//               case "login.ftl":
-//                 return (
-//                   <Login kcContext={kcContext} {...rest} />
-//                 );
-//               case "register.ftl":
-//                 return (
-//                   <Register kcContext={kcContext} {...rest}
-//                   />
-//                 );
-//               case "login-update-profile.ftl":
-//                 return (
-//                   <LoginUpdateProfile kcContext={kcContext} {...rest}
-//                   />
-//                 );
-//               case "login-update-password.ftl":
-//                 return (
-//                   <LoginUpdatePassword kcContext={kcContext} {...rest}
-//                   />
-//                 );
-//               case "login-reset-password.ftl":
-//                 return (
-//                   <LoginResetPassword kcContext={kcContext} {...rest}
-//                   />
-//                 );
-//               case "info.ftl":
-//                 return (
-//                   <Info kcContext={kcContext} {...rest}
-//                   />
-//                 );
-//               default:
-//                 return null;
-//             }
-//           })()}
-//         </ThemeProvider>
-//       </StyledEngineProvider>
-//     </Suspense>
-//   );
-// };
