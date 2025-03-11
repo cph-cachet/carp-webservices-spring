@@ -51,7 +51,10 @@ interface FileService {
         studyId: String,
     ): List<File>
 
-    fun uploadImage(file: MultipartFile): String
+    fun uploadImage(
+        file: MultipartFile,
+        studyId: String,
+    ): String
 
     fun deleteImage(url: String)
 }
