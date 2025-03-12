@@ -1,7 +1,7 @@
 {
   "name": "carp-keycloak-theme",
   "homepage": "https://starter.keycloakify.dev",
-  "version": "6.1.10",
+  "version": "2.0.0",
   "description": "A starter/demo project for keycloakify",
   "repository": {
     "type": "git",
@@ -15,7 +15,6 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
-  "author": "u/garronej",
   "license": "MIT",
   "keywords": [],
   "dependencies": {
