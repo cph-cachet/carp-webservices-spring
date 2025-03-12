@@ -1,13 +1,13 @@
 import { useState, type FormEventHandler } from "react";
 import { useConstCallback } from "keycloakify/tools/useConstCallback";
 import { useFormik } from "formik";
-import { useGetClassName } from "keycloakify/login/lib/useGetClassName";
+import { getKcClsx } from "keycloakify/login/lib/KcClsx";
 import type { PageProps } from "keycloakify/login/pages/PageProps";
 import * as yup from "yup";
 import BannerLogin from "../../components/Layout/PublicPageLayout/BannerLogin";
 import AuthActionButton from "../../components/Buttons/AuthActionButton";
 import type { I18n } from "../i18n";
-import type { KcContext } from "../kcContext";
+import type { KcContext } from "../KcContext";
 import CarpInput from "../../components/CarpInput";
 
 const LoginUpdatePassword = (
@@ -18,14 +18,14 @@ const LoginUpdatePassword = (
 ) => {
   const { kcContext, i18n, doUseDefaultCss, Template, classes } = props;
 
-  const { getClassName } = useGetClassName({
+  const { kcClsx } = getKcClsx({
     doUseDefaultCss,
     classes,
   });
 
   const { msg, msgStr } = i18n;
 
-  const { url, isAppInitiatedAction, username } = kcContext;
+  const { url, isAppInitiatedAction } = kcContext;
 
   const validationSchema = yup.object({
     "password-new": yup
@@ -69,15 +69,6 @@ const LoginUpdatePassword = (
         onSubmit={onSubmit}
       >
         <input
-          type="text"
-          id="username"
-          name="username"
-          value={username}
-          readOnly
-          autoComplete="username"
-          style={{ display: "none" }}
-        />
-        <input
           type="password"
           id="password"
           name="password"
@@ -102,12 +93,12 @@ const LoginUpdatePassword = (
           variant="outlined"
         />
 
-        <div className={getClassName("kcFormGroupClass")}>
+        <div className={kcClsx("kcFormGroupClass")}>
           <div
             id="kc-form-options"
-            className={getClassName("kcFormOptionsClass")}
+            className={kcClsx("kcFormOptionsClass")}
           >
-            <div className={getClassName("kcFormOptionsWrapperClass")}>
+            <div className={kcClsx("kcFormOptionsWrapperClass")}>
               {isAppInitiatedAction && (
                 <div className="checkbox">
                   <input
@@ -125,7 +116,7 @@ const LoginUpdatePassword = (
 
           <div
             id="kc-form-buttons"
-            className={getClassName("kcFormButtonsClass")}
+            className={kcClsx("kcFormButtonsClass")}
           >
             <AuthActionButton text={msgStr("doSubmit")} loading={isLoading} />
           </div>
