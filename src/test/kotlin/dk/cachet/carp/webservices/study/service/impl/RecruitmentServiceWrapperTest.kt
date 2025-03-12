@@ -246,7 +246,7 @@ class RecruitmentServiceWrapperTest {
                 val serializedMockParticipants = "serialized listOf(p1, p2, p3)"
 
                 coEvery {
-                    recruitmentRepository.findParticipantsByStudyIdWithPagination(
+                    recruitmentRepository.findRecruitmentParticipantsByStudyIdAndSearchAndLimitAndOffset(
                         mockStudyId.stringRepresentation,
                         null,
                         null,
@@ -299,7 +299,7 @@ class RecruitmentServiceWrapperTest {
                 val serializedMockParticipants = "serialized listOf(p1, p2, p3)"
 
                 coEvery {
-                    recruitmentRepository.findParticipantsByStudyIdWithPagination(
+                    recruitmentRepository.findRecruitmentParticipantsByStudyIdAndSearchAndLimitAndOffset(
                         mockStudyId.stringRepresentation,
                         null, null, null,
                     )
@@ -646,7 +646,7 @@ class RecruitmentServiceWrapperTest {
                     objectMapper.readValue(serializedMockParticipants, ofType<TypeReference<List<Participant>>>())
                 } returns mockParticipants
                 coEvery {
-                    recruitmentRepository.findParticipantsByStudyIdWithPagination(
+                    recruitmentRepository.findRecruitmentParticipantsByStudyIdAndSearchAndLimitAndOffset(
                         mockStudyId.stringRepresentation,
                         any(), any(), any(),
                     )
@@ -691,7 +691,7 @@ class RecruitmentServiceWrapperTest {
                     objectMapper.readValue(serializedMockParticipants, ofType<TypeReference<List<Participant>>>())
                 } returns mockParticipants
                 coEvery {
-                    recruitmentRepository.findParticipantsByStudyIdWithPagination(
+                    recruitmentRepository.findRecruitmentParticipantsByStudyIdAndSearchAndLimitAndOffset(
                         mockStudyId.stringRepresentation,
                         any(), any(), any(),
                     )

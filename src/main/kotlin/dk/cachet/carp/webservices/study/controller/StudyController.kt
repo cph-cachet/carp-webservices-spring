@@ -9,6 +9,7 @@ import dk.cachet.carp.webservices.common.constants.PathVariableName
 import dk.cachet.carp.webservices.common.constants.RequestParamName
 import dk.cachet.carp.webservices.common.input.WS_JSON
 import dk.cachet.carp.webservices.common.serialisers.ApplicationRequestSerializer
+import dk.cachet.carp.webservices.deployment.dto.ParticipantAccountsDto
 import dk.cachet.carp.webservices.security.authentication.domain.Account
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
 import dk.cachet.carp.webservices.security.authorization.Claim
@@ -68,13 +69,26 @@ class StudyController(
     @GetMapping(value = [GET_PARTICIPANTS_ACCOUNTS])
     @PreAuthorize("canManageStudy(#studyId)")
     @ResponseStatus(HttpStatus.OK)
+    //todo change to always return DTO later (create task)
     suspend fun getParticipantAccounts(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @RequestParam(name = RequestParamName.OFFSET, required = false) offset: Int?,
         @RequestParam(name = RequestParamName.LIMIT, required = false) limit: Int?,
         @RequestParam(name = RequestParamName.SEARCH, required = false) search: String?,
-    ): List<Account> {
+        @RequestParam(name = "response_as_dto", required = false) responseAsDto: Boolean?,
+    ): Any {
         LOGGER.info("Start GET: /api/studies/$studyId/participants/accounts")
+
+        if (responseAsDto == true) {
+            return ParticipantAccountsDto(
+                offset = offset,
+                search = search,
+                limit = limit,
+                total = recruitmentService.countParticipants(studyId, search),
+                participants = recruitmentService.getParticipants(studyId, offset, limit, search),
+            )
+        }
+
         return recruitmentService.getParticipants(studyId, offset, limit, search)
     }
 
