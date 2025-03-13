@@ -2,7 +2,7 @@
 import { useState, type FormEventHandler } from "react";
 import { useConstCallback } from "keycloakify/tools/useConstCallback";
 import { useFormik } from "formik";
-import { useGetClassName } from "keycloakify/login/lib/useGetClassName";
+import { getKcClsx } from "keycloakify/login/lib/KcClsx";
 import type { PageProps } from "keycloakify/login/pages/PageProps";
 import * as yup from "yup";
 import AuthActionButton from "../../components/Buttons/AuthActionButton";
@@ -11,14 +11,14 @@ import { AuthInfoText } from "../../components/Layout/PublicPageLayout/AuthPageL
 import BannerLogin from "../../components/Layout/PublicPageLayout/BannerLogin";
 import StyledLink from "../../components/StyledLink";
 import type { I18n } from "../i18n";
-import type { KcContext } from "../kcContext";
+import type { KcContext } from "../KcContext";
 
 const Register = (
-  props: PageProps<Extract<KcContext, { pageId: "register.ftl" }>, I18n>,
+  props: PageProps<Extract<KcContext, { pageId: "register.ftl" }>, I18n>
 ) => {
   const { kcContext, i18n, doUseDefaultCss, Template, classes } = props;
 
-  const { getClassName } = useGetClassName({
+  const { kcClsx } = getKcClsx({
     doUseDefaultCss,
     classes,
   });
@@ -32,14 +32,8 @@ const Register = (
     formElement.submit();
   });
 
-  const {
-    url,
-    register,
-    passwordRequired,
-    recaptchaRequired,
-    recaptchaSiteKey,
-    realm,
-  } = kcContext;
+  const { url, passwordRequired, recaptchaRequired, recaptchaSiteKey, realm } =
+    kcContext;
 
   const { msg, msgStr } = i18n;
 
@@ -82,10 +76,10 @@ const Register = (
 
   const formik = useFormik({
     initialValues: {
-      username: register.formData.username ?? "",
-      firstName: register.formData.firstName ?? "",
-      lastName: register.formData.lastName ?? "",
-      email: register.formData.email ?? "",
+      username: "",
+      firstName: "",
+      lastName: "",
+      email: "",
       password: "",
       "password-confirm": "",
     },
@@ -163,7 +157,7 @@ const Register = (
         )}
         {recaptchaRequired && (
           <div className="form-group">
-            <div className={getClassName("kcInputWrapperClass")}>
+            <div className={kcClsx("kcInputWrapperClass")}>
               <div
                 className="g-recaptcha"
                 data-size="compact"

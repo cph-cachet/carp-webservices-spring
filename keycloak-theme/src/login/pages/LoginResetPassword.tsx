@@ -7,7 +7,7 @@ import CarpInput from "../../components/CarpInput";
 import { AuthInfoText } from "../../components/Layout/PublicPageLayout/AuthPageLayout/styles";
 import AuthActionButton from "../../components/Buttons/AuthActionButton";
 import BannerLogin from "../../components/Layout/PublicPageLayout/BannerLogin";
-import type { KcContext } from "../kcContext";
+import type { KcContext } from "../KcContext";
 import type { I18n } from "../i18n";
 
 const validationSchema = yup.object({
