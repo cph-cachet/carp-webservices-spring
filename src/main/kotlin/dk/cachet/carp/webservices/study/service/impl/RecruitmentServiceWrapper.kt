@@ -108,16 +108,19 @@ class RecruitmentServiceWrapper(
             accounts
         }
 
-    override suspend fun countParticipants(studyId: UUID, search: String?): Int =
+    override suspend fun countParticipants(
+        studyId: UUID,
+        search: String?,
+    ): Int =
         withContext(Dispatchers.IO + SecurityCoroutineContext()) {
-            val count = recruitmentRepository.countRecruitmentParticipantsByStudyIdAndSearch(
-                studyId.stringRepresentation,
-                search,
-            )
+            val count =
+                recruitmentRepository.countRecruitmentParticipantsByStudyIdAndSearch(
+                    studyId.stringRepresentation,
+                    search,
+                )
 
             count
         }
-
 
     override suspend fun getInactiveDeployments(
         studyId: UUID,
@@ -142,7 +145,7 @@ class RecruitmentServiceWrapper(
                 }
                 .filter {
                     it.dateOfLastDataUpload != null &&
-                            it.dateOfLastDataUpload.plus(lastUpdate, DateTimeUnit.HOUR) < timeNow
+                        it.dateOfLastDataUpload.plus(lastUpdate, DateTimeUnit.HOUR) < timeNow
                 }
 
         if (offset >= 0 && limit > 0) {
