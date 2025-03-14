@@ -8,4 +8,6 @@ interface DataStreamService {
     val core: DataStreamServiceDecorator
 
     fun getLatestUpdatedAt(deploymentId: UUID): Instant?
+
+    fun findDataStreamIdsByDeploymentId(deploymentId: UUID): List<Int>
 }

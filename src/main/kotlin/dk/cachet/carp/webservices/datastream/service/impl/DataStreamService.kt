@@ -49,7 +49,7 @@ class DataStreamService(
         return findLatestUpdatedAtByDataStreamIds(dataStreamIds)
     }
 
-    fun findDataStreamIdsByDeploymentId(deploymentId: UUID): List<Int> {
+    override fun findDataStreamIdsByDeploymentId(deploymentId: UUID): List<Int> {
         return dataStreamIdRepository.getAllByDeploymentId(deploymentId.toString()).map { it.id }
     }
 
