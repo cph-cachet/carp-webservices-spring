@@ -53,6 +53,10 @@ class DataStreamService(
         return dataStreamIdRepository.getAllByDeploymentId(deploymentId.toString()).map { it.id }
     }
 
+    override fun countNumberOfCompletedSurveysByDataStreamIds(dataStreamIds: List<Int>): Int {
+        return dataStreamSequenceRepository.countNumberOfCompletedSurveysByDataStreamIds(dataStreamIds)
+    }
+
     fun findLatestUpdatedAtByDataStreamIds(dataStreamIds: List<Int>): Instant? {
         return if (dataStreamIds.isEmpty()) {
             null

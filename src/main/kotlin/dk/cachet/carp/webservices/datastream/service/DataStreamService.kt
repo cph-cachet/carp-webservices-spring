@@ -10,4 +10,6 @@ interface DataStreamService {
     fun getLatestUpdatedAt(deploymentId: UUID): Instant?
 
     fun findDataStreamIdsByDeploymentId(deploymentId: UUID): List<Int>
+
+    fun countNumberOfCompletedSurveysByDataStreamIds(dataStreamIds: List<Int>): Int
 }

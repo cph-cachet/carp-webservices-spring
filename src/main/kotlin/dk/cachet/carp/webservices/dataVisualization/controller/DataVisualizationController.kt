@@ -34,8 +34,8 @@ class DataVisualizationController(
         @RequestParam("deploymentId", required = true) deploymentId: UUID,
         @RequestParam("scope", required = true) scope: String,
         @RequestParam("type", required = true) type: String,
-        @RequestParam("from", required = true) from: Instant,
-        @RequestParam("to", required = true) to: Instant
+        @RequestParam("from", required = true) from: Long,
+        @RequestParam("to", required = true) to: Long
     ): BarChartDataDto {
         val validScopes = setOf("study", "deployment", "participant")
         val validTypes = setOf("survey", "health", "cognition", "image", "audio", "video")
@@ -54,6 +54,6 @@ class DataVisualizationController(
                     "?studyId=$studyId&deploymentId=$deploymentId&scope=$scope&type=$type&from=$from&to=$to"
         )
 
-        return dataVisualizationService.getBarChartData(studyId, deploymentId, scope, type, from, to)
+        return dataVisualizationService.getBarChartData(studyId, deploymentId, scope, type, Instant.fromEpochSeconds(from), Instant.fromEpochSeconds(to))
     }
 }

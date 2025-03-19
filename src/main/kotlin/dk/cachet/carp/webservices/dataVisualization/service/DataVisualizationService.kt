@@ -25,6 +25,7 @@ class DataVisualizationService(
     ): BarChartDataDto {
         if (scope == "deployment") {
             val dataStreamIds = dataStreamService.findDataStreamIdsByDeploymentId(deploymentId)
+            println()
 //            return getBarChartDataForSurveyInStudy(studyId, from, to)
         }
         return BarChartDataDto()

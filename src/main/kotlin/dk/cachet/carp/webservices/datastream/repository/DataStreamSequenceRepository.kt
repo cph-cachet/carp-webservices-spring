@@ -65,4 +65,25 @@ interface DataStreamSequenceRepository : JpaRepository<DataStreamSequence, Int> 
     fun findSequenceIdsByStreamId(
         @Param("dataStreamIds") dataStreamIds: List<Int>,
     ): List<Int>
+
+    @Query(
+        nativeQuery = true,
+        value =
+            """
+                select count(*) as ct_surveys from (
+                    select * 
+                    FROM public.data_stream_sequence ds,
+                         LATERAL jsonb_array_elements(ds.snapshot->'measurements') AS measurement
+                    WHERE ds.data_stream_id IN :dataStreamIds
+                    AND measurement->'data'->>'__type' = 'dk.cachet.carp.completedtask'
+                    AND measurement->'data'->'taskData'->>'__type' = 'dk.cachet.carp.survey'
+                    AND (measurement->'data'->'taskData'->'result'->>'endDate')::timestamp < :to
+                    AND (measurement->'data'->'taskData'->'result'->>'endDate')::timestamp > :from)
+            """,
+    )
+    fun countNumberOfCompletedSurveysByDataStreamIds(
+        dataStreamIds: Collection<Int>,
+        from: kotlinx.datetime.Instant,
+        to: kotlinx.datetime.Instant,
+    ): Int
 }
