@@ -54,6 +54,6 @@ class DataVisualizationController(
                     "?studyId=$studyId&deploymentId=$deploymentId&scope=$scope&type=$type&from=$from&to=$to"
         )
 
-        return dataVisualizationService.getBarChartData(studyId, deploymentId, scope, type, Instant.fromEpochSeconds(from), Instant.fromEpochSeconds(to))
+        return dataVisualizationService.getBarChartData(studyId, deploymentId, scope, type, from, to)
     }
 }

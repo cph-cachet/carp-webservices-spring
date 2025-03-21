@@ -7,6 +7,7 @@ import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.common.application.data.DataType
 import dk.cachet.carp.data.application.DataStreamId
 import dk.cachet.carp.webservices.common.services.CoreServiceContainer
+import dk.cachet.carp.webservices.dataVisualization.dto.DayKeyQuantityTriple
 import dk.cachet.carp.webservices.datastream.domain.DataStreamSequence
 import dk.cachet.carp.webservices.datastream.repository.DataStreamIdRepository
 import dk.cachet.carp.webservices.datastream.repository.DataStreamSequenceRepository
@@ -53,8 +54,15 @@ class DataStreamService(
         return dataStreamIdRepository.getAllByDeploymentId(deploymentId.toString()).map { it.id }
     }
 
-    override fun countNumberOfCompletedSurveysByDataStreamIds(dataStreamIds: List<Int>): Int {
-        return dataStreamSequenceRepository.countNumberOfCompletedSurveysByDataStreamIds(dataStreamIds)
+    override fun idkhowtonamethisForSurveys(
+        dataStreamIds: List<Int>,
+        from: Instant,
+        to: Instant,
+        studyId: String
+    ): List<DayKeyQuantityTriple> {
+//        return dataStreamSequenceRepository.idkhowtonamethis(dataStreamIds, from, to, studyId)
+        return emptyList()
+
     }
 
     fun findLatestUpdatedAtByDataStreamIds(dataStreamIds: List<Int>): Instant? {

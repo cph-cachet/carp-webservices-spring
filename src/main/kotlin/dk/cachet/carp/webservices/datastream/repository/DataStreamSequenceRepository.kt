@@ -1,5 +1,6 @@
 package dk.cachet.carp.webservices.datastream.repository
 
+import dk.cachet.carp.webservices.dataVisualization.dto.DayKeyQuantityTriple
 import dk.cachet.carp.webservices.datastream.domain.DataStreamSequence
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
@@ -7,6 +8,7 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
+import java.sql.Timestamp
 import java.time.Instant
 
 @Repository
@@ -70,20 +72,34 @@ interface DataStreamSequenceRepository : JpaRepository<DataStreamSequence, Int> 
         nativeQuery = true,
         value =
             """
-                select count(*) as ct_surveys from (
-                    select * 
-                    FROM public.data_stream_sequence ds,
-                         LATERAL jsonb_array_elements(ds.snapshot->'measurements') AS measurement
-                    WHERE ds.data_stream_id IN :dataStreamIds
-                    AND measurement->'data'->>'__type' = 'dk.cachet.carp.completedtask'
-                    AND measurement->'data'->'taskData'->>'__type' = 'dk.cachet.carp.survey'
-                    AND (measurement->'data'->'taskData'->'result'->>'endDate')::timestamp < :to
-                    AND (measurement->'data'->'taskData'->'result'->>'endDate')::timestamp > :from)
+                select t1.day as day, t2.task_title as key, t1.cnt as quantity from (
+                       SELECT 
+                            (measurement->'data'->'taskData'->'result'->>'endDate')::date AS day,
+                            measurement->'data'->>'taskName' AS task_name,
+                            COUNT(*) AS cnt
+                        FROM public.data_stream_sequence ds,
+                             LATERAL jsonb_array_elements(ds.snapshot->'measurements') AS measurement
+                        WHERE ds.data_stream_id IN (:dataStreamIds)
+                        AND measurement->'data'->>'__type' = 'dk.cachet.carp.completedtask'
+                        AND measurement->'data'->'taskData'->>'__type' = 'dk.cachet.carp.survey'
+                        AND (measurement->'data'->'taskData'->'result'->>'endDate')::timestamp < :to
+                        AND (measurement->'data'->'taskData'->'result'->>'endDate')::timestamp > :from
+                        GROUP BY day, task_name
+                        ORDER BY day, cnt DESC
+                ) as t1 left join (
+                        SELECT 
+                            t->>'name' AS task_name,
+                            t->>'title' AS task_title
+                        FROM public.studies,
+                             LATERAL jsonb_array_elements(snapshot->'protocolSnapshot'->'tasks') AS t
+                        WHERE snapshot->>'id' = :studyId
+                )  as t2 on t1.task_name = t2.task_name
             """,
     )
-    fun countNumberOfCompletedSurveysByDataStreamIds(
-        dataStreamIds: Collection<Int>,
-        from: kotlinx.datetime.Instant,
-        to: kotlinx.datetime.Instant,
-    ): Int
+    fun idkhowtonamethis(
+        dataStreamIds: List<Int>,
+        from: Timestamp,
+        to: Timestamp,
+        studyId: String,
+    ): List<DayKeyQuantityTriple>
 }
