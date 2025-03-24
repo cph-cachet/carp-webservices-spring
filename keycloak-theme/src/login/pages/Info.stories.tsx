@@ -1,31 +1,56 @@
-// This is to show that you can create stories for pages that you haven't overloaded.
+import type { Meta, StoryObj } from "@storybook/react";
+import { createKcPageStory } from "../KcPageStory";
 
-import { Meta, StoryObj } from "@storybook/react";
-import createPageStory from "../createPageStory";
-
-const { PageStory } = createPageStory({
-  pageId: "info.ftl",
-});
+const { KcPageStory } = createKcPageStory({ pageId: "info.ftl" });
 
 const meta = {
-  title: "login/Info",
-  component: PageStory,
-} satisfies Meta<typeof PageStory>;
+    title: "login/info.ftl",
+    component: KcPageStory
+} satisfies Meta<typeof KcPageStory>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  render: () => (
-    <PageStory
-      kcContext={{
-        messageHeader: "Account update required",
-        message: {
-          summary: "Your administrator has requested you to",
-          type: "info",
-        },
-        requiredActions: ["UPDATE_PASSWORD", "VERIFY_EMAIL"],
-      }}
-    />
-  ),
+    render: () => (
+        <KcPageStory
+            kcContext={{
+                message: {
+                    summary: "Server info message"
+                }
+            }}
+        />
+    )
+};
+
+export const WithLinkBack: Story = {
+    render: () => (
+        <KcPageStory
+            kcContext={{
+                message: {
+                    summary: "Server message"
+                },
+                actionUri: undefined
+            }}
+        />
+    )
+};
+
+export const WithRequiredActions: Story = {
+    render: () => (
+        <KcPageStory
+            kcContext={{
+                message: {
+                    summary: "Required actions: "
+                },
+                requiredActions: ["CONFIGURE_TOTP", "UPDATE_PROFILE", "VERIFY_EMAIL", "CUSTOM_ACTION"],
+                "x-keycloakify": {
+                    messages: {
+                        "requiredAction.CUSTOM_ACTION": "Custom action"
+                    }
+                }
+            }}
+        />
+    )
 };

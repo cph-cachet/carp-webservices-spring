@@ -1,9 +1,10 @@
 // Copy pasted from: https://github.com/InseeFrLab/keycloakify/blob/main/../../login/Template.tsx
 
 import { clsx } from "keycloakify/tools/clsx";
-import { usePrepareTemplate } from "keycloakify/lib/usePrepareTemplate";
 import { type TemplateProps } from "keycloakify/login/TemplateProps";
-import { useGetClassName } from "keycloakify/login/lib/useGetClassName";
+import { getKcClsx } from "keycloakify/login/lib/KcClsx";
+import { useSetClassName } from "keycloakify/tools/useSetClassName";
+
 import {
   Alert,
   FormControl,
@@ -13,18 +14,22 @@ import {
 } from "@mui/material";
 import LanguageIcon from "@mui/icons-material/Language";
 import AuthPageLayout from "../components/Layout/PublicPageLayout/AuthPageLayout";
-import type { KcContext } from "./kcContext";
+import type { KcContext } from "./KcContext";
 import type { I18n } from "./i18n";
 import PublicPageLayout from "../components/Layout/PublicPageLayout";
 import BootstrapInput from "../components/BootstrapInput";
+import { useEffect } from "react";
+import { useStylesAndScripts } from "keycloakify/login/Template.useStylesAndScripts";
 
 export const Template = (props: TemplateProps<KcContext, I18n>) => {
   const {
     displayMessage = true,
-    displayWide = false,
     showAnotherWayIfPresent = true,
     headerNode,
     infoNode = null,
+    documentTitle,
+    bodyClassName,
+
     kcContext,
     i18n,
     doUseDefaultCss,
@@ -32,20 +37,33 @@ export const Template = (props: TemplateProps<KcContext, I18n>) => {
     children,
   } = props;
 
-  const { getClassName } = useGetClassName({ doUseDefaultCss, classes });
+  const { kcClsx } = getKcClsx({ doUseDefaultCss, classes });
 
-  const { msg, changeLocale, labelBySupportedLanguageTag } = i18n;
+  const { msg, msgStr, getChangeLocaleUrl, labelBySupportedLanguageTag } = i18n;
 
   const { auth, url, message, isAppInitiatedAction, realm, locale } = kcContext;
 
-  const { isReady } = usePrepareTemplate({
-    doFetchDefaultThemeResources: doUseDefaultCss,
-    styles: [],
-    htmlClassName: getClassName("kcHtmlClass"),
-    bodyClassName: undefined,
+  useEffect(() => {
+    document.title =
+      documentTitle ?? msgStr("loginTitle", kcContext.realm.displayName);
+  }, []);
+
+  useSetClassName({
+    qualifiedName: "html",
+    className: kcClsx("kcHtmlClass"),
   });
 
-  if (!isReady) {
+  useSetClassName({
+    qualifiedName: "body",
+    className: bodyClassName ?? kcClsx("kcBodyClass"),
+  });
+
+  const { isReadyToRender } = useStylesAndScripts({
+    kcContext,
+    doUseDefaultCss,
+  });
+
+  if (!isReadyToRender) {
     return null;
   }
 
@@ -81,13 +99,15 @@ export const Template = (props: TemplateProps<KcContext, I18n>) => {
                 }}
               >
                 {locale.supported.map(({ languageTag }) => (
+                  <a   href={getChangeLocaleUrl(languageTag)} style={{textDecoration:"none", color:"inherit"}}>
                   <MenuItem
                     key={languageTag}
                     value={languageTag}
-                    onClick={() => changeLocale(languageTag)}
+                    // onClick={() => getChangeLocaleUrl(languageTag)}
                   >
-                    {getLanguageLabel(languageTag)}
+                  {getLanguageLabel(languageTag)}
                   </MenuItem>
+                  </a>
                 ))}
               </Select>
             </FormControl>
@@ -170,34 +190,23 @@ export const Template = (props: TemplateProps<KcContext, I18n>) => {
               id="kc-select-try-another-way-form"
               action={url.loginAction}
               method="post"
-              className={clsx(
-                displayWide && getClassName("kcContentWrapperClass"),
-              )}
+              className={clsx(kcClsx("kcContentWrapperClass"))}
             >
-              <div
-                className={clsx(
-                  displayWide && [
-                    getClassName("kcFormSocialAccountContentClass"),
-                    getClassName("kcFormSocialAccountClass"),
-                  ],
-                )}
-              >
-                <div className={getClassName("kcFormGroupClass")}>
-                  <input type="hidden" name="tryAnotherWay" value="on" />
-                  {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-                  <a
-                    href="#"
-                    id="try-another-way"
-                    onClick={() => {
-                      document.forms[
-                        "kc-select-try-another-way-form" as never
-                      ].submit();
-                      return false;
-                    }}
-                  >
-                    {msg("doTryAnotherWay")}
-                  </a>
-                </div>
+              <div className={kcClsx("kcFormGroupClass")}>
+                <input type="hidden" name="tryAnotherWay" value="on" />
+                {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+                <a
+                  href="#"
+                  id="try-another-way"
+                  onClick={() => {
+                    document.forms[
+                      "kc-select-try-another-way-form" as never
+                    ].submit();
+                    return false;
+                  }}
+                >
+                  {msg("doTryAnotherWay")}
+                </a>
               </div>
             </form>
           )}

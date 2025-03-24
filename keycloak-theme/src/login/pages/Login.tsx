@@ -20,7 +20,7 @@ import AuthActionButton from "../../components/Buttons/AuthActionButton";
 import AppleLogo from "../../assets/images/logo-apple.png";
 import GoogleLogo from "../../assets/images/logo-google.png";
 import PasskeyLogo from "../../assets/images/logo-passkey.png";
-import type { KcContext } from "../kcContext";
+import type { KcContext } from "../KcContext";
 import type { I18n } from "../i18n";
 import BannerRegister from "../../components/Layout/PublicPageLayout/BannerRegister";
 import {
@@ -38,7 +38,7 @@ const Login = (
   const { social, realm, url, usernameHidden, login, registrationDisabled } =
     kcContext;
 
-  const { msg, msgStr } = i18n;
+  const { msgStr } = i18n;
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -93,8 +93,7 @@ const Login = (
     <Template
       {...{ kcContext, i18n, doUseDefaultCss, classes }}
       displayInfo={social.displayInfo}
-      displayWide={realm.password && social.providers !== undefined}
-      headerNode={msg("doLogIn")}
+      headerNode={msgStr("doLogIn")}
       infoNode={
         realm.registrationAllowed &&
         !registrationDisabled && (
@@ -179,7 +178,7 @@ const Login = (
             {realm.resetPasswordAllowed && (
               <AuthInfoText variant="h4_web">
                 <StyledLink to={url.loginResetCredentialsUrl}>
-                  {msg("doForgotPassword")}
+                  {msgStr("doForgotPassword")}
                 </StyledLink>
               </AuthInfoText>
             )}
