@@ -78,6 +78,5 @@ class ProxiesMethodSecurityExpressionRoot(
             id != null
         }
 
-//    fun isAdmin(): Boolean = hasRole(Role.SYSTEM_ADMIN.toString())
-    fun isAdmin(): Boolean =true
+    fun isAdmin(): Boolean = hasRole(Role.SYSTEM_ADMIN.toString())
 }

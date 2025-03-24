@@ -1,9 +1,9 @@
 package dk.cachet.carp.webservices.dataVisualization.dto;
 
-import kotlinx.datetime.Instant
+import java.sql.Date
 import java.util.HashMap
 
 data class TimeSeriesEntryDto(
-    val x: Instant,
-    val y: HashMap<String, Double>
+    val x: Date,
+    val y: HashMap<String, Long>
 )
