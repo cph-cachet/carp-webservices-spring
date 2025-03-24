@@ -29,7 +29,7 @@ class DataVisualizationController(
     @GetMapping(value = [BAR_CHART])
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("canManageStudy(#studyId)")
-    fun getBarChartData(
+    suspend fun getBarChartData(
         @RequestParam("studyId", required = true) studyId: UUID,
         @RequestParam("deploymentId", required = true) deploymentId: UUID,
         @RequestParam("scope", required = true) scope: String,
