@@ -7,6 +7,7 @@ import dk.cachet.carp.webservices.dataVisualization.dto.DayKeyQuantityTriple
 import dk.cachet.carp.webservices.dataVisualization.dto.TimeSeriesEntryDto
 import dk.cachet.carp.webservices.datastream.repository.DataStreamSequenceRepository
 import dk.cachet.carp.webservices.datastream.service.DataStreamService
+import dk.cachet.carp.webservices.deployment.repository.CoreParticipationRepository
 import dk.cachet.carp.webservices.study.service.RecruitmentService
 import dk.cachet.carp.webservices.study.service.impl.RecruitmentServiceWrapper
 import kotlinx.datetime.Instant
@@ -18,20 +19,21 @@ class DataVisualizationService(
     val dataStreamService: DataStreamService,
     val dataStreamSequenceRepository: DataStreamSequenceRepository,
     val recruitmentServiceWrapper: RecruitmentService,
-    val participantRepository: ParticipantRepository
+    val participantRepository: ParticipantRepository,
+    val coreParticipationRepository: CoreParticipationRepository
 ) {
     suspend fun getBarChartData(
-        studyId: UUID, deploymentId: UUID, scope: String, type: String, from: Long, to: Long
+        studyId: UUID, deploymentId: UUID, participantId: UUID, scope: String, type: String, from: Long, to: Long
     ): BarChartDataDto {
         if (type == "survey") {
-            return getBarChartDataForSurvey(studyId, deploymentId, scope, from, to)
+            return getBarChartDataForSurvey(studyId, deploymentId, participantId, scope, from, to)
         }
 
         return BarChartDataDto()
     }
 
     private suspend fun getBarChartDataForSurvey(
-        studyId: UUID, deploymentId: UUID, scope: String, from: Long, to: Long
+        studyId: UUID, deploymentId: UUID, participantId: UUID, scope: String, from: Long, to: Long
     ): BarChartDataDto {
         if (scope == "deployment") {
             val dataStreamIds = dataStreamService.findDataStreamIdsByDeploymentId(deploymentId)
@@ -57,7 +59,25 @@ class DataVisualizationService(
                 studyId.toString()
             )
             return dayKeyQuantityTriplesToBarChartDataDto(kek)
+        } else {
+            val participantGroup = coreParticipationRepository.getParticipantGroup(deploymentId)
+            if (participantGroup == null) throw IllegalArgumentException("No participant group found for deployment $deploymentId")
 
+            val participationHavingParticipantId = participantGroup.participations.find { it.participation.participantId == participantId}
+            if (participationHavingParticipantId == null) throw IllegalArgumentException("No participation found for participant $participantId in deployment $deploymentId")
+
+            val assignedPrimaryDeviceRoleNames = participationHavingParticipantId.assignedPrimaryDeviceRoleNames
+            val dataStreamIds = dataStreamService.findDataStreamIdsByDeploymentIdAndDeviceRoleNames(deploymentId, assignedPrimaryDeviceRoleNames.toList()).toSet()
+            val kek = dataStreamSequenceRepository.idkhowtonamethis(
+                dataStreamIds.toList(),
+                Timestamp(from * 1000),
+                Timestamp(to * 1000),
+                studyId.toString()
+            )
+
+            return dayKeyQuantityTriplesToBarChartDataDto(kek)
+//            val recruitment = participantRepository.getRecruitment(studyId)
+            println()
         }
         return BarChartDataDto()
     }

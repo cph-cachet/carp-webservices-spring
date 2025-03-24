@@ -32,6 +32,7 @@ class DataVisualizationController(
     suspend fun getBarChartData(
         @RequestParam("studyId", required = true) studyId: UUID,
         @RequestParam("deploymentId", required = true) deploymentId: UUID,
+        @RequestParam("participantId", required = true) participantId: UUID,
         @RequestParam("scope", required = true) scope: String,
         @RequestParam("type", required = true) type: String,
         @RequestParam("from", required = true) from: Long,
@@ -51,9 +52,9 @@ class DataVisualizationController(
 
         LOGGER.info(
             "Start GET: /api/data-visualization/bar-chart" +
-                    "?studyId=$studyId&deploymentId=$deploymentId&scope=$scope&type=$type&from=$from&to=$to"
+                    "?studyId=$studyId&deploymentId=$deploymentId&participantId=$participantId&scope=$scope&type=$type&from=$from&to=$to"
         )
 
-        return dataVisualizationService.getBarChartData(studyId, deploymentId, scope, type, from, to)
+        return dataVisualizationService.getBarChartData(studyId, deploymentId, participantId, scope, type, from, to)
     }
 }

@@ -12,6 +12,8 @@ interface DataStreamService {
 
     fun findDataStreamIdsByDeploymentId(deploymentId: UUID): List<Int>
 
+    fun findDataStreamIdsByDeploymentIdAndDeviceRoleNames(deploymentId: UUID, deviceRoleNames: List<String>): List<Int>
+
     fun idkhowtonamethisForSurveys(
         dataStreamIds: List<Int>,
         from: Instant,

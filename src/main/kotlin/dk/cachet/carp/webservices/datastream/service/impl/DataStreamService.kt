@@ -54,6 +54,14 @@ class DataStreamService(
         return dataStreamIdRepository.getAllByDeploymentId(deploymentId.toString()).map { it.id }
     }
 
+    override fun findDataStreamIdsByDeploymentIdAndDeviceRoleNames(
+        deploymentId: UUID,
+        deviceRoleNames: List<String>
+    ): List<Int> {
+        return dataStreamIdRepository.getAllByStudyDeploymentIdAndDeviceRoleNameIn(deploymentId.toString(), deviceRoleNames.toMutableList())
+            .map { it.id }
+    }
+
     override fun idkhowtonamethisForSurveys(
         dataStreamIds: List<Int>,
         from: Instant,
