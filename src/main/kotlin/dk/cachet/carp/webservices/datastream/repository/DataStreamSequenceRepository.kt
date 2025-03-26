@@ -81,7 +81,7 @@ interface DataStreamSequenceRepository : JpaRepository<DataStreamSequence, Int> 
                              LATERAL jsonb_array_elements(ds.snapshot->'measurements') AS measurement
                         WHERE ds.data_stream_id IN (:dataStreamIds)
                         AND measurement->'data'->>'__type' = 'dk.cachet.carp.completedtask'
-                        AND measurement->'data'->'taskData'->>'__type' = 'dk.cachet.carp.survey'
+                        AND measurement->'data'->'taskData'->>'__type' = :taskType
                         AND (measurement->'data'->'taskData'->'result'->>'endDate')::timestamp < :to
                         AND (measurement->'data'->'taskData'->'result'->>'endDate')::timestamp > :from
                         GROUP BY day, task_name
@@ -96,10 +96,11 @@ interface DataStreamSequenceRepository : JpaRepository<DataStreamSequence, Int> 
                 )  as t2 on t1.task_name = t2.task_name
             """,
     )
-    fun idkhowtonamethis(
+    fun getDayKeyQuantityListByDataStreamIdsAndOtherParameters(
         dataStreamIds: List<Int>,
         from: Timestamp,
         to: Timestamp,
         studyId: String,
+        taskType: String,
     ): List<DayKeyQuantityTriple>
 }

@@ -14,10 +14,11 @@ interface DataStreamService {
 
     fun findDataStreamIdsByDeploymentIdAndDeviceRoleNames(deploymentId: UUID, deviceRoleNames: List<String>): List<Int>
 
-    fun idkhowtonamethisForSurveys(
+    fun getDayKeyQuantityListByDataStreamIdsAndOtherParameters(
         dataStreamIds: List<Int>,
         from: Instant,
         to: Instant,
-        studyId: String
+        studyId: String,
+        type: String
     ): List<DayKeyQuantityTriple>
 }

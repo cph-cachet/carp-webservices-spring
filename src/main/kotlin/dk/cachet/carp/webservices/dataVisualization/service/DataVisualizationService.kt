@@ -5,81 +5,36 @@ import dk.cachet.carp.studies.domain.users.ParticipantRepository
 import dk.cachet.carp.webservices.dataVisualization.dto.BarChartDataDto
 import dk.cachet.carp.webservices.dataVisualization.dto.DayKeyQuantityTriple
 import dk.cachet.carp.webservices.dataVisualization.dto.TimeSeriesEntryDto
-import dk.cachet.carp.webservices.datastream.repository.DataStreamSequenceRepository
 import dk.cachet.carp.webservices.datastream.service.DataStreamService
 import dk.cachet.carp.webservices.deployment.repository.CoreParticipationRepository
-import dk.cachet.carp.webservices.study.service.RecruitmentService
-import dk.cachet.carp.webservices.study.service.impl.RecruitmentServiceWrapper
 import kotlinx.datetime.Instant
 import org.springframework.stereotype.Service
-import java.sql.Timestamp
 
 @Service
 class DataVisualizationService(
     val dataStreamService: DataStreamService,
-    val dataStreamSequenceRepository: DataStreamSequenceRepository,
-    val recruitmentServiceWrapper: RecruitmentService,
     val participantRepository: ParticipantRepository,
     val coreParticipationRepository: CoreParticipationRepository
 ) {
-    suspend fun getBarChartData(
-        studyId: UUID, deploymentId: UUID, participantId: UUID, scope: String, type: String, from: Long, to: Long
-    ): BarChartDataDto {
-        if (type == "survey") {
-            return getBarChartDataForSurvey(studyId, deploymentId, participantId, scope, from, to)
-        }
-
-        return BarChartDataDto()
+    companion object {
+        private val validScopes = setOf("study", "deployment", "participant")
     }
-
-    private suspend fun getBarChartDataForSurvey(
-        studyId: UUID, deploymentId: UUID, participantId: UUID, scope: String, from: Long, to: Long
+    suspend fun getBarChartData(
+        studyId: UUID,
+        deploymentId: UUID?,
+        participantId: UUID?,
+        scope: String,
+        type: String,
+        from: Instant,
+        to: Instant
     ): BarChartDataDto {
-        if (scope == "deployment") {
-            val dataStreamIds = dataStreamService.findDataStreamIdsByDeploymentId(deploymentId)
-            val kek = dataStreamSequenceRepository.idkhowtonamethis(
-                dataStreamIds,
-                Timestamp(from * 1000),
-                Timestamp(to * 1000),
-                studyId.toString()
-            )
+        val dataStreamIds = getDataStreamIds(scope, studyId, deploymentId, participantId)
 
-            return dayKeyQuantityTriplesToBarChartDataDto(kek)
-        } else if (scope == "study") {
-            val deploymentIds = participantRepository.getRecruitment(studyId)?.participantGroups?.keys?.toSet();
-            if (deploymentIds == null) throw IllegalArgumentException("No deployment ids found for study $studyId")
-            val dataStreamIds = deploymentIds
-                .flatMap { dataStreamService.findDataStreamIdsByDeploymentId(it) }
-                .toSet()
+        val dayKeyQuantityTriples = dataStreamService.getDayKeyQuantityListByDataStreamIdsAndOtherParameters(
+            dataStreamIds, from, to, studyId.toString(), type
+        )
 
-            val kek = dataStreamSequenceRepository.idkhowtonamethis(
-                dataStreamIds.toList(),
-                Timestamp(from * 1000),
-                Timestamp(to * 1000),
-                studyId.toString()
-            )
-            return dayKeyQuantityTriplesToBarChartDataDto(kek)
-        } else {
-            val participantGroup = coreParticipationRepository.getParticipantGroup(deploymentId)
-            if (participantGroup == null) throw IllegalArgumentException("No participant group found for deployment $deploymentId")
-
-            val participationHavingParticipantId = participantGroup.participations.find { it.participation.participantId == participantId}
-            if (participationHavingParticipantId == null) throw IllegalArgumentException("No participation found for participant $participantId in deployment $deploymentId")
-
-            val assignedPrimaryDeviceRoleNames = participationHavingParticipantId.assignedPrimaryDeviceRoleNames
-            val dataStreamIds = dataStreamService.findDataStreamIdsByDeploymentIdAndDeviceRoleNames(deploymentId, assignedPrimaryDeviceRoleNames.toList()).toSet()
-            val kek = dataStreamSequenceRepository.idkhowtonamethis(
-                dataStreamIds.toList(),
-                Timestamp(from * 1000),
-                Timestamp(to * 1000),
-                studyId.toString()
-            )
-
-            return dayKeyQuantityTriplesToBarChartDataDto(kek)
-//            val recruitment = participantRepository.getRecruitment(studyId)
-            println()
-        }
-        return BarChartDataDto()
+        return dayKeyQuantityTriplesToBarChartDataDto(dayKeyQuantityTriples)
     }
 
     private fun dayKeyQuantityTriplesToBarChartDataDto(dayKeyQuantityTriple: List<DayKeyQuantityTriple>): BarChartDataDto {
@@ -95,6 +50,56 @@ class DataVisualizationService(
         }
 
         return dto
+    }
+
+    private suspend fun getDataStreamIds(
+        scope: String, studyId: UUID, deploymentId: UUID?, participantId: UUID?
+    ): List<Int> {
+        val dataStreamIds: List<Int>
+        if (scope == "deployment") {
+            if (deploymentId == null) throw IllegalArgumentException("Deployment ID must be provided when scope is 'deployment'.")
+            dataStreamIds = getDataStreamIdsForDeployment(deploymentId)
+        } else if (scope == "study") {
+            dataStreamIds = getDataStreamIdsForStudy(studyId)
+        } else if (scope == "participant") {
+            if (participantId == null) throw IllegalArgumentException("Participant ID must be provided when scope is 'participant'.")
+            if (deploymentId == null) throw IllegalArgumentException("Deployment ID must be provided when scope is 'participant'.")
+            dataStreamIds = getDataStreamIdsForParticipant(participantId, deploymentId)
+        } else {
+            throw IllegalArgumentException("Invalid scope: $scope. Allowed values: $validScopes")
+        }
+
+        return dataStreamIds
+    }
+
+    private fun getDataStreamIdsForDeployment(deploymentId: UUID): List<Int> {
+        return dataStreamService.findDataStreamIdsByDeploymentId(deploymentId)
+    }
+
+    private suspend fun getDataStreamIdsForStudy(studyId: UUID): List<Int> {
+        val deploymentIds = participantRepository.getRecruitment(studyId)?.participantGroups?.keys?.toSet()
+            ?: throw IllegalArgumentException("No deployment ids found for study $studyId");
+        val dataStreamIds =
+            deploymentIds.flatMap { dataStreamService.findDataStreamIdsByDeploymentId(it) }.toSet().toList()
+
+        return dataStreamIds
+    }
+
+    private suspend fun getDataStreamIdsForParticipant(participantId: UUID, deploymentId: UUID): List<Int> {
+        val participantGroup = coreParticipationRepository.getParticipantGroup(deploymentId)
+            ?: throw IllegalArgumentException("No participant group found for deployment $deploymentId")
+
+        val participationHavingParticipantId =
+            participantGroup.participations.find { it.participation.participantId == participantId }
+        if (participationHavingParticipantId == null)
+            throw IllegalArgumentException("No participation found for participant $participantId in deployment $deploymentId")
+
+        val assignedPrimaryDeviceRoleNames = participationHavingParticipantId.assignedPrimaryDeviceRoleNames
+        val dataStreamIds = dataStreamService.findDataStreamIdsByDeploymentIdAndDeviceRoleNames(
+            deploymentId, assignedPrimaryDeviceRoleNames.toList()
+        ).toSet().toList()
+
+        return dataStreamIds
     }
 }
 

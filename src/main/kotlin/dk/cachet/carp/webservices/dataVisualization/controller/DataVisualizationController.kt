@@ -22,7 +22,6 @@ class DataVisualizationController(
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
 
-        /** Endpoint URI constants */
         const val BAR_CHART = "/bar-chart"
     }
 
@@ -31,30 +30,21 @@ class DataVisualizationController(
     @PreAuthorize("canManageStudy(#studyId)")
     suspend fun getBarChartData(
         @RequestParam("studyId", required = true) studyId: UUID,
-        @RequestParam("deploymentId", required = true) deploymentId: UUID,
-        @RequestParam("participantId", required = true) participantId: UUID,
+        @RequestParam("deploymentId", required = false) deploymentId: UUID,
+        @RequestParam("participantId", required = false) participantId: UUID,
         @RequestParam("scope", required = true) scope: String,
         @RequestParam("type", required = true) type: String,
         @RequestParam("from", required = true) from: Long,
         @RequestParam("to", required = true) to: Long
     ): BarChartDataDto {
-        val validScopes = setOf("study", "deployment", "participant")
-        val validTypes = setOf("survey", "health", "cognition", "image", "audio", "video")
-
-        //todo redezign this
-        if (scope !in validScopes)
-            throw IllegalArgumentException("Invalid scope: $scope. Allowed values: $validScopes")
-
-        if (type !in validTypes)
-            throw IllegalArgumentException("Invalid type: $type. Allowed values: $validTypes")
-
-
-
         LOGGER.info(
             "Start GET: /api/data-visualization/bar-chart" +
                     "?studyId=$studyId&deploymentId=$deploymentId&participantId=$participantId&scope=$scope&type=$type&from=$from&to=$to"
         )
 
-        return dataVisualizationService.getBarChartData(studyId, deploymentId, participantId, scope, type, from, to)
+        val toInstant = Instant.fromEpochSeconds(to)
+        val fromInstant = Instant.fromEpochSeconds(from)
+
+        return dataVisualizationService.getBarChartData(studyId, deploymentId, participantId, scope, type, fromInstant, toInstant)
     }
 }

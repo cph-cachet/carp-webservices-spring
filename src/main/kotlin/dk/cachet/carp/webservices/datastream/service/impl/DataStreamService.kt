@@ -16,6 +16,7 @@ import dk.cachet.carp.webservices.datastream.service.createSequence
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
+import kotlinx.datetime.toJavaInstant
 import kotlinx.datetime.toKotlinInstant
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -23,6 +24,7 @@ import org.springframework.dao.DataAccessException
 import org.springframework.stereotype.Service
 import java.io.IOException
 import java.nio.file.Path
+import java.sql.Timestamp
 
 @Service
 class DataStreamService(
@@ -33,6 +35,7 @@ class DataStreamService(
 ) : DataStreamService {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
+        private val validTypes = setOf("survey", "health", "cognition", "image", "audio", "video", "informed_consent")
     }
 
     final override val core = services.dataStreamService
@@ -62,15 +65,20 @@ class DataStreamService(
             .map { it.id }
     }
 
-    override fun idkhowtonamethisForSurveys(
+    override fun getDayKeyQuantityListByDataStreamIdsAndOtherParameters(
         dataStreamIds: List<Int>,
         from: Instant,
         to: Instant,
-        studyId: String
+        studyId: String,
+        type: String
     ): List<DayKeyQuantityTriple> {
-//        return dataStreamSequenceRepository.idkhowtonamethis(dataStreamIds, from, to, studyId)
-        return emptyList()
+        require(type in validTypes) { "Invalid type: $type. Allowed values: $validTypes" }
 
+        val taskType = "dk.cachet.carp.$type"
+        val fromTimestamp = Timestamp.from(from.toJavaInstant())
+        val toTimestamp = Timestamp.from(to.toJavaInstant())
+
+        return dataStreamSequenceRepository.getDayKeyQuantityListByDataStreamIdsAndOtherParameters(dataStreamIds, fromTimestamp, toTimestamp, studyId, taskType)
     }
 
     fun findLatestUpdatedAtByDataStreamIds(dataStreamIds: List<Int>): Instant? {
