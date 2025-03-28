@@ -2,6 +2,7 @@ package dk.cachet.carp.webservices.deployment.service.impl
 
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.deployments.application.users.ParticipantData
+import dk.cachet.carp.deployments.domain.users.ParticipantGroup
 import dk.cachet.carp.deployments.domain.users.ParticipationRepository
 import dk.cachet.carp.webservices.common.services.CoreServiceContainer
 import dk.cachet.carp.webservices.deployment.service.ParticipationService
@@ -15,6 +16,10 @@ class ParticipationServiceWrapper(
     services: CoreServiceContainer,
 ) : ParticipationService, ResourceExporter<ParticipantData> {
     final override val core = services.participationService
+
+    override suspend fun getParticipantGroup(studyDeploymentId: UUID): ParticipantGroup? {
+        return repository.getParticipantGroup(studyDeploymentId)
+    }
 
     final override val dataFileName = "participant-data.json"
 

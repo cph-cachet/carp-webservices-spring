@@ -1,7 +1,7 @@
 package dk.cachet.carp.webservices.datastream.repository
 
-import dk.cachet.carp.webservices.dataVisualization.dto.DayKeyQuantityTriple
 import dk.cachet.carp.webservices.datastream.domain.DataStreamSequence
+import dk.cachet.carp.webservices.datastream.dto.DayTaskQuantityTriple
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
@@ -72,7 +72,7 @@ interface DataStreamSequenceRepository : JpaRepository<DataStreamSequence, Int> 
         nativeQuery = true,
         value =
             """
-                select t1.day as day, t2.task_title as key, t1.cnt as quantity from (
+                select t1.day as day, t2.task_title as task, t1.cnt as quantity from (
                        SELECT 
                             (measurement->'data'->'taskData'->'result'->>'endDate')::date AS day,
                             measurement->'data'->>'taskName' AS task_name,
@@ -102,5 +102,5 @@ interface DataStreamSequenceRepository : JpaRepository<DataStreamSequence, Int> 
         to: Timestamp,
         studyId: String,
         taskType: String,
-    ): List<DayKeyQuantityTriple>
+    ): List<DayTaskQuantityTriple>
 }

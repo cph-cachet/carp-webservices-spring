@@ -64,6 +64,6 @@ interface DataStreamIdRepository : JpaRepository<DataStreamId, Int> {
 
     fun getAllByStudyDeploymentIdAndDeviceRoleNameIn(
         studyDeploymentId: String,
-        deviceRoleNames: MutableCollection<String>
+        deviceRoleNames: MutableCollection<String>,
     ): MutableList<DataStreamId>
 }

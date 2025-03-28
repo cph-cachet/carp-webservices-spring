@@ -1,5 +1,6 @@
 package dk.cachet.carp.webservices.common.configuration.web
 
+import dk.cachet.carp.webservices.common.converter.ISO8601ToKotlinInstantConverter
 import dk.cachet.carp.webservices.common.converter.UUIDConverter
 import org.springframework.context.annotation.Configuration
 import org.springframework.format.FormatterRegistry
@@ -9,5 +10,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 class WebConfig : WebMvcConfigurer {
     override fun addFormatters(registry: FormatterRegistry) {
         registry.addConverter(UUIDConverter())
+        registry.addConverter(ISO8601ToKotlinInstantConverter())
     }
 }
