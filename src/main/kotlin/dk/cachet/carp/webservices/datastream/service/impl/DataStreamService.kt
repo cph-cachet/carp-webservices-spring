@@ -9,6 +9,7 @@ import dk.cachet.carp.data.application.DataStreamId
 import dk.cachet.carp.studies.domain.users.ParticipantRepository
 import dk.cachet.carp.webservices.common.services.CoreServiceContainer
 import dk.cachet.carp.webservices.datastream.domain.DataStreamSequence
+import dk.cachet.carp.webservices.datastream.domain.DateTaskQuantityTriple
 import dk.cachet.carp.webservices.datastream.dto.DataStreamsSummaryDto
 import dk.cachet.carp.webservices.datastream.repository.DataStreamIdRepository
 import dk.cachet.carp.webservices.datastream.repository.DataStreamSequenceRepository
@@ -26,7 +27,6 @@ import org.springframework.dao.DataAccessException
 import org.springframework.stereotype.Service
 import java.io.IOException
 import java.nio.file.Path
-import java.sql.Timestamp
 
 @Service
 class DataStreamService(
@@ -84,19 +84,28 @@ class DataStreamService(
     ): DataStreamsSummaryDto {
         require(type in validTypes) { "Invalid type: $type. Allowed values: $validTypes" }
 
-        val dayKeyQuantityTriples =
+        val dateTaskQuantityTriplesDb =
             withContext(Dispatchers.IO) {
                 dataStreamSequenceRepository.getDayKeyQuantityListByDataStreamIdsAndOtherParameters(
                     dataStreamIds = getDataStreamIds(scope, studyId, deploymentId, participantId),
-                    from = Timestamp.from(from.toJavaInstant()),
-                    to = Timestamp.from(to.toJavaInstant()),
+                    from = from.toJavaInstant(),
+                    to = to.toJavaInstant(),
                     studyId = studyId.toString(),
                     taskType = "dk.cachet.carp.$type",
                 )
             }
 
+        val dateTaskQuantityTriples =
+            dateTaskQuantityTriplesDb.map {
+                DateTaskQuantityTriple(
+                    date = Instant.fromEpochMilliseconds(it.date.time),
+                    task = it.task,
+                    quantity = it.quantity,
+                )
+            }
+
         return DataStreamsSummaryDto(
-            data = dayKeyQuantityTriples,
+            data = dateTaskQuantityTriples,
             studyId = studyId.toString(),
             deploymentId = deploymentId?.toString(),
             participantId = participantId?.toString(),

@@ -45,7 +45,7 @@ class DataStreamController(
         LOGGER.info(
             "Start GET: /api/data-streams/summary" +
                 "?studyId=$studyId&deploymentId=$deploymentId&" +
-                    "participantId=$participantId&scope=$scope&type=$type&from=$from&to=$to",
+                "participantId=$participantId&scope=$scope&type=$type&from=$from&to=$to",
         )
 
         return dataStreamService.getDataStreamsSummary(studyId, deploymentId, participantId, scope, type, from, to)
