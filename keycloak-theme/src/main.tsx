@@ -3,36 +3,24 @@ import {
   StyledEngineProvider,
   ThemeProvider,
 } from "@mui/material";
-import { lazy, Suspense } from "react";
-import { createRoot } from "react-dom/client";
-import { kcContext as kcAccountThemeContext } from "./account/kcContext";
-import { kcContext as kcLoginThemeContext } from "./login/kcContext";
+
 import { themeInstance } from "./utils/theme";
 
-const KcLoginThemeApp = lazy(() => import("./login/KcApp"));
-const KcAccountThemeApp = lazy(() => import("./account/KcApp"));
-const App = lazy(() => import("./App"));
+import { createRoot } from "react-dom/client";
+import { Suspense } from "react";
+import { KcPage } from "./kc.gen";
 
-const container = document.getElementById("root");
-const root = createRoot(container);
-
-root.render(
+createRoot(document.getElementById("root")!).render(
   <Suspense>
     <StyledEngineProvider injectFirst>
       <ThemeProvider theme={themeInstance}>
         <CssBaseline />
-        {(() => {
-          if (kcLoginThemeContext !== undefined) {
-            return <KcLoginThemeApp kcContext={kcLoginThemeContext} />;
-          }
-
-          if (kcAccountThemeContext !== undefined) {
-            return <KcAccountThemeApp kcContext={kcAccountThemeContext} />;
-          }
-
-          return <App />;
-        })()}
+        {!window.kcContext ? (
+          <h1>No Keycloak Context</h1>
+        ) : (
+          <KcPage kcContext={window.kcContext} />
+        )}
       </ThemeProvider>
     </StyledEngineProvider>
-  </Suspense>,
+  </Suspense>
 );

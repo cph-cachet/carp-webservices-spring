@@ -246,7 +246,7 @@ class RecruitmentServiceWrapperTest {
                 val serializedMockParticipants = "serialized listOf(p1, p2, p3)"
 
                 coEvery {
-                    recruitmentRepository.findParticipantsByStudyIdWithPagination(
+                    recruitmentRepository.findRecruitmentParticipantsByStudyIdAndSearchAndLimitAndOffset(
                         mockStudyId.stringRepresentation,
                         null,
                         null,
@@ -299,7 +299,7 @@ class RecruitmentServiceWrapperTest {
                 val serializedMockParticipants = "serialized listOf(p1, p2, p3)"
 
                 coEvery {
-                    recruitmentRepository.findParticipantsByStudyIdWithPagination(
+                    recruitmentRepository.findRecruitmentParticipantsByStudyIdAndSearchAndLimitAndOffset(
                         mockStudyId.stringRepresentation,
                         null, null, null,
                     )
@@ -326,6 +326,39 @@ class RecruitmentServiceWrapperTest {
                 assertEquals(result.get(0), a1)
                 assertEquals(result.get(1), a2)
                 assertEquals(result.get(2), a3)
+            }
+        }
+    }
+
+    @Nested
+    inner class CountParticipants {
+        @Test
+        fun `returns count of participants`() {
+            runTest {
+                val mockStudyId = UUID.randomUUID()
+                val mockSearch = "search"
+
+                val mockCount = 3
+
+                coEvery {
+                    recruitmentRepository.countRecruitmentParticipantsByStudyIdAndSearch(
+                        mockStudyId.stringRepresentation,
+                        mockSearch,
+                    )
+                } returns mockCount
+
+                val sut =
+                    RecruitmentServiceWrapper(
+                        accountService,
+                        dataStreamService,
+                        recruitmentRepository,
+                        objectMapper,
+                        services,
+                    )
+
+                val result = sut.countParticipants(mockStudyId, mockSearch)
+
+                assertEquals(mockCount, result)
             }
         }
     }
@@ -646,7 +679,7 @@ class RecruitmentServiceWrapperTest {
                     objectMapper.readValue(serializedMockParticipants, ofType<TypeReference<List<Participant>>>())
                 } returns mockParticipants
                 coEvery {
-                    recruitmentRepository.findParticipantsByStudyIdWithPagination(
+                    recruitmentRepository.findRecruitmentParticipantsByStudyIdAndSearchAndLimitAndOffset(
                         mockStudyId.stringRepresentation,
                         any(), any(), any(),
                     )
@@ -691,7 +724,7 @@ class RecruitmentServiceWrapperTest {
                     objectMapper.readValue(serializedMockParticipants, ofType<TypeReference<List<Participant>>>())
                 } returns mockParticipants
                 coEvery {
-                    recruitmentRepository.findParticipantsByStudyIdWithPagination(
+                    recruitmentRepository.findRecruitmentParticipantsByStudyIdAndSearchAndLimitAndOffset(
                         mockStudyId.stringRepresentation,
                         any(), any(), any(),
                     )

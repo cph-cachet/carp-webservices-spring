@@ -122,6 +122,6 @@ class FileController(private val fileService: FileService, private val authentic
         @RequestParam(RequestParamName.IMAGE, required = true) image: MultipartFile,
     ): String {
         LOGGER.info("Start PUT: /api/studies/$studyId/images")
-        return fileService.uploadImage(image)
+        return fileService.uploadImage(image, studyId.stringRepresentation)
     }
 }

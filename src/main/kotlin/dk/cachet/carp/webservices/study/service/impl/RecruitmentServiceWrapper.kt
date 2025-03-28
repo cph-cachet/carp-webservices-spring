@@ -84,7 +84,7 @@ class RecruitmentServiceWrapper(
     ): List<Account> =
         withContext(Dispatchers.IO + SecurityCoroutineContext()) {
             val serializedParticipants =
-                recruitmentRepository.findParticipantsByStudyIdWithPagination(
+                recruitmentRepository.findRecruitmentParticipantsByStudyIdAndSearchAndLimitAndOffset(
                     studyId.stringRepresentation,
                     offset,
                     limit,
@@ -106,6 +106,20 @@ class RecruitmentServiceWrapper(
             }
 
             accounts
+        }
+
+    override suspend fun countParticipants(
+        studyId: UUID,
+        search: String?,
+    ): Int =
+        withContext(Dispatchers.IO + SecurityCoroutineContext()) {
+            val count =
+                recruitmentRepository.countRecruitmentParticipantsByStudyIdAndSearch(
+                    studyId.stringRepresentation,
+                    search,
+                )
+
+            count
         }
 
     override suspend fun getInactiveDeployments(

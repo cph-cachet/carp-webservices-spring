@@ -1,11 +1,5 @@
 package dk.cachet.carp.webservices.file.service.impl
 
-import com.amazonaws.services.s3.AmazonS3
-import com.amazonaws.services.s3.AmazonS3URI
-import com.amazonaws.services.s3.model.CannedAccessControlList
-import com.amazonaws.services.s3.model.DeleteObjectRequest
-import com.amazonaws.services.s3.model.ObjectMetadata
-import com.amazonaws.services.s3.model.PutObjectRequest
 import com.fasterxml.jackson.databind.ObjectMapper
 import cz.jirutka.rsql.parser.RSQLParser
 import dk.cachet.carp.common.application.UUID
@@ -29,7 +23,11 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.StringUtils
 import org.springframework.web.multipart.MultipartFile
-import org.springframework.web.util.UriComponentsBuilder
+import software.amazon.awssdk.core.sync.RequestBody
+import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest
+import software.amazon.awssdk.services.s3.model.ObjectCannedACL
+import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import java.nio.file.Files
 import java.nio.file.Path
 
@@ -41,9 +39,9 @@ class FileServiceImpl(
     private val fileRepository: FileRepository,
     private val fileStorage: FileStorage,
     private val validateMessages: MessageBase,
-    private val s3Client: AmazonS3,
+    private val s3Client: S3Client,
     private val authenticationService: AuthenticationService,
-    @Value("\${s3.space.bucket}") private val s3SpaceBucket: String,
+    @Value("\${s3.space.bucket}") private val s3SpaceBucket: String, // no slashes in bucketname allowed
     @Value("\${s3.space.endpoint}") private val s3SpaceEndpoint: String,
 ) : FileService, ResourceExporter<File> {
     companion object {
@@ -191,43 +189,46 @@ class FileServiceImpl(
      * @param file The [file] is the file that needs to be uploaded
      * @return The url where you can access the content
      */
-    override fun uploadImage(file: MultipartFile): String {
-        val extension = StringUtils.getFilenameExtension(file.originalFilename)
-        val filename = "${UUID.randomUUID().stringRepresentation}.$extension"
+    override fun uploadImage(
+        file: MultipartFile,
+        studyId: String,
+    ): String {
+        val fileExtension = StringUtils.getFilenameExtension(file.originalFilename)
+        val key = "studies/$studyId/${UUID.randomUUID().stringRepresentation}.$fileExtension"
+        val fileMetadata = mutableMapOf<String, String>()
 
-        val metadata = ObjectMetadata()
-        metadata.contentLength = file.inputStream.available().toLong()
+        fileMetadata["Content-Length"] = file.size.toString()
 
         if (!file.contentType.isNullOrEmpty()) {
-            metadata.contentType = file.contentType
+            fileMetadata["Content-Type"] = file.contentType!!
         }
 
-        s3Client.putObject(
-            PutObjectRequest(
-                s3SpaceBucket,
-                filename,
-                file.inputStream,
-                metadata,
-            ).withCannedAcl(CannedAccessControlList.PublicRead),
-        )
+        val request =
+            PutObjectRequest.builder()
+                .bucket(s3SpaceBucket)
+                .key(key)
+                .metadata(fileMetadata)
+                .acl(ObjectCannedACL.PUBLIC_READ)
+                .ifNoneMatch("*")
+                .build()
 
-        return UriComponentsBuilder.fromUriString(s3SpaceEndpoint).pathSegment(s3SpaceBucket).pathSegment(filename)
-            .build().toUriString()
+        s3Client.putObject(request, RequestBody.fromInputStream(file.inputStream, file.size))
+
+        return "https://$s3SpaceBucket.${s3SpaceEndpoint.removePrefix("https://")}/$key"
     }
 
     override fun deleteImage(url: String) {
-        val uri: AmazonS3URI
-        try {
-            uri = AmazonS3URI(url.replaceBefore(s3SpaceBucket, ""))
-            LOGGER.info("Deleting s3 resource with uri: $url")
-        } catch (e: IllegalArgumentException) {
-            LOGGER.warn("Ignoring deletion of malformed s3 uri: $url", e)
-            return
-        }
+        val key = url.substringAfter("${s3SpaceEndpoint.removePrefix("https://")}/", "")
 
-        s3Client.deleteObject(
-            DeleteObjectRequest(s3SpaceBucket, uri.key),
-        )
+        LOGGER.info("Deleting s3 resource with uri: $url")
+
+        val deleteRequest =
+            DeleteObjectRequest.builder()
+                .bucket(s3SpaceBucket)
+                .key(key)
+                .build()
+
+        s3Client.deleteObject(deleteRequest)
     }
 
     override val dataFileName = "files.json"

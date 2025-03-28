@@ -22,7 +22,7 @@ interface RecruitmentRepository : JpaRepository<Recruitment, Int> {
 
     @Query(
         value = """
-            SELECT jsonb_agg(elem) AS participants_with_limit_and_offset
+            SELECT jsonb_agg(elem) AS participants_
             FROM (
                 SELECT elem
                 FROM public.recruitments, 
@@ -39,10 +39,29 @@ interface RecruitmentRepository : JpaRepository<Recruitment, Int> {
         """,
         nativeQuery = true,
     )
-    fun findParticipantsByStudyIdWithPagination(
+    fun findRecruitmentParticipantsByStudyIdAndSearchAndLimitAndOffset(
         studyId: String,
         offset: Int?,
         limit: Int?,
         search: String?,
     ): String?
+
+    @Query(
+        value = """
+                SELECT count(*)
+                FROM public.recruitments, 
+                     jsonb_array_elements(snapshot->'participants') arr(elem)
+                WHERE snapshot->>'studyId' = :studyId
+                AND (
+                    :search IS NULL 
+                    OR elem->'accountIdentity'->>'username' ILIKE '%' || :search || '%'
+                    OR elem->'accountIdentity'->>'emailAddress' ILIKE '%' || :search || '%'
+                )
+        """,
+        nativeQuery = true,
+    )
+    fun countRecruitmentParticipantsByStudyIdAndSearch(
+        studyId: String,
+        search: String?,
+    ): Int
 }
