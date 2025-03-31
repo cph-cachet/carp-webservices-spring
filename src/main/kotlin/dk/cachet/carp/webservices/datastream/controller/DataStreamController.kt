@@ -26,7 +26,7 @@ class DataStreamController(
         /** Endpoint URI constants */
         const val DATA_STREAM_SERVICE = "/api/data-stream-service"
         const val DATA_STREAM_SERVICE_GZIP = "/api/data-stream-service-zip"
-        const val DATA_STREAMS_SUMMARY = "/api/data-streams/summary"
+        const val DATA_STREAMS_SUMMARY = "/api/data-stream-service/summary"
     }
 
     @GetMapping(value = [DATA_STREAMS_SUMMARY])
