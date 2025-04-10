@@ -39,7 +39,7 @@ class DataStreamService(
 ) : DataStreamService {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
-        private val validTypes = setOf("survey", "health", "cognition", "image", "audio", "video", "informed_consent")
+        private val validTypes = setOf("informed_consent", "survey", "cognition", "audio", "video", "image", "health", "sensing", "one_time_sensing")
         private val validScopes = setOf("study", "deployment", "participant")
     }
 
@@ -91,7 +91,7 @@ class DataStreamService(
                     from = from.toJavaInstant(),
                     to = to.toJavaInstant(),
                     studyId = studyId.toString(),
-                    taskType = "dk.cachet.carp.$type",
+                    taskType = type,
                 )
             }
 

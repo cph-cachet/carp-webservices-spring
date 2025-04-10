@@ -78,10 +78,10 @@ interface DataStreamSequenceRepository : JpaRepository<DataStreamSequence, Int> 
                         FROM public.data_stream_sequence ds,
                              LATERAL jsonb_array_elements(ds.snapshot->'measurements') AS measurement
                         WHERE ds.data_stream_id IN (:dataStreamIds)
-                        AND measurement->'data'->>'__type' = 'dk.cachet.carp.completedtask'
-                        AND measurement->'data'->'taskData'->>'__type' = :taskType
-                        AND (measurement->'data'->'taskData'->'result'->>'endDate')::timestamp < :to
-                        AND (measurement->'data'->'taskData'->'result'->>'endDate')::timestamp > :from
+                        AND measurement->'data'->>'__type' = 'dk.cachet.carp.completedapptask'
+                        AND measurement->'data'->>'taskType' = :taskType
+                        AND (measurement->'data'->>'completedAt')::timestamp < :to
+                        AND (measurement->'data'->>'completedAt')::timestamp > :from
                         GROUP BY day, task_name
                         ORDER BY day, cnt DESC
                 ) as t1 left join (
