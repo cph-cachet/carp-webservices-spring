@@ -72,7 +72,7 @@ interface DataStreamSequenceRepository : JpaRepository<DataStreamSequence, Int> 
             """
                 select t1.day::timestamp as date, t2.task_title as task, t1.cnt as quantity from (
                        SELECT 
-                            (measurement->'data'->'taskData'->'result'->>'endDate')::date AS day,
+                            (measurement->'data'->>'completedAt')::date AS day,
                             measurement->'data'->>'taskName' AS task_name,
                             COUNT(*) AS cnt
                         FROM public.data_stream_sequence ds,
@@ -80,8 +80,8 @@ interface DataStreamSequenceRepository : JpaRepository<DataStreamSequence, Int> 
                         WHERE ds.data_stream_id IN (:dataStreamIds)
                         AND measurement->'data'->>'__type' = 'dk.cachet.carp.completedapptask'
                         AND measurement->'data'->>'taskType' = :taskType
-                        AND (measurement->'data'->>'completedAt')::timestamp < :to
                         AND (measurement->'data'->>'completedAt')::timestamp > :from
+                        AND (measurement->'data'->>'completedAt')::timestamp < :to
                         GROUP BY day, task_name
                         ORDER BY day, cnt DESC
                 ) as t1 left join (
