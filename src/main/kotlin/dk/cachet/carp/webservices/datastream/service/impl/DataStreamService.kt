@@ -39,7 +39,11 @@ class DataStreamService(
 ) : DataStreamService {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
-        private val validTypes = setOf("informed_consent", "survey", "cognition", "audio", "video", "image", "health", "sensing", "one_time_sensing")
+        private val validTypes =
+            setOf(
+                "informed_consent", "survey", "cognition", "audio", "video", "image", "health", "sensing",
+                "one_time_sensing",
+            )
         private val validScopes = setOf("study", "deployment", "participant")
     }
 
