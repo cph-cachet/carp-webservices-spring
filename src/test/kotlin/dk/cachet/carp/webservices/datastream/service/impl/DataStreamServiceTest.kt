@@ -3,7 +3,11 @@ package dk.cachet.carp.webservices.datastream.service.impl
 import com.fasterxml.jackson.databind.ObjectMapper
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.data.infrastructure.DataStreamServiceDecorator
+import dk.cachet.carp.studies.domain.users.ParticipantRepository
+import dk.cachet.carp.studies.infrastructure.RecruitmentServiceDecorator
 import dk.cachet.carp.webservices.common.services.CoreServiceContainer
+import dk.cachet.carp.webservices.datastream.repository.DataStreamIdRepository
+import dk.cachet.carp.webservices.datastream.repository.DataStreamSequenceRepository
 import dk.cachet.carp.webservices.datastream.service.core.CoreDataStreamService
 import io.mockk.every
 import io.mockk.mockk
@@ -22,8 +26,23 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import kotlin.random.Random
 import kotlin.test.assertFailsWith
+import org.junit.jupiter.api.assertThrows
+import dk.cachet.carp.webservices.deployment.service.ParticipationService
+import kotlinx.datetime.Instant
+
 
 class DataStreamServiceTest {
+    private val dataStreamIdRepository = mockk<DataStreamIdRepository>()
+    private val dataStreamSequenceRepository = mockk<DataStreamSequenceRepository>()
+    private val objectMapper = mockk<ObjectMapper>()
+    private val participantRepository = mockk<ParticipantRepository>()
+    private val participationService = mockk<ParticipationService>()
+    val services: CoreServiceContainer =
+        mockk<CoreServiceContainer> {
+            every { dataStreamService } returns mockk<DataStreamServiceDecorator>()
+        }
+
+
     @Nested
     inner class ExtractFilesFromZip {
         @BeforeEach
@@ -139,6 +158,35 @@ class DataStreamServiceTest {
             jsonGenerator.flush()
 
             return writer.toString()
+        }
+    }
+
+    @Nested
+    inner class GetDataStreamsSummary {
+        @Test
+        fun `throws exception if type is invalid`() {
+            runTest {
+                val sut = DataStreamService(
+                    dataStreamIdRepository,
+                    dataStreamSequenceRepository,
+                    objectMapper,
+                    participantRepository,
+                    participationService,
+                    services,
+                )
+
+                assertThrows<IllegalArgumentException> {
+                    sut.getDataStreamsSummary(
+                        studyId = UUID.randomUUID(),
+                        deploymentId = UUID.randomUUID(),
+                        participantId = UUID.randomUUID(),
+                        scope = "invalidScope",
+                        type = "invalidType",
+                        from = Instant.fromEpochMilliseconds(0),
+                        to = Instant.fromEpochMilliseconds(0),
+                    )
+                }
+            }
         }
     }
 }

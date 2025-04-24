@@ -42,7 +42,6 @@ class DataStreamService(
         private val validTypes =
             setOf(
                 "informed_consent", "survey", "cognition", "audio", "video", "image", "health", "sensing",
-                "one_time_sensing",
             )
         private val validScopes = setOf("study", "deployment", "participant")
     }
