@@ -4,10 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.data.infrastructure.DataStreamServiceDecorator
 import dk.cachet.carp.studies.domain.users.ParticipantRepository
-import dk.cachet.carp.studies.infrastructure.RecruitmentServiceDecorator
 import dk.cachet.carp.webservices.common.services.CoreServiceContainer
+import dk.cachet.carp.webservices.datastream.domain.DataStreamId
+import dk.cachet.carp.webservices.datastream.domain.DateTaskQuantityTriple
 import dk.cachet.carp.webservices.datastream.repository.DataStreamIdRepository
 import dk.cachet.carp.webservices.datastream.repository.DataStreamSequenceRepository
+import dk.cachet.carp.webservices.datastream.repository.DateTaskQuantityTripleDb
 import dk.cachet.carp.webservices.datastream.service.core.CoreDataStreamService
 import io.mockk.every
 import io.mockk.mockk
@@ -29,6 +31,10 @@ import kotlin.test.assertFailsWith
 import org.junit.jupiter.api.assertThrows
 import dk.cachet.carp.webservices.deployment.service.ParticipationService
 import kotlinx.datetime.Instant
+import kotlinx.datetime.toJavaInstant
+import java.sql.Timestamp
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 
 class DataStreamServiceTest {
@@ -37,10 +43,9 @@ class DataStreamServiceTest {
     private val objectMapper = mockk<ObjectMapper>()
     private val participantRepository = mockk<ParticipantRepository>()
     private val participationService = mockk<ParticipationService>()
-    val services: CoreServiceContainer =
-        mockk<CoreServiceContainer> {
-            every { dataStreamService } returns mockk<DataStreamServiceDecorator>()
-        }
+    val services: CoreServiceContainer = mockk<CoreServiceContainer> {
+        every { dataStreamService } returns mockk<DataStreamServiceDecorator>()
+    }
 
 
     @Nested
@@ -51,48 +56,45 @@ class DataStreamServiceTest {
         }
 
         @Test
-        fun `should extract files from valid zip from generateRandomDataStreamServiceRequest()`() =
-            runTest {
-                val requestAsJson = generateRandomDataStreamServiceRequest()
-                val zipOutputStream = compressData(requestAsJson)
+        fun `should extract files from valid zip from generateRandomDataStreamServiceRequest()`() = runTest {
+            val requestAsJson = generateRandomDataStreamServiceRequest()
+            val zipOutputStream = compressData(requestAsJson)
 
-                val services = mockk<CoreServiceContainer>()
-                val coreDataStreamService = mockk<CoreDataStreamService>()
-                every { services.dataStreamService } returns DataStreamServiceDecorator(coreDataStreamService, mockk())
+            val services = mockk<CoreServiceContainer>()
+            val coreDataStreamService = mockk<CoreDataStreamService>()
+            every { services.dataStreamService } returns DataStreamServiceDecorator(coreDataStreamService, mockk())
 
-                assertDoesNotThrow {
-                    withContext(Dispatchers.IO) {
-                        decompressGzip(zipOutputStream)
-                    }
+            assertDoesNotThrow {
+                withContext(Dispatchers.IO) {
+                    decompressGzip(zipOutputStream)
                 }
             }
+        }
 
         @Test
-        fun `should throw error for invalid zip`() =
-            runTest {
-                val invalidJsonZip = createInvalidZip()
+        fun `should throw error for invalid zip`() = runTest {
+            val invalidJsonZip = createInvalidZip()
 
-                val mockFile = mockk<MultipartFile>()
-                every { mockFile.originalFilename } returns "invalid.zip"
-                every { mockFile.contentType } returns "application/zip"
-                every { mockFile.size } returns invalidJsonZip.size.toLong()
-                every { mockFile.isEmpty } returns false
-                every { mockFile.bytes } returns invalidJsonZip
+            val mockFile = mockk<MultipartFile>()
+            every { mockFile.originalFilename } returns "invalid.zip"
+            every { mockFile.contentType } returns "application/zip"
+            every { mockFile.size } returns invalidJsonZip.size.toLong()
+            every { mockFile.isEmpty } returns false
+            every { mockFile.bytes } returns invalidJsonZip
 
-                val services = mockk<CoreServiceContainer>()
-                val coreDataStreamService = mockk<CoreDataStreamService>()
-                every { services.dataStreamService } returns
-                    DataStreamServiceDecorator(
-                        coreDataStreamService,
-                        mockk(),
-                    )
+            val services = mockk<CoreServiceContainer>()
+            val coreDataStreamService = mockk<CoreDataStreamService>()
+            every { services.dataStreamService } returns DataStreamServiceDecorator(
+                coreDataStreamService,
+                mockk(),
+            )
 
-                assertFailsWith<IOException> {
-                    withContext(Dispatchers.IO) {
-                        decompressGzip(mockFile.bytes)
-                    }
+            assertFailsWith<IOException> {
+                withContext(Dispatchers.IO) {
+                    decompressGzip(mockFile.bytes)
                 }
             }
+        }
 
         private fun createInvalidZip(): ByteArray {
             val byteArrayOutputStream = ByteArrayOutputStream()
@@ -163,29 +165,136 @@ class DataStreamServiceTest {
 
     @Nested
     inner class GetDataStreamsSummary {
+        val sut = DataStreamService(
+            dataStreamIdRepository,
+            dataStreamSequenceRepository,
+            objectMapper,
+            participantRepository,
+            participationService,
+            services,
+        )
+
         @Test
         fun `throws exception if type is invalid`() {
             runTest {
-                val sut = DataStreamService(
-                    dataStreamIdRepository,
-                    dataStreamSequenceRepository,
-                    objectMapper,
-                    participantRepository,
-                    participationService,
-                    services,
-                )
-
-                assertThrows<IllegalArgumentException> {
+                val e = assertThrows<IllegalArgumentException> {
                     sut.getDataStreamsSummary(
                         studyId = UUID.randomUUID(),
                         deploymentId = UUID.randomUUID(),
                         participantId = UUID.randomUUID(),
-                        scope = "invalidScope",
+                        scope = "study",
                         type = "invalidType",
                         from = Instant.fromEpochMilliseconds(0),
                         to = Instant.fromEpochMilliseconds(0),
                     )
                 }
+
+                assertTrue { e.message?.contains("Invalid type") == true }
+            }
+        }
+
+        @Test
+        fun `throws exception if scope is invalid`() {
+            runTest {
+                val e = assertThrows<IllegalArgumentException> {
+                    sut.getDataStreamsSummary(
+                        studyId = UUID.randomUUID(),
+                        deploymentId = UUID.randomUUID(),
+                        participantId = UUID.randomUUID(),
+                        scope = "invalidType",
+                        type = "survey",
+                        from = Instant.fromEpochMilliseconds(0),
+                        to = Instant.fromEpochMilliseconds(0),
+                    )
+                }
+
+                assertTrue { e.message?.contains("Invalid scope") == true }
+            }
+        }
+
+        @Test
+        fun `throws exception if scope is deployment but deploymentId is absent`() {
+            runTest {
+                val e = assertThrows<IllegalArgumentException> {
+                    sut.getDataStreamsSummary(
+                        studyId = UUID.randomUUID(),
+                        deploymentId = null,
+                        participantId = UUID.randomUUID(),
+                        scope = "deployment",
+                        type = "survey",
+                        from = Instant.fromEpochMilliseconds(0),
+                        to = Instant.fromEpochMilliseconds(0),
+                    )
+                }
+
+                assertTrue { e.message?.contains("Deployment ID must be provided when scope is 'deployment'") == true }
+            }
+        }
+
+        @Test
+        fun `should return the data stream summary for deployment scope`() {
+            runTest {
+                val deploymentId = UUID.randomUUID()
+                val from = Instant.fromEpochMilliseconds(0)
+                val to = Instant.fromEpochMilliseconds(1000)
+                val studyId = UUID.randomUUID()
+                val taskType = "survey"
+
+                val mockListOfDataStreamIds = listOf(
+                    DataStreamId(id = 1),
+                    DataStreamId(id = 2),
+                )
+
+                val mockListOfDateTaskQuantityTripleDbs = listOf(
+                    DateTaskQuantityTripleDb(
+                        date = Timestamp(1000L),
+                        "survey1",
+                        2,
+                    ),
+                    DateTaskQuantityTripleDb(
+                        date = Timestamp(2000L),
+                        "survey1",
+                        2,
+                    ),
+                )
+
+                val mockedListOfDateTaskQuantityTriples = mockListOfDateTaskQuantityTripleDbs.map {
+                    DateTaskQuantityTriple(
+                        date = Instant.fromEpochMilliseconds(it.date.time),
+                        task = it.task,
+                        quantity = it.quantity,
+                    )
+                }
+
+                every { dataStreamIdRepository.getAllByDeploymentId(deploymentId.toString()) } returns mockListOfDataStreamIds
+                every {
+                    dataStreamSequenceRepository.getDayKeyQuantityListByDataStreamIdsAndOtherParameters(
+                        dataStreamIds = mockListOfDataStreamIds.map { it.id },
+                        from = from.toJavaInstant(),
+                        to = to.toJavaInstant(),
+                        studyId = studyId.toString(),
+                        taskType = taskType,
+                    )
+                } returns mockListOfDateTaskQuantityTripleDbs
+
+                val result = sut.getDataStreamsSummary(
+                    studyId = studyId,
+                    deploymentId = deploymentId,
+                    participantId = null,
+                    scope = "deployment",
+                    type = taskType,
+                    from = from,
+                    to = to,
+                )
+
+                assertEquals(result.data, mockedListOfDateTaskQuantityTriples )
+                assertEquals(result.studyId, studyId.toString())
+                assertEquals(result.deploymentId, deploymentId.toString())
+                assertEquals(result.participantId, null)
+                assertEquals(result.scope, "deployment")
+                assertEquals(result.type, taskType)
+                assertEquals(result.from, from)
+                assertEquals(result.to, to)
             }
         }
     }

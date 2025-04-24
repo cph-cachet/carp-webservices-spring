@@ -41,7 +41,7 @@ class DataStreamService(
         private val LOGGER: Logger = LogManager.getLogger()
         private val validTypes =
             setOf(
-                "informed_consent", "survey", "cognition", "audio", "video", "image", "health", "sensing",
+                "informed_consent", "survey", "cognition", "audio", "image", "health", "sensing",
             )
         private val validScopes = setOf("study", "deployment", "participant")
     }
