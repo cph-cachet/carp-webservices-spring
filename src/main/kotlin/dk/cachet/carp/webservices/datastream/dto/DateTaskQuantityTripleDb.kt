@@ -1,4 +1,4 @@
-package dk.cachet.carp.webservices.datastream.repository
+package dk.cachet.carp.webservices.datastream.dto
 
 import java.sql.Timestamp
 

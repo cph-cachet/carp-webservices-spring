@@ -1,6 +1,7 @@
 package dk.cachet.carp.webservices.datastream.repository
 
 import dk.cachet.carp.webservices.datastream.domain.DataStreamSequence
+import dk.cachet.carp.webservices.datastream.dto.DateTaskQuantityTripleDb
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query

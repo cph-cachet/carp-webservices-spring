@@ -13,7 +13,7 @@ import dk.cachet.carp.webservices.datastream.domain.DataStreamId
 import dk.cachet.carp.webservices.datastream.domain.DateTaskQuantityTriple
 import dk.cachet.carp.webservices.datastream.repository.DataStreamIdRepository
 import dk.cachet.carp.webservices.datastream.repository.DataStreamSequenceRepository
-import dk.cachet.carp.webservices.datastream.repository.DateTaskQuantityTripleDb
+import dk.cachet.carp.webservices.datastream.dto.DateTaskQuantityTripleDb
 import dk.cachet.carp.webservices.datastream.service.core.CoreDataStreamService
 import dk.cachet.carp.webservices.deployment.service.ParticipationService
 import io.mockk.coEvery
