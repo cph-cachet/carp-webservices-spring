@@ -49,7 +49,7 @@ class DataStreamService(
                 "health",
                 "sensing",
                 "video",
-                "one_time_sensing"
+                "one_time_sensing",
             )
         private val validScopes = setOf("study", "deployment", "participant")
     }
