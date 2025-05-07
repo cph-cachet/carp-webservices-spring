@@ -6,15 +6,20 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.common.application.data.DataType
 import dk.cachet.carp.data.application.DataStreamId
+import dk.cachet.carp.studies.domain.users.ParticipantRepository
 import dk.cachet.carp.webservices.common.services.CoreServiceContainer
 import dk.cachet.carp.webservices.datastream.domain.DataStreamSequence
+import dk.cachet.carp.webservices.datastream.domain.DateTaskQuantityTriple
+import dk.cachet.carp.webservices.datastream.dto.DataStreamsSummaryDto
 import dk.cachet.carp.webservices.datastream.repository.DataStreamIdRepository
 import dk.cachet.carp.webservices.datastream.repository.DataStreamSequenceRepository
 import dk.cachet.carp.webservices.datastream.service.DataStreamService
 import dk.cachet.carp.webservices.datastream.service.createSequence
+import dk.cachet.carp.webservices.deployment.service.ParticipationService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
+import kotlinx.datetime.toJavaInstant
 import kotlinx.datetime.toKotlinInstant
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -28,10 +33,25 @@ class DataStreamService(
     private val dataStreamIdRepository: DataStreamIdRepository,
     private val dataStreamSequenceRepository: DataStreamSequenceRepository,
     private val objectMapper: ObjectMapper,
+    private val participantRepository: ParticipantRepository,
+    private val participationService: ParticipationService,
     services: CoreServiceContainer,
 ) : DataStreamService {
     companion object {
         private val LOGGER: Logger = LogManager.getLogger()
+        private val validTypes =
+            setOf(
+                "informed_consent",
+                "survey",
+                "cognition",
+                "audio",
+                "image",
+                "health",
+                "sensing",
+                "video",
+                "one_time_sensing",
+            )
+        private val validScopes = setOf("study", "deployment", "participant")
     }
 
     final override val core = services.dataStreamService
@@ -49,8 +69,62 @@ class DataStreamService(
         return findLatestUpdatedAtByDataStreamIds(dataStreamIds)
     }
 
-    fun findDataStreamIdsByDeploymentId(deploymentId: UUID): List<Int> {
+    override fun findDataStreamIdsByDeploymentId(deploymentId: UUID): List<Int> {
         return dataStreamIdRepository.getAllByDeploymentId(deploymentId.toString()).map { it.id }
+    }
+
+    override fun findDataStreamIdsByDeploymentIdAndDeviceRoleNames(
+        deploymentId: UUID,
+        deviceRoleNames: List<String>,
+    ): List<Int> {
+        return dataStreamIdRepository.getAllByStudyDeploymentIdAndDeviceRoleNameIn(
+            deploymentId.toString(),
+            deviceRoleNames.toMutableList(),
+        )
+            .map { it.id }
+    }
+
+    override suspend fun getDataStreamsSummary(
+        studyId: UUID,
+        deploymentId: UUID?,
+        participantId: UUID?,
+        scope: String,
+        type: String,
+        from: Instant,
+        to: Instant,
+    ): DataStreamsSummaryDto {
+        require(type in validTypes) { "Invalid type: $type. Allowed values: $validTypes" }
+
+        val dateTaskQuantityTriplesDb =
+            withContext(Dispatchers.IO) {
+                dataStreamSequenceRepository.getDayKeyQuantityListByDataStreamIdsAndOtherParameters(
+                    dataStreamIds = getDataStreamIds(scope, studyId, deploymentId, participantId),
+                    from = from.toJavaInstant(),
+                    to = to.toJavaInstant(),
+                    studyId = studyId.toString(),
+                    taskType = type,
+                )
+            }
+
+        val dateTaskQuantityTriples =
+            dateTaskQuantityTriplesDb.map {
+                DateTaskQuantityTriple(
+                    date = Instant.fromEpochMilliseconds(it.date.time),
+                    task = it.task,
+                    quantity = it.quantity,
+                )
+            }
+
+        return DataStreamsSummaryDto(
+            data = dateTaskQuantityTriples,
+            studyId = studyId.toString(),
+            deploymentId = deploymentId?.toString(),
+            participantId = participantId?.toString(),
+            scope = scope,
+            type = type,
+            from = from,
+            to = to,
+        )
     }
 
     fun findLatestUpdatedAtByDataStreamIds(dataStreamIds: List<Int>): Instant? {
@@ -159,5 +233,50 @@ class DataStreamService(
         } catch (e: DataAccessException) {
             LOGGER.error("Database access error for sequence ID: ${dataStreamSequence.id} - ${e.message}", e)
         }
+    }
+
+    private suspend fun getDataStreamIds(
+        scope: String,
+        studyId: UUID,
+        deploymentId: UUID?,
+        participantId: UUID?,
+    ): List<Int> {
+        require(scope in validScopes) { "Invalid scope: $scope. Allowed values: $validScopes" }
+        if (scope == "deployment") {
+            requireNotNull(deploymentId) { "Deployment ID must be provided when scope is 'deployment'." }
+            return getDataStreamIdsForDeployment(deploymentId)
+        } else if (scope == "study") {
+            return getDataStreamIdsForStudy(studyId)
+        } else {
+            requireNotNull(participantId) { "Participant ID must be provided when scope is 'participant'." }
+            requireNotNull(deploymentId) { "Deployment ID must be provided when scope is 'participant'." }
+            return getDataStreamIdsForParticipant(participantId, deploymentId)
+        }
+    }
+
+    private fun getDataStreamIdsForDeployment(deploymentId: UUID): List<Int> {
+        return findDataStreamIdsByDeploymentId(deploymentId)
+    }
+
+    private suspend fun getDataStreamIdsForStudy(studyId: UUID): List<Int> {
+        val deploymentIds = participantRepository.getRecruitment(studyId)?.participantGroups?.keys?.toSet()
+
+        return deploymentIds!!.flatMap { findDataStreamIdsByDeploymentId(it) }.toSet().toList()
+    }
+
+    private suspend fun getDataStreamIdsForParticipant(
+        participantId: UUID,
+        deploymentId: UUID,
+    ): List<Int> {
+        val participantGroup = participationService.getParticipantGroup(deploymentId)
+
+        val participationHavingParticipantId =
+            participantGroup!!.participations.find { it.participation.participantId == participantId }
+
+        val assignedPrimaryDeviceRoleNames = participationHavingParticipantId!!.assignedPrimaryDeviceRoleNames
+        return findDataStreamIdsByDeploymentIdAndDeviceRoleNames(
+            deploymentId,
+            assignedPrimaryDeviceRoleNames.toList(),
+        ).toSet().toList()
     }
 }

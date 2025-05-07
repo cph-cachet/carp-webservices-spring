@@ -78,7 +78,7 @@ class QuerySpecification<T>(
         val firstArgument: Any = allArguments!!.first()
 
         return when (QueryOperation.getSimpleOperator(operator)) {
-             QueryOperation.EQUAL ->
+            QueryOperation.EQUAL ->
                 {
                     return when (firstArgument) {
                         is String -> builder.like(propertyQuery, firstArgument.toString().replace('*', '%'))

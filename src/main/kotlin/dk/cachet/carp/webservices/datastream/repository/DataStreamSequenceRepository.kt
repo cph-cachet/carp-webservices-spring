@@ -1,6 +1,7 @@
 package dk.cachet.carp.webservices.datastream.repository
 
 import dk.cachet.carp.webservices.datastream.domain.DataStreamSequence
+import dk.cachet.carp.webservices.datastream.dto.DateTaskQuantityTripleDb
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
@@ -65,4 +66,40 @@ interface DataStreamSequenceRepository : JpaRepository<DataStreamSequence, Int> 
     fun findSequenceIdsByStreamId(
         @Param("dataStreamIds") dataStreamIds: List<Int>,
     ): List<Int>
+
+    @Query(
+        nativeQuery = true,
+        value =
+            """
+                select t1.day::timestamp as date, t2.task_title as task, t1.cnt as quantity from (
+                       SELECT 
+                            (measurement->'data'->>'completedAt')::date AS day,
+                            measurement->'data'->>'taskName' AS task_name,
+                            COUNT(*) AS cnt
+                        FROM public.data_stream_sequence ds,
+                             LATERAL jsonb_array_elements(ds.snapshot->'measurements') AS measurement
+                        WHERE ds.data_stream_id IN (:dataStreamIds)
+                        AND measurement->'data'->>'__type' = 'dk.cachet.carp.completedapptask'
+                        AND measurement->'data'->>'taskType' = :taskType
+                        AND (measurement->'data'->>'completedAt')::timestamp > :from
+                        AND (measurement->'data'->>'completedAt')::timestamp < :to
+                        GROUP BY day, task_name
+                        ORDER BY day, cnt DESC
+                ) as t1 left join (
+                        SELECT 
+                            t->>'name' AS task_name,
+                            t->>'title' AS task_title
+                        FROM public.studies,
+                             LATERAL jsonb_array_elements(snapshot->'protocolSnapshot'->'tasks') AS t
+                        WHERE snapshot->>'id' = :studyId
+                )  as t2 on t1.task_name = t2.task_name
+            """,
+    )
+    fun getDayKeyQuantityListByDataStreamIdsAndOtherParameters(
+        dataStreamIds: List<Int>,
+        from: Instant,
+        to: Instant,
+        studyId: String,
+        taskType: String,
+    ): List<DateTaskQuantityTripleDb>
 }
