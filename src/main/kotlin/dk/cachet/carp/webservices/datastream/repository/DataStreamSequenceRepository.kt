@@ -71,7 +71,7 @@ interface DataStreamSequenceRepository : JpaRepository<DataStreamSequence, Int> 
         nativeQuery = true,
         value =
             """
-                select t1.day::timestamp as date, t2.task_title as task, t1.cnt as quantity from (
+                select t1.day::timestamp as date, COALESCE(t2.task_title, t1.task_name), t1.cnt as quantity from (
                        SELECT 
                             (measurement->'data'->>'completedAt')::date AS day,
                             measurement->'data'->>'taskName' AS task_name,
