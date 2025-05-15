@@ -1,12 +1,12 @@
 import { useConstCallback } from "keycloakify/tools/useConstCallback";
 import { useState, type FormEventHandler } from "react";
-import { useGetClassName } from "keycloakify/login/lib/useGetClassName";
+import { getKcClsx } from "keycloakify/login/lib/KcClsx";
 import type { PageProps } from "keycloakify/login/pages/PageProps";
 import { clsx } from "keycloakify/tools/clsx";
 import * as yup from "yup";
 import { useFormik } from "formik";
 import type { I18n } from "../i18n";
-import type { KcContext } from "../kcContext";
+import type { KcContext } from "../KcContext";
 import CarpInput from "../../components/CarpInput";
 import AuthActionButton from "../../components/Buttons/AuthActionButton";
 
@@ -19,14 +19,14 @@ const LoginUpdateProfile = (
   const [isLoading, setIsLoading] = useState(false);
   const { kcContext, i18n, doUseDefaultCss, Template, classes } = props;
 
-  const { getClassName } = useGetClassName({
+  const { kcClsx } = getKcClsx({
     doUseDefaultCss,
     classes,
   });
 
   const { msg, msgStr } = i18n;
 
-  const { url, user, isAppInitiatedAction } = kcContext;
+  const { url, profile, isAppInitiatedAction } = kcContext;
 
   const validationSchemaUsername = yup.object({
     username: yup.string().required(msgStr("usernameRequired")),
@@ -48,13 +48,13 @@ const LoginUpdateProfile = (
   });
 
   const formik = useFormik({
-    initialValues: {
-      username: user.username ?? "",
-      firstName: user.firstName ?? "",
-      lastName: user.lastName ?? "",
-      email: user.email ?? "",
-    },
-    validationSchema: user.editUsernameAllowed
+    initialValues : {
+      username: typeof kcContext.profile.attributesByName.username === "string" ? kcContext.profile.attributesByName.username: "",
+      firstName: typeof kcContext.profile.attributesByName.firstName === "string" ? kcContext.profile.attributesByName.firstName : "",
+      lastName: typeof kcContext.profile.attributesByName.lastName === "string" ? kcContext.profile.attributesByName.lastName : "",
+      email: typeof kcContext.profile.attributesByName.email === "string" ? kcContext.profile.attributesByName.email : "",
+  },
+    validationSchema: profile.attributesByName.editUsernameAllowed
       ? validationSchemaUsername
       : validationSchemaNoUsername,
     onSubmit: () => {},
@@ -75,12 +75,12 @@ const LoginUpdateProfile = (
     >
       <form
         id="kc-update-profile-form"
-        className={getClassName("kcFormClass")}
+        className={kcClsx("kcFormClass")}
         onSubmit={onSubmit}
         action={url.loginAction}
         method="post"
       >
-        {user.editUsernameAllowed && (
+        {profile.attributesByName.editUsernameAllowed && (
           <CarpInput
             name="username"
             label={msgStr("username")}
@@ -118,34 +118,34 @@ const LoginUpdateProfile = (
           variant="outlined"
         />
 
-        <div className={getClassName("kcFormGroupClass")}>
+        <div className={kcClsx("kcFormGroupClass")}>
           <div
             id="kc-form-options"
-            className={getClassName("kcFormOptionsClass")}
+            className={kcClsx("kcFormOptionsClass")}
           >
-            <div className={getClassName("kcFormOptionsWrapperClass")} />
+            <div className={kcClsx("kcFormOptionsWrapperClass")} />
           </div>
 
           <div
             id="kc-form-buttons"
-            className={getClassName("kcFormButtonsClass")}
+            className={kcClsx("kcFormButtonsClass")}
           >
             {isAppInitiatedAction ? (
               <>
                 <input
                   className={clsx(
-                    getClassName("kcButtonClass"),
-                    getClassName("kcButtonPrimaryClass"),
-                    getClassName("kcButtonLargeClass"),
+                    kcClsx("kcButtonClass"),
+                    kcClsx("kcButtonPrimaryClass"),
+                    kcClsx("kcButtonLargeClass"),
                   )}
                   type="submit"
                   defaultValue={msgStr("doSubmit")}
                 />
                 <button
                   className={clsx(
-                    getClassName("kcButtonClass"),
-                    getClassName("kcButtonDefaultClass"),
-                    getClassName("kcButtonLargeClass"),
+                    kcClsx("kcButtonClass"),
+                    kcClsx("kcButtonDefaultClass"),
+                    kcClsx("kcButtonLargeClass"),
                   )}
                   type="submit"
                   name="cancel-aia"
@@ -157,7 +157,7 @@ const LoginUpdateProfile = (
             ) : (
               <div
                 id="kc-form-buttons"
-                className={getClassName("kcFormButtonsClass")}
+                className={kcClsx("kcFormButtonsClass")}
               >
                 <AuthActionButton
                   text={msgStr("doSubmit")}

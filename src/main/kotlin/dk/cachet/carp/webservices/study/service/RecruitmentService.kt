@@ -21,9 +21,15 @@ interface RecruitmentService {
 
     suspend fun getParticipants(
         studyId: UUID,
-        offset: Int = 0,
-        limit: Int = -1,
+        offset: Int?,
+        limit: Int?,
+        search: String?,
     ): List<Account>
+
+    suspend fun countParticipants(
+        studyId: UUID,
+        search: String?,
+    ): Int
 
     suspend fun getInactiveDeployments(
         studyId: UUID,

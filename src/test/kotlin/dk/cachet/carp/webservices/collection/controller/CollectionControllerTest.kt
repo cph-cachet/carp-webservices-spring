@@ -39,7 +39,7 @@ class CollectionControllerTest {
         fun `should return 400 if request body is invalid`() =
             runTest {
                 val mockStudyId = UUID.randomUUID().stringRepresentation
-                val url = "/api/studies/$mockStudyId/collections/"
+                val url = "/api/studies/$mockStudyId/collections"
                 val collectionCreateRequestDto = CollectionCreateRequestDto("")
 
                 mockMvc.perform(
@@ -52,7 +52,7 @@ class CollectionControllerTest {
         fun `should return 400 if studyId is not a valid UUID`() =
             runTest {
                 val collectionCreateRequestDto = CollectionCreateRequestDto("someName", "someDeploymentId")
-                val badUrl = "/api/studies/1/collections/"
+                val badUrl = "/api/studies/1/collections"
 
                 mockMvc.perform(
                     post(badUrl).contentType(MediaType.APPLICATION_JSON)
@@ -64,7 +64,7 @@ class CollectionControllerTest {
         fun `should succeed if request is valid`() =
             runTest {
                 val mockStudyId = UUID.randomUUID().stringRepresentation
-                val url = "/api/studies/$mockStudyId/collections/"
+                val url = "/api/studies/$mockStudyId/collections"
                 val collectionCreateRequestDto = CollectionCreateRequestDto("someName", "someDeploymentId")
                 val collectionMock: Collection = mockk(relaxed = true)
                 every { collectionService.create(any(), any(), any()) } returns collectionMock

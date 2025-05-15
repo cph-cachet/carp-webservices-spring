@@ -1,7 +1,10 @@
 package dk.cachet.carp.webservices.study.service.impl
 
+import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.databind.ObjectMapper
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.common.application.users.AccountIdentity
+import dk.cachet.carp.studies.application.users.Participant
 import dk.cachet.carp.studies.application.users.ParticipantGroupStatus
 import dk.cachet.carp.webservices.account.service.AccountService
 import dk.cachet.carp.webservices.common.services.CoreServiceContainer
@@ -10,10 +13,8 @@ import dk.cachet.carp.webservices.security.authentication.domain.Account
 import dk.cachet.carp.webservices.security.authorization.Claim
 import dk.cachet.carp.webservices.security.authorization.Role
 import dk.cachet.carp.webservices.security.config.SecurityCoroutineContext
-import dk.cachet.carp.webservices.study.domain.InactiveDeploymentInfo
-import dk.cachet.carp.webservices.study.domain.ParticipantAccount
-import dk.cachet.carp.webservices.study.domain.ParticipantGroupInfo
-import dk.cachet.carp.webservices.study.domain.ParticipantGroupsStatus
+import dk.cachet.carp.webservices.study.domain.*
+import dk.cachet.carp.webservices.study.repository.RecruitmentRepository
 import dk.cachet.carp.webservices.study.service.RecruitmentService
 import kotlinx.coroutines.*
 import kotlinx.datetime.Clock
@@ -28,6 +29,8 @@ import org.springframework.stereotype.Service
 class RecruitmentServiceWrapper(
     private val accountService: AccountService,
     private val dataStreamService: DataStreamService,
+    private val recruitmentRepository: RecruitmentRepository,
+    private val objectMapper: ObjectMapper,
     services: CoreServiceContainer,
 ) : RecruitmentService {
     final override val core = services.recruitmentService
@@ -75,21 +78,48 @@ class RecruitmentServiceWrapper(
 
     override suspend fun getParticipants(
         studyId: UUID,
-        offset: Int,
-        limit: Int,
+        offset: Int?,
+        limit: Int?,
+        search: String?,
     ): List<Account> =
         withContext(Dispatchers.IO + SecurityCoroutineContext()) {
-            var participants = core.getParticipants(studyId)
-            val accounts = arrayListOf<Account>()
-            if (offset >= 0 && limit > 0) {
-                participants = participants.drop(offset * limit).take(limit).toMutableList()
-            }
+            val serializedParticipants =
+                recruitmentRepository.findRecruitmentParticipantsByStudyIdAndSearchAndLimitAndOffset(
+                    studyId.stringRepresentation,
+                    offset,
+                    limit,
+                    search,
+                )
 
+            if (serializedParticipants.isNullOrEmpty()) return@withContext emptyList()
+
+            val participants =
+                objectMapper.readValue(
+                    serializedParticipants,
+                    object : TypeReference<List<Participant>>() {},
+                )
+
+            val accounts = arrayListOf<Account>()
             for (participant in participants) {
                 val account = accountService.findByAccountIdentity(participant.accountIdentity)
                 accounts.add(account ?: Account.fromAccountIdentity(participant.accountIdentity))
             }
+
             accounts
+        }
+
+    override suspend fun countParticipants(
+        studyId: UUID,
+        search: String?,
+    ): Int =
+        withContext(Dispatchers.IO + SecurityCoroutineContext()) {
+            val count =
+                recruitmentRepository.countRecruitmentParticipantsByStudyIdAndSearch(
+                    studyId.stringRepresentation,
+                    search,
+                )
+
+            count
         }
 
     override suspend fun getInactiveDeployments(
@@ -130,7 +160,7 @@ class RecruitmentServiceWrapper(
         accountId: UUID,
     ): Boolean =
         runBlocking(SecurityCoroutineContext()) {
-            getParticipants(studyId).any { it.id == accountId.toString() }
+            getParticipants(studyId, null, null, null).any { it.id == accountId.toString() }
         }
 
     override suspend fun getParticipantGroupsStatus(studyId: UUID): ParticipantGroupsStatus =

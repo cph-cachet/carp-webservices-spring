@@ -1,8 +1,5 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-// NOTE: This is just for the Keycloakify core contributors to be able to dynamically link
-// to a local version of the keycloakify package. This is not needed for normal usage.
-import commonjs from "vite-plugin-commonjs";
 import { keycloakify } from "keycloakify/vite-plugin";
 
 
@@ -10,14 +7,21 @@ import { keycloakify } from "keycloakify/vite-plugin";
 export default defineConfig({
   plugins: [
     react(), 
-    commonjs(), 
     keycloakify({
+      accountThemeImplementation: "none",
+
+      environmentVariables: [
+        {
+          name: "MY_ENV_VARIABLE",
+          default: ""
+      }
+    ],
       // See: https://docs.keycloakify.dev/build-options#themename
       themeName: "carp-custom-theme",
       // See: https://docs.keycloakify.dev/environnement-variables
-      extraThemeProperties: [
-        "MY_ENV_VARIABLE=${env.MY_ENV_VARIABLE:}"
-      ],
+      // extraThemeProperties: [
+      //   "MY_ENV_VARIABLE=${env.MY_ENV_VARIABLE:}"
+      // ],
       // This is a hook that will be called after the build is done
       // but before the jar is created.  
       // You can use it to add/remove/edit your theme files.  

@@ -1,26 +1,30 @@
-// This is to show that you can create stories for pages that you haven't overloaded.
+import type { Meta, StoryObj } from "@storybook/react";
+import { createKcPageStory } from "../KcPageStory";
 
-import { Meta, StoryObj } from "@storybook/react";
-import createPageStory from "../createPageStory";
-
-const { PageStory } = createPageStory({
-  pageId: "login-reset-password.ftl",
-});
+const { KcPageStory } = createKcPageStory({ pageId: "login-reset-password.ftl" });
 
 const meta = {
-  title: "login/LoginResetPassword",
-  component: PageStory,
-} satisfies Meta<typeof PageStory>;
+    title: "login/login-reset-password.ftl",
+    component: KcPageStory
+} satisfies Meta<typeof KcPageStory>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  render: () => <PageStory />,
+    render: () => <KcPageStory />
 };
 
-export const Danish: Story = {
-  render: () => (
-    <PageStory kcContext={{ locale: { currentLanguageTag: "da" } }} />
-  ),
+export const WithEmailAsUsername: Story = {
+    render: () => (
+        <KcPageStory
+            kcContext={{
+                realm: {
+                    loginWithEmailAllowed: true,
+                    registrationEmailAsUsername: true
+                }
+            }}
+        />
+    )
 };

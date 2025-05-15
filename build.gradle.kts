@@ -134,7 +134,7 @@ dependencies {
     implementation("org.flywaydb:flyway-database-postgresql:${property("flywayVersion")}")
 
     // S3
-    implementation("com.amazonaws:aws-java-sdk-s3:${property("awsSDKVersion")}")
+    implementation("software.amazon.awssdk:s3:${property("awsSDKVersion")}")
 
     // MICROMETER
     runtimeOnly("io.micrometer:micrometer-registry-prometheus")
@@ -146,7 +146,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webflux")
 
     // GSON Library
-    implementation("com.google.code.gson:gson:2.10.1")
+    implementation("com.google.code.gson:gson:${property("gsonVersion")}")
 
     // Apache Commons Compress
     implementation("org.apache.commons:commons-compress:${property("commonsCompressVersion")}")

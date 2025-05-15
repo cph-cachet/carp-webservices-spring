@@ -33,7 +33,7 @@ class AccountControllerTest {
 
     @Nested
     inner class Invite {
-        private val endpoint = "/api/accounts/invite/"
+        private val endpoint = "/api/accounts/invite"
 
         @Test
         fun `should return 400 if email is invalid`() =
@@ -75,7 +75,7 @@ class AccountControllerTest {
 
     @Nested
     inner class Role {
-        private val endpoint = "/api/accounts/role/"
+        private val endpoint = "/api/accounts/role"
 
         @Test
         fun `should return 400 if email is invalid`() =

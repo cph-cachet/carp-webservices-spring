@@ -1,11 +1,11 @@
 import { createTheme, PaletteOptions } from "@mui/material/styles";
 import { createStyled } from "@mui/system";
 import {
-  museosans100,
-  museosans300,
-  museosans500,
-  museosans700,
-  museosans900,
+  opensans100,
+  opensans300,
+  opensans500,
+  opensans700,
+  opensans900,
 } from "../assets/fonts";
 
 declare module "@mui/material/styles/createPalette" {
@@ -145,19 +145,19 @@ export const themeInstance = createTheme({
           lineHeight: "1.25rem",
           fontWeight: 300,
         },
-        "@font-face": museosans100,
+        "@font-face": opensans100,
         fallbacks: [
           {
-            "@font-face": museosans300,
+            "@font-face": opensans300,
           },
           {
-            "@font-face": museosans500,
+            "@font-face": opensans500,
           },
           {
-            "@font-face": museosans700,
+            "@font-face": opensans700,
           },
           {
-            "@font-face": museosans900,
+            "@font-face": opensans900,
           },
         ],
       },
@@ -255,7 +255,7 @@ export const themeInstance = createTheme({
     },
   },
   typography: {
-    fontFamily: "Museo Sans",
+    fontFamily: "Open Sans",
     h1: {
       fontSize: "2.8125rem",
       lineHeight: "3.25rem",

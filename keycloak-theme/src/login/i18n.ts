@@ -1,6 +1,6 @@
 import { createUseI18n } from "keycloakify/login";
 
-export const { useI18n } = createUseI18n({
+export const { useI18n, ofTypeI18n } = createUseI18n({
   en: {
     alphanumericalCharsOnly: "Only alphanumerical characters",
     gender: "Gender",
@@ -59,4 +59,4 @@ export const { useI18n } = createUseI18n({
   },
 });
 
-export type I18n = NonNullable<ReturnType<typeof useI18n>>;
+export type I18n = typeof ofTypeI18n;
