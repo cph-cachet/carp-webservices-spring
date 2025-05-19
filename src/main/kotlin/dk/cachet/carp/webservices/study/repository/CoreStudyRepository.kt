@@ -17,6 +17,8 @@ import dk.cachet.carp.webservices.file.service.FileService
 import dk.cachet.carp.webservices.study.domain.Study
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.stereotype.Service
@@ -52,11 +54,16 @@ class CoreStudyRepository(
 
             val studyToSave = Study()
 
+            val applicationJson =
+                buildJsonObject {
+                    put("studyId", JsonPrimitive(study.id.stringRepresentation))
+                }.toString()
+
             study.invitation =
                 StudyInvitation(
                     study.invitation.name,
                     study.invitation.description,
-                    study.id.stringRepresentation,
+                    applicationJson,
                 )
 
             val snapshot = WS_JSON.encodeToString(StudySnapshot.serializer(), study.getSnapshot())
