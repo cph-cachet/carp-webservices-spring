@@ -168,7 +168,10 @@ class DataStreamService(
         target: Path,
     ) = withContext(Dispatchers.IO) {
         // Validate inputs
-        require(dataStreamIds.isNotEmpty()) { "DataStream list cannot be empty." }
+        if (dataStreamIds.isEmpty()) {
+            LOGGER.warn("DataStream list is empty.")
+            return@withContext
+        }
 
         val path = target.resolve(dataFileName)
 
