@@ -109,6 +109,7 @@ services:
     environment:
       - "KEYCLOAK_ADMIN=${ADMIN_USER}"
       - "KEYCLOAK_ADMIN_PASSWORD=${ADMIN_PASSWORD}"
+      - "JAVA_OPTS_APPEND=-XX:InitialRAMPercentage=50.0 -XX:MaxRAMPercentage=75.0"
     image: quay.io/keycloak/keycloak:24.0.4
     ports:
       - "${KC_PORT}:8080"
@@ -122,6 +123,7 @@ services:
 
   keycloak-dev:
     <<: [*keycloak, *keycloak-dev-commands]
+    mem_limit: 1024m
     profiles:
       - staging
       - testing
@@ -130,6 +132,7 @@ services:
 
   keycloak-prod:
     <<: [*keycloak, *keycloak-prod-commands]
+    mem_limit: 3072m
     profiles:
       - production
 
