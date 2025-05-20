@@ -40,6 +40,7 @@ class AccountController(private val accountService: AccountService) {
     }
 
     @PostMapping(ROLE)
+    @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('RESEARCHER') and hasRole(#request.role)")
     suspend fun role(
         @Valid @RequestBody request: AccountRequest,
