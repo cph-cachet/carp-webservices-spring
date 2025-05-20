@@ -85,7 +85,11 @@ class CoreStudyRepositoryTest {
                     studyRepository.save(
                         match {
                             val snapshot = WS_JSON.decodeFromString(StudySnapshot.serializer(), it.snapshot.toString())
-                            snapshot.id == mockStudySnapshot.id && snapshot.ownerId == mockStudySnapshot.ownerId && snapshot.name == mockStudySnapshot.name && snapshot.description == mockStudySnapshot.description && snapshot.invitation.name == mockStudySnapshot.invitation.name
+                            snapshot.id == mockStudySnapshot.id &&
+                                snapshot.ownerId == mockStudySnapshot.ownerId &&
+                                snapshot.name == mockStudySnapshot.name &&
+                                snapshot.description == mockStudySnapshot.description &&
+                                snapshot.invitation.name == mockStudySnapshot.invitation.name
                         },
                     )
                 }
@@ -226,6 +230,7 @@ class CoreStudyRepositoryTest {
             }
     }
 
+    @Suppress("LongMethod")
     @Nested
     inner class GetForOwner {
         @Test
@@ -255,7 +260,8 @@ class CoreStudyRepositoryTest {
                         ownerId = mockUUID,
                         name = "name",
                         description = "description",
-                        invitation = StudyInvitation("name", "description", UUID.randomUUID().stringRepresentation),
+                        invitation =
+                            StudyInvitation("name", "description", UUID.randomUUID().stringRepresentation),
                         protocolSnapshot = null,
                         isLive = false,
                     )
@@ -263,12 +269,14 @@ class CoreStudyRepositoryTest {
                 val study1 =
                     Study().apply {
                         snapshot =
-                            objectMapper.readTree(WS_JSON.encodeToString(StudySnapshot.serializer(), mockStudySnapshot1))
+                            objectMapper
+                                .readTree(WS_JSON.encodeToString(StudySnapshot.serializer(), mockStudySnapshot1))
                     }
                 val study2 =
                     Study().apply {
                         snapshot =
-                            objectMapper.readTree(WS_JSON.encodeToString(StudySnapshot.serializer(), mockStudySnapshot2))
+                            objectMapper
+                                .readTree(WS_JSON.encodeToString(StudySnapshot.serializer(), mockStudySnapshot2))
                     }
 
                 every { studyRepository.findAllByOwnerId(mockUUID.stringRepresentation) } returns listOf(study1, study2)
@@ -302,8 +310,9 @@ class CoreStudyRepositoryTest {
         }
     }
 
+    @Suppress("LongMethod")
     @Nested
-    inner class Remove() {
+    inner class Remove {
         @Test
         fun `should remove study`() {
             runTest {
@@ -406,7 +415,7 @@ class CoreStudyRepositoryTest {
     }
 
     @Nested
-    inner class GetWSStudyById() {
+    inner class GetWSStudyById {
         @Test
         fun `should return study`() {
             runTest {
@@ -477,7 +486,7 @@ class CoreStudyRepositoryTest {
     }
 
     @Nested
-    inner class Update() {
+    inner class Update {
         @Test
         fun `should update`() {
             runTest {
@@ -542,6 +551,7 @@ class CoreStudyRepositoryTest {
         }
     }
 
+    @Suppress("LongMethod")
     @Nested
     inner class FindAllByStudyIds {
         @Test

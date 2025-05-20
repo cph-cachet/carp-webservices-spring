@@ -39,7 +39,8 @@ class CoreParticipantRepositoryTest {
                     }
                 val mockExistingRecruitment = null
                 val mockSavedRecruitment = mockk<Recruitment>(relaxed = true)
-                coEvery { mockRepository.findRecruitmentByStudyId(mockUUID1.stringRepresentation) } returns mockExistingRecruitment
+                coEvery { mockRepository.findRecruitmentByStudyId(mockUUID1.stringRepresentation) } returns
+                    mockExistingRecruitment
                 coEvery { mockRepository.save(ofType<Recruitment>()) } returns mockSavedRecruitment
 
                 val sut = CoreParticipantRepository(mockRepository)
@@ -83,7 +84,8 @@ class CoreParticipantRepositoryTest {
                     }
                 val mockExistingRecruitment = mockk<Recruitment>()
                 val mockSavedRecruitment = mockk<Recruitment>(relaxed = true)
-                coEvery { mockRepository.findRecruitmentByStudyId(mockUUID1.stringRepresentation) } returns mockExistingRecruitment
+                coEvery { mockRepository.findRecruitmentByStudyId(mockUUID1.stringRepresentation) } returns
+                    mockExistingRecruitment
                 coEvery { mockRepository.save(ofType<Recruitment>()) } returns mockSavedRecruitment
 
                 val sut = CoreParticipantRepository(mockRepository)
@@ -116,9 +118,11 @@ class CoreParticipantRepositoryTest {
                     )
                 val mockRecruitment =
                     mockk<Recruitment>().apply {
-                        every { snapshot } returns WS_JSON.encodeToString(RecruitmentSnapshot.serializer(), mockSnapshot)
+                        every { snapshot } returns
+                            WS_JSON.encodeToString(RecruitmentSnapshot.serializer(), mockSnapshot)
                     }
-                coEvery { mockRepository.findRecruitmentByStudyId(mockUUID1.stringRepresentation) } returns mockRecruitment
+                coEvery { mockRepository.findRecruitmentByStudyId(mockUUID1.stringRepresentation) } returns
+                    mockRecruitment
 
                 val expectedResult =
                     CoreRecruitment.fromSnapshot(
@@ -140,7 +144,8 @@ class CoreParticipantRepositoryTest {
             runTest {
                 val mockUUID = UUID.randomUUID()
                 val mockRecruitment = null
-                coEvery { mockRepository.findRecruitmentByStudyId(mockUUID.stringRepresentation) } returns mockRecruitment
+                coEvery { mockRepository.findRecruitmentByStudyId(mockUUID.stringRepresentation) } returns
+                    mockRecruitment
 
                 val sut = CoreParticipantRepository(mockRepository)
 
@@ -170,9 +175,11 @@ class CoreParticipantRepositoryTest {
                     )
                 val mockRecruitment =
                     mockk<Recruitment>().apply {
-                        every { snapshot } returns WS_JSON.encodeToString(RecruitmentSnapshot.serializer(), mockSnapshot)
+                        every { snapshot } returns
+                            WS_JSON.encodeToString(RecruitmentSnapshot.serializer(), mockSnapshot)
                     }
-                coEvery { mockRepository.findRecruitmentByStudyId(mockUUID1.stringRepresentation) } returns mockRecruitment
+                coEvery { mockRepository.findRecruitmentByStudyId(mockUUID1.stringRepresentation) } returns
+                    mockRecruitment
                 coEvery { mockRepository.deleteByStudyId(mockUUID1.stringRepresentation) } just Runs
 
                 val sut = CoreParticipantRepository(mockRepository)
@@ -190,7 +197,8 @@ class CoreParticipantRepositoryTest {
             runTest {
                 val mockUUID = UUID.randomUUID()
                 val mockRecruitment = null
-                coEvery { mockRepository.findRecruitmentByStudyId(mockUUID.stringRepresentation) } returns mockRecruitment
+                coEvery { mockRepository.findRecruitmentByStudyId(mockUUID.stringRepresentation) } returns
+                    mockRecruitment
 
                 val sut = CoreParticipantRepository(mockRepository)
 
@@ -259,7 +267,8 @@ class CoreParticipantRepositoryTest {
                         snapshot = WS_JSON.encodeToString(RecruitmentSnapshot.serializer(), oldMockSnapshot)
                     }
 
-                coEvery { mockRepository.findRecruitmentByStudyId(mockUUID1.stringRepresentation) } returns mockRecruitmentFound
+                coEvery { mockRepository.findRecruitmentByStudyId(mockUUID1.stringRepresentation) } returns
+                    mockRecruitmentFound
                 coEvery { mockRepository.save(ofType<Recruitment>()) } returns mockk()
 
                 val sut = CoreParticipantRepository(mockRepository)
