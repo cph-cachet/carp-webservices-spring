@@ -39,10 +39,10 @@ class DiskSpaceAlert(
     fun checkRegularDiskSpace() {
         val statusHealth = diskSpace.statusHealth()
         val diskSpaceHealth = JSONObject(diskSpace.statusDetails())
-        val freeStorageSpace: String = diskSpaceHealth.getString("free")
-        val totalStorageSpace: String = diskSpaceHealth.getString("total")
 
-        if ("UP" == statusHealth.code && !ObjectUtils.isEmpty(diskSpaceHealth)) {
+        if ("UP" == statusHealth.code && diskSpaceHealth.length() != 0) {
+            val freeStorageSpace: String = diskSpaceHealth.getString("free")
+            val totalStorageSpace: String = diskSpaceHealth.getString("total")
             val usableSpace = totalStorageSpace.toDouble() - freeStorageSpace.toDouble()
             val usablePercentage = usableSpace / totalStorageSpace.toDouble()
             if (totalStorageSpace.toDouble() > 0 && (usablePercentage * 100).toInt() > LIMIT_PERCENT) {
