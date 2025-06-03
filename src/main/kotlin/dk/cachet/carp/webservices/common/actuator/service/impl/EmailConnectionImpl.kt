@@ -1,7 +1,6 @@
 package dk.cachet.carp.webservices.common.actuator.service.impl
 
 import dk.cachet.carp.webservices.common.actuator.service.IMailConnection
-import dk.cachet.carp.webservices.common.exception.email.EmailException
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.context.annotation.Lazy
@@ -22,14 +21,9 @@ class EmailConnectionImpl(
      */
     override fun mailServerConnection(): String? {
         var status = "DOWN"
-        try {
-            if (testConnection()) {
-                status = "UP"
-                LOGGER.info("Mail server is available!")
-            }
-        } catch (ex: MessagingException) {
-            LOGGER.warn("Mail server is not available!")
-            throw EmailException("Mail server is not available. Exception: $ex")
+        if (testConnection()) {
+            status = "UP"
+            LOGGER.info("Mail server is available!")
         }
         return status
     }
