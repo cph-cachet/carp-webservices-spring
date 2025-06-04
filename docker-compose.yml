@@ -87,6 +87,11 @@ services:
       - PGDATA=/var/lib/postgresql/data
     hostname: "carp-postgres-${PROFILE}"
     image: postgres:16.6
+    command:
+      -c work_mem=64MB
+      -c maintenance_work_mem=128MB
+      -c temp_file_limit=2147483648   # 2GB in bytes
+      -c log_temp_files=1048576       # 1MB
     profiles:
       - production
       - staging
