@@ -24,8 +24,8 @@ x-keycloak-prod-commands: &keycloak-prod-commands
     - "--import-realm"
 
 # Apply the following configuration if hosting behind a reverse proxy
-#    - "--hostname-url=${KC_URL}"
-#    - "--hostname-admin-url=${KC_URL}"
+#    - "--hostname=${KC_URL}"
+#    - "--hostname-admin=${KC_URL}"
 #    - "--proxy-headers xforwarded"
 #    - "--http-enabled true"
 
@@ -110,7 +110,7 @@ services:
       - "KEYCLOAK_ADMIN=${ADMIN_USER}"
       - "KEYCLOAK_ADMIN_PASSWORD=${ADMIN_PASSWORD}"
       - "JAVA_OPTS_APPEND=-XX:InitialRAMPercentage=50.0 -XX:MaxRAMPercentage=75.0"
-    image: quay.io/keycloak/keycloak:24.0.4
+    image: quay.io/keycloak/keycloak:25.0.6
     ports:
       - "${KC_PORT}:8080"
     profiles:
