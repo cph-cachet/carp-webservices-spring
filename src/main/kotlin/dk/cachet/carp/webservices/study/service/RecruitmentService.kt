@@ -5,6 +5,7 @@ import dk.cachet.carp.studies.infrastructure.RecruitmentServiceDecorator
 import dk.cachet.carp.webservices.security.authentication.domain.Account
 import dk.cachet.carp.webservices.study.domain.InactiveDeploymentInfo
 import dk.cachet.carp.webservices.study.domain.ParticipantGroupsStatus
+import dk.cachet.carp.webservices.study.domain.ParticipantOrderBy
 
 interface RecruitmentService {
     val core: RecruitmentServiceDecorator
@@ -19,11 +20,14 @@ interface RecruitmentService {
         email: String,
     ): Boolean
 
+    @Suppress("LongParameterList")
     suspend fun getParticipants(
         studyId: UUID,
         offset: Int?,
         limit: Int?,
         search: String?,
+        isDescending: Boolean?,
+        orderBy: ParticipantOrderBy?,
     ): List<Account>
 
     suspend fun countParticipants(
