@@ -1,6 +1,5 @@
 package dk.cachet.carp.webservices.study.repository
 
-import dk.cachet.carp.webservices.study.domain.ParticipantOrderBy
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
 
@@ -13,7 +12,6 @@ class RecruitmentRepositoryImpl(
         limit: Int?,
         search: String?,
         isDescending: Boolean?,
-        orderBy: ParticipantOrderBy?,
     ): String? {
         val direction = if (isDescending == true) "DESC" else "ASC"
 
@@ -30,12 +28,15 @@ class RecruitmentRepositoryImpl(
             }
 
         val orderByClause =
-            if (orderBy == null) {
+            if (isDescending == null) {
                 "idx"
-            } else if (orderBy == ParticipantOrderBy.Username) {
-                "elem->'accountIdentity'->>'username'"
             } else {
-                "elem->'accountIdentity'->>'emailAddress'"
+                """
+                COALESCE(
+                     elem->'accountIdentity'->>'username',
+                     elem->'accountIdentity'->>'emailAddress'
+             )
+            """
             }
 
         val sql = """

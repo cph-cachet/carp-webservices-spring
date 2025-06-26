@@ -14,7 +14,6 @@ import dk.cachet.carp.webservices.security.authentication.service.Authentication
 import dk.cachet.carp.webservices.security.authorization.Claim
 import dk.cachet.carp.webservices.study.domain.InactiveDeploymentInfo
 import dk.cachet.carp.webservices.study.domain.ParticipantGroupsStatus
-import dk.cachet.carp.webservices.study.domain.ParticipantOrderBy
 import dk.cachet.carp.webservices.study.domain.StudyOverview
 import dk.cachet.carp.webservices.study.dto.AddParticipantsRequestDto
 import dk.cachet.carp.webservices.study.dto.ParticipantAccountsDto
@@ -77,7 +76,6 @@ class StudyController(
         @RequestParam(name = RequestParamName.LIMIT, required = false) limit: Int?,
         @RequestParam(name = RequestParamName.SEARCH, required = false) search: String?,
         @RequestParam(name = RequestParamName.IS_DESCENDING, required = false) isDescending: Boolean?,
-        @RequestParam(name = RequestParamName.ORDER_BY, required = false) orderBy: ParticipantOrderBy?,
         @RequestParam(name = "response_as_dto", required = false) responseAsDto: Boolean?,
     ): Any {
         LOGGER.info("Start GET: /api/studies/$studyId/participants/accounts")
@@ -95,12 +93,11 @@ class StudyController(
                         limit,
                         search,
                         isDescending,
-                        orderBy,
                     ),
             )
         }
 
-        return recruitmentService.getParticipants(studyId, offset, limit, search, isDescending, orderBy)
+        return recruitmentService.getParticipants(studyId, offset, limit, search, isDescending)
     }
 
     @GetMapping(value = [RESEARCHERS])

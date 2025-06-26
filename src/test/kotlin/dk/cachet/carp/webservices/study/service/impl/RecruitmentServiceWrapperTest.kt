@@ -250,7 +250,7 @@ class RecruitmentServiceWrapperTest {
                         mockStudyId.stringRepresentation,
                         null,
                         null,
-                        null, null, null,
+                        null, null,
                     )
                 } returns serializedMockParticipants
                 coEvery {
@@ -269,7 +269,7 @@ class RecruitmentServiceWrapperTest {
                         services,
                     )
 
-                val result = sut.getParticipants(mockStudyId, null, null, null, null, null)
+                val result = sut.getParticipants(mockStudyId, null, null, null, null)
 
                 assertEquals(mockParticipants.size, result.size)
                 assertEquals(result.get(0), a1)
@@ -301,7 +301,7 @@ class RecruitmentServiceWrapperTest {
                 coEvery {
                     recruitmentRepository.findRecruitmentParticipantsByStudyIdAndSearchAndLimitAndOffset(
                         mockStudyId.stringRepresentation,
-                        null, null, null, null, null,
+                        null, null, null, null,
                     )
                 } returns serializedMockParticipants
                 coEvery {
@@ -320,7 +320,7 @@ class RecruitmentServiceWrapperTest {
                         services,
                     )
 
-                val result = sut.getParticipants(mockStudyId, null, null, null, null, null)
+                val result = sut.getParticipants(mockStudyId, null, null, null, null)
 
                 assertEquals(mockParticipants.size, result.size)
                 assertEquals(result.get(0), a1)
@@ -681,7 +681,7 @@ class RecruitmentServiceWrapperTest {
                 coEvery {
                     recruitmentRepository.findRecruitmentParticipantsByStudyIdAndSearchAndLimitAndOffset(
                         mockStudyId.stringRepresentation,
-                        any(), any(), any(), any(), any(),
+                        any(), any(), any(), any(),
                     )
                 } returns serializedMockParticipants
                 coEvery { accountService.findByAccountIdentity(ai1) } returns a1
@@ -726,7 +726,7 @@ class RecruitmentServiceWrapperTest {
                 coEvery {
                     recruitmentRepository.findRecruitmentParticipantsByStudyIdAndSearchAndLimitAndOffset(
                         mockStudyId.stringRepresentation,
-                        any(), any(), any(), any(), any(),
+                        any(), any(), any(), any(),
                     )
                 } returns serializedMockParticipants
                 coEvery { accountService.findByAccountIdentity(ai1) } returns a1

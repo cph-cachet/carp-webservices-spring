@@ -82,7 +82,6 @@ class RecruitmentServiceWrapper(
         limit: Int?,
         search: String?,
         isDescending: Boolean?,
-        orderBy: ParticipantOrderBy?,
     ): List<Account> =
         withContext(Dispatchers.IO + SecurityCoroutineContext()) {
             val serializedParticipants =
@@ -92,7 +91,6 @@ class RecruitmentServiceWrapper(
                     limit,
                     search,
                     isDescending,
-                    orderBy,
                 )
 
             if (serializedParticipants.isNullOrEmpty()) return@withContext emptyList()
@@ -164,7 +162,7 @@ class RecruitmentServiceWrapper(
         accountId: UUID,
     ): Boolean =
         runBlocking(SecurityCoroutineContext()) {
-            getParticipants(studyId, null, null, null, false, null).any { it.id == accountId.toString() }
+            getParticipants(studyId, null, null, null, false).any { it.id == accountId.toString() }
         }
 
     override suspend fun getParticipantGroupsStatus(studyId: UUID): ParticipantGroupsStatus =
