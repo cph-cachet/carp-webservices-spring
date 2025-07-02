@@ -62,6 +62,28 @@ class RecruitmentServiceWrapper(
         LOGGER.info("Account with email $email is added as a researcher to study with id $studyId.")
     }
 
+    override suspend fun inviteResearcherAssistant(
+        studyId: UUID, email: String
+    ) = withContext(Dispatchers.IO + SecurityCoroutineContext()) {
+        val accountIdentity = AccountIdentity.fromEmailAddress(email)
+        var account = accountService.findByAccountIdentity(accountIdentity)
+
+        if (account == null) {
+            LOGGER.info("Account with email $email is not found. Inviting...")
+            account = accountService.invite(accountIdentity, Role.RESEARCHER_ASSISTANT)
+        }
+
+        if (account.role!! < Role.RESEARCHER_ASSISTANT) {
+            accountService.addRole(accountIdentity, Role.RESEARCHER_ASSISTANT)
+            LOGGER.info("Account with email $email is granted the role RESEARCHER_ASSISTANT.")
+        }
+
+        // grant it claims for the study and every deployment within it
+        accountService.grant(accountIdentity, setOf(Claim.LimitedManageStudy(studyId)))
+
+        LOGGER.info("Account with email $email is added as a researcher assistant to study with id $studyId.")
+    }
+
     override suspend fun removeResearcher(
         studyId: UUID,
         email: String,
@@ -70,6 +92,20 @@ class RecruitmentServiceWrapper(
             val accountIdentity = AccountIdentity.fromEmailAddress(email)
 
             val claims = setOf(Claim.ManageStudy(studyId))
+
+            val account = accountService.revoke(accountIdentity, claims)
+
+            account.carpClaims?.intersect(claims)?.isEmpty() ?: false
+        }
+
+    override suspend fun removeResearcherAssistant(
+        studyId: UUID,
+        email: String,
+    ): Boolean =
+        withContext(Dispatchers.IO + SecurityCoroutineContext()) {
+            val accountIdentity = AccountIdentity.fromEmailAddress(email)
+
+            val claims = setOf(Claim.LimitedManageStudy(studyId))
 
             val account = accountService.revoke(accountIdentity, claims)
 
@@ -145,7 +181,7 @@ class RecruitmentServiceWrapper(
                 }
                 .filter {
                     it.dateOfLastDataUpload != null &&
-                        it.dateOfLastDataUpload.plus(lastUpdate, DateTimeUnit.HOUR) < timeNow
+                            it.dateOfLastDataUpload.plus(lastUpdate, DateTimeUnit.HOUR) < timeNow
                 }
 
         if (offset >= 0 && limit > 0) {

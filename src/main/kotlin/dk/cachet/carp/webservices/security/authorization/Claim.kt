@@ -60,6 +60,10 @@ sealed class Claim {
         override val value = studyId.toString()
     }
 
+    data class LimitedManageStudy(val studyId: UUID) : Claim() {
+        override val value = studyId.toString()
+    }
+
     data class ProtocolOwner(val protocolId: UUID) : Claim() {
         override val value = protocolId.toString()
     }

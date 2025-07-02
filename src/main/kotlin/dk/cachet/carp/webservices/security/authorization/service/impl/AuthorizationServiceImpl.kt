@@ -34,6 +34,18 @@ class AuthorizationServiceImpl(
         require(authenticationService.getClaims().containsAll(claims.toList()), lazyMessage)
     }
 
+    override fun requireAny(claims: Set<Claim>) = requireAny(*claims.toTypedArray()) { PERMISSION_DENIED_MSG }
+
+    private inline fun requireAny(
+        vararg claims: Claim,
+        crossinline lazyMessage: () -> Any = {},
+    ) {
+        if (isAdmin()) return
+
+        val currentClaims = authenticationService.getClaims()
+        require(claims.any { currentClaims.contains(it) }, lazyMessage)
+    }
+
     override fun require(role: Role) = require(role) { PERMISSION_DENIED_MSG }
 
     private inline fun require(
@@ -43,6 +55,20 @@ class AuthorizationServiceImpl(
         if (isAdmin()) return
 
         require(authenticationService.getRole() >= role, lazyMessage)
+    }
+
+    override fun requireAny(roles: Set<Role>) {
+        requireAny(*roles.toTypedArray()) { PERMISSION_DENIED_MSG }
+    }
+
+    private inline fun requireAny(
+        vararg roles: Role,
+        crossinline lazyMessage: () -> Any = {},
+    ) {
+        if (isAdmin()) return
+
+        val currentRole = authenticationService.getRole()
+        require(roles.any { currentRole >= it }, lazyMessage)
     }
 
     override fun requireOwner(ownerId: UUID) = requireOwner(ownerId) { PERMISSION_DENIED_MSG }
