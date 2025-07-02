@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 
 @Repository
-interface RecruitmentRepository : JpaRepository<Recruitment, Int> {
+interface RecruitmentRepository : JpaRepository<Recruitment, Int>, RecruitmentRepositoryCustom {
     @Query(value = "SELECT * FROM recruitments WHERE snapshot->>'studyId' = ?1", nativeQuery = true)
     fun findRecruitmentByStudyId(studyId: String): Recruitment?
 
@@ -19,32 +19,6 @@ interface RecruitmentRepository : JpaRepository<Recruitment, Int> {
         value = "DELETE FROM recruitments WHERE snapshot->>'studyId' = ?1",
     )
     fun deleteByStudyId(studyId: String)
-
-    @Query(
-        value = """
-            SELECT jsonb_agg(elem) AS participants_
-            FROM (
-                SELECT elem
-                FROM public.recruitments, 
-                     jsonb_array_elements(snapshot->'participants') WITH ORDINALITY arr(elem, idx)
-                WHERE snapshot->>'studyId' = :studyId
-                AND (
-                    :search IS NULL 
-                    OR elem->'accountIdentity'->>'username' ILIKE '%' || :search || '%'
-                    OR elem->'accountIdentity'->>'emailAddress' ILIKE '%' || :search || '%'
-                )
-                ORDER BY idx
-                LIMIT :limit OFFSET :offset
-            ) subquery
-        """,
-        nativeQuery = true,
-    )
-    fun findRecruitmentParticipantsByStudyIdAndSearchAndLimitAndOffset(
-        studyId: String,
-        offset: Int?,
-        limit: Int?,
-        search: String?,
-    ): String?
 
     @Query(
         value = """
