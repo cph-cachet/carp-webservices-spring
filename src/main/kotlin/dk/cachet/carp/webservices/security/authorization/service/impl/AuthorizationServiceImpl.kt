@@ -34,9 +34,9 @@ class AuthorizationServiceImpl(
         require(authenticationService.getClaims().containsAll(claims.toList()), lazyMessage)
     }
 
-    override fun requireAny(claims: Set<Claim>) = requireAny(*claims.toTypedArray()) { PERMISSION_DENIED_MSG }
+    override fun requireAnyClaim(claims: Set<Claim>) = requireAnyClaim(*claims.toTypedArray()) { PERMISSION_DENIED_MSG }
 
-    private inline fun requireAny(
+    private inline fun requireAnyClaim(
         vararg claims: Claim,
         crossinline lazyMessage: () -> Any = {},
     ) {
@@ -57,11 +57,11 @@ class AuthorizationServiceImpl(
         require(authenticationService.getRole() >= role, lazyMessage)
     }
 
-    override fun requireAny(roles: Set<Role>) {
-        requireAny(*roles.toTypedArray()) { PERMISSION_DENIED_MSG }
+    override fun requireAnyRole(roles: Set<Role>) {
+        requireAnyRole(*roles.toTypedArray()) { PERMISSION_DENIED_MSG }
     }
 
-    private inline fun requireAny(
+    private inline fun requireAnyRole(
         vararg roles: Role,
         crossinline lazyMessage: () -> Any = {},
     ) {

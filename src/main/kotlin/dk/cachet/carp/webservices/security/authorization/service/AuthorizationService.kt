@@ -24,7 +24,7 @@ interface AuthorizationService {
      *
      * @throws ForbiddenException when the current authentication does not have any of the specified [claims].
      */
-    fun requireAny(claims: Set<Claim>)
+    fun requireAnyClaim(claims: Set<Claim>)
 
     /**
      * Require the current authentication to have the specified [role].
@@ -38,7 +38,7 @@ interface AuthorizationService {
      *
      * @throws ForbiddenException when the current authentication does not have any of the specified [roles].
      */
-    fun requireAny(roles: Set<Role>)
+    fun requireAnyRole(roles: Set<Role>)
 
     /**
      * Require the current authentication to be the owner of the entity identified by [ownerId].

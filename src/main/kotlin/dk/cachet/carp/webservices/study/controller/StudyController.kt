@@ -60,6 +60,7 @@ class StudyController(
     @PostMapping(value = [ADD_RESEARCHER])
     @PreAuthorize("canManageStudy(#studyId)")
     @ResponseStatus(HttpStatus.OK)
+    @Deprecated("Use addResearcherAssistant instead")
     suspend fun addResearcher(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @RequestParam(RequestParamName.EMAIL) email: String,

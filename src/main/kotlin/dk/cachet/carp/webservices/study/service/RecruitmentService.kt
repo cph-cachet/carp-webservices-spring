@@ -49,7 +49,7 @@ interface RecruitmentService {
     ): List<InactiveDeploymentInfo>
 
     fun isParticipant(
-        studyId: UUID,  
+        studyId: UUID,
         accountId: UUID,
     ): Boolean
 

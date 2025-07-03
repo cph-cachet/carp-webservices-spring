@@ -46,7 +46,7 @@ class DocumentController(
     }
 
     @GetMapping(value = [DOCUMENTS])
-    @PreAuthorize("canManageStudy(#studyId)")
+    @PreAuthorize("canManageStudy(#studyId) or canLimitedManageStudy(#studyId)")
     @ResponseStatus(HttpStatus.OK)
     fun getAll(
         @RequestParam(RequestParamName.QUERY) query: String?,
@@ -60,7 +60,7 @@ class DocumentController(
     }
 
     @GetMapping(value = [COLLECTIONS], produces = [MediaType.APPLICATION_JSON_VALUE])
-    @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
+    @PreAuthorize("canManageStudy(#studyId) or canLimitedManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
     @Suppress("TooGenericExceptionCaught", "SwallowedException")
     @ResponseStatus(HttpStatus.OK)
     @Operation(description = "Get a document by its path e.g. .../collections/foo/bar/baz")
@@ -81,7 +81,7 @@ class DocumentController(
     }
 
     @PostMapping(value = [COLLECTIONS], produces = [MediaType.APPLICATION_JSON_VALUE])
-    @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
+    @PreAuthorize("canManageStudy(#studyId) or canLimitedManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(description = "Create a document by its path e.g. .../collections/foo/bar/baz")
     fun createByDocumentPath(
@@ -95,7 +95,7 @@ class DocumentController(
     }
 
     @GetMapping(value = [GET_DOCUMENT_BY_ID], produces = [MediaType.APPLICATION_JSON_VALUE])
-    @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
+    @PreAuthorize("canManageStudy(#studyId) or canLimitedManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
     @ResponseStatus(HttpStatus.OK)
     fun getOne(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
@@ -106,7 +106,7 @@ class DocumentController(
     }
 
     @PostMapping(value = [DOCUMENTS], produces = [MediaType.APPLICATION_JSON_VALUE])
-    @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
+    @PreAuthorize("canManageStudy(#studyId) or canLimitedManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
     @ResponseStatus(HttpStatus.CREATED)
     fun create(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
@@ -117,7 +117,7 @@ class DocumentController(
     }
 
     @DeleteMapping(value = [GET_DOCUMENT_BY_ID])
-    @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
+    @PreAuthorize("canManageStudy(#studyId) or canLimitedManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
     @ResponseStatus(HttpStatus.OK)
     fun delete(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
@@ -128,7 +128,7 @@ class DocumentController(
     }
 
     @PutMapping(value = [GET_DOCUMENT_BY_ID])
-    @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
+    @PreAuthorize("canManageStudy(#studyId) or canLimitedManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
     @ResponseStatus(HttpStatus.OK)
     fun update(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
@@ -140,7 +140,7 @@ class DocumentController(
     }
 
     @PutMapping(value = [GET_DOCUMENT_BY_ID + APPEND])
-    @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
+    @PreAuthorize("canManageStudy(#studyId) or canLimitedManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
     @ResponseStatus(HttpStatus.OK)
     fun append(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,

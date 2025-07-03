@@ -63,7 +63,8 @@ class RecruitmentServiceWrapper(
     }
 
     override suspend fun inviteResearcherAssistant(
-        studyId: UUID, email: String
+        studyId: UUID,
+        email: String,
     ) = withContext(Dispatchers.IO + SecurityCoroutineContext()) {
         val accountIdentity = AccountIdentity.fromEmailAddress(email)
         var account = accountService.findByAccountIdentity(accountIdentity)
@@ -181,7 +182,7 @@ class RecruitmentServiceWrapper(
                 }
                 .filter {
                     it.dateOfLastDataUpload != null &&
-                            it.dateOfLastDataUpload.plus(lastUpdate, DateTimeUnit.HOUR) < timeNow
+                        it.dateOfLastDataUpload.plus(lastUpdate, DateTimeUnit.HOUR) < timeNow
                 }
 
         if (offset >= 0 && limit > 0) {

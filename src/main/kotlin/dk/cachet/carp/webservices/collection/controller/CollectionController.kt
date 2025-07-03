@@ -35,7 +35,7 @@ class CollectionController(
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
+    @PreAuthorize("canManageStudy(#studyId) or canLimitedManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
     fun create(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @Valid @RequestBody request: CollectionCreateRequestDto,
@@ -45,7 +45,7 @@ class CollectionController(
     }
 
     @GetMapping(value = [GET_COLLECTION_BY_ID])
-    @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
+    @PreAuthorize("canManageStudy(#studyId) or canLimitedManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
     @ResponseStatus(HttpStatus.OK)
     fun getByStudyIdAndCollectionId(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
@@ -57,7 +57,7 @@ class CollectionController(
 
     // todo replace with .../collection?collectionName=...
     @GetMapping(value = [GET_COLLECTION_BY_NAME])
-    @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
+    @PreAuthorize("canManageStudy(#studyId) or canLimitedManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
     @Operation(description = "Gets a collection by studyId and collectionName")
     @ResponseStatus(HttpStatus.OK)
     fun getByStudyIdAndCollectionName(
@@ -69,7 +69,7 @@ class CollectionController(
     }
 
     @GetMapping
-    @PreAuthorize("canManageStudy(#studyId)")
+    @PreAuthorize("canManageStudy(#studyId) or canLimitedManageStudy(#studyId)")
     @ResponseStatus(HttpStatus.OK)
     fun getAll(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
@@ -83,7 +83,7 @@ class CollectionController(
     @GetMapping(value = [GET_COLLECTION_BY_DEPLOYMENT_ID])
     @Operation(description = "Gets a collection by studyId and deploymentId")
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("canManageStudy(#studyId) or isInDeployment(#deploymentId)")
+    @PreAuthorize("canManageStudy(#studyId) or canLimitedManageStudy(#studyId) or isInDeployment(#deploymentId)")
     fun getByStudyIdAndDeploymentId(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @PathVariable(PathVariableName.DEPLOYMENT_ID) deploymentId: UUID,
@@ -96,7 +96,7 @@ class CollectionController(
     }
 
     @DeleteMapping(value = [GET_COLLECTION_BY_ID])
-    @PreAuthorize("canManageStudy(#studyId) or isCollectionOwner(#collectionId)")
+    @PreAuthorize("canManageStudy(#studyId) or canLimitedManageStudy(#studyId) or isCollectionOwner(#collectionId)")
     @ResponseStatus(HttpStatus.OK)
     fun delete(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
@@ -107,7 +107,7 @@ class CollectionController(
     }
 
     @PutMapping(value = [GET_COLLECTION_BY_ID])
-    @PreAuthorize("canManageStudy(#studyId) or isCollectionOwner(#collectionId)")
+    @PreAuthorize("canManageStudy(#studyId) or canLimitedManageStudy(#studyId) or isCollectionOwner(#collectionId)")
     @ResponseStatus(HttpStatus.OK)
     fun update(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
