@@ -30,8 +30,14 @@ class StudyServiceWrapper(
                     ?: throw IllegalArgumentException("Account with id $accountId is not found.")
 
             account.carpClaims
-                ?.filterIsInstance<Claim.ManageStudy>()
-                ?.map { it.studyId }
+                ?.filter { it is Claim.ManageStudy || it is Claim.LimitedManageStudy }
+                ?.mapNotNull { claim: Claim ->
+                    when (claim) {
+                        is Claim.ManageStudy -> claim.studyId
+                        is Claim.LimitedManageStudy -> claim.studyId
+                        else -> null
+                    }
+                }
                 ?.let { studyRepository.findAllByStudyIds(it) }
                 ?.map {
                     val status = it.getStatus()

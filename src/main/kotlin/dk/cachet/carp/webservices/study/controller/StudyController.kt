@@ -32,6 +32,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 
 @RestController
+@Suppress("TooManyFunctions")
 class StudyController(
     private val authenticationService: AuthenticationService,
     private val accountService: AccountService,
@@ -113,6 +114,16 @@ class StudyController(
     ): List<Account> {
         LOGGER.info("Start GET: /api/studies/$studyId/researchers")
         return accountService.findAllByClaim(Claim.ManageStudy(studyId))
+    }
+
+    @GetMapping(value = [RESEARCHER_ASSISTANTS])
+    @PreAuthorize("canManageStudy(#studyId) or canLimitedManageStudy(#studyId)")
+    @ResponseStatus(HttpStatus.OK)
+    suspend fun getResearcherAssistants(
+        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
+    ): List<Account> {
+        LOGGER.info("Start GET: /api/studies/$studyId/researcher-assistants")
+        return accountService.findAllByClaim(Claim.LimitedManageStudy(studyId))
     }
 
     @GetMapping(value = [GET_PARTICIPANT_GROUP_STATUS])

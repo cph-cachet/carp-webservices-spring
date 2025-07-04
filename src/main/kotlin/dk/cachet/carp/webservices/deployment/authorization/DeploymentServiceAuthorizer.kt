@@ -18,7 +18,7 @@ class DeploymentServiceAuthorizer(
     override fun DeploymentServiceRequest<*>.authorize() =
         when (this) {
             // Participants should be able to deploy themselves if needed,
-            // we shouldn't restrict study deployment creation to researchers only
+            // we shouldn't restrict study deployment creation to researchers/researcher assistants only
             is DeploymentServiceRequest.CreateStudyDeployment -> Unit
             is DeploymentServiceRequest.RemoveStudyDeployments ->
                 authorizationService.require(studyDeploymentIds.map { Claim.ManageDeployment(it) }.toSet()) // TODO: 269

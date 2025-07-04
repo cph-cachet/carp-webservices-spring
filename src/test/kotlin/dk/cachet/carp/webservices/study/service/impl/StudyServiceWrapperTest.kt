@@ -171,5 +171,52 @@ class StudyServiceWrapperTest {
                 assertTrue(result[0].canDeployToParticipants)
             }
         }
+
+        @Test
+        fun `should get studies overview when LimitedManageStudyClaim is used`() {
+            runTest {
+                val mockAccountId = UUID.randomUUID()
+                val mockStudyId1 = UUID.randomUUID()
+                val mockStudyId2 = UUID.randomUUID()
+                val mockNotStudyId3 = UUID.randomUUID()
+                val mockClaim1 = Claim.LimitedManageStudy(mockStudyId1)
+                val mockClaim2 = Claim.LimitedManageStudy(mockStudyId2)
+                val mockClaim3 = Claim.ProtocolOwner(mockNotStudyId3)
+                val mockAccount = mockk<Account>()
+                coEvery { mockAccount.carpClaims } returns setOf(mockClaim1, mockClaim2, mockClaim3)
+                val mockStudyStatus11 = mockk<StudyStatus.Configuring>(relaxed = true)
+                coEvery { mockStudyStatus11.studyId } returns mockStudyId1
+                val mockStudyStatus12 = mockk<StudyStatus.Configuring>(relaxed = true)
+                coEvery { mockStudyStatus12.studyId } returns mockStudyId1
+                val mockStudyStatus21 = mockk<StudyStatus.Configuring>(relaxed = true)
+                coEvery { mockStudyStatus21.studyId } returns mockStudyId2
+                val mockStudy11 =
+                    mockk<Study>(relaxed = true).apply {
+                        coEvery { getStatus() } returns mockStudyStatus11
+                    }
+                val mockStudy12 =
+                    mockk<Study>(relaxed = true).apply {
+                        coEvery { getStatus() } returns mockStudyStatus12
+                    }
+                val mockStudy21 =
+                    mockk<Study>(relaxed = true).apply {
+                        coEvery { getStatus() } returns mockStudyStatus21
+                    }
+                coEvery { accountService.findByUUID(mockAccountId) } returns mockAccount
+                coEvery { studyRepository.findAllByStudyIds(listOf(mockStudyId1, mockStudyId2)) } returns
+                    listOf(
+                        mockStudy11, mockStudy12, mockStudy21,
+                    )
+
+                val sut = StudyServiceWrapper(accountService, studyRepository, services)
+
+                val result = sut.getStudiesOverview(mockAccountId)
+
+                assertEquals(3, result.size)
+                assertEquals(mockStudyId1, result[0].studyId)
+                assertEquals(mockStudyId1, result[1].studyId)
+                assertEquals(mockStudyId2, result[2].studyId)
+            }
+        }
     }
 }

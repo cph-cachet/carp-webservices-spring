@@ -139,6 +139,8 @@ com:
               caze: upper
             - path: $.manage_study
               prefix: manage_study_
+            - path: $.limited_manage_study
+              prefix: limited_manage_study_
             - path: $.in_deployment
               prefix: in_deployment_
             - path: $.protocol_owner
