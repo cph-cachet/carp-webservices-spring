@@ -34,6 +34,7 @@ interface RecruitmentService {
         offset: Int?,
         limit: Int?,
         search: String?,
+        isDescending: Boolean?,
     ): List<Account>
 
     suspend fun countParticipants(
