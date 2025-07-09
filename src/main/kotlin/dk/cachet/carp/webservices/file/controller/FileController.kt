@@ -89,18 +89,13 @@ class FileController(private val fileService: FileService, private val authentic
     fun create(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @RequestParam(RequestParamName.METADATA, required = false) metadata: String?,
-        // todo change to required = true after https://github.com/cph-cachet/carp-webservices-spring/issues/209
-        @RequestParam(RequestParamName.DEPLOYMENT_ID, required = false) deploymentId: UUID?,
+        @RequestParam(RequestParamName.DEPLOYMENT_ID, required = true) deploymentId: UUID,
         @RequestPart file: MultipartFile,
     ): File {
         LOGGER.info("Start POST: /api/studies/$studyId/files")
         val ownerId = authenticationService.getId()
 
-        if (deploymentId == null) {
-            return fileService.createDEPRECATED(studyId.stringRepresentation, file, metadata, ownerId)
-        } else {
-            return fileService.create(studyId, deploymentId, ownerId, file, metadata)
-        }
+        return fileService.create(studyId, deploymentId, ownerId, file, metadata)
     }
 
     @DeleteMapping(FILE_ID)
