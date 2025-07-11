@@ -14,4 +14,6 @@ object RequestParamName {
     const val LIMIT = "limit"
     const val LAST_UPDATE = "last_update"
     const val SEARCH = "search"
+    const val IS_DESCENDING = "is_descending"
+    const val ORDER_BY = "order_by"
 }

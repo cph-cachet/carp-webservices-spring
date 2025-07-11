@@ -69,11 +69,13 @@ class StudyController(
     @GetMapping(value = [GET_PARTICIPANTS_ACCOUNTS])
     @PreAuthorize("canManageStudy(#studyId)")
     @ResponseStatus(HttpStatus.OK)
+    @Suppress("LongParameterList")
     suspend fun getParticipantAccounts(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @RequestParam(name = RequestParamName.OFFSET, required = false) offset: Int?,
         @RequestParam(name = RequestParamName.LIMIT, required = false) limit: Int?,
         @RequestParam(name = RequestParamName.SEARCH, required = false) search: String?,
+        @RequestParam(name = RequestParamName.IS_DESCENDING, required = false) isDescending: Boolean?,
         @RequestParam(name = "response_as_dto", required = false) responseAsDto: Boolean?,
     ): Any {
         LOGGER.info("Start GET: /api/studies/$studyId/participants/accounts")
@@ -84,11 +86,18 @@ class StudyController(
                 search = search,
                 limit = limit,
                 total = recruitmentService.countParticipants(studyId, search),
-                participants = recruitmentService.getParticipants(studyId, offset, limit, search),
+                participants =
+                    recruitmentService.getParticipants(
+                        studyId,
+                        offset,
+                        limit,
+                        search,
+                        isDescending,
+                    ),
             )
         }
 
-        return recruitmentService.getParticipants(studyId, offset, limit, search)
+        return recruitmentService.getParticipants(studyId, offset, limit, search, isDescending)
     }
 
     @GetMapping(value = [RESEARCHERS])
