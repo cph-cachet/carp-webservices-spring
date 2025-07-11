@@ -84,32 +84,6 @@ class FileServiceImpl(
         return optionalFile.get()
     }
 
-    @Deprecated("Use -create- instead")
-    override fun createDEPRECATED(
-        studyId: String,
-        file: MultipartFile,
-        metadata: String?,
-        ownerId: UUID,
-    ): File {
-        val relativePath = Path.of("studies", studyId, "deployments", "unknown")
-        val filename = fileStorage.storeAtPath(file, relativePath)
-
-        val saved =
-            fileRepository.save(
-                studyId,
-                file,
-                filename,
-                metadata?.let { json -> ObjectMapper().readTree(json) },
-                ownerId.toString(),
-                null,
-                relativePath.toString(),
-            )
-
-        LOGGER.info("File saved (deprecated method), id = ${saved.id}")
-
-        return saved
-    }
-
     override fun create(
         studyId: UUID,
         deploymentId: UUID,
