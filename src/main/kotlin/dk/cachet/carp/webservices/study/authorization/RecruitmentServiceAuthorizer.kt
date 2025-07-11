@@ -13,13 +13,34 @@ class RecruitmentServiceAuthorizer(
 ) : ApplicationServiceAuthorizer<RecruitmentService, RecruitmentServiceRequest<*>> {
     override fun RecruitmentServiceRequest<*>.authorize() =
         when (this) {
-            is RecruitmentServiceRequest.AddParticipantByEmailAddress -> auth.require(Claim.ManageStudy(studyId))
-            is RecruitmentServiceRequest.AddParticipantByUsername -> auth.require(Claim.ManageStudy(studyId))
-            is RecruitmentServiceRequest.GetParticipant -> auth.require(Claim.ManageStudy(studyId))
-            is RecruitmentServiceRequest.GetParticipants -> auth.require(Claim.ManageStudy(studyId))
-            is RecruitmentServiceRequest.InviteNewParticipantGroup -> auth.require(Claim.ManageStudy(studyId))
-            is RecruitmentServiceRequest.GetParticipantGroupStatusList -> auth.require(Claim.ManageStudy(studyId))
-            is RecruitmentServiceRequest.StopParticipantGroup -> auth.require(Claim.ManageStudy(studyId))
+            is RecruitmentServiceRequest.AddParticipantByEmailAddress ->
+                auth.requireAnyClaim(
+                    setOf(Claim.ManageStudy(studyId), Claim.LimitedManageStudy(studyId)),
+                )
+            is RecruitmentServiceRequest.AddParticipantByUsername ->
+                auth.requireAnyClaim(
+                    setOf(Claim.ManageStudy(studyId), Claim.LimitedManageStudy(studyId)),
+                )
+            is RecruitmentServiceRequest.GetParticipant ->
+                auth.requireAnyClaim(
+                    setOf(Claim.ManageStudy(studyId), Claim.LimitedManageStudy(studyId)),
+                )
+            is RecruitmentServiceRequest.GetParticipants ->
+                auth.requireAnyClaim(
+                    setOf(Claim.ManageStudy(studyId), Claim.LimitedManageStudy(studyId)),
+                )
+            is RecruitmentServiceRequest.InviteNewParticipantGroup ->
+                auth.requireAnyClaim(
+                    setOf(Claim.ManageStudy(studyId), Claim.LimitedManageStudy(studyId)),
+                )
+            is RecruitmentServiceRequest.GetParticipantGroupStatusList ->
+                auth.requireAnyClaim(
+                    setOf(Claim.ManageStudy(studyId), Claim.LimitedManageStudy(studyId)),
+                )
+            is RecruitmentServiceRequest.StopParticipantGroup ->
+                auth.requireAnyClaim(
+                    setOf(Claim.ManageStudy(studyId), Claim.LimitedManageStudy(studyId)),
+                )
         }
 
     override suspend fun RecruitmentServiceRequest<*>.changeClaimsOnSuccess(result: Any?) =

@@ -32,7 +32,9 @@ class FileController(private val fileService: FileService, private val authentic
 
     @GetMapping(FILE_ID)
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("canManageStudy(#studyId) or @fileControllerAuthorizer.isFileOwner(#fileId)")
+    @PreAuthorize(
+        "canManageStudy(#studyId) or canLimitedManageStudy(#studyId) or @fileControllerAuthorizer.isFileOwner(#fileId)",
+    )
     fun getOne(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @PathVariable(PathVariableName.FILE_ID) fileId: Int,
@@ -42,7 +44,7 @@ class FileController(private val fileService: FileService, private val authentic
     }
 
     @GetMapping(FILE_BASE)
-    @PreAuthorize("canManageStudy(#studyId)")
+    @PreAuthorize("canManageStudy(#studyId) or canLimitedManageStudy(#studyId)")
     @ResponseStatus(HttpStatus.OK)
     fun getAll(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
@@ -60,7 +62,9 @@ class FileController(private val fileService: FileService, private val authentic
         value = [DOWNLOAD],
     )
     @ResponseBody
-    @PreAuthorize("canManageStudy(#studyId) or @fileControllerAuthorizer.isFileOwner(#id)")
+    @PreAuthorize(
+        "canManageStudy(#studyId) or canLimitedManageStudy(#studyId) or @fileControllerAuthorizer.isFileOwner(#id)",
+    )
     @ResponseStatus(HttpStatus.OK)
     @Operation(description = "Ensure the JWT token is refreshed, before accessing this endpoint.")
     fun download(
@@ -85,27 +89,24 @@ class FileController(private val fileService: FileService, private val authentic
         value = [FILE_BASE],
     )
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
+    @PreAuthorize("canManageStudy(#studyId) or canLimitedManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
     fun create(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @RequestParam(RequestParamName.METADATA, required = false) metadata: String?,
-        // todo change to required = true after https://github.com/cph-cachet/carp-webservices-spring/issues/209
-        @RequestParam(RequestParamName.DEPLOYMENT_ID, required = false) deploymentId: UUID?,
+        @RequestParam(RequestParamName.DEPLOYMENT_ID, required = true) deploymentId: UUID,
         @RequestPart file: MultipartFile,
     ): File {
         LOGGER.info("Start POST: /api/studies/$studyId/files")
         val ownerId = authenticationService.getId()
 
-        if (deploymentId == null) {
-            return fileService.createDEPRECATED(studyId.stringRepresentation, file, metadata, ownerId)
-        } else {
-            return fileService.create(studyId, deploymentId, ownerId, file, metadata)
-        }
+        return fileService.create(studyId, deploymentId, ownerId, file, metadata)
     }
 
     @DeleteMapping(FILE_ID)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("canManageStudy(#studyId) or @fileControllerAuthorizer.isFileOwner(#fileId)")
+    @PreAuthorize(
+        "canManageStudy(#studyId) or canLimitedManageStudy(#studyId) or @fileControllerAuthorizer.isFileOwner(#fileId)",
+    )
     fun delete(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @PathVariable(PathVariableName.FILE_ID) fileId: Int,
@@ -116,7 +117,7 @@ class FileController(private val fileService: FileService, private val authentic
 
     @PostMapping(UPLOAD_IMAGE)
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("canManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
+    @PreAuthorize("canManageStudy(#studyId) or canLimitedManageStudy(#studyId) or isInDeploymentOfStudy(#studyId)")
     fun uploadS3(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @RequestParam(RequestParamName.IMAGE, required = true) image: MultipartFile,

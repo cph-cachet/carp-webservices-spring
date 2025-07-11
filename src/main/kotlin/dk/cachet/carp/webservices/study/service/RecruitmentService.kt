@@ -14,7 +14,17 @@ interface RecruitmentService {
         email: String,
     )
 
+    suspend fun inviteResearcherAssistant(
+        studyId: UUID,
+        email: String,
+    )
+
     suspend fun removeResearcher(
+        studyId: UUID,
+        email: String,
+    ): Boolean
+
+    suspend fun removeResearcherAssistant(
         studyId: UUID,
         email: String,
     ): Boolean

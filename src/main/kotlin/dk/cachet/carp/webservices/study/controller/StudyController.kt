@@ -32,6 +32,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 
 @RestController
+@Suppress("TooManyFunctions")
 class StudyController(
     private val authenticationService: AuthenticationService,
     private val accountService: AccountService,
@@ -47,7 +48,9 @@ class StudyController(
         const val STUDY_SERVICE = "/api/study-service"
         const val RECRUITMENT_SERVICE = "/api/recruitment-service"
         const val RESEARCHERS = "/api/studies/{${PathVariableName.STUDY_ID}}/researchers"
+        const val RESEARCHER_ASSISTANTS = "/api/studies/{${PathVariableName.STUDY_ID}}/researcher-assistants"
         const val ADD_RESEARCHER = "/api/studies/{${PathVariableName.STUDY_ID}}/researchers/add"
+        const val ADD_RESEARCHER_ASSISTANT = "/api/studies/{${PathVariableName.STUDY_ID}}/researcher-assistants/add"
         const val GET_STUDIES_OVERVIEW = "/api/studies/studies-overview"
         const val GET_PARTICIPANTS_ACCOUNTS = "/api/studies/{${PathVariableName.STUDY_ID}}/participants/accounts"
         const val GET_PARTICIPANT_GROUP_STATUS = "/api/studies/{${PathVariableName.STUDY_ID}}/participantGroup/status"
@@ -58,6 +61,7 @@ class StudyController(
     @PostMapping(value = [ADD_RESEARCHER])
     @PreAuthorize("canManageStudy(#studyId)")
     @ResponseStatus(HttpStatus.OK)
+    @Deprecated("Use addResearcherAssistant instead")
     suspend fun addResearcher(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @RequestParam(RequestParamName.EMAIL) email: String,
@@ -66,8 +70,19 @@ class StudyController(
         return recruitmentService.inviteResearcher(studyId, email)
     }
 
-    @GetMapping(value = [GET_PARTICIPANTS_ACCOUNTS])
+    @PostMapping(value = [ADD_RESEARCHER_ASSISTANT])
     @PreAuthorize("canManageStudy(#studyId)")
+    @ResponseStatus(HttpStatus.OK)
+    suspend fun addResearcherAssistant(
+        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
+        @RequestParam(RequestParamName.EMAIL) email: String,
+    ) {
+        LOGGER.info("Start POST: /api/studies/$studyId/researcher-assistants")
+        return recruitmentService.inviteResearcherAssistant(studyId, email)
+    }
+
+    @GetMapping(value = [GET_PARTICIPANTS_ACCOUNTS])
+    @PreAuthorize("canManageStudy(#studyId) or canLimitedManageStudy(#studyId)")
     @ResponseStatus(HttpStatus.OK)
     @Suppress("LongParameterList")
     suspend fun getParticipantAccounts(
@@ -101,7 +116,7 @@ class StudyController(
     }
 
     @GetMapping(value = [RESEARCHERS])
-    @PreAuthorize("canManageStudy(#studyId)")
+    @PreAuthorize("canManageStudy(#studyId) or canLimitedManageStudy(#studyId)")
     @ResponseStatus(HttpStatus.OK)
     suspend fun getResearchers(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
@@ -110,8 +125,18 @@ class StudyController(
         return accountService.findAllByClaim(Claim.ManageStudy(studyId))
     }
 
+    @GetMapping(value = [RESEARCHER_ASSISTANTS])
+    @PreAuthorize("canManageStudy(#studyId) or canLimitedManageStudy(#studyId)")
+    @ResponseStatus(HttpStatus.OK)
+    suspend fun getResearcherAssistants(
+        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
+    ): List<Account> {
+        LOGGER.info("Start GET: /api/studies/$studyId/researcher-assistants")
+        return accountService.findAllByClaim(Claim.LimitedManageStudy(studyId))
+    }
+
     @GetMapping(value = [GET_PARTICIPANT_GROUP_STATUS])
-    @PreAuthorize("canManageStudy(#studyId)")
+    @PreAuthorize("canManageStudy(#studyId) or canLimitedManageStudy(#studyId)")
     @ResponseStatus(HttpStatus.OK)
     suspend fun getParticipantGroupStatus(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
@@ -129,6 +154,14 @@ class StudyController(
         @RequestParam(RequestParamName.EMAIL) email: String,
     ): Boolean = recruitmentService.removeResearcher(studyId, email)
 
+    @DeleteMapping(value = [RESEARCHER_ASSISTANTS])
+    @PreAuthorize("canManageStudy(#studyId)")
+    @ResponseStatus(HttpStatus.OK)
+    suspend fun removeResearcherAssistant(
+        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
+        @RequestParam(RequestParamName.EMAIL) email: String,
+    ): Boolean = recruitmentService.removeResearcherAssistant(studyId, email)
+
     @GetMapping(value = [GET_STUDIES_OVERVIEW])
     @ResponseStatus(HttpStatus.OK)
     suspend fun getStudiesOverview(): List<StudyOverview> {
@@ -137,7 +170,7 @@ class StudyController(
     }
 
     @PostMapping(value = [ADD_PARTICIPANTS])
-    @PreAuthorize("canManageStudy(#studyId)")
+    @PreAuthorize("canManageStudy(#studyId) or canLimitedManageStudy(#studyId)")
     @ResponseStatus(HttpStatus.OK)
     suspend fun addParticipants(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
@@ -153,7 +186,7 @@ class StudyController(
      * @param lastUpdate The last updated time in HOURS.
      */
     @GetMapping(value = [GET_INACTIVE_DEPLOYMENTS])
-    @PreAuthorize("canManageStudy(#studyId)")
+    @PreAuthorize("canManageStudy(#studyId) or canLimitedManageStudy(#studyId)")
     @ResponseStatus(HttpStatus.OK)
     suspend fun getInactiveParticipants(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,

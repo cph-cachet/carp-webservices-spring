@@ -22,13 +22,34 @@ class StudyServiceAuthorizer(
             is StudyServiceRequest.GetStudiesOverview -> auth.requireOwner(ownerId)
 
             // the duplication seems unavoidable if we still want to keep exhaustive pattern matching
-            is StudyServiceRequest.SetInternalDescription -> auth.require(Claim.ManageStudy(studyId))
-            is StudyServiceRequest.GetStudyDetails -> auth.require(Claim.ManageStudy(studyId))
-            is StudyServiceRequest.GetStudyStatus -> auth.require(Claim.ManageStudy(studyId))
-            is StudyServiceRequest.SetInvitation -> auth.require(Claim.ManageStudy(studyId))
-            is StudyServiceRequest.SetProtocol -> auth.require(Claim.ManageStudy(studyId))
-            is StudyServiceRequest.RemoveProtocol -> auth.require(Claim.ManageStudy(studyId))
-            is StudyServiceRequest.GoLive -> auth.require(Claim.ManageStudy(studyId))
+            is StudyServiceRequest.SetInternalDescription ->
+                auth.requireAnyClaim(
+                    setOf(Claim.ManageStudy(studyId), Claim.LimitedManageStudy(studyId)),
+                )
+            is StudyServiceRequest.GetStudyDetails ->
+                auth.requireAnyClaim(
+                    setOf(Claim.ManageStudy(studyId), Claim.LimitedManageStudy(studyId)),
+                )
+            is StudyServiceRequest.GetStudyStatus ->
+                auth.requireAnyClaim(
+                    setOf(Claim.ManageStudy(studyId), Claim.LimitedManageStudy(studyId)),
+                )
+            is StudyServiceRequest.SetInvitation ->
+                auth.requireAnyClaim(
+                    setOf(Claim.ManageStudy(studyId), Claim.LimitedManageStudy(studyId)),
+                )
+            is StudyServiceRequest.SetProtocol ->
+                auth.requireAnyClaim(
+                    setOf(Claim.ManageStudy(studyId), Claim.LimitedManageStudy(studyId)),
+                )
+            is StudyServiceRequest.RemoveProtocol ->
+                auth.requireAnyClaim(
+                    setOf(Claim.ManageStudy(studyId), Claim.LimitedManageStudy(studyId)),
+                )
+            is StudyServiceRequest.GoLive ->
+                auth.requireAnyClaim(
+                    setOf(Claim.ManageStudy(studyId), Claim.LimitedManageStudy(studyId)),
+                )
             is StudyServiceRequest.Remove -> auth.require(Claim.ManageStudy(studyId))
         }
 
@@ -49,6 +70,7 @@ class StudyServiceAuthorizer(
             -> Unit
             is StudyServiceRequest.Remove -> {
                 auth.revokeClaimFromAllAccounts(Claim.ManageStudy(studyId))
+                auth.revokeClaimFromAllAccounts(Claim.LimitedManageStudy(studyId))
             }
         }
 }

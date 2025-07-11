@@ -54,14 +54,14 @@ class FileServiceImpl(
     ): List<File> {
         val id = authenticationService.getId()
         val role = authenticationService.getRole()
-        val isResearcher = role >= Role.RESEARCHER
+        val isFullyAuthorized = role >= Role.RESEARCHER_ASSISTANT
 
-        if (isResearcher && query == null) {
+        if (isFullyAuthorized && query == null) {
             return fileRepository.findByStudyId(studyId)
         } else {
             query?.let {
                 val queryForRole =
-                    if (!isResearcher) {
+                    if (!isFullyAuthorized) {
                         // Return data relevant to this user only.
                         "$query;created_by==$id;study_id==$studyId"
                     } else {
@@ -82,32 +82,6 @@ class FileServiceImpl(
             throw ResourceNotFoundException(validateMessages.get("file.not_found", id))
         }
         return optionalFile.get()
-    }
-
-    @Deprecated("Use -create- instead")
-    override fun createDEPRECATED(
-        studyId: String,
-        file: MultipartFile,
-        metadata: String?,
-        ownerId: UUID,
-    ): File {
-        val relativePath = Path.of("studies", studyId, "deployments", "unknown")
-        val filename = fileStorage.storeAtPath(file, relativePath)
-
-        val saved =
-            fileRepository.save(
-                studyId,
-                file,
-                filename,
-                metadata?.let { json -> ObjectMapper().readTree(json) },
-                ownerId.toString(),
-                null,
-                relativePath.toString(),
-            )
-
-        LOGGER.info("File saved (deprecated method), id = ${saved.id}")
-
-        return saved
     }
 
     override fun create(
