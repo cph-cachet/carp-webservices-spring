@@ -27,7 +27,7 @@ class ProtocolServiceAuthorizer(
             is ProtocolServiceRequest.GetBy,
             is ProtocolServiceRequest.GetAllForOwner,
             is ProtocolServiceRequest.GetVersionHistoryFor,
-            -> auth.require(Role.RESEARCHER)
+            -> auth.requireAnyRole(setOf(Role.RESEARCHER, Role.RESEARCHER_ASSISTANT))
         }
 
     override suspend fun ProtocolServiceRequest<*>.changeClaimsOnSuccess(result: Any?) =

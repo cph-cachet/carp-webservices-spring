@@ -38,7 +38,7 @@ class ExportController(
 
     @PostMapping(SUMMARIES)
     @ResponseStatus(HttpStatus.ACCEPTED)
-    @PreAuthorize("canManageStudy( #studyId ) ")
+    @PreAuthorize("canManageStudy(#studyId) or canLimitedManageStudy(#studyId)")
     suspend fun exportSummary(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @RequestBody request: SummaryRequest,
@@ -61,7 +61,7 @@ class ExportController(
 
     @PostMapping(ANONYMOUS_PARTICIPANTS)
     @ResponseStatus(HttpStatus.ACCEPTED)
-    @PreAuthorize("canManageStudy( #studyId )")
+    @PreAuthorize("canManageStudy(#studyId) or canLimitedManageStudy(#studyId)")
     suspend fun exportAnonymousParticipants(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @RequestBody request: AnonymousParticipantRequest,
@@ -75,7 +75,7 @@ class ExportController(
 
     @DeleteMapping(DELETE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("canManageStudy( #studyId )")
+    @PreAuthorize("canManageStudy(#studyId) or canLimitedManageStudy(#studyId)")
     fun delete(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @PathVariable(PathVariableName.EXPORT_ID) exportId: UUID,
@@ -85,7 +85,7 @@ class ExportController(
     }
 
     @GetMapping(DOWNLOAD)
-    @PreAuthorize("canManageStudy( #studyId )")
+    @PreAuthorize("canManageStudy(#studyId) or canLimitedManageStudy(#studyId)")
     @ResponseStatus(HttpStatus.OK)
     @Operation(description = "Download the export file.")
     fun download(
@@ -104,7 +104,7 @@ class ExportController(
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("canManageStudy( #studyId )")
+    @PreAuthorize("canManageStudy(#studyId) or canLimitedManageStudy(#studyId)")
     fun poll(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
     ): List<Export> {

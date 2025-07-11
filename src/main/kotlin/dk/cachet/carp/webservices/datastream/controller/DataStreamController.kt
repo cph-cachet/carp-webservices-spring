@@ -31,7 +31,7 @@ class DataStreamController(
 
     @GetMapping(value = [DATA_STREAMS_SUMMARY])
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("canManageStudy(#studyId)")
+    @PreAuthorize("canManageStudy(#studyId) or canLimitedManageStudy(#studyId)")
     @Suppress("LongParameterList")
     suspend fun getDataStreamsSummary(
         @RequestParam("studyId", required = true) studyId: UUID,

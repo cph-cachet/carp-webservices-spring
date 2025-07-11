@@ -95,6 +95,15 @@
         "attributes": {}
       },
       {
+        "id": "c3cd0090-f80e-4f43-9a71-af2e35d240a5",
+        "name": "researcher_assistant",
+        "description": "",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "f872c779-2143-47e0-af3d-28a20ff745e9",
+        "attributes": {}
+      },
+      {
         "id": "00f7bab1-e892-4ca5-922a-3237a705e9d3",
         "name": "participant",
         "description": "",
@@ -914,6 +923,22 @@
             "id.token.claim": "true",
             "access.token.claim": "true",
             "claim.name": "manage_study",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "id": "8fa0afc4-a4f0-4731-aded-057da077d562",
+          "name": "Limited Manage Study",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "multivalued": "true",
+            "user.attribute": "limitedManageStudy",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "limited_manage_study",
             "jsonType.label": "String"
           }
         },

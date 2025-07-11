@@ -4,7 +4,7 @@ The Export section of the project provides tools and functionalities for generat
 
 ## 1. Anonymous Account Generation
 
-**Purpose**: The Anonymous Account Generation feature allows the researchers to create anonymous accounts that can be used in studies.
+**Purpose**: The Anonymous Account Generation feature allows the researchers/researcher assistants to create anonymous accounts that can be used in studies.
 
 - **Functionality**:
     - **Account Creation**: Generates accounts without personal identifiers, ensuring that users can participate anonymously.
@@ -23,5 +23,5 @@ The Export section of the project provides tools and functionalities for generat
     - **Batch Export**: Supports exporting data in bulk for large studies or trials.
 
 - **Security Measures**:
-    - **Access Controls**: Researchers only.
+    - **Access Controls**: Researchers and researcher assistants only.
 

@@ -54,14 +54,14 @@ class FileServiceImpl(
     ): List<File> {
         val id = authenticationService.getId()
         val role = authenticationService.getRole()
-        val isResearcher = role >= Role.RESEARCHER
+        val isFullyAuthorized = role >= Role.RESEARCHER_ASSISTANT
 
-        if (isResearcher && query == null) {
+        if (isFullyAuthorized && query == null) {
             return fileRepository.findByStudyId(studyId)
         } else {
             query?.let {
                 val queryForRole =
-                    if (!isResearcher) {
+                    if (!isFullyAuthorized) {
                         // Return data relevant to this user only.
                         "$query;created_by==$id;study_id==$studyId"
                     } else {

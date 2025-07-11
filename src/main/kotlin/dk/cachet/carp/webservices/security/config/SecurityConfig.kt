@@ -51,6 +51,9 @@ class ProxiesMethodSecurityExpressionRoot(
     fun canManageStudy(studyId: UUID?): Boolean =
         studyId != null && auth.getClaims().contains(Claim.ManageStudy(studyId)) || isAdmin()
 
+    fun canLimitedManageStudy(studyId: UUID?): Boolean =
+        studyId != null && auth.getClaims().contains(Claim.LimitedManageStudy(studyId)) || isAdmin()
+
     fun isInDeployment(deploymentId: UUID?): Boolean =
         deploymentId != null && auth.getClaims().contains(Claim.InDeployment(deploymentId)) || isAdmin()
 
