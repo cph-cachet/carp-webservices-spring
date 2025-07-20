@@ -3,14 +3,15 @@
 - Input Data Usage
   * [Protocol Example](#protocol-example)
   * [Endpoint Example](#endpoint-example)
-- Supported Input Data List
+- Supported Input Data Types
   * [Address](#address)
   * [Diagnosis](#diagnosis)
   * [FullName](#fullname)
   * [InformedConsent](#informedconsent)
   * [PhoneNumber](#phonenumber)
   * [SocialSecurityNumber](#socialsecuritynumber)
-
+- Supported CARP.CORE Input Data Types
+  * [Sex](#sex)
 
 ## Protocol Example
 The `expectedParticipantData` section of the study protocol is used to define type information for the study. Any data type utilized must be defined here.
@@ -269,7 +270,7 @@ An enumeration representing the sex of a participant.
 
 ### Data Type Name
 
-'dk.cachet.carp.input.sex`
+`dk.cachet.carp.input.sex`
 
 ### Enum Values
 
