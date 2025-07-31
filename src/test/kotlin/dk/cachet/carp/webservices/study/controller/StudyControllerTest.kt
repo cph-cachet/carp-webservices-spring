@@ -10,16 +10,13 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Nested
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.get
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import kotlin.test.BeforeTest
-import org.junit.jupiter.api.Nested
-import org.springframework.http.MediaType
-import org.springframework.test.web.servlet.get
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import kotlin.test.Test
-
 
 class StudyControllerTest {
     private val authenticationService: AuthenticationService = mockk()
@@ -30,11 +27,12 @@ class StudyControllerTest {
 
     @BeforeTest
     fun setup() {
-        mockMvc = MockMvcBuilders.standaloneSetup(
-            StudyController(
-                authenticationService, accountService, studyService, recruitmentService
-            )
-        ).build()
+        mockMvc =
+            MockMvcBuilders.standaloneSetup(
+                StudyController(
+                    authenticationService, accountService, studyService, recruitmentService,
+                ),
+            ).build()
     }
 
     @Nested
@@ -46,10 +44,10 @@ class StudyControllerTest {
                 val url = "/api/studies/$mockStudyId/participants/accounts?response_as_dto=true"
 
                 coEvery { recruitmentService.countParticipants(any(), any()) } returns 0
-                coEvery { recruitmentService.getParticipants(any(), any(), any(), any()) }
+                coEvery { recruitmentService.getParticipants(any(), any(), any(), any(), any()) }
 
                 mockMvc.get(url).andExpect { status { isOk() } }
-                coVerify(exactly = 1) { recruitmentService.getParticipants(any(), any(), any(), any()) }
+                coVerify(exactly = 1) { recruitmentService.getParticipants(any(), any(), any(), any(), any()) }
                 coVerify(exactly = 1) { recruitmentService.countParticipants(any(), any()) }
             }
         }
@@ -61,10 +59,10 @@ class StudyControllerTest {
                 val url = "/api/studies/$mockStudyId/participants/accounts"
 
                 coEvery { recruitmentService.countParticipants(any(), any()) } returns 0
-                coEvery { recruitmentService.getParticipants(any(), any(), any(), any()) }
+                coEvery { recruitmentService.getParticipants(any(), any(), any(), any(), any()) }
 
                 mockMvc.get(url).andExpect { status { isOk() } }
-                coVerify(exactly = 1) { recruitmentService.getParticipants(any(), any(), any(), any()) }
+                coVerify(exactly = 1) { recruitmentService.getParticipants(any(), any(), any(), any(), any()) }
                 coVerify(exactly = 0) { recruitmentService.countParticipants(any(), any()) }
             }
         }

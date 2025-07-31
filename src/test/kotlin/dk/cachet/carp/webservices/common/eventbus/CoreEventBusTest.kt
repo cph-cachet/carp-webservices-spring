@@ -24,7 +24,6 @@ class CoreEventBusTest {
 
     @Nested
     inner class Publish {
-
         @BeforeEach
         fun setup() {
             every { rabbitTemplate.convertAndSend(any(), any<String>()) } returns Unit
@@ -35,19 +34,24 @@ class CoreEventBusTest {
         @Test
         fun `should publish when study service`() {
             runTest {
-                val event = StudyService.Event.StudyCreated(
-                    study = StudyDetails(
-                        studyId = UUID.randomUUID(),
-                        ownerId = UUID.randomUUID(),
-                        name = "dsa",
-                        createdOn = Instant.parse("2020-04-02T00:00:00.000Z"),
-                        description = "dsa",
-                        invitation = StudyInvitation(
-                            name = "dsa", description = "dsa", applicationData = ""
-                        ),
-                        protocolSnapshot = null
+                val event =
+                    StudyService.Event.StudyCreated(
+                        study =
+                            StudyDetails(
+                                studyId = UUID.randomUUID(),
+                                ownerId = UUID.randomUUID(),
+                                name = "dsa",
+                                createdOn = Instant.parse("2020-04-02T00:00:00.000Z"),
+                                description = "dsa",
+                                invitation =
+                                    StudyInvitation(
+                                        name = "dsa",
+                                        description = "dsa",
+                                        applicationData = "",
+                                    ),
+                                protocolSnapshot = null,
+                            ),
                     )
-                )
                 val publishingService = StudyService::class
                 val sut = CoreEventBus(rabbitTemplate, environment)
 
@@ -62,15 +66,20 @@ class CoreEventBusTest {
         @Test
         fun `should publish when deployment`() {
             runTest {
-                val event = DeploymentService.Event.StudyDeploymentCreated(
-                    studyDeploymentId = UUID.randomUUID(), protocol = StudyProtocolSnapshot(
-                        id = UUID.randomUUID(),
-                        createdOn = Clock.System.now(),
-                        version = 1,
-                        ownerId = UUID.randomUUID(),
-                        name = "name",
-                    ), invitations = emptyList(), connectedDevicePreregistrations = mapOf()
-                )
+                val event =
+                    DeploymentService.Event.StudyDeploymentCreated(
+                        studyDeploymentId = UUID.randomUUID(),
+                        protocol =
+                            StudyProtocolSnapshot(
+                                id = UUID.randomUUID(),
+                                createdOn = Clock.System.now(),
+                                version = 1,
+                                ownerId = UUID.randomUUID(),
+                                name = "name",
+                            ),
+                        invitations = emptyList(),
+                        connectedDevicePreregistrations = mapOf(),
+                    )
                 val deploymentService = DeploymentService::class
                 val sut = CoreEventBus(rabbitTemplate, environment)
 

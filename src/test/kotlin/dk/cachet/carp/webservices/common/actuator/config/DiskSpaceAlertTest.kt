@@ -16,21 +16,26 @@ class DiskSpaceAlertTest {
 
     @Nested
     inner class CheckRegularDiskSpace {
-
         @Test
         fun `should not do anything if disk not UP`() {
             every { diskSpace.statusHealth().code } returns "DOWN"
 
-            val mockStatusDetails = mutableMapOf<String, Any>(
-                "free" to "1000",
-                "total" to "5000",
-            )
+            val mockStatusDetails =
+                mutableMapOf<String, Any>(
+                    "free" to "1000",
+                    "total" to "5000",
+                )
 
             every { diskSpace.statusDetails() } returns mockStatusDetails
 
-            val sut = DiskSpaceAlert(
-                diskSpace, notificationService, emailNotificationService, alertEmail, alertWarning
-            )
+            val sut =
+                DiskSpaceAlert(
+                    diskSpace,
+                    notificationService,
+                    emailNotificationService,
+                    alertEmail,
+                    alertWarning,
+                )
 
             sut.checkRegularDiskSpace()
 
@@ -42,14 +47,19 @@ class DiskSpaceAlertTest {
         fun `should not do anything if diskSpaceHealth has no info`() {
             every { diskSpace.statusHealth().code } returns "UP"
 
-            val mockStatusDetails = mutableMapOf<String, Any>(
-            )
+            val mockStatusDetails =
+                mutableMapOf<String, Any>()
 
             every { diskSpace.statusDetails() } returns mockStatusDetails
 
-            val sut = DiskSpaceAlert(
-                diskSpace, notificationService, emailNotificationService, alertEmail, alertWarning
-            )
+            val sut =
+                DiskSpaceAlert(
+                    diskSpace,
+                    notificationService,
+                    emailNotificationService,
+                    alertEmail,
+                    alertWarning,
+                )
 
             sut.checkRegularDiskSpace()
 
@@ -61,16 +71,22 @@ class DiskSpaceAlertTest {
         fun `should not take action if usable percentage is less than limit`() {
             every { diskSpace.statusHealth().code } returns "UP"
 
-            val mockStatusDetails = mutableMapOf<String, Any>(
-                "free" to "1000",
-                "total" to "5000",
-            )
+            val mockStatusDetails =
+                mutableMapOf<String, Any>(
+                    "free" to "1000",
+                    "total" to "5000",
+                )
 
             every { diskSpace.statusDetails() } returns mockStatusDetails
 
-            val sut = DiskSpaceAlert(
-                diskSpace, notificationService, emailNotificationService, alertEmail, alertWarning
-            )
+            val sut =
+                DiskSpaceAlert(
+                    diskSpace,
+                    notificationService,
+                    emailNotificationService,
+                    alertEmail,
+                    alertWarning,
+                )
 
             sut.checkRegularDiskSpace()
 
@@ -84,16 +100,22 @@ class DiskSpaceAlertTest {
             every { notificationService.sendAlertOrGeneralNotification(any(), any()) } just Runs
             every { emailNotificationService.sendNotificationEmail(any(), any(), any()) } just Runs
 
-            val mockStatusDetails = mutableMapOf<String, Any>(
-                "free" to "1000",
-                "total" to "15000",
-            )
+            val mockStatusDetails =
+                mutableMapOf<String, Any>(
+                    "free" to "1000",
+                    "total" to "15000",
+                )
 
             every { diskSpace.statusDetails() } returns mockStatusDetails
 
-            val sut = DiskSpaceAlert(
-                diskSpace, notificationService, emailNotificationService, alertEmail, alertWarning
-            )
+            val sut =
+                DiskSpaceAlert(
+                    diskSpace,
+                    notificationService,
+                    emailNotificationService,
+                    alertEmail,
+                    alertWarning,
+                )
 
             sut.checkRegularDiskSpace()
 

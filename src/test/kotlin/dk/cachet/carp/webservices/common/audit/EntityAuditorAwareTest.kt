@@ -2,8 +2,8 @@ package dk.cachet.carp.webservices.common.audit
 
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
 import io.mockk.*
-import kotlin.test.Test
 import org.junit.jupiter.api.Nested
+import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class EntityAuditorAwareTest {
@@ -20,7 +20,6 @@ class EntityAuditorAwareTest {
             val auditor = sut.getCurrentAuditor()
             assertEquals(auditor.get(), "user")
         }
-
 
         @Test
         fun `should return SYSTEM if no authenticated user is available`() {

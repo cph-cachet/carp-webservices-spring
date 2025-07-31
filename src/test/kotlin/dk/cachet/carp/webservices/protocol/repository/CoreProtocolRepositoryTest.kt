@@ -32,9 +32,12 @@ class CoreProtocolRepositoryTest {
                 coEvery { protocolRepository.findAllById(any<String>()) } returns listOf(mockk())
                 coEvery { validationMessages.get("protocol.id.already.exists", protocol.id) } returns "error"
 
-                val sut = CoreProtocolRepository(
-                    protocolRepository, validationMessages, objectMapper
-                )
+                val sut =
+                    CoreProtocolRepository(
+                        protocolRepository,
+                        validationMessages,
+                        objectMapper,
+                    )
 
                 assertThrows<IllegalStateException> {
                     sut.add(protocol, mockk())
@@ -54,9 +57,12 @@ class CoreProtocolRepositoryTest {
                 coEvery { protocolRepository.findByParams(any(), any()) } returns listOf(mockk())
                 coEvery { validationMessages.get("protocol.already.exists", any(), any(), any()) } returns "error"
 
-                val sut = CoreProtocolRepository(
-                    protocolRepository, validationMessages, objectMapper
-                )
+                val sut =
+                    CoreProtocolRepository(
+                        protocolRepository,
+                        validationMessages,
+                        objectMapper,
+                    )
 
                 assertThrows<IllegalStateException> {
                     sut.add(protocol, version)
@@ -71,13 +77,14 @@ class CoreProtocolRepositoryTest {
             runTest {
                 val protocol = mockk<StudyProtocol>()
                 val version = mockk<ProtocolVersion>(relaxed = true)
-                coEvery { protocol.getSnapshot() } returns StudyProtocolSnapshot(
-                    id = UUID.randomUUID(),
-                    createdOn = Instant.fromEpochMilliseconds(0),
-                    version = 1,
-                    ownerId = UUID.randomUUID(),
-                    name = "1",
-                )
+                coEvery { protocol.getSnapshot() } returns
+                    StudyProtocolSnapshot(
+                        id = UUID.randomUUID(),
+                        createdOn = Instant.fromEpochMilliseconds(0),
+                        version = 1,
+                        ownerId = UUID.randomUUID(),
+                        name = "1",
+                    )
                 coEvery { protocol.id } returns UUID.randomUUID()
                 coEvery { protocol.name } returns "1"
 
@@ -86,9 +93,12 @@ class CoreProtocolRepositoryTest {
                 coEvery { protocolRepository.save(any()) } returns mockk()
                 coEvery { objectMapper.readTree(any<String>()) } returns mockk()
 
-                val sut = CoreProtocolRepository(
-                    protocolRepository, validationMessages, objectMapper
-                )
+                val sut =
+                    CoreProtocolRepository(
+                        protocolRepository,
+                        validationMessages,
+                        objectMapper,
+                    )
 
                 sut.add(protocol, version)
 
@@ -102,13 +112,14 @@ class CoreProtocolRepositoryTest {
         @Test
         fun `should return a sequence of protocols`() {
             runTest {
-                val studyProtocolSnapshot = StudyProtocolSnapshot(
-                    id = UUID.randomUUID(),
-                    createdOn = Instant.fromEpochMilliseconds(0),
-                    version = 1,
-                    ownerId = UUID.randomUUID(),
-                    name = "1",
-                )
+                val studyProtocolSnapshot =
+                    StudyProtocolSnapshot(
+                        id = UUID.randomUUID(),
+                        createdOn = Instant.fromEpochMilliseconds(0),
+                        version = 1,
+                        ownerId = UUID.randomUUID(),
+                        name = "1",
+                    )
                 val snapshot = WS_JSON.encodeToString(StudyProtocolSnapshot.serializer(), studyProtocolSnapshot)
                 val jsonNode = ObjectMapper().readTree(snapshot)
                 val protocol1 = mockk<Protocol>()
@@ -116,9 +127,12 @@ class CoreProtocolRepositoryTest {
 
                 coEvery { protocolRepository.findAllByOwnerId(any()) } returns listOf(protocol1)
 
-                val sut = CoreProtocolRepository(
-                    protocolRepository, validationMessages, objectMapper
-                )
+                val sut =
+                    CoreProtocolRepository(
+                        protocolRepository,
+                        validationMessages,
+                        objectMapper,
+                    )
 
                 val protocols = sut.getAllForOwner(studyProtocolSnapshot.ownerId)
 
@@ -134,9 +148,12 @@ class CoreProtocolRepositoryTest {
 
                 coEvery { protocolRepository.findAllByOwnerId(any()) } returns listOf(protocol)
 
-                val sut = CoreProtocolRepository(
-                    protocolRepository, validationMessages, objectMapper
-                )
+                val sut =
+                    CoreProtocolRepository(
+                        protocolRepository,
+                        validationMessages,
+                        objectMapper,
+                    )
 
                 assertThrows<NullPointerException> {
                     sut.getAllForOwner(UUID.randomUUID())
@@ -150,13 +167,14 @@ class CoreProtocolRepositoryTest {
         @Test
         fun `should return the protocol`() {
             runTest {
-                val studyProtocolSnapshot = StudyProtocolSnapshot(
-                    id = UUID.randomUUID(),
-                    createdOn = Instant.fromEpochMilliseconds(0),
-                    version = 1,
-                    ownerId = UUID.randomUUID(),
-                    name = "1",
-                )
+                val studyProtocolSnapshot =
+                    StudyProtocolSnapshot(
+                        id = UUID.randomUUID(),
+                        createdOn = Instant.fromEpochMilliseconds(0),
+                        version = 1,
+                        ownerId = UUID.randomUUID(),
+                        name = "1",
+                    )
                 val snapshot = WS_JSON.encodeToString(StudyProtocolSnapshot.serializer(), studyProtocolSnapshot)
                 val jsonNode = ObjectMapper().readTree(snapshot)
                 val protocol1 = mockk<Protocol>()
@@ -164,9 +182,12 @@ class CoreProtocolRepositoryTest {
 
                 coEvery { protocolRepository.findByParams(any(), any()) } returns listOf(protocol1)
 
-                val sut = CoreProtocolRepository(
-                    protocolRepository, validationMessages, objectMapper
-                )
+                val sut =
+                    CoreProtocolRepository(
+                        protocolRepository,
+                        validationMessages,
+                        objectMapper,
+                    )
 
                 sut.getBy(studyProtocolSnapshot.ownerId, "1")
 
@@ -182,9 +203,12 @@ class CoreProtocolRepositoryTest {
 
                 coEvery { protocolRepository.findByParams(any(), any()) } returns listOf(protocol)
 
-                val sut = CoreProtocolRepository(
-                    protocolRepository, validationMessages, objectMapper
-                )
+                val sut =
+                    CoreProtocolRepository(
+                        protocolRepository,
+                        validationMessages,
+                        objectMapper,
+                    )
 
                 assertThrows<NullPointerException> {
                     sut.getBy(UUID.randomUUID(), "1")
@@ -197,9 +221,12 @@ class CoreProtocolRepositoryTest {
             runTest {
                 coEvery { protocolRepository.findByParams(any(), any()) } returns emptyList()
 
-                val sut = CoreProtocolRepository(
-                    protocolRepository, validationMessages, objectMapper
-                )
+                val sut =
+                    CoreProtocolRepository(
+                        protocolRepository,
+                        validationMessages,
+                        objectMapper,
+                    )
 
                 val result = sut.getBy(UUID.randomUUID(), "1")
 
@@ -216,9 +243,12 @@ class CoreProtocolRepositoryTest {
                 val protocol1 = mockk<Protocol>(relaxed = true)
                 val protocol2 = mockk<Protocol>(relaxed = true)
                 coEvery { protocolRepository.findByParams(any(), any()) } returns listOf(protocol1, protocol2)
-                val sut = CoreProtocolRepository(
-                    protocolRepository, validationMessages, objectMapper
-                )
+                val sut =
+                    CoreProtocolRepository(
+                        protocolRepository,
+                        validationMessages,
+                        objectMapper,
+                    )
 
                 val result = sut.getVersionHistoryFor(UUID.randomUUID())
 
@@ -232,9 +262,12 @@ class CoreProtocolRepositoryTest {
                 coEvery { protocolRepository.findByParams(any(), any()) } returns emptyList()
                 coEvery { validationMessages.get(any<String>(), any()) } returns ""
 
-                val sut = CoreProtocolRepository(
-                    protocolRepository, validationMessages, objectMapper
-                )
+                val sut =
+                    CoreProtocolRepository(
+                        protocolRepository,
+                        validationMessages,
+                        objectMapper,
+                    )
 
                 assertThrows<IllegalStateException> {
                     sut.getVersionHistoryFor(UUID.randomUUID())
@@ -252,9 +285,12 @@ class CoreProtocolRepositoryTest {
                 coEvery { protocolRepository.findByParams(any(), any()) } returns emptyList()
                 coEvery { validationMessages.get(any<String>(), any(), any()) } returns ""
 
-                val sut = CoreProtocolRepository(
-                    protocolRepository, validationMessages, objectMapper
-                )
+                val sut =
+                    CoreProtocolRepository(
+                        protocolRepository,
+                        validationMessages,
+                        objectMapper,
+                    )
 
                 assertThrows<IllegalStateException> {
                     sut.replace(protocol, ProtocolVersion("1", Instant.fromEpochMilliseconds(0)))
@@ -266,24 +302,28 @@ class CoreProtocolRepositoryTest {
         fun `should replace with new version`() {
             runTest {
                 val version = mockk<ProtocolVersion>(relaxed = true)
-                val newProtocol = StudyProtocol(
-                    id = UUID.randomUUID(),
-                    ownerId = UUID.randomUUID(),
-                    name = "Test Protocol",
-                    createdOn = Instant.fromEpochMilliseconds(0),
-                )
+                val newProtocol =
+                    StudyProtocol(
+                        id = UUID.randomUUID(),
+                        ownerId = UUID.randomUUID(),
+                        name = "Test Protocol",
+                        createdOn = Instant.fromEpochMilliseconds(0),
+                    )
                 val existingProtocol = mockk<Protocol>(relaxed = true)
                 coEvery {
                     protocolRepository.findByParams(
-                        newProtocol.id.stringRepresentation, version.tag
+                        newProtocol.id.stringRepresentation, version.tag,
                     )
                 } returns listOf(existingProtocol)
                 coEvery { protocolRepository.delete(any<Protocol>()) } returns Unit
                 coEvery { protocolRepository.save(any<Protocol>()) } returns mockk()
                 coEvery { objectMapper.readTree(any<String>()) } returns mockk()
-                val sut = CoreProtocolRepository(
-                    protocolRepository, validationMessages, objectMapper
-                )
+                val sut =
+                    CoreProtocolRepository(
+                        protocolRepository,
+                        validationMessages,
+                        objectMapper,
+                    )
 
                 sut.replace(newProtocol, version)
 
@@ -302,9 +342,12 @@ class CoreProtocolRepositoryTest {
                 coEvery { protocolRepository.findAllById(any<String>()) } returns emptyList()
                 coEvery { validationMessages.get(any<String>(), any(), any()) } returns ""
 
-                val sut = CoreProtocolRepository(
-                    protocolRepository, validationMessages, objectMapper
-                )
+                val sut =
+                    CoreProtocolRepository(
+                        protocolRepository,
+                        validationMessages,
+                        objectMapper,
+                    )
 
                 assertThrows<IllegalArgumentException> {
                     sut.addVersion(protocol, ProtocolVersion("1", Instant.fromEpochMilliseconds(0)))
@@ -315,51 +358,62 @@ class CoreProtocolRepositoryTest {
         @Test
         fun `should throw if protocol with this version already exists`() {
             runTest {
-                val studyProtocol = mockk<StudyProtocol> {
-                    every { id } returns UUID.randomUUID()
-                    every { name } returns "Test Protocol"
-                    every { ownerId } returns UUID.randomUUID()
-                }
-                val returnedProtocol = mockk<Protocol> {
-                    every { versionTag } returns "1"
-                }
-                val version = mockk<ProtocolVersion> {
-                    every { tag } returns "1"
-                }
+                val studyProtocol =
+                    mockk<StudyProtocol> {
+                        every { id } returns UUID.randomUUID()
+                        every { name } returns "Test Protocol"
+                        every { ownerId } returns UUID.randomUUID()
+                    }
+                val returnedProtocol =
+                    mockk<Protocol> {
+                        every { versionTag } returns "1"
+                    }
+                val version =
+                    mockk<ProtocolVersion> {
+                        every { tag } returns "1"
+                    }
                 coEvery { protocolRepository.findAllById(any<String>()) } returns listOf(returnedProtocol)
                 coEvery { validationMessages.get(any(), any(), any(), any()) } returns ""
-                val sut = CoreProtocolRepository(
-                    protocolRepository, validationMessages, objectMapper
-                )
+                val sut =
+                    CoreProtocolRepository(
+                        protocolRepository,
+                        validationMessages,
+                        objectMapper,
+                    )
 
                 assertThrows<IllegalArgumentException> {
                     sut.addVersion(studyProtocol, version)
                 }
-
             }
         }
 
         @Test
         fun `should add a new version`() {
             runTest {
-                val protocol = StudyProtocol(
-                    id = UUID.randomUUID(),
-                    ownerId = UUID.randomUUID(),
-                    name = "Test Protocol",
-                    createdOn = Instant.fromEpochMilliseconds(0),
-                )
-                val returnedProtocol = mockk<Protocol> {
-                    every { versionTag } returns "1"
-                }
-                val version = mockk<ProtocolVersion> {
-                    every { tag } returns "2"
-                }
+                val protocol =
+                    StudyProtocol(
+                        id = UUID.randomUUID(),
+                        ownerId = UUID.randomUUID(),
+                        name = "Test Protocol",
+                        createdOn = Instant.fromEpochMilliseconds(0),
+                    )
+                val returnedProtocol =
+                    mockk<Protocol> {
+                        every { versionTag } returns "1"
+                    }
+                val version =
+                    mockk<ProtocolVersion> {
+                        every { tag } returns "2"
+                    }
                 coEvery { protocolRepository.findAllById(any<String>()) } returns listOf(returnedProtocol)
                 coEvery { objectMapper.readTree(any<String>()) } returns mockk()
                 coEvery { protocolRepository.save(any()) } returns mockk()
-                val sut = CoreProtocolRepository(
-                    protocolRepository, validationMessages, objectMapper
-                )
+                val sut =
+                    CoreProtocolRepository(
+                        protocolRepository,
+                        validationMessages,
+                        objectMapper,
+                    )
 
                 sut.addVersion(protocol, version)
 

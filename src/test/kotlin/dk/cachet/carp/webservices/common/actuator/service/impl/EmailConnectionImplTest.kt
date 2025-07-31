@@ -1,12 +1,11 @@
 package dk.cachet.carp.webservices.common.actuator.service.impl
 
-import org.springframework.mail.javamail.JavaMailSenderImpl
 import io.mockk.*
 import org.junit.jupiter.api.Nested
+import org.springframework.mail.javamail.JavaMailSenderImpl
 import org.springframework.messaging.MessagingException
 import kotlin.test.Test
 import kotlin.test.assertEquals
-
 
 class EmailConnectionImplTest {
     private val mailSender: JavaMailSenderImpl = mockk()

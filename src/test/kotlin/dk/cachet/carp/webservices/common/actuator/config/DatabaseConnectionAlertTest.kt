@@ -21,9 +21,14 @@ class DatabaseConnectionAlertTest {
         fun `nothing should happen if database ok`() {
             every { database.statusHealth().code } returns "UP"
 
-            val sut = DatabaseConnectionAlert(
-                database, notificationService, emailNotificationService, alertEmail, alertWarning
-            )
+            val sut =
+                DatabaseConnectionAlert(
+                    database,
+                    notificationService,
+                    emailNotificationService,
+                    alertEmail,
+                    alertWarning,
+                )
 
             sut.checkRegularDatabaseConnection()
 
@@ -38,9 +43,14 @@ class DatabaseConnectionAlertTest {
             every { notificationService.sendAlertOrGeneralNotification(any(), any()) } just Runs
             every { emailNotificationService.sendNotificationEmail(any(), any(), any()) } just Runs
 
-            val sut = DatabaseConnectionAlert(
-                database, notificationService, emailNotificationService, alertEmail, alertWarning
-            )
+            val sut =
+                DatabaseConnectionAlert(
+                    database,
+                    notificationService,
+                    emailNotificationService,
+                    alertEmail,
+                    alertWarning,
+                )
 
             sut.checkRegularDatabaseConnection()
 

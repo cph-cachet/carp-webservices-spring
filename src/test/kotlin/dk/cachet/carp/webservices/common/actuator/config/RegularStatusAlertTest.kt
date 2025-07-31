@@ -39,7 +39,7 @@ class RegularStatusAlertTest {
                         val checkmarkCount = message.count { it == '✅' }
                         assertEquals(5, checkmarkCount, "Should contain 5 checkmark emojis")
                     },
-                    TeamsChannel.HEARTBEAT
+                    TeamsChannel.HEARTBEAT,
                 )
             }
         }
@@ -65,7 +65,7 @@ class RegularStatusAlertTest {
                         val checkmarkCount = message.count { it == '❌' }
                         assertEquals(5, checkmarkCount, "Should contain 5 cross emojis")
                     },
-                    TeamsChannel.HEARTBEAT
+                    TeamsChannel.HEARTBEAT,
                 )
             }
         }
