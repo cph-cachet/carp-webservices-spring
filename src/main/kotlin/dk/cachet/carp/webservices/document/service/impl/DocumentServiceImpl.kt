@@ -50,7 +50,7 @@ class DocumentServiceImpl(
         try {
             val role = authenticationService.getRole()
             val id = authenticationService.getId()
-            val isAccountResearcher = role >= Role.RESEARCHER
+            val isFullyAuthorized = role >= Role.RESEARCHER_ASSISTANT
             val belongsToStudySpec = DocumentSpecifications.belongsToStudyId(studyId)
             val belongsToUserSpec = DocumentSpecifications.belongsToUserAccountId(id.stringRepresentation)
 
@@ -58,7 +58,7 @@ class DocumentServiceImpl(
 
             validatedQuery?.let {
                 val queryForRole =
-                    if (!isAccountResearcher) {
+                    if (!isFullyAuthorized) {
                         // Return data relevant to this user only.
                         "$validatedQuery;created_by==$id"
                     } else {
@@ -73,7 +73,7 @@ class DocumentServiceImpl(
                 return documentRepository.findAll(specification.and(belongsToStudySpec), pageRequest).content
             }
 
-            if (isAccountResearcher) {
+            if (isFullyAuthorized) {
                 return documentRepository.findAll(belongsToStudySpec, pageRequest).content
             }
 

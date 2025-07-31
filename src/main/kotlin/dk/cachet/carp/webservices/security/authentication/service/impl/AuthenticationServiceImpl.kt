@@ -30,10 +30,19 @@ class AuthenticationServiceImpl(
         getJwtAuthenticationToken().authorities
             .mapNotNull { Claim.fromGrantedAuthority(it.authority) }
             .flatMap { claim ->
-                // if the study has `Claim.ManageStudy`,
-                // also add `Claim.ManageDeployment` for all deployments in the study
+                // if the study has `Claim.ManageStudy` or `Claim.LimitedManageStudy`, then
+                // also add `Claim.InDeployment` for all deployments in the study
                 when (claim) {
                     is Claim.ManageStudy -> {
+                        runBlocking {
+                            participantRepository.getRecruitment(claim.studyId)
+                                ?.participantGroups?.keys
+                                ?.map { deploymentId -> Claim.InDeployment(deploymentId) }
+                                ?.plus(claim)
+                                ?: listOf(claim)
+                        }
+                    }
+                    is Claim.LimitedManageStudy -> {
                         runBlocking {
                             participantRepository.getRecruitment(claim.studyId)
                                 ?.participantGroups?.keys

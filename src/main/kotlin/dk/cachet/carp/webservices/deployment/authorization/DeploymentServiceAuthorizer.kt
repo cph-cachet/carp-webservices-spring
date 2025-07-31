@@ -18,10 +18,10 @@ class DeploymentServiceAuthorizer(
     override fun DeploymentServiceRequest<*>.authorize() =
         when (this) {
             // Participants should be able to deploy themselves if needed,
-            // we shouldn't restrict study deployment creation to researchers only
+            // we shouldn't restrict study deployment creation to researchers/researcher assistants only
             is DeploymentServiceRequest.CreateStudyDeployment -> Unit
             is DeploymentServiceRequest.RemoveStudyDeployments ->
-                authorizationService.require(studyDeploymentIds.map { Claim.ManageDeployment(it) }.toSet())
+                authorizationService.require(studyDeploymentIds.map { Claim.ManageDeployment(it) }.toSet()) // TODO: 269
             is DeploymentServiceRequest.GetStudyDeploymentStatus ->
                 authorizationService.require(Claim.InDeployment(studyDeploymentId))
             is DeploymentServiceRequest.GetStudyDeploymentStatusList ->
@@ -42,7 +42,7 @@ class DeploymentServiceAuthorizer(
         when (this) {
             is DeploymentServiceRequest.CreateStudyDeployment -> {
                 require(result is StudyDeploymentStatus)
-
+// TODO: 270
                 if (authenticationService.getRole() == Role.PARTICIPANT) {
                     authorizationService.grantCurrentAuthentication(
                         setOf(Claim.InDeployment(result.studyDeploymentId)),
