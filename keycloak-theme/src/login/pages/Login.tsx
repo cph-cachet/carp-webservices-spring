@@ -29,12 +29,7 @@ import {
   LoginSeparator,
   LoginSeparatorText,
 } from "./styles";
-import {
-  QrCode,
-  QrCode2,
-  QrCodeScanner,
-  QrCodeScannerOutlined,
-} from "@mui/icons-material";
+import { QrCodeScannerOutlined } from "@mui/icons-material";
 import QRScannerModal from "../../components/QRScannerModal";
 
 const Login = (
