@@ -1,4 +1,4 @@
-import { Dialog, DialogTitle, Modal } from "@mui/material";
+import { Dialog, DialogTitle } from "@mui/material";
 import { Scanner } from "@yudiel/react-qr-scanner";
 
 const QRScannerModal = ({ open }: { open: boolean }) => {
