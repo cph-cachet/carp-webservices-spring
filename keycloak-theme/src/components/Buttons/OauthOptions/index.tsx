@@ -1,3 +1,4 @@
+import React from "react";
 import {
   LoginOauthOptionButton,
   LoginOauthOptionText,
@@ -5,15 +6,19 @@ import {
 } from "./style";
 
 type Props = {
-  logoSrc: string;
+  logoSrc?: string | null;
+  logoComponent?: React.ComponentType;
   name: string;
+  onClick?: () => void;
 };
 
-const LoginOauthOption = ({ logoSrc, name }: Props) => {
+const LoginOauthOption = ({ logoSrc, logoComponent, name, onClick }: Props) => {
   return (
-    <StyledOption>
+    <StyledOption onClick={onClick}>
       <LoginOauthOptionButton>
-        <img src={logoSrc} alt="login oauth option" />
+        {logoComponent
+          ? React.createElement(logoComponent)
+          : logoSrc && <img src={logoSrc} alt="login oauth option" />}
       </LoginOauthOptionButton>
       <LoginOauthOptionText>{name}</LoginOauthOptionText>
     </StyledOption>

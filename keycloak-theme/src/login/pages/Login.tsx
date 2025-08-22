@@ -29,9 +29,16 @@ import {
   LoginSeparator,
   LoginSeparatorText,
 } from "./styles";
+import {
+  QrCode,
+  QrCode2,
+  QrCodeScanner,
+  QrCodeScannerOutlined,
+} from "@mui/icons-material";
+import QRScannerModal from "../../components/QRScannerModal";
 
 const Login = (
-  props: PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18n>,
+  props: PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18n>
 ) => {
   const { kcContext, i18n, doUseDefaultCss, Template, classes } = props;
 
@@ -69,7 +76,7 @@ const Login = (
       .required(
         realm.loginWithEmailAllowed
           ? msgStr("emailOrUsernameRequired")
-          : msgStr("usernameRequired"),
+          : msgStr("usernameRequired")
       ),
     password: yup.string().required(msgStr("passwordRequired")),
   });
@@ -89,6 +96,8 @@ const Login = (
   const [showPassword, setShowPassword] = useState(false);
   const toggleSignedIn = () => setStaySignedIn(!staySignedIn);
 
+  const [open, setOpen] = useState(false);
+
   return (
     <Template
       {...{ kcContext, i18n, doUseDefaultCss, classes }}
@@ -101,6 +110,7 @@ const Login = (
         )
       }
     >
+      <QRScannerModal open={open}></QRScannerModal>
       {realm.password && (
         <form
           id="kc-form-login"
@@ -114,8 +124,8 @@ const Login = (
               const label = !realm.loginWithEmailAllowed
                 ? "username"
                 : realm.registrationEmailAsUsername
-                  ? "email"
-                  : "usernameOrEmail";
+                ? "email"
+                : "usernameOrEmail";
 
               const autoCompleteHelper: typeof label =
                 label === "usernameOrEmail" ? "username" : label;
@@ -193,21 +203,27 @@ const Login = (
           </AuthInfoText>
         </form>
       )}
-
-      {social.providers !== undefined && (
-        <>
-          <LoginSeparator>
-            <LoginSeparatorText variant="h4_web" component="span">
-              Or log in with
-            </LoginSeparatorText>
-          </LoginSeparator>
-          <LoginOauthOptions>
+      <LoginSeparator>
+        <LoginSeparatorText variant="h4_web" component="span">
+          Or log in with
+        </LoginSeparatorText>
+      </LoginSeparator>
+      <LoginOauthOptions>
+        <LoginOauthOption
+          logoComponent={QrCodeScannerOutlined}
+          name="QR Code"
+          onClick={() => {
+            setOpen(true);
+          }}
+        />
+        {social.providers !== undefined && (
+          <>
             <LoginOauthOption logoSrc={AppleLogo} name="Apple" />
             <LoginOauthOption logoSrc={PasskeyLogo} name="Passkey" />
             <LoginOauthOption logoSrc={GoogleLogo} name="Google" />
-          </LoginOauthOptions>
-        </>
-      )}
+          </>
+        )}
+      </LoginOauthOptions>
     </Template>
   );
 };
