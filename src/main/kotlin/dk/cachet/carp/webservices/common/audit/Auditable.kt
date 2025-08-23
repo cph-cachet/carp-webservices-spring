@@ -1,13 +1,15 @@
 package dk.cachet.carp.webservices.common.audit
 
+import dk.cachet.carp.webservices.common.converter.InstantConverter
+import jakarta.persistence.Convert
 import jakarta.persistence.EntityListeners
 import jakarta.persistence.MappedSuperclass
+import kotlinx.datetime.Instant
 import org.springframework.data.annotation.CreatedBy
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedBy
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
-import java.time.Instant
 
 /**
  * The Class [Auditable].
@@ -22,6 +24,7 @@ abstract class Auditable {
 
     /** The [createdAt] time of creation. */
     @CreatedDate
+    @Convert(converter = InstantConverter::class)
     var createdAt: Instant? = null
 
     /** The [updatedBy] the ID of the user the entity was updated by. */
@@ -30,5 +33,6 @@ abstract class Auditable {
 
     /** The [updatedAt] last time the entity was updated. */
     @LastModifiedDate
+    @Convert(converter = InstantConverter::class)
     var updatedAt: Instant? = null
 }
