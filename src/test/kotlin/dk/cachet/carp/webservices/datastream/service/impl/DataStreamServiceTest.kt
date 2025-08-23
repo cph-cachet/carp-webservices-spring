@@ -17,6 +17,7 @@ import dk.cachet.carp.webservices.datastream.repository.DataStreamSequenceReposi
 import dk.cachet.carp.webservices.datastream.service.core.CoreDataStreamService
 import dk.cachet.carp.webservices.deployment.service.ParticipationService
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
@@ -33,6 +34,7 @@ import org.springframework.web.multipart.MultipartFile
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.StringWriter
+import java.nio.file.Path
 import java.sql.Timestamp
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
@@ -420,8 +422,7 @@ class DataStreamServiceTest {
                     }
 
                 assertTrue {
-                    e
-                        .message?.contains("Participant ID must be provided when scope is 'participant'") == true
+                    e.message?.contains("Participant ID must be provided when scope is 'participant'") == true
                 }
             }
         }
@@ -443,8 +444,7 @@ class DataStreamServiceTest {
                     }
 
                 assertTrue {
-                    e
-                        .message?.contains("Deployment ID must be provided when scope is 'participant'") == true
+                    e.message?.contains("Deployment ID must be provided when scope is 'participant'") == true
                 }
             }
         }
@@ -548,4 +548,99 @@ class DataStreamServiceTest {
             }
         }
     }
+
+    @Nested
+    inner class FindLatestUpdatedAtByDataStreamIds {
+        lateinit var sut: DataStreamService
+
+        @BeforeEach
+        fun setup() {
+            sut =
+                DataStreamService(
+                    dataStreamIdRepository,
+                    dataStreamSequenceRepository,
+                    objectMapper,
+                    participantRepository,
+                    participationService,
+                    services,
+                )
+
+            every {
+                dataStreamSequenceRepository.findMaxUpdatedAtByDataStreamIds(any())
+            } returns java.time.Instant.ofEpochMilli(1000L)
+        }
+
+        @Test
+        fun `should return null if dataStreamIds is empty`() {
+            val dataStreamIds = listOf<Int>()
+
+            val result = sut.findLatestUpdatedAtByDataStreamIds(dataStreamIds)
+
+            assertEquals(null, result)
+        }
+
+        @Test
+        fun `should return latest updated as kotlin instant`() {
+            val dataStreamIds = listOf(1, 2)
+
+            val result = sut.findLatestUpdatedAtByDataStreamIds(dataStreamIds)
+
+            assertEquals(Instant.fromEpochMilliseconds(1000L), result)
+        }
+    }
+
+    @Nested
+    inner class BuildDataStreamBatch {
+        lateinit var sut: DataStreamService
+
+        @BeforeEach
+        fun setup() {
+            sut =
+                DataStreamService(
+                    dataStreamIdRepository,
+                    dataStreamSequenceRepository,
+                    objectMapper,
+                    participantRepository,
+                    participationService,
+                    services,
+                )
+        }
+
+        @Test
+        fun `should throw if dataStreamId not found`() {
+            every { dataStreamIdRepository.findByDataStreamId(any()) } returns null
+        }
+    }
+
+    @Nested
+    inner class GetDataStreams {
+        lateinit var sut: DataStreamService
+
+        @BeforeEach
+        fun setup() {
+            sut =
+                DataStreamService(
+                    dataStreamIdRepository,
+                    dataStreamSequenceRepository,
+                    objectMapper,
+                    participantRepository,
+                    participationService,
+                    services,
+                )
+        }
+
+        @Test
+        fun `fun should return if empty data streams`() {
+            runTest {
+                coEvery { dataStreamSequenceRepository.findSequenceIdsByStreamId(any()) } returns emptyList()
+
+                sut.getDataStreams(emptyList(), Path.of("/file.txt"))
+
+                coVerify(exactly = 0) { dataStreamSequenceRepository.findAllByDataStreamIds(any()) }
+            }
+        }
+    }
+
+    @Nested
+    inner class ExportDataOrThrow
 }
