@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useContext, useState } from "react";
+import { createContext, ReactNode, useContext, useMemo, useState } from "react";
 import { SnackbarType } from "../components/Snackbar";
 
 type ProviderProps = {
@@ -40,15 +40,18 @@ export const SnackbarProvider = ({ children }: ProviderProps) => {
     });
   };
 
+  const contextValue = useMemo(
+    () => ({
+      snackbarState,
+      setSnackbarState,
+      setSnackbarSuccess,
+      setSnackbarError,
+    }),
+    [snackbarState]
+  );
+
   return (
-    <SnackbarContext.Provider
-      value={{
-        snackbarState,
-        setSnackbarState,
-        setSnackbarSuccess,
-        setSnackbarError,
-      }}
-    >
+    <SnackbarContext.Provider value={contextValue}>
       {children}
     </SnackbarContext.Provider>
   );

@@ -93,6 +93,16 @@ const Login = (
 
   const [open, setOpen] = useState(false);
 
+  const usernameLabel = () => {
+    if (!realm.loginWithEmailAllowed) {
+      return "username";
+    }
+    if (realm.registrationEmailAsUsername) {
+      return "email";
+    }
+    return "usernameOrEmail";
+  };
+
   return (
     <Template
       {...{ kcContext, i18n, doUseDefaultCss, classes }}
@@ -104,8 +114,12 @@ const Login = (
           <BannerRegister registerUrl={url.registrationUrl} msgStr={msgStr} />
         )
       }
+      key={"login-" + (realm.password ? "password" : "no-password")}
     >
-      <QRScannerModal open={open}></QRScannerModal>
+      <QRScannerModal
+        open={open}
+        onClose={() => setOpen(false)}
+      ></QRScannerModal>
       {realm.password && (
         <form
           id="kc-form-login"
@@ -115,12 +129,7 @@ const Login = (
         >
           {!usernameHidden &&
             (() => {
-              // eslint-disable-next-line no-nested-ternary
-              const label = !realm.loginWithEmailAllowed
-                ? "username"
-                : realm.registrationEmailAsUsername
-                ? "email"
-                : "usernameOrEmail";
+              const label = usernameLabel();
 
               const autoCompleteHelper: typeof label =
                 label === "usernameOrEmail" ? "username" : label;
