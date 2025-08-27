@@ -28,27 +28,34 @@ const Info = (
     client,
   } = kcContext;
 
+  const headerNode = () => {
+    if (messageHeader !== "<Message header>") {
+      return <>{messageHeader}</>; // ✅ Apply translation
+    }
+    if (message?.summary) {
+      return <>({messageTypeSelector(message.type)} )</>;
+    }
+    return <Typography variant="h2">Info</Typography>;
+  };
+
+  const messageTypeSelector = (type: string) => {
+    switch (type) {
+      case "info":
+        return "Information";
+      case "warning":
+        return "Warning";
+      case "error":
+        return "Error";
+      default:
+        return "Notification";
+    }
+  };
+
   return (
     <Template
       {...{ kcContext, i18n, doUseDefaultCss, classes }}
       displayMessage={false}
-      headerNode={
-        messageHeader !== "<Message header>" ? (
-          <>{messageHeader}</> // ✅ Apply translation
-        ) : message?.summary ? (
-          <>
-              {message.type === "info"
-                ? ("Information")
-                : message.type === "warning"
-                ? "Warning"
-                : message.type === "error"
-                ? "Error"
-                : "Notification"}
-          </>
-        ) : (
-          <Typography variant="h2">Info</Typography>
-        )
-      }
+      headerNode={headerNode()}
     >
       <div id="kc-info-message">
         <Typography variant="body1" className="instruction">
@@ -63,23 +70,36 @@ const Info = (
             </b>
           )}
         </Typography>
-        <Box display="flex" justifyContent="center" mt={4}>
-          {!skipLink && pageRedirectUri !== undefined ? (
-            <CarpButton href={pageRedirectUri} variant="contained">
-              {msgStr("backToApplication")}
-            </CarpButton>
-          ) : actionUri !== undefined ? (
-            <CarpButton href={actionUri} variant="contained">
-              {msgStr("proceedWithAction")}
-            </CarpButton>
-          ) : (
-            client.baseUrl !== undefined && (
-              <CarpButton href={client.baseUrl} variant="contained">
-                {msgStr("backToApplication")}
-              </CarpButton>
-            )
-          )}
-        </Box>
+        {(() => {
+          if (!skipLink && pageRedirectUri !== undefined) {
+            return (
+              <Box display="flex" justifyContent="center" mt={4}>
+                <CarpButton href={pageRedirectUri} variant="contained">
+                  {msgStr("backToApplication")}
+                </CarpButton>
+              </Box>
+            );
+          }
+          if (actionUri !== undefined) {
+            return (
+              <Box display="flex" justifyContent="center" mt={4}>
+                <CarpButton href={actionUri} variant="contained">
+                  {msgStr("proceedWithAction")}
+                </CarpButton>
+              </Box>
+            );
+          }
+          if (client.baseUrl !== undefined) {
+            return (
+              <Box display="flex" justifyContent="center" mt={4}>
+                <CarpButton href={client.baseUrl} variant="contained">
+                  {msgStr("backToApplication")}
+                </CarpButton>
+              </Box>
+            );
+          }
+          return null;
+        })()}
       </div>
     </Template>
   );
