@@ -33,22 +33,18 @@ const Info = (
       return <>{messageHeader}</>; // ✅ Apply translation
     }
     if (message?.summary) {
-      return <>({messageTypeSelector(message.type)} )</>;
+      switch (message.type) {
+        case "info":
+          return <Typography variant="h2">Information</Typography>;
+        case "warning":
+          return <Typography variant="h2">Warning</Typography>;
+        case "error":
+          return <Typography variant="h2">Error</Typography>;
+        default:
+          return <Typography variant="h2">Notification</Typography>;
+      }
     }
     return <Typography variant="h2">Info</Typography>;
-  };
-
-  const messageTypeSelector = (type: string) => {
-    switch (type) {
-      case "info":
-        return "Information";
-      case "warning":
-        return "Warning";
-      case "error":
-        return "Error";
-      default:
-        return "Notification";
-    }
   };
 
   return (

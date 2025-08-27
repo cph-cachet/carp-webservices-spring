@@ -2,11 +2,17 @@ import { Dialog, DialogActions } from "@mui/material";
 import { Scanner } from "@yudiel/react-qr-scanner";
 import CarpButton from "../Buttons/AuthActionButton/styles";
 import { Title } from "./styles";
+import { useSnackbar } from "../../utils/snackbar";
 
 const checkURL = (url: string) => {
   try {
     const parsedURL = new URL(url);
+    const windowLocation = window.location;
+    // Allow localhost for development purposes
+    if (windowLocation.hostname === "localhost") return true;
+
     if (parsedURL.protocol !== "https:") return false;
+    if (windowLocation.hostname !== parsedURL.hostname) return false;
     return true;
   } catch {
     return false;
@@ -20,6 +26,8 @@ const QRScannerModal = ({
   open: boolean;
   onClose: () => void;
 }) => {
+  const { setSnackbarError } = useSnackbar();
+
   return (
     <Dialog open={open} fullWidth>
       <Title variant="h2">QR Code Scanner</Title>
@@ -30,7 +38,7 @@ const QRScannerModal = ({
           if (url && checkURL(url)) {
             window.location.replace(url);
           } else {
-            alert("Invalid URL scanned");
+            setSnackbarError("Invalid URL scanned");
           }
         }}
         styles={{
