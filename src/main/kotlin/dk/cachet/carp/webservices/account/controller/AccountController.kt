@@ -31,7 +31,7 @@ class AccountController(private val accountService: AccountService) {
 
     @PostMapping(INVITE)
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasRole('RESEARCHER_ASSISTANT') and hasRole(#request.role)")
+    @PreAuthorize("hasRole('RESEARCHER') and hasRole(#request.role)")
     suspend fun invite(
         @Valid @RequestBody request: AccountRequest,
     ) {
@@ -66,7 +66,7 @@ class AccountController(private val accountService: AccountService) {
 
     @GetMapping(REDIRECT_URIS)
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasRole('RESEARCHER_ASSISTANT')")
+    @PreAuthorize("hasRole('RESEARCHER_ASSISTANT') or hasRole('RESEARCHER')")
     suspend fun redirectUris(): List<String> {
         LOGGER.info("Start GET: $ACCOUNT_BASE$REDIRECT_URIS")
         return accountService.getRedirectUris()

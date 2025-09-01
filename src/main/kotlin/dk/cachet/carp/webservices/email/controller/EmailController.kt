@@ -24,7 +24,7 @@ class EmailController(
 
     @PostMapping(SEND_GENERIC)
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasRole('RESEARCHER_ASSISTANT')")
+    @PreAuthorize("hasRole('RESEARCHER_ASSISTANT') or hasRole('RESEARCHER')")
     fun sendGeneric(
         @Valid @RequestBody request: GenericEmailRequestDto,
     ) {
