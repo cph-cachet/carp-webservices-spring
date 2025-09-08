@@ -23,7 +23,7 @@ const UserProfileFormFields = lazy(
 
 const doMakeUserConfirmPassword = true;
 
-export default function KcPage(props: { kcContext: KcContext }) {
+export default function KcPage(props: Readonly<{ kcContext: KcContext }>) {
   const { kcContext } = props;
 
   const { i18n } = useI18n({ kcContext });

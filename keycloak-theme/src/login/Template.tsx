@@ -92,21 +92,25 @@ export const Template = (props: TemplateProps<KcContext, I18n>) => {
                     >
                       <LanguageIcon sx={{ strokeWidth: 0.8, stroke: "#fff" }} />
                       <Typography>
-                        {getLanguageLabel(selected as string)}
+                        {getLanguageLabel(selected)}
                       </Typography>
                     </div>
                   );
                 }}
               >
                 {locale.supported.map(({ languageTag }) => (
-                  <a   href={getChangeLocaleUrl(languageTag)} style={{textDecoration:"none", color:"inherit"}}>
-                  <MenuItem
+                  <a
+                    href={getChangeLocaleUrl(languageTag)}
+                    style={{ textDecoration: "none", color: "inherit" }}
                     key={languageTag}
-                    value={languageTag}
-                    // onClick={() => getChangeLocaleUrl(languageTag)}
                   >
-                  {getLanguageLabel(languageTag)}
-                  </MenuItem>
+                    <MenuItem
+                      key={languageTag}
+                      value={languageTag}
+                      // onClick={() => getChangeLocaleUrl(languageTag)}
+                    >
+                      {getLanguageLabel(languageTag)}
+                    </MenuItem>
                   </a>
                 ))}
               </Select>

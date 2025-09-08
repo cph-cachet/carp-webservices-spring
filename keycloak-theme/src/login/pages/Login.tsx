@@ -29,9 +29,11 @@ import {
   LoginSeparator,
   LoginSeparatorText,
 } from "./styles";
+import { QrCodeScannerOutlined } from "@mui/icons-material";
+import QRScannerModal from "../../components/QRScannerModal";
 
 const Login = (
-  props: PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18n>,
+  props: PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18n>
 ) => {
   const { kcContext, i18n, doUseDefaultCss, Template, classes } = props;
 
@@ -69,7 +71,7 @@ const Login = (
       .required(
         realm.loginWithEmailAllowed
           ? msgStr("emailOrUsernameRequired")
-          : msgStr("usernameRequired"),
+          : msgStr("usernameRequired")
       ),
     password: yup.string().required(msgStr("passwordRequired")),
   });
@@ -89,6 +91,18 @@ const Login = (
   const [showPassword, setShowPassword] = useState(false);
   const toggleSignedIn = () => setStaySignedIn(!staySignedIn);
 
+  const [open, setOpen] = useState(false);
+
+  const usernameLabel = () => {
+    if (!realm.loginWithEmailAllowed) {
+      return "username";
+    }
+    if (realm.registrationEmailAsUsername) {
+      return "email";
+    }
+    return "usernameOrEmail";
+  };
+
   return (
     <Template
       {...{ kcContext, i18n, doUseDefaultCss, classes }}
@@ -100,7 +114,12 @@ const Login = (
           <BannerRegister registerUrl={url.registrationUrl} msgStr={msgStr} />
         )
       }
+      key={"login-" + (realm.password ? "password" : "no-password")}
     >
+      <QRScannerModal
+        open={open}
+        onClose={() => setOpen(false)}
+      ></QRScannerModal>
       {realm.password && (
         <form
           id="kc-form-login"
@@ -110,12 +129,7 @@ const Login = (
         >
           {!usernameHidden &&
             (() => {
-              // eslint-disable-next-line no-nested-ternary
-              const label = !realm.loginWithEmailAllowed
-                ? "username"
-                : realm.registrationEmailAsUsername
-                  ? "email"
-                  : "usernameOrEmail";
+              const label = usernameLabel();
 
               const autoCompleteHelper: typeof label =
                 label === "usernameOrEmail" ? "username" : label;
@@ -193,21 +207,27 @@ const Login = (
           </AuthInfoText>
         </form>
       )}
-
-      {social.providers !== undefined && (
-        <>
-          <LoginSeparator>
-            <LoginSeparatorText variant="h4_web" component="span">
-              Or log in with
-            </LoginSeparatorText>
-          </LoginSeparator>
-          <LoginOauthOptions>
+      <LoginSeparator>
+        <LoginSeparatorText variant="h4_web" component="span">
+          Or log in with
+        </LoginSeparatorText>
+      </LoginSeparator>
+      <LoginOauthOptions>
+        <LoginOauthOption
+          logoComponent={QrCodeScannerOutlined}
+          name="QR Code"
+          onClick={() => {
+            setOpen(true);
+          }}
+        />
+        {social.providers !== undefined && (
+          <>
             <LoginOauthOption logoSrc={AppleLogo} name="Apple" />
             <LoginOauthOption logoSrc={PasskeyLogo} name="Passkey" />
             <LoginOauthOption logoSrc={GoogleLogo} name="Google" />
-          </LoginOauthOptions>
-        </>
-      )}
+          </>
+        )}
+      </LoginOauthOptions>
     </Template>
   );
 };
