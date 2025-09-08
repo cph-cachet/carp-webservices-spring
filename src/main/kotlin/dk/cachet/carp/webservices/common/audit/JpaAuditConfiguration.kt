@@ -11,11 +11,17 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing
  * The [JpaAuditConfiguration] implements the configuration logic for the [EntityAuditorAware].
  */
 @Configuration
-@EnableJpaAuditing(auditorAwareRef = "auditorAware")
+@EnableJpaAuditing(auditorAwareRef = "auditorAware", dateTimeProviderRef = "dateTimeProvider")
 class JpaAuditConfiguration(private val authenticationService: AuthenticationService) {
     /**
      * The function [auditorAware] returns the current auditor of the application.
      */
     @Bean("auditorAware")
     fun auditorAware(): AuditorAware<String> = EntityAuditorAware(authenticationService)
+
+    /**
+     * The function [dateTimeProvider] returns the current date and time.
+     */
+    @Bean("dateTimeProvider")
+    fun dateTimeProvider(): EntityDateTimeProvider = EntityDateTimeProvider()
 }

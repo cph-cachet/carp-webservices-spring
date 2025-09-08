@@ -12,7 +12,6 @@ import dk.cachet.carp.webservices.protocol.service.ProtocolService
 import dk.cachet.carp.webservices.security.authentication.domain.Account
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.toKotlinInstant
 import org.springframework.stereotype.Service
 
 @Service
@@ -61,8 +60,8 @@ class ProtocolServiceWrapper(
 
         return ProtocolOverview(
             owner?.fullName,
-            versions.first().createdAt?.toKotlinInstant(),
-            versions.last().createdAt?.toKotlinInstant(),
+            versions.first().createdAt,
+            versions.last().createdAt,
             versions.last().versionTag,
             snapshot,
         )
