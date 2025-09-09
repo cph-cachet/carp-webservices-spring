@@ -127,9 +127,6 @@ com:
           - /swagger-ui/**
           - /v3/api-docs/**
           - /doc/**
-          cors:
-          - path: /**
-            allowed-origins: "*"
         ops:
           - iss: ${keycloak.auth-server-url}/realms/${keycloak.realm}
             username-claim: preferred_username
