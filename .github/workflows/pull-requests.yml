@@ -11,7 +11,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Setup Java
         uses: actions/setup-java@v2
@@ -20,7 +20,7 @@ jobs:
           java-version: 17
 
       - name: Gradle wrapper validation
-        uses: gradle/wrapper-validation-action@v1.0.3
+        uses: gradle/actions/wrapper-validation@v3
 
       - name: Build and test
         run: ./gradlew build
