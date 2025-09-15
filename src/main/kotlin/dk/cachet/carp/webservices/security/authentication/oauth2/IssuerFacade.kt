@@ -36,6 +36,7 @@ interface IssuerFacade {
 
     suspend fun recoverAccount(
         account: Account,
+        clientId: String,
         redirectUri: String?,
         expirationSeconds: Long?,
     ): String

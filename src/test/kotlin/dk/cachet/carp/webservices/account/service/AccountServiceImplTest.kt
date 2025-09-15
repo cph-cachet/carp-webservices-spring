@@ -463,13 +463,14 @@ class AccountServiceImplTest {
         fun `should return a pair of UsernameAccountIdentity and a password`() =
             runTest {
                 val expirationSeconds = 3600L
+                val clientId = "clientId"
                 val redirectUri = "http://localhost:8080"
                 val account = mockk<Account>()
                 coEvery { issuerFacade.createAccount(any()) } returns account
-                coEvery { issuerFacade.recoverAccount(account, redirectUri, expirationSeconds) } returns "foo"
+                coEvery { issuerFacade.recoverAccount(account, clientId, redirectUri, expirationSeconds) } returns "foo"
                 val sut = AccountServiceImpl(issuerFacade)
 
-                val result = sut.generateAnonymousAccount(expirationSeconds, redirectUri)
+                val result = sut.generateAnonymousAccount(expirationSeconds, clientId, redirectUri)
 
                 coVerify(exactly = 1) { issuerFacade.createAccount(any()) }
                 assertTrue { result.first.username.toString().length == UUID.randomUUID().stringRepresentation.length }

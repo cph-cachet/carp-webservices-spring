@@ -144,17 +144,18 @@ class AccountServiceImpl(
 
     override suspend fun generateAnonymousAccount(
         expirationSeconds: Long?,
+        clientId: String,
         redirectUri: String?,
     ): Pair<UsernameAccountIdentity, String> {
         val username = UUID.randomUUID()
         val identity = UsernameAccountIdentity(username.toString())
-
         val account = issuerFacade.createAccount(Account.fromAccountIdentity(identity))
 
         return Pair(
             identity,
             issuerFacade.recoverAccount(
                 account,
+                clientId,
                 redirectUri,
                 expirationSeconds,
             ),

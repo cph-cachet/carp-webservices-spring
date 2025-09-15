@@ -26,6 +26,7 @@ class ExportAnonymousParticipantsTest {
         AnonymousParticipantRequest(
             amountOfAccounts = 1,
             expirationSeconds = 1L,
+            clientId = "id",
             redirectUri = "uri",
             participantRoleName = "role",
         )
