@@ -10,6 +10,8 @@ data class AnonymousParticipantRequest(
     @field:Positive
     val expirationSeconds: Long,
     @field:NotEmpty
+    val clientId: String,
+    @field:NotEmpty
     val redirectUri: String,
     @field:NotBlank
     val participantRoleName: String,

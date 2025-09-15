@@ -81,6 +81,7 @@ class ExportAnonymousParticipants(
             val (identity, link) =
                 accountService.generateAnonymousAccount(
                     payload.expirationSeconds,
+                    payload.clientId,
                     payload.redirectUri,
                 )
             anonymousParticipants.add(createAnonymousParticipant(identity, link))

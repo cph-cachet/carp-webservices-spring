@@ -43,6 +43,7 @@ interface AccountService {
 
     suspend fun generateAnonymousAccount(
         expirationSeconds: Long?,
+        clientId: String,
         redirectUri: String?,
     ): Pair<UsernameAccountIdentity, String>
 
