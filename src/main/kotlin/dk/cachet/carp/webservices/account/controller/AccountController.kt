@@ -67,7 +67,7 @@ class AccountController(private val accountService: AccountService) {
     @GetMapping(REDIRECT_URIS)
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('RESEARCHER_ASSISTANT') or hasRole('RESEARCHER')")
-    suspend fun redirectUris(): List<String> {
+    suspend fun redirectUris(): Map<String, List<String>> {
         LOGGER.info("Start GET: $ACCOUNT_BASE$REDIRECT_URIS")
         return accountService.getRedirectUris()
     }

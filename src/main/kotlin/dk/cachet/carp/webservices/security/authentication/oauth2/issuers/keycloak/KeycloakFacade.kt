@@ -259,7 +259,7 @@ class KeycloakFacade(
         return magicLinkResponse.link
     }
 
-    override suspend fun getRedirectUrisForClient(): List<String> {
+    override suspend fun getRedirectUrisForClient(): Map<String, List<String>> {
         val token = authenticate().accessToken
 
         LOGGER.debug("Getting redirect URIs for client.")
@@ -271,9 +271,22 @@ class KeycloakFacade(
                 }
                 .retrieve()
                 .awaitBody<List<Map<String, Any>>>()
+                // Only include clients that can be used for logging in (i.e. display in console).
+                .filter { it["alwaysDisplayInConsole"] == true }
 
-        val wsClientRepresentation = clientRepresentations.first { it["clientId"] == clientId }
-        return (wsClientRepresentation["redirectUris"] as? List<*>)?.filterIsInstance<String>() ?: emptyList()
+        val clientsWithRedirectUris: Map<String, List<String>> =
+            clientRepresentations
+                .filter { it["redirectUris"] != null && (it["redirectUris"] as? List<*>)?.isNotEmpty() == true }
+                .mapNotNull { clientRepresentation ->
+                    val id = clientRepresentation["clientId"] as? String
+                    val redirectUris = clientRepresentation["redirectUris"] as? List<*>
+                    if (id != null && redirectUris != null) {
+                        id to redirectUris.filterIsInstance<String>()
+                    } else {
+                        null
+                    }
+                }.toMap()
+        return clientsWithRedirectUris
     }
 
     private suspend fun queryAll(query: String): List<Account> {
