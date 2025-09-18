@@ -162,7 +162,7 @@ class AccountServiceImpl(
         )
     }
 
-    override suspend fun getRedirectUris(): List<String> {
+    override suspend fun getRedirectUris(): Map<String, List<String>> {
         return issuerFacade.getRedirectUrisForClient()
     }
 }

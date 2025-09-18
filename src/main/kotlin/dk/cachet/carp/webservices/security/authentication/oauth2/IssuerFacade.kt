@@ -41,5 +41,5 @@ interface IssuerFacade {
         expirationSeconds: Long?,
     ): String
 
-    suspend fun getRedirectUrisForClient(): List<String>
+    suspend fun getRedirectUrisForClient(): Map<String, List<String>>
 }

@@ -47,5 +47,5 @@ interface AccountService {
         redirectUri: String?,
     ): Pair<UsernameAccountIdentity, String>
 
-    suspend fun getRedirectUris(): List<String>
+    suspend fun getRedirectUris(): Map<String, List<String>>
 }
