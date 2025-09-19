@@ -50,7 +50,7 @@ class DocumentServiceImpl(
         try {
             val role = authenticationService.getRole()
             val id = authenticationService.getId()
-            val isFullyAuthorized = role >= Role.RESEARCHER_ASSISTANT
+            val isFullyAuthorized = role >= Role.RESEARCH_ASSISTANT
             val belongsToStudySpec = DocumentSpecifications.belongsToStudyId(studyId)
             val belongsToUserSpec = DocumentSpecifications.belongsToUserAccountId(id.stringRepresentation)
 
