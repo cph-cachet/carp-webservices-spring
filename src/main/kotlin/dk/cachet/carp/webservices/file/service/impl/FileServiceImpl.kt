@@ -54,7 +54,7 @@ class FileServiceImpl(
     ): List<File> {
         val id = authenticationService.getId()
         val role = authenticationService.getRole()
-        val isFullyAuthorized = role >= Role.RESEARCHER_ASSISTANT
+        val isFullyAuthorized = role >= Role.RESEARCH_ASSISTANT
 
         if (isFullyAuthorized && query == null) {
             return fileRepository.findByStudyId(studyId)

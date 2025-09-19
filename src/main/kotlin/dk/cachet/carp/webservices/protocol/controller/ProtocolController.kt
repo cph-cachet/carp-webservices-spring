@@ -38,7 +38,7 @@ class ProtocolController(
     }
 
     @GetMapping(value = [GET_PROTOCOL_OVERVIEW])
-    @PreAuthorize("hasRole('RESEARCHER_ASSISTANT' ) or hasRole('RESEARCHER')")
+    @PreAuthorize("hasRole('RESEARCH_ASSISTANT' ) or hasRole('RESEARCHER')")
     @ResponseStatus(HttpStatus.OK)
     suspend fun getSingleProtocolOverview(
         @PathVariable(PathVariableName.PROTOCOL_ID) protocolId: String,
@@ -51,7 +51,7 @@ class ProtocolController(
     }
 
     @GetMapping(value = [GET_PROTOCOLS_OVERVIEW])
-    @PreAuthorize("hasRole('RESEARCHER_ASSISTANT') or hasRole('RESEARCHER')")
+    @PreAuthorize("hasRole('RESEARCH_ASSISTANT') or hasRole('RESEARCHER')")
     @ResponseStatus(HttpStatus.OK)
     suspend fun getProtocolsOverview(): List<ProtocolOverview> {
         LOGGER.info("Start GET: /api/protocols")

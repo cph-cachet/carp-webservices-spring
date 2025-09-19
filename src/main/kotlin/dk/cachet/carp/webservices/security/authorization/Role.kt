@@ -3,7 +3,7 @@ package dk.cachet.carp.webservices.security.authorization
 enum class Role {
     UNKNOWN,
     PARTICIPANT,
-    RESEARCHER_ASSISTANT,
+    RESEARCH_ASSISTANT,
     RESEARCHER,
     CARP_ADMIN,
     SYSTEM_ADMIN,
@@ -20,7 +20,7 @@ enum class Role {
             UNKNOWN -> throw IllegalArgumentException("Unknown role: $this")
             PARTICIPANT -> "Participant"
             RESEARCHER -> "Researcher"
-            RESEARCHER_ASSISTANT -> "Researcher Assistant"
+            RESEARCH_ASSISTANT -> "Research Assistant"
             CARP_ADMIN -> "CARP Admin"
             SYSTEM_ADMIN -> "System Admin"
         }

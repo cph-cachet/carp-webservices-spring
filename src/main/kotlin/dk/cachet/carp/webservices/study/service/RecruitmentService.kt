@@ -3,28 +3,20 @@ package dk.cachet.carp.webservices.study.service
 import dk.cachet.carp.common.application.UUID
 import dk.cachet.carp.studies.infrastructure.RecruitmentServiceDecorator
 import dk.cachet.carp.webservices.security.authentication.domain.Account
+import dk.cachet.carp.webservices.security.authorization.Role
 import dk.cachet.carp.webservices.study.domain.InactiveDeploymentInfo
 import dk.cachet.carp.webservices.study.domain.ParticipantGroupsStatus
 
 interface RecruitmentService {
     val core: RecruitmentServiceDecorator
 
-    suspend fun inviteResearcher(
+    suspend fun inviteUserWithRole(
         studyId: UUID,
         email: String,
+        role: Role,
     )
 
-    suspend fun inviteResearcherAssistant(
-        studyId: UUID,
-        email: String,
-    )
-
-    suspend fun removeResearcher(
-        studyId: UUID,
-        email: String,
-    ): Boolean
-
-    suspend fun removeResearcherAssistant(
+    suspend fun removeStudyManager(
         studyId: UUID,
         email: String,
     ): Boolean
