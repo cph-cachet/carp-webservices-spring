@@ -58,7 +58,7 @@ class RecruitmentServiceWrapperTest {
                         services,
                     )
 
-                sut.inviteResearcher(mockStudyId, mockEmail)
+                sut.inviteUserWithRole(mockStudyId, mockEmail, Role.RESEARCHER)
 
                 coVerify { accountService.invite(ofType<EmailAccountIdentity>(), Role.RESEARCHER) }
                 coVerify(exactly = 0) { accountService.addRole(ofType<EmailAccountIdentity>(), any()) }
@@ -90,7 +90,7 @@ class RecruitmentServiceWrapperTest {
                         services,
                     )
 
-                sut.inviteResearcher(mockStudyId, mockEmail)
+                sut.inviteUserWithRole(mockStudyId, mockEmail, Role.RESEARCHER)
 
                 coVerify(exactly = 0) { accountService.invite(ofType<EmailAccountIdentity>(), Role.RESEARCHER) }
                 coVerify { accountService.addRole(ofType<EmailAccountIdentity>(), Role.RESEARCHER) }
@@ -123,7 +123,7 @@ class RecruitmentServiceWrapperTest {
                     )
 
                 assertFailsWith<NullPointerException> {
-                    sut.inviteResearcher(mockStudyId, mockEmail)
+                    sut.inviteUserWithRole(mockStudyId, mockEmail, Role.RESEARCHER)
                 }
 
                 coVerify(exactly = 0) { accountService.invite(ofType<EmailAccountIdentity>(), Role.RESEARCHER) }
@@ -155,7 +155,7 @@ class RecruitmentServiceWrapperTest {
                         services,
                     )
 
-                sut.inviteResearcher(mockStudyId, mockEmail)
+                sut.inviteUserWithRole(mockStudyId, mockEmail, Role.RESEARCHER)
 
                 coVerify(exactly = 0) { accountService.invite(ofType<EmailAccountIdentity>(), Role.RESEARCHER) }
                 coVerify(exactly = 0) { accountService.addRole(ofType<EmailAccountIdentity>(), Role.RESEARCHER) }
@@ -188,7 +188,7 @@ class RecruitmentServiceWrapperTest {
                         services,
                     )
 
-                val result = sut.removeResearcher(mockStudyId, mockEmail)
+                val result = sut.removeStudyManager(mockStudyId, mockEmail)
 
                 assertTrue(result)
             }
@@ -216,7 +216,7 @@ class RecruitmentServiceWrapperTest {
                         services,
                     )
 
-                val result = sut.removeResearcher(mockStudyId, mockEmail)
+                val result = sut.removeStudyManager(mockStudyId, mockEmail)
 
                 assertFalse(result)
             }
@@ -751,7 +751,7 @@ class RecruitmentServiceWrapperTest {
     @Nested
     inner class GetParticipantGroupsStatus {
         @Test
-        fun `getsParticipantGroupsStatuses`() {
+        fun getParticipantGroupsStatuses() {
             runTest {
                 val mockStudyId = UUID.randomUUID()
 

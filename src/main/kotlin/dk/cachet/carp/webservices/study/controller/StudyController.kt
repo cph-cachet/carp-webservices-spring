@@ -12,6 +12,7 @@ import dk.cachet.carp.webservices.common.serialisers.ApplicationRequestSerialize
 import dk.cachet.carp.webservices.security.authentication.domain.Account
 import dk.cachet.carp.webservices.security.authentication.service.AuthenticationService
 import dk.cachet.carp.webservices.security.authorization.Claim
+import dk.cachet.carp.webservices.security.authorization.Role
 import dk.cachet.carp.webservices.study.domain.InactiveDeploymentInfo
 import dk.cachet.carp.webservices.study.domain.ParticipantGroupsStatus
 import dk.cachet.carp.webservices.study.domain.StudyOverview
@@ -48,9 +49,8 @@ class StudyController(
         const val STUDY_SERVICE = "/api/study-service"
         const val RECRUITMENT_SERVICE = "/api/recruitment-service"
         const val RESEARCHERS = "/api/studies/{${PathVariableName.STUDY_ID}}/researchers"
-        const val RESEARCHER_ASSISTANTS = "/api/studies/{${PathVariableName.STUDY_ID}}/researcher-assistants"
+        const val RESEARCH_ASSISTANTS = "/api/studies/{${PathVariableName.STUDY_ID}}/researcher-assistants"
         const val ADD_RESEARCHER = "/api/studies/{${PathVariableName.STUDY_ID}}/researchers/add"
-        const val ADD_RESEARCHER_ASSISTANT = "/api/studies/{${PathVariableName.STUDY_ID}}/researcher-assistants/add"
         const val GET_STUDIES_OVERVIEW = "/api/studies/studies-overview"
         const val GET_PARTICIPANTS_ACCOUNTS = "/api/studies/{${PathVariableName.STUDY_ID}}/participants/accounts"
         const val GET_PARTICIPANT_GROUP_STATUS = "/api/studies/{${PathVariableName.STUDY_ID}}/participantGroup/status"
@@ -61,24 +61,13 @@ class StudyController(
     @PostMapping(value = [ADD_RESEARCHER])
     @PreAuthorize("canManageStudy(#studyId)")
     @ResponseStatus(HttpStatus.OK)
-    @Deprecated("Use addResearcherAssistant instead")
     suspend fun addResearcher(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @RequestParam(RequestParamName.EMAIL) email: String,
+        @RequestParam(RequestParamName.ROLE) role: Role,
     ) {
         LOGGER.info("Start POST: /api/studies/$studyId/researchers")
-        return recruitmentService.inviteResearcher(studyId, email)
-    }
-
-    @PostMapping(value = [ADD_RESEARCHER_ASSISTANT])
-    @PreAuthorize("canManageStudy(#studyId)")
-    @ResponseStatus(HttpStatus.OK)
-    suspend fun addResearcherAssistant(
-        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
-        @RequestParam(RequestParamName.EMAIL) email: String,
-    ) {
-        LOGGER.info("Start POST: /api/studies/$studyId/researcher-assistants")
-        return recruitmentService.inviteResearcherAssistant(studyId, email)
+        return recruitmentService.inviteUserWithRole(studyId, email, role)
     }
 
     @GetMapping(value = [GET_PARTICIPANTS_ACCOUNTS])
@@ -125,7 +114,7 @@ class StudyController(
         return accountService.findAllByClaim(Claim.ManageStudy(studyId))
     }
 
-    @GetMapping(value = [RESEARCHER_ASSISTANTS])
+    @GetMapping(value = [RESEARCH_ASSISTANTS])
     @PreAuthorize("canManageStudy(#studyId) or canLimitedManageStudy(#studyId)")
     @ResponseStatus(HttpStatus.OK)
     suspend fun getResearcherAssistants(
@@ -152,15 +141,7 @@ class StudyController(
     suspend fun removeResearcher(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
         @RequestParam(RequestParamName.EMAIL) email: String,
-    ): Boolean = recruitmentService.removeResearcher(studyId, email)
-
-    @DeleteMapping(value = [RESEARCHER_ASSISTANTS])
-    @PreAuthorize("canManageStudy(#studyId)")
-    @ResponseStatus(HttpStatus.OK)
-    suspend fun removeResearcherAssistant(
-        @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
-        @RequestParam(RequestParamName.EMAIL) email: String,
-    ): Boolean = recruitmentService.removeResearcherAssistant(studyId, email)
+    ): Boolean = recruitmentService.removeStudyManager(studyId, email)
 
     @GetMapping(value = [GET_STUDIES_OVERVIEW])
     @ResponseStatus(HttpStatus.OK)

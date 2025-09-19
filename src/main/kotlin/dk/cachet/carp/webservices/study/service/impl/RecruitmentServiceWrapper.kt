@@ -39,74 +39,45 @@ class RecruitmentServiceWrapper(
         private val LOGGER: Logger = LogManager.getLogger()
     }
 
-    override suspend fun inviteResearcher(
+    override suspend fun inviteUserWithRole(
         studyId: UUID,
         email: String,
+        role: Role,
     ) = withContext(Dispatchers.IO + SecurityCoroutineContext()) {
         val accountIdentity = AccountIdentity.fromEmailAddress(email)
         var account = accountService.findByAccountIdentity(accountIdentity)
 
         if (account == null) {
             LOGGER.info("Account with email $email is not found. Inviting...")
-            account = accountService.invite(accountIdentity, Role.RESEARCHER)
+            account = accountService.invite(accountIdentity, role)
         }
 
-        if (account.role!! < Role.RESEARCHER) {
-            accountService.addRole(accountIdentity, Role.RESEARCHER)
-            LOGGER.info("Account with email $email is granted the role RESEARCHER.")
-        }
-
-        // grant it claims for the study and every deployment within it
-        accountService.grant(accountIdentity, setOf(Claim.ManageStudy(studyId)))
-
-        LOGGER.info("Account with email $email is added as a researcher to study with id $studyId.")
-    }
-
-    override suspend fun inviteResearcherAssistant(
-        studyId: UUID,
-        email: String,
-    ) = withContext(Dispatchers.IO + SecurityCoroutineContext()) {
-        val accountIdentity = AccountIdentity.fromEmailAddress(email)
-        var account = accountService.findByAccountIdentity(accountIdentity)
-
-        if (account == null) {
-            LOGGER.info("Account with email $email is not found. Inviting...")
-            account = accountService.invite(accountIdentity, Role.RESEARCHER_ASSISTANT)
-        }
-
-        if (account.role!! < Role.RESEARCHER_ASSISTANT) {
-            accountService.addRole(accountIdentity, Role.RESEARCHER_ASSISTANT)
-            LOGGER.info("Account with email $email is granted the role RESEARCHER_ASSISTANT.")
+        if (account.role!! < role) {
+            accountService.addRole(accountIdentity, role)
+            LOGGER.info("Account with email $email is granted the role $role.")
         }
 
         // grant it claims for the study and every deployment within it
-        accountService.grant(accountIdentity, setOf(Claim.LimitedManageStudy(studyId)))
+        when (role) {
+            Role.RESEARCHER ->
+                accountService.grant(accountIdentity, setOf(Claim.ManageStudy(studyId)))
+            Role.RESEARCH_ASSISTANT ->
+                accountService.grant(accountIdentity, setOf(Claim.LimitedManageStudy(studyId)))
+            else -> throw IllegalArgumentException("Role $role is not allowed to be invited to a study.")
+        }
 
-        LOGGER.info("Account with email $email is added as a researcher assistant to study with id $studyId.")
+        LOGGER.info("Account with email $email is added as a ${role.prettyPrint()} to study with id $studyId.")
     }
 
-    override suspend fun removeResearcher(
+    override suspend fun removeStudyManager(
         studyId: UUID,
         email: String,
     ): Boolean =
         withContext(Dispatchers.IO + SecurityCoroutineContext()) {
             val accountIdentity = AccountIdentity.fromEmailAddress(email)
 
-            val claims = setOf(Claim.ManageStudy(studyId))
-
-            val account = accountService.revoke(accountIdentity, claims)
-
-            account.carpClaims?.intersect(claims)?.isEmpty() ?: false
-        }
-
-    override suspend fun removeResearcherAssistant(
-        studyId: UUID,
-        email: String,
-    ): Boolean =
-        withContext(Dispatchers.IO + SecurityCoroutineContext()) {
-            val accountIdentity = AccountIdentity.fromEmailAddress(email)
-
-            val claims = setOf(Claim.LimitedManageStudy(studyId))
+            val claims =
+                setOf(Claim.ManageStudy(studyId)) + setOf(Claim.LimitedManageStudy(studyId))
 
             val account = accountService.revoke(accountIdentity, claims)
 

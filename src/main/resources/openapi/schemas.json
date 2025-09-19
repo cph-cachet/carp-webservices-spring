@@ -3858,7 +3858,7 @@
           "UNKNOWN",
           "PARTICIPANT",
           "RESEARCHER",
-          "RESEARCHER_ASSISTANT",
+          "RESEARCH_ASSISTANT",
           "CARP_ADMIN",
           "SYSTEM_ADMIN"
         ]
@@ -3892,7 +3892,7 @@
           "UNKNOWN",
           "PARTICIPANT",
           "RESEARCHER",
-          "RESEARCHER_ASSISTANT",
+          "RESEARCH_ASSISTANT",
           "CARP_ADMIN",
           "SYSTEM_ADMIN"
         ]
