@@ -49,7 +49,7 @@ class StudyController(
         const val STUDY_SERVICE = "/api/study-service"
         const val RECRUITMENT_SERVICE = "/api/recruitment-service"
         const val RESEARCHERS = "/api/studies/{${PathVariableName.STUDY_ID}}/researchers"
-        const val RESEARCH_ASSISTANTS = "/api/studies/{${PathVariableName.STUDY_ID}}/researcher-assistants"
+        const val RESEARCH_ASSISTANTS = "/api/studies/{${PathVariableName.STUDY_ID}}/research-assistants"
         const val ADD_RESEARCHER = "/api/studies/{${PathVariableName.STUDY_ID}}/researchers/add"
         const val GET_STUDIES_OVERVIEW = "/api/studies/studies-overview"
         const val GET_PARTICIPANTS_ACCOUNTS = "/api/studies/{${PathVariableName.STUDY_ID}}/participants/accounts"
@@ -120,7 +120,7 @@ class StudyController(
     suspend fun getResearcherAssistants(
         @PathVariable(PathVariableName.STUDY_ID) studyId: UUID,
     ): List<Account> {
-        LOGGER.info("Start GET: /api/studies/$studyId/researcher-assistants")
+        LOGGER.info("Start GET: /api/studies/$studyId/research-assistants")
         return accountService.findAllByClaim(Claim.LimitedManageStudy(studyId))
     }
 
